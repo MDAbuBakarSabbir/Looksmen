@@ -17,7 +17,7 @@ class AuthController extends Controller
         if (Auth::guard('admin')->check()) {
             return redirect()->route('admin.dashboard');
         }
-        return view('AdminDash.auth.admin-portal-login');
+        return view('adminDash.auth.admin-portal-login');
     }
 
     /**

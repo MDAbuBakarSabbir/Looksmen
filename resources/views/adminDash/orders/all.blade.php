@@ -73,7 +73,7 @@
                         </tr>
                     </thead>
                     <tbody class="oldData">
-                        @include('AdminDash.orders.extends.order_rows', ['orders' => $orders ?? $countorders])
+                        @include('adminDash.orders.extends.order_rows', ['orders' => $orders ?? $countorders])
                     </tbody>
                 </table>
             </div>

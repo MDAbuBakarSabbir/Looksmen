@@ -10,11 +10,11 @@ class PagesController extends Controller
 {
     public function index(){
         $pages = Pages::all();
-        return view('AdminDash.pages.index',compact('pages'));
+        return view('adminDash.pages.index',compact('pages'));
     }
 
     public function create(){
-        return view('AdminDash.pages.create');
+        return view('adminDash.pages.create');
     }
 
     public function store(Request $request){
@@ -51,7 +51,7 @@ class PagesController extends Controller
 
     public function edit($id){
         $pageData = Pages::where('id',$id)->first();
-        return view('AdminDash.pages.edit',compact('pageData'));
+        return view('adminDash.pages.edit',compact('pageData'));
     }
 
 public function destroy($id)

@@ -88,7 +88,7 @@ class AdminsController extends Controller
     {
 
         $admin = Admins::findOrFail($id);
-        return view('AdminDash.admins.permissions',compact('admin'));
+        return view('adminDash.admins.permissions',compact('admin'));
     }
 
     public function updatePermission(Request $request, $id)

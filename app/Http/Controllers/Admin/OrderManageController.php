@@ -140,7 +140,7 @@ class OrderManageController extends Controller
 
         $orders = $query->latest()->get();
 
-        return view('AdminDash.orders.extends.order_rows', compact('orders'))->render();
+        return view('adminDash.orders.extends.order_rows', compact('orders'))->render();
     }
 
     public function updateStatus(Request $request)

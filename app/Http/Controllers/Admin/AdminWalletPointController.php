@@ -19,7 +19,7 @@ class AdminWalletPointController extends Controller
         $point_transactions = PointTransaction::with('user', 'order')->latest()->paginate(15, ['*'], 'point_page');
         $users = User::orderBy('name')->get();
 
-        return view('AdminDash.wallet.index', compact('transactions', 'point_transactions', 'users'));
+        return view('adminDash.wallet.index', compact('transactions', 'point_transactions', 'users'));
     }
 
     public function manualRecharges()
@@ -30,7 +30,7 @@ class AdminWalletPointController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('AdminDash.wallet.manual_recharges', compact('pending_recharges'));
+        return view('adminDash.wallet.manual_recharges', compact('pending_recharges'));
     }
 
     public function approveRecharge($id)
@@ -132,7 +132,7 @@ class AdminWalletPointController extends Controller
         $point_conversion_rate = GeneralWebSettings::where('name', 'point_conversion_rate')->first();
         $points_per_taka = GeneralWebSettings::where('name', 'points_per_taka')->first();
 
-        return view('AdminDash.wallet.points_config', compact('point_conversion_rate', 'points_per_taka'));
+        return view('adminDash.wallet.points_config', compact('point_conversion_rate', 'points_per_taka'));
     }
 
     public function pointConfigStore(Request $request)

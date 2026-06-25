@@ -55,7 +55,7 @@ class ReportsController extends Controller
 
         $orders = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        return view('AdminDash.reports.order', compact('orders', 'summary', 'startDate', 'endDate', 'status'));
+        return view('adminDash.reports.order', compact('orders', 'summary', 'startDate', 'endDate', 'status'));
     }
 
     /**
@@ -85,7 +85,7 @@ class ReportsController extends Controller
         $products = $query->orderBy('num_of_sale', 'desc')->paginate(15);
         $categories = Category::all();
 
-        return view('AdminDash.reports.product', compact('products', 'categories', 'categoryId', 'stockStatus'));
+        return view('adminDash.reports.product', compact('products', 'categories', 'categoryId', 'stockStatus'));
     }
 
     /**
@@ -114,7 +114,7 @@ class ReportsController extends Controller
 
         $orders = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        return view('AdminDash.reports.web_order', compact('orders', 'summary', 'startDate', 'endDate', 'status'));
+        return view('adminDash.reports.web_order', compact('orders', 'summary', 'startDate', 'endDate', 'status'));
     }
 
     /**
@@ -144,7 +144,7 @@ class ReportsController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        return view('AdminDash.reports.meta_ads', compact(
+        return view('adminDash.reports.meta_ads', compact(
             'totalPurchases', 'totalValue', 'aov', 'mockPageViews', 'mockAddCarts', 
             'mockCheckouts', 'conversions', 'startDate', 'endDate'
         ));
@@ -176,7 +176,7 @@ class ReportsController extends Controller
             ->orderBy('date', 'asc')
             ->get();
 
-        return view('AdminDash.reports.profit_sales', compact(
+        return view('adminDash.reports.profit_sales', compact(
             'grossSales', 'deliveryCharge', 'discounts', 'estimatedProfit', 
             'ordersCount', 'salesByDate', 'startDate', 'endDate'
         ));
@@ -206,7 +206,7 @@ class ReportsController extends Controller
             ];
         });
 
-        return view('AdminDash.reports.employee', compact('employees'));
+        return view('adminDash.reports.employee', compact('employees'));
     }
 
     /**
@@ -242,6 +242,6 @@ class ReportsController extends Controller
             ]
         ];
 
-        return view('AdminDash.reports.my_limits', compact('limits'));
+        return view('adminDash.reports.my_limits', compact('limits'));
     }
 }

@@ -52,7 +52,7 @@ class IncompleteOrdersController extends Controller
         }
 
         $incomOrders = $query->orderBy('id', 'desc')->paginate(10)->withQueryString();
-        return view('AdminDash.orders.incomplete', compact('incomOrders'));
+        return view('adminDash.orders.incomplete', compact('incomOrders'));
     }
 
     public function destroy($id)

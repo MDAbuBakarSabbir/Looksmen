@@ -26,7 +26,7 @@ class UserController extends Controller
 
         $customers = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        return view('AdminDash.customers.registered', compact('customers', 'search'));
+        return view('adminDash.customers.registered', compact('customers', 'search'));
     }
 
     /**
@@ -51,7 +51,7 @@ class UserController extends Controller
             ->orderBy('total_spent', 'desc')
             ->paginate(15);
 
-        return view('AdminDash.customers.non_registered', compact('customers', 'search'));
+        return view('adminDash.customers.non_registered', compact('customers', 'search'));
     }
 
     /**
@@ -71,7 +71,7 @@ class UserController extends Controller
 
         $customers = $query->orderBy('updated_at', 'desc')->paginate(15);
 
-        return view('AdminDash.customers.blocked', compact('customers', 'search'));
+        return view('adminDash.customers.blocked', compact('customers', 'search'));
     }
 
     /**
@@ -118,7 +118,7 @@ class UserController extends Controller
 
         $blockedIps = $query->orderBy('created_at', 'desc')->paginate(15);
 
-        return view('AdminDash.customers.ip_blocked', compact('blockedIps', 'search'));
+        return view('adminDash.customers.ip_blocked', compact('blockedIps', 'search'));
     }
 
     /**

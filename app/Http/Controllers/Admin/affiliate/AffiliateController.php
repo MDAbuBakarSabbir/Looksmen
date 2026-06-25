@@ -126,7 +126,7 @@ class AffiliateController extends Controller
             $validation_time->save();
         }
 
-        return view('AdminDash.affiliate.configs');
+        return view('adminDash.affiliate.configs');
     }
 
     public function config_store(Request $request){
@@ -176,7 +176,7 @@ class AffiliateController extends Controller
     public function affiliate_logs_admin()
     {
         $affiliate_logs = AffiliateLog::latest()->paginate(10);
-        return view('AdminDash.affiliate.affiliate_logs',compact('affiliate_logs'));
+        return view('adminDash.affiliate.affiliate_logs',compact('affiliate_logs'));
     }
 
     public function store_affiliate_user(Request $request){
@@ -253,12 +253,12 @@ class AffiliateController extends Controller
 
     public function users(){
         $affiliate_users = AffiliateUser::paginate(12);
-        return view('AdminDash.affiliate.users', compact('affiliate_users'));
+        return view('adminDash.affiliate.users', compact('affiliate_users'));
     }
 
     public function show_verification_request($id){
         $affiliate_user = AffiliateUser::findOrFail($id);
-        return view('AdminDash.affiliate.show_verification_request', compact('affiliate_user'));
+        return view('adminDash.affiliate.show_verification_request', compact('affiliate_user'));
     }
 
     public function approve_user($id)
@@ -311,7 +311,7 @@ class AffiliateController extends Controller
     public function payment_modal(Request $request)
     {
         $affiliate_user = AffiliateUser::findOrFail($request->id);
-        return view('AdminDash.affiliate.payment_modal', compact('affiliate_user'));
+        return view('adminDash.affiliate.payment_modal', compact('affiliate_user'));
     }
 
     public function payment_store(Request $request){
@@ -332,7 +332,7 @@ class AffiliateController extends Controller
     public function payment_history($id){
         $affiliate_user = AffiliateUser::findOrFail(decrypt($id));
         $affiliate_payments = $affiliate_user->affiliate_payments();
-        return view('AdminDash.affiliate.payment_history', compact('affiliate_payments', 'affiliate_user'));
+        return view('adminDash.affiliate.payment_history', compact('affiliate_payments', 'affiliate_user'));
     }
 
     public function user_index(Request $request){
@@ -534,7 +534,7 @@ class AffiliateController extends Controller
     public function refferal_users()
     {
         $refferal_users = User::where('referred_by', '!=' , null)->paginate(10);
-        return view('AdminDash.affiliate.refferal_users', compact('refferal_users'));
+        return view('adminDash.affiliate.refferal_users', compact('refferal_users'));
     }
 
     // Affiliate Withdraw Request
@@ -563,14 +563,14 @@ class AffiliateController extends Controller
     public function affiliate_withdraw_requests()
     {
         $affiliate_withdraw_requests = AffiliateWithdrawRequest::orderBy('id', 'desc')->paginate(10);
-        return view('AdminDash.affiliate.affiliate_withdraw_requests', compact('affiliate_withdraw_requests'));
+        return view('adminDash.affiliate.affiliate_withdraw_requests', compact('affiliate_withdraw_requests'));
     }
 
     public function affiliate_withdraw_modal(Request $request)
     {
         $affiliate_withdraw_request = AffiliateWithdrawRequest::findOrFail($request->id);
         $affiliate_user = AffiliateUser::where('user_id',$affiliate_withdraw_request->user_id)->first();
-        return view('AdminDash.affiliate.affiliate_withdraw_modal', compact('affiliate_withdraw_request','affiliate_user'));
+        return view('adminDash.affiliate.affiliate_withdraw_modal', compact('affiliate_withdraw_request','affiliate_user'));
     }
 
     public function withdraw_request_payment_store(Request $request){

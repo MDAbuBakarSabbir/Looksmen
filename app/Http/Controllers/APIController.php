@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 class APIController extends Controller
 {
     public function froudCheck(){
-        return view('AdminDash.settings.api.fraudCheck');
+        return view('adminDash.settings.api.fraudCheck');
     }
 
     public function updateFraudCheck(Request $request)

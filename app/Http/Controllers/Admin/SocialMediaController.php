@@ -11,7 +11,7 @@ class SocialMediaController extends Controller
     public function index()
     {
         $socialLinks = SocialMedia::all();
-        return view('AdminDash.socialMedia.socialLinks', compact('socialLinks'));
+        return view('adminDash.socialMedia.socialLinks', compact('socialLinks'));
     }
 
 

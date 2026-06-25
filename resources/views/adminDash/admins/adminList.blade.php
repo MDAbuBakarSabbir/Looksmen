@@ -98,7 +98,7 @@
                         </tr>
                     </thead>
                     <tbody id="employeeTableBody">
-                        @include('AdminDash.admins.extends.admin_rows')
+                        @include('adminDash.admins.extends.admin_rows')
                     </tbody>
                 </table>
             </div>
