@@ -1,0 +1,88 @@
+    /* মডাল যেন ক্লিক করা যায় এবং পেছনের কালো ছায়া বাধা না দেয় */
+    .modal {
+        background: rgba(0, 0, 0, 0.5);
+        /* ম্যানুয়াল ব্যাকড্রপ যদি বুটস্ট্র্যাপে সমস্যা করে */
+    }
+
+    #cart-modal {
+        z-index: 1060 !important;
+    }
+
+    .modal-backdrop {
+        display: none !important;
+        /* যদি ব্যাকড্রপ মডালের উপর চলে আসে তবে এটি ব্যবহার করুন */
+    }
+
+    .size-60px {
+        width: 60px;
+        height: 60px;
+        object-fit: cover;
+    }
+
+    /* বাটন এবং ইনপুট ফিল্ড পাশাপাশি রাখার জন্য */
+    .aiz-plus-minus {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        align-items: stretch;
+    }
+
+    .aiz-plus-minus .btn {
+        padding: 2px 8px;
+        z-index: 2;
+    }
+
+    .aiz-plus-minus input {
+        height: 31px !important;
+        padding: 0;
+        font-weight: 600;
+        background: #fff !important;
+        width: 40px !important;
+        flex: none !important;
+        /* ইনপুট যেন বড় হয়ে বাটনকে ধাক্কা না দেয় */
+    }
+
+    /* মোবাইলে যাতে ভেঙে না যায় */
+    @media (max-width: 576px) {
+        .aiz-plus-minus {
+            margin: 10px auto;
+
+        }
+    }
+
+    .payment-card {
+        transition: all 0.3s ease;
+        background: #fff;
+        border: 2px solid #eee !important;
+    }
+
+    /* পিসি বা বড় স্ক্রিনে হোভার ইফেক্ট */
+    @media (min-width: 768px) {
+        .payment-card:hover {
+            border-color: #d1007e !important; /* bKash Color */
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+    }
+
+    /* মোবাইলে ক্লিক করলে হালকা ইফেক্ট */
+    .payment-card:active {
+        background-color: #f8f9fa;
+        transform: scale(0.95);
+    }
+
+    .fw-600 { font-weight: 600; }
+    .cursor-pointer { cursor: pointer; }
+
+    /* ছোট মোবাইলের জন্য ইমেজ সাইজ ঠিক করা */
+    @media (max-width: 576px) {
+        .modal-dialog { margin: 1.75rem auto; }
+        .payment-card span { font-size: 11px; }
+    }
+
+    .product-gallery .carousel-box img {
+    width: 100%;
+    height: auto;
+    max-height: 500px; /* আপনার প্রয়োজন মতো */
+    object-fit: contain;
+}
+
