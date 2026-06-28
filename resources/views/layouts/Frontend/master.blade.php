@@ -155,12 +155,35 @@
             width: 100%;
         }
 
-        .container,
-        .container-lg,
-        .container-md,
-        .container-sm,
-        .container-xl {
-            max-width: 1280px !important;
+        @media (min-width: 1280px) {
+            .container,
+            .container-lg,
+            .container-md,
+            .container-sm,
+            .container-xl {
+                max-width: 1280px !important;
+            }
+        }
+
+        /* Prevent nested containers from causing double padding or layout issues */
+        .container .container {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+            max-width: 100% !important;
+            width: 100% !important;
+        }
+
+        /* Prevent flexbox column width calculation issues with sliders */
+        .row, .col, [class*="col-"] {
+            min-width: 0;
+        }
+        .aiz-carousel {
+            max-width: 100%;
+            width: 100%;
+            min-width: 0;
+        }
+        .slick-list, .slick-track {
+            max-width: 100%;
         }
     </style>
 </head>
