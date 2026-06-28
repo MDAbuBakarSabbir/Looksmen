@@ -637,9 +637,9 @@ class OrderManageController extends Controller
 
         $webConfig = GeneralWebSettings::first()->pluck('value', 'name', 'status')->toArray();
         $apiKey = $webConfig['fraud_check_api_key'];
-        $endpoint = $webConfig['fraud_check_api_url'] ?? 'https://bdcourier.com/api/courier-check';
+        $endpoint = $webConfig['fraud_check_api_url'] ?? 'https://api.bdcourier.com/courier-check';
 
-        $response = Http::withHeaders([
+        $response = Http::timeout(30)->withHeaders([
             'Authorization' => 'Bearer ' . $apiKey,
         ])->post($endpoint, [
             'phone' => $request->phone

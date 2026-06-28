@@ -103,7 +103,7 @@ class IncompleteOrdersController extends Controller
             $base_url = $webConfig['fraud_check_api_url'];
         }
         try {
-            $response = Http::withHeaders([
+            $response = Http::timeout(30)->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
                 'Content-Type'  => 'application/json',
             ])->post($base_url, [

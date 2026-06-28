@@ -17,7 +17,7 @@ class APIController extends Controller
             'base_url' => 'nullable|string|url|max:255',
         ]);
 
-        $baseUrl = $validated['base_url'] ?? 'https://bdcourier.com/api/courier-check';
+        $baseUrl = $validated['base_url'] ?? 'https://api.bdcourier.com/courier-check';
 
         // 1. Update or create in fraud_checks table
         \App\Models\FraudCheck::updateOrCreate(
