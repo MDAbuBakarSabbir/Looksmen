@@ -62,11 +62,20 @@
 
     $currentBalance = null;
     $balanceStatus = 'none';
+    $activeCourierName = '';
     if (isset($featuresConfig['courier_api']) && $featuresConfig['courier_api'] == '1') {
-        $balanceData = \Illuminate\Support\Facades\Cache::get('steadfast_balance');
-        if ($balanceData) {
-            $currentBalance = $balanceData['balance'];
-            $balanceStatus = $balanceData['status'];
+        if (class_exists('App\Models\CourierApi')) {
+            try {
+                $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
+                if ($activeCourier) {
+                    $activeCourierName = ucfirst($activeCourier->courier_name);
+                    $balanceData = \Illuminate\Support\Facades\Cache::get('active_courier_balance');
+                    if ($balanceData && isset($balanceData['courier']) && $balanceData['courier'] == $activeCourier->courier_name) {
+                        $currentBalance = $balanceData['balance'];
+                        $balanceStatus = $balanceData['status'];
+                    }
+                }
+            } catch (\Exception $e) {}
         }
     }
 @endphp
@@ -1047,11 +1056,11 @@
                                     <i class="fa-solid fa-moon fs-18" id="darkModeIcon"></i>
                                 </button>
                             </li>
-                            @if (isset($featuresConfig['courier_api']) && $featuresConfig['courier_api'] == '1')
+                            @if (isset($featuresConfig['courier_api']) && $featuresConfig['courier_api'] == '1' && $activeCourierName)
                                 <div class="container d-flex justify-content-center align-items-center">
                                     <div class="balance-box {{ $balanceStatus == 'success' ? 'revealed' : '' }}" id="balanceBox" data-url="{{ route('courier.balance') }}">
                                         <i class="fa-solid fa-wallet balance-icon"></i>
-                                        <span class="balance-label">Balance:</span>
+                                        <span class="balance-label">Balance ({{ $activeCourierName }}):</span>
                                         <div class="balance-content">
                                             <span class="balance-click-to-show"><i class="fa-solid fa-eye mr-1"></i> Tap to check</span>
                                             <span class="balance-spinner"><i class="fa-solid fa-spinner"></i></span>
