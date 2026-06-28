@@ -1844,5 +1844,94 @@
     </script>
 
     @yield('script')
+
+    <!-- Reusable Courier Tracking Modal -->
+    <div class="modal fade" id="courierTrackingModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15); background: #ffffff;">
+                <div class="modal-header border-bottom-0 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title font-weight-bold text-dark"><i class="fa-solid fa-truck mr-2 text-primary"></i> Courier Tracking Details</h5>
+                    <button type="button" class="close m-0 p-0" data-dismiss="modal" aria-label="Close" style="outline: none; border: none; background: transparent; font-size: 1.5rem; cursor: pointer;">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body py-4">
+                    <div id="trackingLoading" class="text-center py-4">
+                        <i class="fa-solid fa-spinner fa-spin fa-2xl text-primary mb-3" style="font-size: 32px;"></i>
+                        <p class="text-muted mb-0">Fetching latest courier updates...</p>
+                    </div>
+                    <div id="trackingError" class="alert alert-danger d-none"></div>
+                    <div id="trackingContent" class="d-none">
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                            <span class="text-muted font-weight-bold">Courier:</span>
+                            <span id="trackCourierName" class="font-weight-bold text-primary">N/A</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                            <span class="text-muted font-weight-bold">Consignment ID:</span>
+                            <span id="trackConsignmentId" class="font-weight-bold text-dark">N/A</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 border-bottom pb-2">
+                            <span class="text-muted font-weight-bold">Tracking Code:</span>
+                            <span id="trackTrackingCode" class="font-weight-bold text-dark">N/A</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3 pb-2">
+                            <span class="text-muted font-weight-bold">Current Status:</span>
+                            <span id="trackStatus" class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 20px;">N/A</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-top-0 pt-0">
+                    <button type="button" class="btn btn-secondary font-weight-bold" data-dismiss="modal" style="border-radius: 8px;">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.track-courier-btn', function(e) {
+                e.preventDefault();
+                const orderId = $(this).data('id');
+                const $modal = $('#courierTrackingModal');
+                
+                // Reset modal state
+                $('#trackingLoading').removeClass('d-none');
+                $('#trackingError').addClass('d-none').text('');
+                $('#trackingContent').addClass('d-none');
+                
+                $modal.modal('show');
+                
+                $.ajax({
+                    url: `/admin/orders/courier-track/${orderId}`,
+                    type: 'GET',
+                    success: function(response) {
+                        $('#trackingLoading').addClass('d-none');
+                        if (response.status === 'success') {
+                            $('#trackCourierName').text(response.courier);
+                            if (response.raw_response && response.raw_response.consignment) {
+                                $('#trackConsignmentId').text(response.raw_response.consignment.consignment_id || response.consignment_id || 'N/A');
+                                $('#trackTrackingCode').text(response.raw_response.consignment.tracking_code || response.tracking_code || 'N/A');
+                            } else {
+                                $('#trackConsignmentId').text(response.consignment_id || 'N/A');
+                                $('#trackTrackingCode').text(response.tracking_code || 'N/A');
+                            }
+                            $('#trackStatus').text((response.delivery_status || 'unknown').replace(/_/g, ' ').toUpperCase());
+                            $('#trackingContent').removeClass('d-none');
+                        } else {
+                            $('#trackingError').removeClass('d-none').text(response.message || 'Error fetching tracking details');
+                        }
+                    },
+                    error: function(xhr) {
+                        $('#trackingLoading').addClass('d-none');
+                        let errMsg = 'Something went wrong while tracking this order.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errMsg = xhr.responseJSON.message;
+                        }
+                        $('#trackingError').removeClass('d-none').text(errMsg);
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
