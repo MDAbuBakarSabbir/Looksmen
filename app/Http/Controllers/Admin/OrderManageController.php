@@ -153,20 +153,35 @@ class OrderManageController extends Controller
 
         $this->checkOrderAccess($order);
 
+        // Auto courier entry on status changed to in-courier
+        if (in_array($request->status, ['incourier', 'in_courier'])) {
+            if (!$order->consignment_id) {
+                $courierRes = $this->placeCourierOrderInternal($order);
+                if ($courierRes['status'] === 'error') {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Courier booking failed: ' . $courierRes['message']
+                    ]);
+                }
+            } else {
+                $order->delivery_status = 'incourier';
+                $order->save();
+            }
+        } else {
+            $order->delivery_status = $request->status;
+            $order->updated_by = auth()->id();
+            $order->save();
+        }
+
         $logs = new Logs();
         $logs->user_id = auth()->id();
         $logs->order_id = $request->id;
         $logs->action_type = 'status_update';
-        $logs->details = 'Order status changed from ' . $order->delivery_status . ' to ' . $request->status;
-        $logs->order_status = $request->status;
+        $logs->details = 'Order status changed to ' . $order->delivery_status;
+        $logs->order_status = $order->delivery_status;
         $logs->save();
 
-
-        $order->delivery_status = $request->status;
-        $order->updated_by = auth()->id();
-        $order->save();
-
-        if ($request->status == 'delivered') {
+        if ($order->delivery_status == 'delivered') {
             try {
                 $affiliateController = new \App\Http\Controllers\Admin\affiliate\AffiliateController();
                 $affiliateController->processAffiliatePoints($order);
@@ -175,8 +190,6 @@ class OrderManageController extends Controller
             }
             $this->processOrderPoints($order);
         }
-
-
 
         $badgeClass = ($order->delivery_status == 'cancel') ? 'bg-danger' : 'bg-info';
         $statusText = ucfirst($order->delivery_status);
@@ -188,7 +201,9 @@ class OrderManageController extends Controller
             'status_text' => $statusText,
             'badge_class' => $badgeClass,
             'order_id' => $order->id,
-            'new_dropdown' => $view
+            'new_dropdown' => $view,
+            'consignment_id' => $order->consignment_id,
+            'tracking_code' => $order->tracking_code
         ]);
     }
 
@@ -387,47 +402,100 @@ class OrderManageController extends Controller
         $this->steadfast = $steadfast;
     }
 
-    // AJAX: Mark Order as In Courier
-    public function placeSteadfastOrder($id)
+    // Helper: Place Order into Active Courier
+    protected function placeCourierOrderInternal(Orders $order)
+    {
+        if ($order->consignment_id) {
+            return [
+                'status' => 'success',
+                'message' => 'Order is already booked in courier.',
+                'consignment_id' => $order->consignment_id,
+                'tracking_code' => $order->tracking_code
+            ];
+        }
+
+        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
+        if (!$activeCourier) {
+            return [
+                'status' => 'error',
+                'message' => 'No active courier API configured.'
+            ];
+        }
+
+        if ($activeCourier->courier_name === 'steadfast') {
+            $payload = [
+                'invoice' => $order->order_id,
+                'recipient_name' => $order->name,
+                'recipient_phone' => $order->phone,
+                'recipient_address' => $order->address,
+                'cod_amount' => (float)$order->grand_total,
+                'note' => $order->comments,
+            ];
+
+            $response = $this->steadfast->createOrder($payload);
+
+            if (!isset($response['status']) || $response['status'] != 200) {
+                $errorMsg = $response['message'] ?? 'Steadfast API error';
+                return [
+                    'status' => 'error',
+                    'message' => 'Steadfast: ' . $errorMsg,
+                    'api_response' => $response
+                ];
+            }
+
+            $order->consignment_id = $response['consignment']['consignment_id'];
+            $order->tracking_code = $response['consignment']['tracking_code'] ?? null;
+            $order->delivery_status = 'incourier';
+            $order->courier_updated_by = auth()->id();
+            $order->courier_popup_shown = 0;
+            $order->save();
+
+            return [
+                'status' => 'success',
+                'message' => 'Successfully booked in Steadfast Courier.',
+                'consignment_id' => $order->consignment_id,
+                'tracking_code' => $order->tracking_code
+            ];
+        }
+
+        return [
+            'status' => 'error',
+            'message' => 'Active courier ' . ucfirst($activeCourier->courier_name) . ' API integration not fully implemented.'
+        ];
+    }
+
+    // AJAX: Manually Place Order in Courier
+    public function placeCourierOrder($id)
     {
         $order = Orders::find($id);
         if (!$order) {
             return response()->json(['status' => 'error', 'message' => 'Order Not Found']);
         }
 
-        $courier = \App\Models\CourierApi::where('courier_name', 'steadfast')->first();
-        if (!$courier || $courier->status != '1') {
-            return response()->json(['status' => 'error', 'message' => 'Steadfast Courier API is not active.']);
-        }
-
         $this->checkOrderAccess($order);
 
-        $payload = [
-            'invoice' => $order->order_id,
-            'recipient_name' => $order->name,
-            'recipient_phone' => $order->phone,
-            'recipient_address' => $order->address,
-            'cod_amount' => (float)$order->grand_total,
-            'note' => $order->comments,
-        ];
+        $result = $this->placeCourierOrderInternal($order);
 
-        $response = $this->steadfast->createOrder($payload);
-
-        if (!isset($response['status']) || $response['status'] != 200) {
-            return response()->json(['status' => 'error', 'message' => 'Courier API Failed', 'api_response' => $response]);
+        if ($result['status'] === 'success') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $result['message'],
+                'consignment_id' => $result['consignment_id'],
+                'tracking_code' => $result['tracking_code']
+            ]);
         }
 
-        $order->consignment_id = $response['consignment']['consignment_id'];
-        $order->tracking_code = $response['consignment']['tracking_code'];
-        $order->delivery_status = 'in_courier';
-        $order->courier_updated_by = auth()->id();
-        $order->courier_popup_shown = 0;
-        $order->save();
-
         return response()->json([
-            'status' => 'success',
-            'consignment_id' => $order->consignment_id
+            'status' => 'error',
+            'message' => $result['message'],
+            'api_response' => $result['api_response'] ?? null
         ]);
+    }
+
+    // AJAX: Keep route compatibility
+    public function placeSteadfastOrder($id)
+    {
+        return $this->placeCourierOrder($id);
     }
 
     // Mark popup seen
@@ -444,17 +512,95 @@ class OrderManageController extends Controller
     // Cron: Update Status from Steadfast
     public function updateStatuses()
     {
-        $orders = Orders::whereNotNull('consignment_id')->get();
-
-        foreach ($orders as $order) {
-            $res = $this->steadfast->checkStatusByInvoice($order->order_id);
-            if (isset($res['delivery_status'])) {
-                $order->delivery_status = $res['delivery_status'];
-                $order->save();
-            }
+        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
+        if (!$activeCourier) {
+            return "No active courier configuration.";
         }
 
-        return "Status Updated";
+        if ($activeCourier->courier_name === 'steadfast') {
+            $orders = Orders::whereNotNull('consignment_id')
+                ->whereNotIn('delivery_status', ['delivered', 'cancel', 'cancelled', 'returned'])
+                ->get();
+
+            $updatedCount = 0;
+            foreach ($orders as $order) {
+                $res = $this->steadfast->checkStatusByInvoice($order->order_id);
+                if (isset($res['status']) && $res['status'] == 200 && isset($res['delivery_status'])) {
+                    $newStatus = $res['delivery_status'];
+                    if ($newStatus === 'cancelled') {
+                        $newStatus = 'cancel';
+                    }
+                    if ($order->delivery_status !== $newStatus) {
+                        $order->delivery_status = $newStatus;
+                        $order->save();
+                        $updatedCount++;
+
+                        try {
+                            $logs = new Logs();
+                            $logs->user_id = 0; // system
+                            $logs->order_id = $order->id;
+                            $logs->action_type = 'status_update';
+                            $logs->details = 'System auto-synced courier status to ' . $newStatus;
+                            $logs->order_status = $newStatus;
+                            $logs->save();
+                        } catch (\Exception $e) {}
+                    }
+                }
+            }
+            return "Status Updated: {$updatedCount} orders updated.";
+        }
+
+        return "Active courier {$activeCourier->courier_name} auto-sync not implemented.";
+    }
+
+    // AJAX: Track Courier Order Details
+    public function trackCourierOrder($id)
+    {
+        $order = Orders::find($id);
+        if (!$order) {
+            return response()->json(['status' => 'error', 'message' => 'Order Not Found']);
+        }
+
+        $this->checkOrderAccess($order);
+
+        if (!$order->consignment_id) {
+            return response()->json(['status' => 'error', 'message' => 'This order is not booked in any courier yet.']);
+        }
+
+        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
+        if (!$activeCourier) {
+            return response()->json(['status' => 'error', 'message' => 'No active courier configuration found.']);
+        }
+
+        if ($activeCourier->courier_name === 'steadfast') {
+            $response = $this->steadfast->checkStatusByTrackingCode($order->tracking_code ?? $order->consignment_id);
+            if (isset($response['status']) && $response['status'] == 200) {
+                return response()->json([
+                    'status' => 'success',
+                    'courier' => 'Steadfast',
+                    'consignment_id' => $order->consignment_id,
+                    'tracking_code' => $order->tracking_code,
+                    'delivery_status' => $response['delivery_status'] ?? 'unknown',
+                    'raw_response' => $response
+                ]);
+            }
+            
+            $response = $this->steadfast->checkStatusByInvoice($order->order_id);
+            if (isset($response['status']) && $response['status'] == 200) {
+                return response()->json([
+                    'status' => 'success',
+                    'courier' => 'Steadfast',
+                    'consignment_id' => $order->consignment_id,
+                    'tracking_code' => $order->tracking_code,
+                    'delivery_status' => $response['delivery_status'] ?? 'unknown',
+                    'raw_response' => $response
+                ]);
+            }
+
+            return response()->json(['status' => 'error', 'message' => 'Failed to retrieve tracking data from Steadfast API.', 'response' => $response]);
+        }
+
+        return response()->json(['status' => 'error', 'message' => 'Tracking for ' . ucfirst($activeCourier->courier_name) . ' is not implemented yet.']);
     }
 
 
