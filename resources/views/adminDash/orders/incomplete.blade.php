@@ -5,7 +5,7 @@
     $featuresConfig = $features->pluck('status', 'name')->toArray();
 @endphp
 
-@extends('layouts.AdminLays.master')
+@extends('layouts.Backend.master')
 @section('title')
     INCOMPLETE ORDERS
 @endsection

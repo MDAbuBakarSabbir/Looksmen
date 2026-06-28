@@ -82,7 +82,7 @@
     $cancelRate = $totalOrders > 0 ? ($cancelCount / $totalOrders) * 100 : 0;
 @endphp
 
-@extends('layouts.AdminLays.master')
+@extends('layouts.Backend.master')
 @section('title')
     DASHBOARD
 @endsection

@@ -3,7 +3,7 @@
     $settings  = GeneralWebSettings::all()->keyBy('name');
     $webConfig = $settings->map(fn($i) => $i->value)->toArray();
 @endphp
-@extends('layouts.AdminLays.master')
+@extends('layouts.Backend.master')
 @section('title') FRAUD CHECK API @endsection
 @section('content')
 

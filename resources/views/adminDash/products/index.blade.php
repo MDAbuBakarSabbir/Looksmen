@@ -1,7 +1,7 @@
 @php
     use App\Models\ProductImage;
 @endphp
-@extends('layouts.adminLays.master')
+@extends('layouts.Backend.master')
 @section('title')
     PRODUCTS
 @endsection

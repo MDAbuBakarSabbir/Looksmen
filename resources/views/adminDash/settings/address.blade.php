@@ -2,7 +2,7 @@
     use App\Models\District;
     $allDistricts = District::where('status','1')->get();
 @endphp
-@extends('layouts.adminLays.master')
+@extends('layouts.Backend.master')
 @section('title')
     ADDRESS
 @endsection

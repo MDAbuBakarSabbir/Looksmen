@@ -1,4 +1,4 @@
-@extends('layouts.AdminLays.master')
+@extends('layouts.Backend.master')
 @section('title') SOCIAL MEDIA @endsection
 @section('content')
 

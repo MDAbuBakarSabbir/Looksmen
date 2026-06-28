@@ -2,8 +2,11 @@
 
 use App\Http\Controllers\admin\AddressController;
 use App\Http\Controllers\Admin\AdminsController;
+use App\Http\Controllers\Admin\AdminSupportController;
+use App\Http\Controllers\Admin\AdminWalletPointController;
 use App\Http\Controllers\Admin\affiliate\AffiliateController;
 use App\Http\Controllers\Admin\AttributeController;
+use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChildCategoryController;
@@ -13,31 +16,30 @@ use App\Http\Controllers\Admin\CourierApiController;
 use App\Http\Controllers\Admin\FeatureActivationController;
 use App\Http\Controllers\Admin\GeneralWebSettingsController;
 use App\Http\Controllers\Admin\OrderManageController;
+use App\Http\Controllers\admin\PagesController;
+use App\Http\Controllers\admin\PaymentController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\ReviewsController;
 use App\Http\Controllers\Admin\SliderController;
+use App\Http\Controllers\admin\SmtpController;
 use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\SubCategoryController;
-use App\Http\Controllers\admin\PaymentController;
-use App\Http\Controllers\admin\SmtpController;
-use App\Http\Controllers\admin\PagesController;
 use App\Http\Controllers\APIController;
 use App\Http\Controllers\IncompleteOrdersController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Models\Orders;
 use App\Models\PaymentAPIS;
 use App\Models\Product;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // Admin Dashboard with safe fallback checks and permission check
     Route::get('dashboard', function () {
         $topSellingProducts = collect([]);
         $orders = collect([]);
-        
+
         if (class_exists('App\Models\Product')) {
             try {
                 $topSellingProducts = Product::with('firstImage')
@@ -45,16 +47,18 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
                     ->orderBy('order_details_count', 'desc')
                     ->take(5)
                     ->get();
-            } catch (\Exception $e) {}
+            } catch (Exception $e) {
+            }
         }
-        
+
         if (class_exists('App\Models\Orders')) {
             try {
                 $orders = Orders::all();
-            } catch (\Exception $e) {}
+            } catch (Exception $e) {
+            }
         }
 
-        return view('AdminDash.dashboard', compact('orders', 'topSellingProducts'));
+        return view('adminDash.dashboard', compact('orders', 'topSellingProducts'));
     })->name('admin.dashboard')->middleware('admin.permission:view_dashboard');
 
     // Secure Admin Logout route
@@ -68,7 +72,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
             Artisan::call('view:clear');
 
             return response()->json(['success' => true, 'message' => 'Cache cleared successfully!']);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => 'Something went wrong!'], 500);
         }
     })->name('clear.cache')->middleware('admin.permission:setup_general_settings');
@@ -82,7 +86,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('admins/status', 'status')->name('admin.status')->middleware('admin.permission:manage_admin');
         Route::get('admins/permission/assaign/{id}', 'permission')->name('admin.permission')->middleware('admin.permission:manage_admin');
         Route::post('admins/permission/assaign/{id}', 'updatePermission')->name('admin.permission.update')->middleware('admin.permission:manage_admin');
-        
+
         // Admin Profile Update
         Route::get('profile', 'profile')->name('admin.profile');
         Route::post('profile/update', 'profileUpdate')->name('admin.profile.update');
@@ -194,7 +198,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('category/status', 'status')->name('category.status')->middleware('admin.permission:manage_category');
         Route::post('category/destroy', 'destroy')->name('category.destroy')->middleware('admin.permission:manage_category');
     });
-    
+
     Route::controller(SubCategoryController::class)->group(function () {
         Route::get('sub-category', 'index')->name('sub-category.index')->middleware('admin.permission:manage_subcategory');
         Route::get('sub-category/create', 'create')->name('sub-category.create')->middleware('admin.permission:manage_subcategory');
@@ -393,10 +397,10 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     });
 
     // Support Ticket & Customer Chat routes
-    Route::controller(\App\Http\Controllers\Admin\AdminSupportController::class)->group(function () {
+    Route::controller(AdminSupportController::class)->group(function () {
         Route::get('/tickets', 'tickets')->name('admin.tickets')->middleware('admin.permission:manage_support_tickets');
         Route::post('/tickets/{id}/update', 'updateTicket')->name('admin.tickets.update')->middleware('admin.permission:manage_support_tickets');
-        
+
         Route::get('/chat', 'chatDashboard')->name('admin.chat')->middleware('admin.permission:manage_support_tickets');
         Route::get('/chat/users', 'getChatUsers')->name('admin.chat.users')->middleware('admin.permission:manage_support_tickets');
         Route::get('/chat/messages/{user_id}', 'getUserMessages')->name('admin.chat.messages')->middleware('admin.permission:manage_support_tickets');
@@ -404,7 +408,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     });
 
     // Admin Wallet & Point System Routes
-    Route::controller(\App\Http\Controllers\Admin\AdminWalletPointController::class)->group(function () {
+    Route::controller(AdminWalletPointController::class)->group(function () {
         Route::get('/wallet/transactions', 'transactions')->name('admin.wallet.transactions')->middleware('admin.permission:manage_wallet');
         Route::get('/wallet/manual-recharges', 'manualRecharges')->name('admin.wallet.manual-recharges')->middleware('admin.permission:manage_wallet');
         Route::post('/wallet/recharge/approve/{id}', 'approveRecharge')->name('admin.wallet.recharge.approve')->middleware('admin.permission:manage_wallet');

@@ -5,7 +5,7 @@
 
 @endphp
 
-@extends('layouts.frontend.master')
+@extends('layouts.Frontend.master')
 @section('title')
     HOME
 @endsection

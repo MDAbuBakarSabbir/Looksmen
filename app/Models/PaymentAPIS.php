@@ -10,7 +10,7 @@ class PaymentAPIS extends Model
         $features = FeatureActivation::all();
         $featuresConfig = $features->pluck('status', 'name')->toArray();
         if ($featuresConfig['payment_api'] == '1') {
-            return view('AdminDash.settings.api.payment.index');
+            return view('adminDash.settings.api.payment.index');
         }
         abort(404);
     }

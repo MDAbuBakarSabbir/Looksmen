@@ -1,4 +1,4 @@
-@extends('layouts.AdminLays.master')
+@extends('layouts.Backend.master')
 @section('title')
     NON-REGISTERED CUSTOMERS
 @endsection

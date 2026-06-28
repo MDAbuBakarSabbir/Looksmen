@@ -1,4 +1,4 @@
-@extends('layouts.adminLays.master')
+@extends('layouts.Backend.master')
 @section('title')
     EDIT SLIDER
 @endsection

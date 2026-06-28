@@ -2,7 +2,7 @@
     use App\Models\Attribute;
 
 @endphp
-@extends('layouts.adminLays.master')
+@extends('layouts.Backend.master')
 @section('title')
     ATTRIBUTE CREATE
 @endsection
