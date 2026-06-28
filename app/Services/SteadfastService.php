@@ -14,12 +14,17 @@ class SteadfastService
 
     public function __construct()
     {
-
-        // নিরাপত্তা নিশ্চিত করতে এই Key গুলো .env ফাইল থেকে নেওয়া উচিত
-        // $this->apiKey = '0kdq3kykufkth7t6gvw9xoyapmzzc1gx ';
-        // $this->secretKey = 'mfzpyt42yilmm6yyotudeqy6';
-        $this->apiKey = env('STEADFAST_API_KEY', 'API Key Here');
-        $this->secretKey = env('STEADFAST_SECRET_KEY', 'Secret Key Here');
+        $courier = \App\Models\CourierApi::where('courier_name', 'steadfast')->first();
+        if ($courier) {
+            $this->apiKey = $courier->api_key ?? env('STEADFAST_API_KEY', 'API Key Here');
+            $this->secretKey = $courier->secret_key ?? env('STEADFAST_SECRET_KEY', 'Secret Key Here');
+            if ($courier->base_url) {
+                $this->baseUrl = rtrim($courier->base_url, '/');
+            }
+        } else {
+            $this->apiKey = env('STEADFAST_API_KEY', 'API Key Here');
+            $this->secretKey = env('STEADFAST_SECRET_KEY', 'Secret Key Here');
+        }
     }
 
     // অথেনটিকেশন হেডার তৈরি করা
@@ -63,22 +68,15 @@ class SteadfastService
     // প্রয়োজনীয় API মেথডগুলো এখানে তৈরি করা হবে
     //---------------------------------------------------------
 
-    // ধাপ ১: নতুন অর্ডার প্লেস করা
+    // নতুন অর্ডার প্লেস করা
     public function createOrder($data)
     {
-        return Http::withHeaders([
-            'Api-Key' => env('STEADFAST_API_KEY'),
-            'Secret-Key' => env('STEADFAST_SECRET_KEY'),
-            'Content-Type' => 'application/json'
-        ])->post($this->base_url.'/create_order', $data)->json();
+        return $this->post('/create_order', $data);
     }
 
     public function checkStatusByInvoice($invoice)
     {
-        return Http::withHeaders([
-            'Api-Key' => env('STEADFAST_API_KEY'),
-            'Secret-Key' => env('STEADFAST_SECRET_KEY'),
-        ])->get($this->base_url.'/status_by_invoice/'.$invoice)->json();
+        return $this->get('/status_by_invoice/' . $invoice);
     }
 
     // ধাপ ৩: ডেলিভারি স্ট্যাটাস চেক করা (Tracking Code ব্যবহার করে)
