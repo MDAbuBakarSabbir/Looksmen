@@ -69,7 +69,10 @@ use App\Models\GeneralWebSettings;
                 <a href="" class="app-brand-link gap-2">
                   @php
                       $webLogo = \App\Models\GeneralWebSettings::where('name', 'web_logo')->first();
-                      $logoPath = $webLogo && $webLogo->value ? 'adminDash/assets/img/layouts/' . $webLogo->value : 'logo.png';
+                      $logoPath = 'frontend/uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png';
+                      if ($webLogo && !empty($webLogo->value) && file_exists(public_path('adminDash/assets/img/layouts/' . $webLogo->value))) {
+                          $logoPath = 'adminDash/assets/img/layouts/' . $webLogo->value;
+                      }
                   @endphp
                   <img src="{{ asset($logoPath) }}" alt="Website Logo" style="max-height: 50px; max-width: 100%;">
                 </a>
