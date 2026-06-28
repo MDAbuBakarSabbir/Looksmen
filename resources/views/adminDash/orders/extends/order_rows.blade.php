@@ -107,14 +107,19 @@
 
         <!-- Invoice Column -->
         <td style="vertical-align: middle;">
-            <div class="d-flex flex-column" style="gap: 6px; align-items: flex-start;">
+            <div class="d-flex flex-column" style="gap: 6px; align-items: flex-start;" id="courier-info-{{ $order->id }}">
                 <span class="badge badge-light text-dark font-weight-bold" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: monospace; display: inline-block;">
                     Invoice: #LM-{{ $order->id }}
                 </span>
                 @if ($order->consignment_id != null)
-                    <span class="badge badge-info text-white font-weight-bold" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; background-color: #0284c7; border: 1px solid #0284c7; font-family: monospace; display: inline-block;">
-                        Courier: {{ $order->consignment_id }}
-                    </span>
+                    <div class="d-flex align-items-center" style="gap: 4px;">
+                        <span class="badge badge-info text-white font-weight-bold" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; background-color: #0284c7; border: 1px solid #0284c7; font-family: monospace; display: inline-block;">
+                            Courier: {{ $order->consignment_id }}
+                        </span>
+                        <button type="button" class="btn btn-xs btn-outline-info track-courier-btn" data-id="{{ $order->id }}" style="padding: 2px 5px; border-radius: 4px; cursor: pointer;" title="Track Order">
+                            <i class="fa-solid fa-magnifying-glass" style="font-size: 10px;"></i>
+                        </button>
+                    </div>
                 @else
                     <span class="badge badge-light text-muted font-weight-normal" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: monospace; display: inline-block;">
                         Courier: N/A
@@ -394,6 +399,31 @@
                         badge.addClass('status-' + response.status);
 
                         
+                        if (response.consignment_id) {
+                            $('#courier-info-' + response.order_id).html(`
+                                <span class="badge badge-light text-dark font-weight-bold" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: monospace; display: inline-block;">
+                                    Invoice: #LM-${response.order_id}
+                                </span>
+                                <div class="d-flex align-items-center" style="gap: 4px;">
+                                    <span class="badge badge-info text-white font-weight-bold" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; background-color: #0284c7; border: 1px solid #0284c7; font-family: monospace; display: inline-block;">
+                                        Courier: ${response.consignment_id}
+                                    </span>
+                                    <button type="button" class="btn btn-xs btn-outline-info track-courier-btn" data-id="${response.order_id}" style="padding: 2px 5px; border-radius: 4px; cursor: pointer;" title="Track Order">
+                                        <i class="fa-solid fa-magnifying-glass" style="font-size: 10px;"></i>
+                                    </button>
+                                </div>
+                            `);
+                        } else {
+                            $('#courier-info-' + response.order_id).html(`
+                                <span class="badge badge-light text-dark font-weight-bold" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: monospace; display: inline-block;">
+                                    Invoice: #LM-${response.order_id}
+                                </span>
+                                <span class="badge badge-light text-muted font-weight-normal" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; border: 1px solid #e2e8f0; font-family: monospace; display: inline-block;">
+                                    Courier: N/A
+                                </span>
+                            `);
+                        }
+
                         Toast.fire({
                             icon: 'success',
                             title: 'Status updated to ' + response.status_text
