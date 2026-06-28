@@ -130,25 +130,41 @@ public function updateCredentials(Request $request)
 public function getBalance()
 {
     try {
-        $steadfastService = new SteadfastService();
-        $balanceResponse = $steadfastService->getCurrentBalance();
-        if (isset($balanceResponse['status']) && $balanceResponse['status'] == 200) {
-            // Cache the balance for fast future access
-            \Illuminate\Support\Facades\Cache::put('steadfast_balance', [
-                'status' => 'success',
-                'balance' => $balanceResponse['current_balance']
-            ], 300);
-
+        $activeCourier = CourierApi::where('status', '1')->first();
+        if (!$activeCourier) {
             return response()->json([
-                'success' => true,
-                'balance' => $balanceResponse['current_balance']
-            ]);
+                'success' => false,
+                'message' => 'No active courier API configured.'
+            ], 400);
         }
 
-        $message = isset($balanceResponse['message']) ? $balanceResponse['message'] : 'Could not fetch balance from Steadfast API.';
+        if ($activeCourier->courier_name == 'steadfast') {
+            $steadfastService = new SteadfastService();
+            $balanceResponse = $steadfastService->getCurrentBalance();
+            if (isset($balanceResponse['status']) && $balanceResponse['status'] == 200) {
+                // Cache the balance under a generic key for layouts/header
+                \Illuminate\Support\Facades\Cache::put('active_courier_balance', [
+                    'status' => 'success',
+                    'courier' => 'steadfast',
+                    'balance' => $balanceResponse['current_balance']
+                ], 300);
+
+                return response()->json([
+                    'success' => true,
+                    'balance' => $balanceResponse['current_balance']
+                ]);
+            }
+
+            $message = isset($balanceResponse['message']) ? $balanceResponse['message'] : 'Could not fetch balance from Steadfast API.';
+            return response()->json([
+                'success' => false,
+                'message' => $message
+            ], 400);
+        }
+
         return response()->json([
             'success' => false,
-            'message' => $message
+            'message' => 'Balance check for ' . ucfirst($activeCourier->courier_name) . ' is not implemented yet.'
         ], 400);
     } catch (\Exception $e) {
         return response()->json([
