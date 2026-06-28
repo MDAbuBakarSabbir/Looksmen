@@ -58,6 +58,7 @@
     <meta property="fb:app_id" content="1125412091428219">
     <meta name="facebook-domain-verification" content="fyxav3lhjmr6gjtzvyu9o0r4utfakz" />
     <!-- Favicon -->
+    <script src="{{ asset('frontend') }}/assets/js/vendors.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="icon" href="{{ asset('adminDash/assets/img/layouts/'.$webConfig['web_favicon']) }}">
@@ -935,7 +936,6 @@
 
 
     <!-- SCRIPTS -->
-    <script src="{{ asset('frontend') }}/assets/js/vendors.js"></script>
     <script src="{{ asset('frontend') }}/assets/js/aiz-core.js"></script>
     <script src="{{ asset('frontend') }}/assets/js/custom.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
