@@ -83,12 +83,14 @@
             width: 100%;
         }
 
-        .container,
-        .container-lg,
-        .container-md,
-        .container-sm,
-        .container-xl {
-            max-width: 1280px !important;
+        @media (min-width: 1280px) {
+            .container,
+            .container-lg,
+            .container-md,
+            .container-sm,
+            .container-xl {
+                max-width: 1280px !important;
+            }
         }
 
         /* Redesign Styles */
