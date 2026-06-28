@@ -67,7 +67,11 @@ use App\Models\GeneralWebSettings;
               <!-- Logo -->
               <div class="app-brand justify-content-center">
                 <a href="" class="app-brand-link gap-2">
-                  <span class="app-brand-text demo text-body fw-bolder">Sneat</span>
+                  @php
+                      $webLogo = \App\Models\GeneralWebSettings::where('name', 'web_logo')->first();
+                      $logoPath = $webLogo && $webLogo->value ? 'adminDash/assets/img/layouts/' . $webLogo->value : 'logo.png';
+                  @endphp
+                  <img src="{{ asset($logoPath) }}" alt="Website Logo" style="max-height: 50px; max-width: 100%;">
                 </a>
               </div>
               <!-- /Logo -->

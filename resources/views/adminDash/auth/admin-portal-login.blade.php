@@ -370,9 +370,11 @@
         <div class="login-card">
             <div class="brand-section">
                 <div class="brand-logo">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M12 2L1 21h22L12 2zm0 3.99L19.53 19H4.47L12 5.99zM13 16h-2v2h2v-2zm0-6h-2v4h2v-4z"/>
-                    </svg>
+                    @php
+                        $webLogo = \App\Models\GeneralWebSettings::where('name', 'web_logo')->first();
+                        $logoPath = $webLogo && $webLogo->value ? 'adminDash/assets/img/layouts/' . $webLogo->value : 'logo.png';
+                    @endphp
+                    <img src="{{ asset($logoPath) }}" alt="Website Logo" style="max-height: 50px; max-width: 100%;">
                 </div>
                 <h1>Admin Control Panel</h1>
                 <p>Sign in with your administrator credentials</p>
