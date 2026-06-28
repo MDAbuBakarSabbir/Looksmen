@@ -704,10 +704,14 @@
 
                 let product = window.productCatalog ? window.productCatalog[id] : null;
 
-                // Check if already in the list
+                // Check if already in the list with default variants
                 let alreadyExists = false;
                 $('.product-row').each(function() {
-                    if ($(this).attr('data-product-id') == id) {
+                    let rowId = $(this).attr('data-product-id');
+                    let rowSize = $(this).find('.spec-size').val() || "N/A";
+                    let rowColor = $(this).find('.spec-color').val() || "N/A";
+                    
+                    if (rowId == id && rowSize === "N/A" && rowColor === "N/A") {
                         alreadyExists = true;
                         let qtyInput = $(this).find('.qty-input');
                         qtyInput.val(parseInt(qtyInput.val()) + 1);
@@ -798,6 +802,39 @@
 
                 $resultsDropdown.hide().empty();
                 $searchField.val('');
+            });
+
+            // Handle merging when a variant is selected
+            $(document).on('change', '.spec-size, .spec-color', function() {
+                let currentRow = $(this).closest('.product-row');
+                let id = currentRow.attr('data-product-id');
+                let size = currentRow.find('.spec-size').val() || "N/A";
+                let color = currentRow.find('.spec-color').val() || "N/A";
+                
+                let duplicateRow = null;
+                $('.product-row').not(currentRow).each(function() {
+                    let rId = $(this).attr('data-product-id');
+                    let rSize = $(this).find('.spec-size').val() || "N/A";
+                    let rColor = $(this).find('.spec-color').val() || "N/A";
+                    if (rId == id && rSize === size && rColor === color) {
+                        duplicateRow = $(this);
+                    }
+                });
+                
+                if (duplicateRow) {
+                    let currentQty = parseInt(currentRow.find('.qty-input').val()) || 1;
+                    let duplicateQtyInput = duplicateRow.find('.qty-input');
+                    duplicateQtyInput.val(parseInt(duplicateQtyInput.val()) + currentQty);
+                    
+                    currentRow.remove();
+                    
+                    // Re-index SL numbers
+                    $('.product-row').each(function(index) {
+                        $(this).find('.sl-number').text(index + 1);
+                    });
+                    
+                    calculateTotals();
+                }
             });
         });
     </script>

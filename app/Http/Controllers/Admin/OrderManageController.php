@@ -557,22 +557,43 @@ class OrderManageController extends Controller
             $prices = $request->prices ?? [];
 
             $totalAmount = 0;
-
+            
+            // Group the products by ID, size, and color to prevent duplicates
+            $groupedProducts = [];
             for ($i = 0; $i < count($productIds); $i++) {
                 if (empty($productIds[$i])) continue;
+                
+                $pId = $productIds[$i];
+                $pSize = $sizes[$i] ?? 'N/A';
+                $pColor = $colors[$i] ?? 'N/A';
+                $pQty = (int)($quantities[$i] ?? 1);
+                $pPrice = (float)($prices[$i] ?? 0);
+                
+                $key = $pId . '|' . $pSize . '|' . $pColor;
+                
+                if (isset($groupedProducts[$key])) {
+                    $groupedProducts[$key]['qty'] += $pQty;
+                } else {
+                    $groupedProducts[$key] = [
+                        'id' => $pId,
+                        'size' => $pSize,
+                        'color' => $pColor,
+                        'qty' => $pQty,
+                        'price' => $pPrice,
+                    ];
+                }
+            }
 
+            foreach ($groupedProducts as $item) {
                 $detail = new OrderDetails();
                 $detail->order_id = $order->id;
-                $detail->product_id = $productIds[$i];
-                $detail->product_attribute = $sizes[$i] ?? 'N/A';
-                $detail->product_colour = $colors[$i] ?? 'N/A';
+                $detail->product_id = $item['id'];
+                $detail->product_attribute = $item['size'];
+                $detail->product_colour = $item['color'];
                 
-                $qty = (int)($quantities[$i] ?? 1);
-                $unitPrice = (float)($prices[$i] ?? 0);
-                
-                $detail->product_qty = $qty;
-                $detail->unit_price = $unitPrice;
-                $detail->total_price = $qty * $unitPrice;
+                $detail->product_qty = $item['qty'];
+                $detail->unit_price = $item['price'];
+                $detail->total_price = $item['qty'] * $item['price'];
                 $detail->save();
 
                 $totalAmount += $detail->total_price;
@@ -852,21 +873,42 @@ class OrderManageController extends Controller
 
             $totalAmount = 0;
 
+            // Group the products by ID, size, and color to prevent duplicates
+            $groupedProducts = [];
             for ($i = 0; $i < count($productIds); $i++) {
                 if (empty($productIds[$i])) continue;
+                
+                $pId = $productIds[$i];
+                $pSize = $sizes[$i] ?? 'N/A';
+                $pColor = $colors[$i] ?? 'N/A';
+                $pQty = (int)($quantities[$i] ?? 1);
+                $pPrice = (float)($prices[$i] ?? 0);
+                
+                $key = $pId . '|' . $pSize . '|' . $pColor;
+                
+                if (isset($groupedProducts[$key])) {
+                    $groupedProducts[$key]['qty'] += $pQty;
+                } else {
+                    $groupedProducts[$key] = [
+                        'id' => $pId,
+                        'size' => $pSize,
+                        'color' => $pColor,
+                        'qty' => $pQty,
+                        'price' => $pPrice,
+                    ];
+                }
+            }
 
+            foreach ($groupedProducts as $item) {
                 $detail = new OrderDetails();
                 $detail->order_id = $order->id;
-                $detail->product_id = $productIds[$i];
-                $detail->product_attribute = $sizes[$i] ?? 'N/A';
-                $detail->product_colour = $colors[$i] ?? 'N/A';
+                $detail->product_id = $item['id'];
+                $detail->product_attribute = $item['size'];
+                $detail->product_colour = $item['color'];
                 
-                $qty = (int)($quantities[$i] ?? 1);
-                $unitPrice = (float)($prices[$i] ?? 0);
-                
-                $detail->product_qty = $qty;
-                $detail->unit_price = $unitPrice;
-                $detail->total_price = $qty * $unitPrice;
+                $detail->product_qty = $item['qty'];
+                $detail->unit_price = $item['price'];
+                $detail->total_price = $item['qty'] * $item['price'];
                 $detail->save();
 
                 $totalAmount += $detail->total_price;
