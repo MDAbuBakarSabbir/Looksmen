@@ -1,4 +1,4 @@
-@extends('layouts.frontEnd.master')
+@extends('layouts.Frontend.master')
 
 @section('title')
     AFFILIATE WITHDRAW REQUESTS
