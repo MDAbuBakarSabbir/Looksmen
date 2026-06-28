@@ -845,8 +845,9 @@
                                         <span class="text-muted">Courier Status:</span>
                                         <span class="badge badge-info px-2 py-1 text-uppercase">{{ $order->delivery_status }}</span>
                                     </div>
-                                    <div class="border-top pt-3 mt-2">
-                                        <a href="https://steadfast.com.bd/" target="_blank" class="btn btn-sm btn-outline-primary w-100 font-weight-bold text-center"><i class="fa-solid fa-up-right-from-square mr-1"></i> Track consignment</a>
+                                    <div class="border-top pt-3 mt-2 d-flex" style="gap: 8px;">
+                                        <button type="button" class="btn btn-sm btn-primary w-100 font-weight-bold text-center track-courier-btn" data-id="{{ $order->id }}"><i class="fa-solid fa-magnifying-glass mr-1"></i> Track Consignment</button>
+                                        <a href="https://steadfast.com.bd/" target="_blank" class="btn btn-sm btn-outline-secondary font-weight-bold text-center" style="width: 50px;" title="Steadfast Website"><i class="fa-solid fa-up-right-from-square"></i></a>
                                     </div>
                                 </div>
                             @endif
