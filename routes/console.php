@@ -8,7 +8,7 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 use Illuminate\Support\Facades\Schedule;
-use App\Http\Controllers\admin\OrderManageController;
+use App\Http\Controllers\Admin\OrderManageController;
 
 Schedule::call(function () {
     try {
