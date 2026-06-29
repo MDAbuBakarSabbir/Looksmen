@@ -10,10 +10,12 @@ class SubCategoryController extends Controller
 {
     public function index()
     {
+        $maincategorys = Category::all();
+        $categories = $maincategorys;
         $subcategories = SubCategory::all();
-        $categories = Category::all();
-
-        return view('adminDash.category.sub.index',compact('subcategories','categories'));
+        $childcategories = \App\Models\ChildCategory::all();
+        $activeTab = 'sub';
+        return view('adminDash.category.index', compact('maincategorys', 'categories', 'subcategories', 'childcategories', 'activeTab'));
     }
     public function create()
     {
