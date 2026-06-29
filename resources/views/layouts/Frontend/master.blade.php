@@ -186,6 +186,23 @@
         .slick-list, .slick-track {
             max-width: 100%;
         }
+
+        /* Make customer dashboard layouts responsive on mobile */
+        @media (max-width: 991.98px) {
+            .container .d-flex.align-items-start {
+                flex-direction: column !important;
+                align-items: stretch !important;
+            }
+            .container .d-flex.align-items-start > .user-sidenav {
+                width: 100% !important;
+                margin-bottom: 24px !important;
+            }
+            .container .d-flex.align-items-start > .aiz-user-panel {
+                width: 100% !important;
+                margin-left: 0 !important;
+                margin-top: 24px !important;
+            }
+        }
     </style>
 </head>
 
