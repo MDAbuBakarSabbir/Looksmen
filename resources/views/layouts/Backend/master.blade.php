@@ -91,18 +91,21 @@
     <title>{{ $webConfig['web_name'] }} | @yield('title') </title>
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('adminDash/assets/img/layouts/favicon.png') }}">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ asset('adminDash/assets/vendor/jquery/jquery.min.js') }}"></script>
     <link href="{{ asset('adminDash/assets/vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet">
 
-    <!-- Select2 & Summernote CDNs -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css" rel="stylesheet">
-
-    <!-- Font Awesome 6 Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Select2 & Summernote -->
+    <link rel="stylesheet" href="{{ asset('adminDash/assets/vendor/select2/select2.min.css') }}">
     <link href="{{ asset('adminDash/assets/css/style.css') }}" rel="stylesheet">
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Font Awesome 6 Icons - loaded non-blocking -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
+    <!-- Summernote CSS - non-blocking -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css"></noscript>
+
+    <script src="{{ asset('adminDash/assets/vendor/sweetalert2/sweetalert2.min.js') }}"></script>
     <script>
         window.Toast = Swal.mixin({
             toast: true,
@@ -1482,8 +1485,9 @@
     <script src="{{ asset('adminDash/assets/vendor/jquery.counterup/jquery.counterup.min.js') }}"></script>
     <script src="{{ asset('adminDash/assets/js/dashboard/dashboard-1.js') }}"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js"></script>
+    <script src="{{ asset('adminDash/assets/vendor/select2/select2.full.min.js') }}"></script>
+    {{-- Summernote JS - deferred so it does not block page load --}}
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js" crossorigin="anonymous"></script>
 
     <!-- AJAX Order Alerts -->
     <script>
