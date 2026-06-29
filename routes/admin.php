@@ -194,28 +194,30 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('category', 'index')->name('category.index')->middleware('admin.permission:manage_category');
         Route::get('category/create', 'create')->name('category.create')->middleware('admin.permission:create_category');
         Route::post('category/store', 'store')->name('category.store')->middleware('admin.permission:create_category');
-        Route::get('category/edit', 'edit')->name('category.edit')->middleware('admin.permission:manage_category');
-        Route::post('category/update', 'update')->name('category.update')->middleware('admin.permission:manage_category');
+        Route::get('category/edit/{id}', 'edit')->name('category.edit')->middleware('admin.permission:manage_category');
+        Route::post('category/update/{id}', 'update')->name('category.update')->middleware('admin.permission:manage_category');
         Route::post('category/status', 'status')->name('category.status')->middleware('admin.permission:manage_category');
-        Route::post('category/destroy', 'destroy')->name('category.destroy')->middleware('admin.permission:manage_category');
+        Route::get('category/destroy/{id}', 'destroy')->name('category.destroy')->middleware('admin.permission:manage_category');
     });
 
     Route::controller(SubCategoryController::class)->group(function () {
         Route::get('sub-category', 'index')->name('sub-category.index')->middleware('admin.permission:manage_subcategory');
         Route::get('sub-category/create', 'create')->name('sub-category.create')->middleware('admin.permission:manage_subcategory');
         Route::post('sub-category/store', 'store')->name('sub-category.store')->middleware('admin.permission:manage_subcategory');
-        Route::get('sub-category/edit', 'edit')->name('sub-category.edit')->middleware('admin.permission:manage_subcategory');
-        Route::post('sub-category/update', 'update')->name('sub-category.update')->middleware('admin.permission:manage_subcategory');
-        Route::post('sub-category/destroy', 'destroy')->name('sub-category.destroy')->middleware('admin.permission:manage_subcategory');
+        Route::get('sub-category/edit/{id}', 'edit')->name('sub-category.edit')->middleware('admin.permission:manage_subcategory');
+        Route::post('sub-category/update/{id}', 'update')->name('sub-category.update')->middleware('admin.permission:manage_subcategory');
+        Route::post('sub-category/status', 'status')->name('sub-category.status')->middleware('admin.permission:manage_subcategory');
+        Route::get('sub-category/destroy/{id}', 'destroy')->name('sub-category.destroy')->middleware('admin.permission:manage_subcategory');
     });
 
     Route::controller(ChildCategoryController::class)->group(function () {
         Route::get('child-category', 'index')->name('child-category.index')->middleware('admin.permission:manage_childcategory');
         Route::get('child-category/create', 'create')->name('child-category.create')->middleware('admin.permission:manage_childcategory');
         Route::post('child-category/store', 'store')->name('child-category.store')->middleware('admin.permission:manage_childcategory');
-        Route::get('child-category/edit', 'edit')->name('child-category.edit')->middleware('admin.permission:manage_childcategory');
-        Route::post('child-category/update', 'update')->name('child-category.update')->middleware('admin.permission:manage_childcategory');
-        Route::post('child-category/destroy', 'destroy')->name('child-category.destroy')->middleware('admin.permission:manage_childcategory');
+        Route::get('child-category/edit/{id}', 'edit')->name('child-category.edit')->middleware('admin.permission:manage_childcategory');
+        Route::post('child-category/update/{id}', 'update')->name('child-category.update')->middleware('admin.permission:manage_childcategory');
+        Route::post('child-category/status', 'status')->name('child-category.status')->middleware('admin.permission:manage_childcategory');
+        Route::get('child-category/destroy/{id}', 'destroy')->name('child-category.destroy')->middleware('admin.permission:manage_childcategory');
     });
 
     // Colour Routes
