@@ -302,6 +302,9 @@
                                                 <a href="{{ route('attribute.create', $attribute->id) }}" class="action-icon-btn edit" title="Manage Values">
                                                     <i class="fa-solid fa-list-ul"></i>
                                                 </a>
+                                                <a href="{{ route('attribute.edit', $attribute->id) }}" class="action-icon-btn edit" style="background: rgba(16, 185, 129, 0.1); color: #10b981;" title="Edit Attribute Name">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </a>
                                                 <a href="{{ route('attribute.destroy', $attribute->id) }}" class="action-icon-btn delete" title="Delete Attribute" onclick="return confirm('Are you sure you want to delete this Attribute? Clicking OK will delete all values too.');">
                                                     <i class="fa-solid fa-trash"></i>
                                                 </a>
