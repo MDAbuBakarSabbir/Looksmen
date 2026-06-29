@@ -972,6 +972,29 @@
             0% { opacity: 0.4; }
             100% { opacity: 1; }
         }
+
+        /* Small slider bar / thin scrollbar for admin side navigation */
+        .quixnav-scroll::-webkit-scrollbar {
+            width: 5px;
+            background-color: transparent;
+        }
+        .quixnav-scroll::-webkit-scrollbar-track {
+            background-color: transparent;
+        }
+        .quixnav-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(99, 102, 241, 0.25);
+            border-radius: 10px;
+            transition: background-color 0.2s ease;
+        }
+        .quixnav-scroll:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(99, 102, 241, 0.5);
+        }
+        body.dark-mode .quixnav-scroll::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.15);
+        }
+        body.dark-mode .quixnav-scroll:hover::-webkit-scrollbar-thumb {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
     </style>
     <script>
         // Apply dark mode immediately to html and body elements to prevent white flash
