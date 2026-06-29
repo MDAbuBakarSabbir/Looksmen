@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Pages;
 use Illuminate\Http\Request;
 
+use Illuminate\Support\Str;
+
 class PagesController extends Controller
 {
     public function index(){
@@ -24,10 +26,29 @@ class PagesController extends Controller
         ]);
         Pages::create([
             'page_name'=> $request->page_name,
+            'slug'=> Str::slug($request->page_name),
             'english_description'=> $request->english_description,
             'bangla_description'=> $request->bangla_description,
         ]);
         return back()->with('success', 'Page Create Successfull!');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $request->validate([
+            'page_name' => 'required|string',
+            'english_description'=>'required|string'
+        ]);
+
+        $page = Pages::findOrFail($id);
+        $page->update([
+            'page_name'=> $request->page_name,
+            'slug'=> Str::slug($request->page_name),
+            'english_description'=> $request->english_description,
+            'bangla_description'=> $request->bangla_description,
+        ]);
+
+        return redirect()->route('pages.index')->with('success', 'Page Updated Successfully!');
     }
 
     public function status(Request $request)
