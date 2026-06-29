@@ -56,7 +56,26 @@
         content="{{ $webConfig['web_description'] }}" />
     <meta property="og:site_name" content="LOOKSMEN" />
     <meta property="fb:app_id" content="1125412091428219">
-    <meta name="facebook-domain-verification" content="fyxav3lhjmr6gjtzvyu9o0r4utfakz" />
+    
+    <!-- Facebook Domain Verification -->
+    @if (!empty($webConfig['fbdomainverify']))
+        @if (strpos($webConfig['fbdomainverify'], '<') !== false)
+            {!! $webConfig['fbdomainverify'] !!}
+        @else
+            <meta name="facebook-domain-verification" content="{{ $webConfig['fbdomainverify'] }}" />
+        @endif
+    @else
+        <meta name="facebook-domain-verification" content="fyxav3lhjmr6gjtzvyu9o0r4utfakz" />
+    @endif
+
+    <!-- Google Domain Verification -->
+    @if (!empty($webConfig['gdomainverify']))
+        @if (strpos($webConfig['gdomainverify'], '<') !== false)
+            {!! $webConfig['gdomainverify'] !!}
+        @else
+            <meta name="google-site-verification" content="{{ $webConfig['gdomainverify'] }}" />
+        @endif
+    @endif
     <!-- Favicon -->
     <script src="{{ asset('frontend') }}/assets/js/vendors.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
@@ -144,12 +163,17 @@
                 j = d.createElement(s),
                 dl = l != 'dataLayer' ? '&l=' + l : '';
             j.async = true;
-            j.src =
-                '../www.googletagmanager.com/gtm5445.html?id=' + i + dl;
+            j.src = 'https://www.googletagmanager.com/gtm.js?id=' + i + dl;
             f.parentNode.insertBefore(j, f);
-        })(window, document, 'script', 'dataLayer', 'GTM-N36FZRPR');
+        })(window, document, 'script', 'dataLayer', '{{ $webConfig['gtagid'] ?? 'GTM-N36FZRPR' }}');
     </script>
     <!-- End Google Tag Manager -->
+
+    <!-- Facebook Pixel Code -->
+    @if (!empty($webConfig['fb_pixel']))
+        {!! $webConfig['fb_pixel'] !!}
+    @endif
+    <!-- End Facebook Pixel Code -->
 
     <style>
         img.mw-100.h-30px.h-md-40px {
@@ -243,6 +267,10 @@
 </head>
 
 <body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id={{ $webConfig['gtagid'] ?? 'GTM-N36FZRPR' }}" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
     <div class="aiz-main-wrapper d-flex flex-column">
         <div class="top-navbar bg-white border-bottom border-soft-secondary z-1035">
             <div class="container">
@@ -1618,13 +1646,9 @@
 
 
 
-    <!-- Google Tag Manager (noscript) -->
-    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N36FZRPR" height="0" width="0"
-            style="display:none;visibility:hidden"></iframe></noscript>
-    <!-- End Google Tag Manager (noscript) -->
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous"
-        src="../connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=1"
+        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=1"
         nonce="mvlbA8Xg"></script>
     </div>
 
