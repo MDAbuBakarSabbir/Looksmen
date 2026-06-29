@@ -1,6 +1,6 @@
 @extends('layouts.Backend.master')
 @section('title')
-    SMTP SETTINGS
+    SMTP & SMS SETTINGS
 @endsection
 @section('content')
     <style>
@@ -9,13 +9,7 @@
             border-radius: 12px;
             background: #fff;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.05);
-        }
-        .guide-box {
-            background-color: rgba(99, 102, 241, 0.04);
-            border: 1px dashed rgba(99, 102, 241, 0.2);
-            border-radius: 10px;
-            padding: 20px;
-            color: #4b5563;
+            height: 100%;
         }
         .form-label-custom {
             font-size: 13px;
@@ -37,28 +31,33 @@
             outline: none;
         }
         .btn-submit-custom {
-            background: linear-gradient(135deg, #4f46e5, #6366f1);
-            color: #fff;
             font-weight: 600;
             border: none;
             border-radius: 8px;
             padding: 12px;
             cursor: pointer;
             transition: opacity 0.2s;
+            color: #fff;
         }
         .btn-submit-custom:hover {
             opacity: 0.95;
         }
     </style>
 
-    <div class="row justify-content-center">
-        @if ($featuresConfig['email_verification'] == '1')
-            <div class="col-lg-7 mb-4">
-                <div class="settings-card card border-0">
-                    <div class="card-header bg-white border-bottom border-light p-4">
-                        <h4 class="mb-0 font-weight-bold" style="color: #1f2937;"><i class="fa-solid fa-envelope text-primary mr-2"></i>Mail SMTP Settings</h4>
-                    </div>
-                    <div class="card-body p-4">
+    <div class="row">
+        {{-- Email SMTP Section --}}
+        <div class="col-lg-6 mb-4">
+            <div class="settings-card card border-0">
+                <div class="card-header bg-white border-bottom border-light p-4 d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0 font-weight-bold" style="color: #1f2937;"><i class="fa-solid fa-envelope text-primary mr-2"></i>Mail SMTP Settings</h4>
+                    @if ($featuresConfig['email_verification'] != '1')
+                        <span class="badge badge-warning">Disabled in Config</span>
+                    @else
+                        <span class="badge badge-success">Active</span>
+                    @endif
+                </div>
+                <div class="card-body p-4">
+                    @if ($featuresConfig['email_verification'] == '1')
                         <form action="{{ route('smtp.store') }}" method="POST">
                             @csrf
                             <div class="row">
@@ -94,61 +93,87 @@
                                     <div class="form-check mr-4">
                                         <input class="form-check-input" type="radio" name="mailencription" id="encryptionTLS" value="tls" {{ (isset($smtpSettings['mailencription']) && $smtpSettings['mailencription'] == 'tls') ? 'checked' : '' }}>
                                         <label class="form-check-label font-weight-bold text-dark" for="encryptionTLS" style="cursor: pointer;">
-                                            TLS (Usually port 587)
+                                            TLS
                                         </label>
                                     </div>
                                     <div class="form-check mr-4">
                                         <input class="form-check-input" type="radio" name="mailencription" id="encryptionSSL" value="ssl" {{ (!isset($smtpSettings['mailencription']) || $smtpSettings['mailencription'] == 'ssl') ? 'checked' : '' }}>
                                         <label class="form-check-label font-weight-bold text-dark" for="encryptionSSL" style="cursor: pointer;">
-                                            SSL (Usually port 465)
+                                            SSL
                                         </label>
                                     </div>
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-submit-custom btn-block">
-                                <i class="fa-solid fa-circle-check mr-2"></i>Save Configuration
+                            <button type="submit" class="btn btn-submit-custom btn-block" style="background: linear-gradient(135deg, #4f46e5, #6366f1);">
+                                <i class="fa-solid fa-circle-check mr-2"></i>Save SMTP Configuration
                             </button>
                         </form>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="settings-card card border-0">
-                    <div class="card-header bg-white border-bottom border-light p-4">
-                        <h4 class="mb-0 font-weight-bold" style="color: #1f2937;"><i class="fa-solid fa-circle-info text-info mr-2"></i>Configuration Guide</h4>
-                    </div>
-                    <div class="card-body p-4">
-                        <div class="guide-box mb-4">
-                            <h5 class="font-weight-bold mb-3" style="color: #4f46e5;"><i class="fa-solid fa-circle-play mr-2"></i>Getting Started</h5>
-                            <p style="font-size: 13px; line-height: 1.6;">SMTP stands for Simple Mail Transfer Protocol. Configure SMTP settings to send verification emails, notifications, and reset password links dynamically from this application.</p>
+                    @else
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-envelope-open-text mb-3" style="font-size: 40px; opacity: 0.5;"></i>
+                            <p class="mb-2 font-weight-bold">Email SMTP is Disabled</p>
+                            <a href="{{ route('feature.index') }}" class="btn btn-sm btn-outline-primary" style="border-radius: 6px;">Enable in Feature Activation</a>
                         </div>
+                    @endif
+                </div>
+            </div>
+        </div>
 
-                        <h6 class="font-weight-bold text-dark mb-2">Recommended Settings for Popular Providers:</h6>
-                        <ul class="pl-3" style="font-size: 13px; color: #4b5563; line-height: 2;">
-                            <li><strong>Gmail:</strong> Host: <code>smtp.gmail.com</code> | Port: <code>465</code> (SSL) or <code>587</code> (TLS)</li>
-                            <li><strong>Outlook:</strong> Host: <code>smtp-mail.outlook.com</code> | Port: <code>587</code> (TLS)</li>
-                            <li><strong>Mailtrap (Testing):</strong> Host: <code>sandbox.smtp.mailtrap.io</code> | Port: <code>2525</code></li>
-                        </ul>
-                        <div class="alert alert-warning p-3 mt-3 border-0" style="border-radius: 8px; font-size: 13px;">
-                            <i class="fa-solid fa-triangle-exclamation mr-2 text-warning"></i>
-                            <strong>Important:</strong> If using Gmail, make sure you configure and use an <strong>App Password</strong> instead of your regular account password.
+        {{-- SMS Gateway Section --}}
+        <div class="col-lg-6 mb-4">
+            <div class="settings-card card border-0">
+                <div class="card-header bg-white border-bottom border-light p-4 d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0 font-weight-bold" style="color: #1f2937;"><i class="fa-solid fa-comment-sms text-success mr-2"></i>SMS Gateway Settings</h4>
+                    @if ($featuresConfig['sms_verification'] != '1')
+                        <span class="badge badge-warning">Disabled in Config</span>
+                    @else
+                        <span class="badge badge-success">Active</span>
+                    @endif
+                </div>
+                <div class="card-body p-4">
+                    @if ($featuresConfig['sms_verification'] == '1')
+                        <form action="{{ route('sms.store') }}" method="POST">
+                            @csrf
+                            <div class="mb-3">
+                                <label class="form-label-custom">SMS Gateway Provider</label>
+                                <select class="form-control form-control-custom" name="sms_gateway_provider">
+                                    <option value="steadfast" {{ (isset($smtpSettings['sms_gateway_provider']) && $smtpSettings['sms_gateway_provider'] == 'steadfast') ? 'selected' : '' }}>Steadfast SMS (Recommended)</option>
+                                    <option value="greenweb" {{ (isset($smtpSettings['sms_gateway_provider']) && $smtpSettings['sms_gateway_provider'] == 'greenweb') ? 'selected' : '' }}>Greenweb SMS</option>
+                                    <option value="bulksmsbd" {{ (isset($smtpSettings['sms_gateway_provider']) && $smtpSettings['sms_gateway_provider'] == 'bulksmsbd') ? 'selected' : '' }}>BulkSMS BD</option>
+                                    <option value="mimsms" {{ (isset($smtpSettings['sms_gateway_provider']) && $smtpSettings['sms_gateway_provider'] == 'mimsms') ? 'selected' : '' }}>Mim SMS</option>
+                                    <option value="other" {{ (isset($smtpSettings['sms_gateway_provider']) && $smtpSettings['sms_gateway_provider'] == 'other') ? 'selected' : '' }}>Other HTTP API Gateway</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">API Key / Token</label>
+                                <input type="password" class="form-control form-control-custom" name="sms_api_key" placeholder="Enter API Access Token" value="{{ $smtpSettings['sms_api_key'] ?? '' }}" required>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label-custom">Sender ID (Masking / Client ID)</label>
+                                <input type="text" class="form-control form-control-custom" name="sms_sender_id" placeholder="e.g. 8809612... or BRANDNAME" value="{{ $smtpSettings['sms_sender_id'] ?? '' }}">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label-custom">API Gateway Endpoint URL</label>
+                                <input type="text" class="form-control form-control-custom" name="sms_api_url" placeholder="e.g. https://api.smsprovider.com/send" value="{{ $smtpSettings['sms_api_url'] ?? '' }}">
+                            </div>
+
+                            <button type="submit" class="btn btn-submit-custom btn-block" style="background: linear-gradient(135deg, #10b981, #059669);">
+                                <i class="fa-solid fa-circle-check mr-2"></i>Save SMS Configuration
+                            </button>
+                        </form>
+                    @else
+                        <div class="text-center py-5 text-muted">
+                            <i class="fa-solid fa-sms mb-3" style="font-size: 40px; opacity: 0.5;"></i>
+                            <p class="mb-2 font-weight-bold">SMS Verification is Disabled</p>
+                            <a href="{{ route('feature.index') }}" class="btn btn-sm btn-outline-success" style="border-radius: 6px;">Enable in Feature Activation</a>
                         </div>
-                    </div>
+                    @endif
                 </div>
             </div>
-        @else
-            <div class="col-lg-8 text-center py-5">
-                <div class="card border-0 shadow-sm p-5" style="border-radius: 12px;">
-                    <i class="fa-solid fa-envelope-circle-check text-muted mb-4" style="font-size: 64px; opacity: 0.4;"></i>
-                    <h3 class="font-weight-bold text-dark mb-3">Email Feature is Disabled</h3>
-                    <p class="text-muted mb-4" style="font-size: 15px; max-width: 500px; margin: 0 auto;">To configure SMTP, please make sure the email verification feature is turned on in the Activation configs panel.</p>
-                    <a href="{{ route('feature.index') }}" class="btn btn-primary d-inline-block mx-auto" style="border-radius: 8px; font-weight: 600; padding: 10px 24px; background: linear-gradient(135deg, #4f46e5, #6366f1); border: none;">
-                        Go to Feature Activation
-                    </a>
-                </div>
-            </div>
-        @endif
+        </div>
     </div>
 @endsection
