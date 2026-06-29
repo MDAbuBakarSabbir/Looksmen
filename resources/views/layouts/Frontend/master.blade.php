@@ -187,20 +187,55 @@
             max-width: 100%;
         }
 
-        /* Make customer dashboard layouts responsive on mobile */
+        /* Make customer dashboard layouts responsive on mobile (Slide-out Off-canvas Drawer) */
         @media (max-width: 991.98px) {
             .container .d-flex.align-items-start {
                 flex-direction: column !important;
                 align-items: stretch !important;
             }
             .container .d-flex.align-items-start > .user-sidenav {
-                width: 100% !important;
-                margin-bottom: 24px !important;
+                position: fixed !important;
+                top: 0 !important;
+                left: -280px !important;
+                width: 280px !important;
+                height: 100vh !important;
+                z-index: 1045 !important;
+                background: #ffffff !important;
+                box-shadow: 5px 0 25px rgba(0,0,0,0.15) !important;
+                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                margin-bottom: 0 !important;
+                border-radius: 0 !important;
+                border: none !important;
+                display: block !important;
+            }
+            .container .d-flex.align-items-start > .user-sidenav.show {
+                left: 0 !important;
             }
             .container .d-flex.align-items-start > .aiz-user-panel {
                 width: 100% !important;
                 margin-left: 0 !important;
-                margin-top: 24px !important;
+                margin-top: 0 !important;
+            }
+
+            /* Off-canvas Backdrop */
+            .user-sidenav-backdrop {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                background: rgba(0, 0, 0, 0.5);
+                z-index: 1040;
+                display: none;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            .user-sidenav-backdrop.show {
+                display: block;
+                opacity: 1;
+            }
+            body.overflow-hidden {
+                overflow: hidden !important;
             }
         }
     </style>
@@ -262,6 +297,9 @@
             <div class="d-flex align-items-center">
 
                 <div class="col-auto col-xl-3 pl-0 pr-3 d-flex align-items-center">
+                    <button type="button" class="btn p-0 mr-3 d-xl-none mobile-dashboard-toggle" style="font-size: 24px; color: #000; background: none; border: none; outline: none; cursor: pointer;">
+                        <i class="las la-bars"></i>
+                    </button>
                     <a class="d-block py-20px mr-3 ml-0" href="{{ url('/') }}">
                         <img src="{{ asset('frontend') }}/uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png"
                             alt="LOOKSMEN" class="mw-100 h-40px h-md-60px" height="40">
@@ -719,8 +757,7 @@
                 <div class="col">
                     @auth
                         <a href="javascript:void(0)"
-                            class="text-reset d-block text-center pb-2 pt-3 mobile-side-nav-thumb"
-                            data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
+                            class="text-reset d-block text-center pb-2 pt-3 mobile-dashboard-toggle">
                             <span class="d-block mx-auto">
                                 <img src="{{ asset('frontend') }}/assets/img/avatar-place.png"
                                     class="rounded-circle size-20px">
@@ -729,8 +766,7 @@
                         </a>
                     @else
                         <a href="{{ route('login') }}"
-                            class="text-reset d-block text-center pb-2 pt-3 mobile-side-nav-thumb"
-                            data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
+                            class="text-reset d-block text-center pb-2 pt-3">
                             <span class="d-block mx-auto">
                                 <img src="{{ asset('frontend') }}/assets/img/avatar-place.png"
                                     class="rounded-circle size-20px">
@@ -952,6 +988,9 @@
 
 
 
+    <!-- Dashboard mobile sidebar backdrop -->
+    <div class="user-sidenav-backdrop" id="userSidenavBackdrop"></div>
+
     <!-- SCRIPTS -->
     <script src="{{ asset('frontend') }}/assets/js/aiz-core.js"></script>
     <script src="{{ asset('frontend') }}/assets/js/custom.js"></script>
@@ -962,6 +1001,55 @@
 
     <script>
         $(document).ready(function() {
+            // Mobile Sidenav drawer logic
+            function toggleUserSidenav() {
+                var $sidenav = $('.user-sidenav');
+                var $backdrop = $('#userSidenavBackdrop');
+                if ($sidenav.length > 0) {
+                    $sidenav.toggleClass('show');
+                    $backdrop.toggleClass('show');
+                    $('body').toggleClass('overflow-hidden');
+                }
+            }
+
+            function closeUserSidenav() {
+                $('.user-sidenav').removeClass('show');
+                $('#userSidenavBackdrop').removeClass('show');
+                $('body').removeClass('overflow-hidden');
+            }
+
+            // Bind click event
+            $(document).on('click', '.mobile-dashboard-toggle', function(e) {
+                e.preventDefault();
+                var $sidenav = $('.user-sidenav');
+                if ($sidenav.length > 0) {
+                    toggleUserSidenav();
+                } else {
+                    // Redirect to dashboard with hash to open menu automatically
+                    window.location.href = "{{ route('dashboard') }}#open-menu";
+                }
+            });
+
+            // Close when clicking backdrop or close button
+            $('#userSidenavBackdrop').on('click', closeUserSidenav);
+            $(document).on('click', '#mobile-sidenav-close-btn', closeUserSidenav);
+            $(document).on('click', '.user-sidenav .user-nav-link', closeUserSidenav);
+
+            // Add close button to user-sidenav header if on mobile
+            if ($('.user-sidenav').length > 0 && $('#mobile-sidenav-close-btn').length === 0) {
+                $('.user-sidenav-header').addClass('position-relative').prepend(
+                    '<button type="button" id="mobile-sidenav-close-btn" class="btn p-0 d-lg-none" style="position: absolute; top: 15px; right: 15px; color: white; font-size: 24px; z-index: 10; border: none; background: none; outline: none;"><i class="las la-times"></i></button>'
+                );
+            }
+
+            // Check if page loaded with hash to open menu
+            if (window.location.hash === '#open-menu') {
+                history.replaceState(null, null, ' ');
+                setTimeout(function() {
+                    toggleUserSidenav();
+                }, 300);
+            }
+
             $('.category-nav-element').each(function(i, el) {
                 $(el).on('mouseover', function() {
                     if (!$(el).find('.sub-cat-menu').hasClass('loaded')) {
