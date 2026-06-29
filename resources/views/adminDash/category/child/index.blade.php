@@ -1,205 +1,468 @@
 @extends('layouts.Backend.master')
 @section('title')
-    CHILD CATEGORY
+    CHILD CATEGORIES
 @endsection
 @section('content')
     <style>
-        /* --- General Button --- */
-        .btn {
-            padding: 10px 20px;
-            background: #2563eb;
-            color: #fff;
+        /* --- Premium Admin Style Rules --- */
+        .category-tab-btn {
+            font-weight: 600;
+            padding: 10px 22px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+        .category-tab-btn.active {
+            background: linear-gradient(135deg, #4f46e5, #6366f1) !important;
+            color: #fff !important;
+            box-shadow: 0 4px 15px rgba(79, 70, 229, 0.25);
             border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: background 0.3s ease;
         }
-
-        .btn:hover {
-            background: #1e40af;
+        .category-tab-btn:not(.active) {
+            background: #f3f4f6 !important;
+            color: #4b5563 !important;
+            border: 1px solid #e5e7eb;
         }
-
-        /* --- Modal Background --- */
+        .category-tab-btn:not(.active):hover {
+            background: #e5e7eb !important;
+            color: #1f2937 !important;
+        }
+        .metrics-card {
+            border: 1px solid rgba(0, 0, 0, 0.05);
+            border-radius: 12px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background: #fff;
+        }
+        .metrics-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+        .metrics-icon-box {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+        .table-custom th {
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #374151;
+            background-color: #f9fafb !important;
+            border-bottom: 2px solid #e5e7eb;
+            padding: 16px 20px;
+        }
+        .table-custom td {
+            padding: 16px 20px;
+            vertical-align: middle;
+            font-size: 14px;
+            color: #4b5563;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        .action-icon-btn {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        .action-icon-btn.edit {
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+        }
+        .action-icon-btn.edit:hover {
+            background: #10b981;
+            color: #fff;
+        }
+        .action-icon-btn.delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+        .action-icon-btn.delete:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+        /* --- Modern Pop-up Modal Customization --- */
         .modal {
             position: fixed;
-            z-index: 999;
+            z-index: 1060;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
             display: flex;
             align-items: center;
             justify-content: center;
-
-            /* Animation setup */
             opacity: 0;
             visibility: hidden;
-            transition: opacity 0.3s ease, visibility 0.3s ease;
+            transition: all 0.3s ease;
         }
-
-        /* Show modal smoothly */
         .modal.show {
             opacity: 1;
             visibility: visible;
         }
-
-        /* --- Modal Content Box --- */
         .modal-content {
             background: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            width: 400px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
-            transform: translateY(-30px);
+            padding: 30px;
+            border-radius: 16px;
+            width: 500px;
+            max-width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            transform: scale(0.9);
             transition: transform 0.3s ease;
-        }
-
-        /* Slide in effect */
-        .modal.show .modal-content {
-            transform: translateY(0);
-        }
-
-        /* --- Input Styles --- */
-        .modal-content input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            font-size: 15px;
-        }
-
-        /* --- Buttons --- */
-        .modal-content button {
-            padding: 10px 15px;
             border: none;
-            border-radius: 6px;
-            cursor: pointer;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        .modal.show .modal-content {
+            transform: scale(1);
+        }
+        .modal-header-custom {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f3f4f6;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .modal-title-custom {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1f2937;
+            margin: 0;
+        }
+        .form-label-custom {
+            font-size: 13px;
             font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 6px;
+            display: block;
         }
-
-        .submit-btn {
-            background: #16a34a;
-            color: white;
+        .form-control-custom {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #1f2937;
+            margin-bottom: 16px;
+            transition: border-color 0.2s;
         }
-
-        .submit-btn:hover {
-            background: #15803d;
+        .form-control-custom:focus {
+            border-color: #6366f1;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
-
-        .cancel-btn {
-            background: #dc2626;
-            color: white;
-            margin-left: 10px;
+        .modal-footer-custom {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 10px;
+            border-top: 1px solid #f3f4f6;
+            padding-top: 15px;
         }
-
-        .cancel-btn:hover {
-            background: #b91c1c;
+        .btn-submit-custom {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: #fff;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .btn-submit-custom:hover {
+            opacity: 0.9;
+        }
+        .btn-cancel-custom {
+            background: #f3f4f6;
+            color: #4b5563;
+            font-weight: 600;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-cancel-custom:hover {
+            background: #e5e7eb;
+            color: #1f2937;
         }
     </style>
-    <div class="card">
-        <div class="card-body">
-            <h3>Child Category </h3>
-            <div class="head mb-3 d-flex justify-content-between">
-                <div class="hula">
-                    <a class="btn btn-primary" href="{{ route('category.index') }}"><i class="fa-solid fa-arrow-right"></i>Main
-                        Category</a>
-                    <a class="btn btn-primary" href="{{ route('sub-category.index') }}"><i
-                            class="fa-solid fa-arrow-right"></i>Child Category</a>
-                </div>
-                <div class="form-group mr-3">
-                    <input type="text" class="form-control input-focus" placeholder="Search Color">
-                </div>
-                <button class="btn btn-primary" id="AddChildCategory"><i class="fa-solid fa-plus"></i>
-                    Add</button>
-            </div>
-            <div id="ChildCategoryModal" class="modal">
-                <div class="modal-content">
-                    <h3 style="margin-bottom:15px;">Add Sub Category</h3>
-                    <form action="{{ route('child-category.store') }}" method="POST">
-                        @csrf
-                        <label for="exampleInputCatrgory1" class="form-label">Category<span
-                                class="text-danger">*</span></label>
-                        <select class="dropdown-groups select2-hidden-accessible" data-select2-id="2" tabindex="-1"
-                            aria-hidden="true" name="category_id">
-                            <optgroup data-select2-id="125">
-                                <option selected disabled>Select Category</option>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
-                        <label for="exampleInputCatrgory1" class="form-label">SubCategory<span
-                                class="text-danger">*</span></label>
-                        <select class="dropdown-groups select2-hidden-accessible" data-select2-id="1" tabindex="-1"
-                            aria-hidden="true" name="subCategory_id">
-                            <optgroup data-select2-id="130">
-                                <option selected disabled>Select Sub Category</option>
-                                @foreach ($subcategories as $subcategory)
-                                    <option value="{{ $subcategory->id }}">{{ $subcategory->name }}</option>
-                                @endforeach
-                            </optgroup>
-                        </select>
 
-                        <label>Child Category Name<span class="text-danger">*</span></label>
-                        <input type="text" name="childcategory_name" placeholder="Enter Child Category Name">
+    {{-- Tabs section --}}
+    <div class="d-flex gap-2 mb-4 align-items-center flex-wrap">
+        <a class="category-tab-btn" href="{{ route('category.index') }}">
+            <i class="fa-solid fa-layer-group"></i> Main Categories
+        </a>
+        <a class="category-tab-btn" href="{{ route('sub-category.index') }}">
+            <i class="fa-solid fa-tags"></i> Sub Categories
+        </a>
+        <a class="category-tab-btn active" href="{{ route('child-category.index') }}">
+            <i class="fa-solid fa-diagram-project"></i> Child Categories
+        </a>
+    </div>
 
-                        <label>Meta Title (Optional)</label>
-                        <input type="text" name="meta_title" placeholder="Enter Meta Title">
-
-                        <label>Meta Description (Optional)</label>
-                        <input type="text" name="meta_description" placeholder="Enter Meta Description">
-
-                        <button type="submit" class="submit-btn">Submit</button>
-                        <button type="button" class="cancel-btn" id="cancelBtn">Cancel</button>
-                    </form>
+    {{-- Metrics cards section --}}
+    <div class="row mb-4">
+        <div class="col-lg-3 col-sm-6 mb-3">
+            <div class="metrics-card card p-3 border-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 font-weight-bold fs-12 uppercase tracking-wide">Total Child Categories</p>
+                        <h3 class="mb-0 font-weight-bold" style="color: #1f2937;">{{ $childcategories->count() }}</h3>
+                    </div>
+                    <div class="metrics-icon-box" style="background: rgba(99, 102, 241, 0.1); color: #6366f1;">
+                        <i class="fa-solid fa-diagram-project"></i>
+                    </div>
                 </div>
             </div>
-
-            <table class="table">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Category Name</th>
-                        <th scope="col">Image</th>
-                        <th scope="col">Status</th>
-                        <th scope="col">Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($childcategories as $childcategory)
-                    <tr>
-                            <th scope="row">1</th>
-                            <td>{{ $childcategory->name }}</td>
-                            <td>{{ $childcategory->banner }}</td>
-                            <td>
-                                <label class="switch">
-                                    <input class="status-switch" type="checkbox" data-id="{{ $childcategory->id }}"
-                                        {{ $childcategory->status == '1' ? 'checked' : '' }}>
-                                    <span class="slider round" title="Click for Deactive">
-                                    </span>
-                                </label>
-                            </td>
-                            <td>
-                                <div class="d-flex">
-                                    <a href="{{ route('category.edit', $childcategory->id) }}" class="text-primary mr-2"
-                                        title="Click to Edit"><i class="fa-solid fa-pen-to-square fa-xl"></i></a>
-                                    <a href="{{ route('category.destroy', $childcategory->id) }}" class="text-danger"
-                                        title="Click to Delete"><i class="fa-solid fa-trash fa-xl"></i></a>
-                                </div>
-                            </td>
-                            </tr>
-                        @empty
-                    <tr>
-                        <td colspan="5" class="text-center text-danger">No Category found.</td>
-                    </tr>
-                    @endforelse
-
-                </tbody>
-            </table>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-3">
+            <div class="metrics-card card p-3 border-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 font-weight-bold fs-12 uppercase tracking-wide">Active Child Categories</p>
+                        <h3 class="mb-0 font-weight-bold" style="color: #10b981;">{{ $childcategories->where('status', '1')->count() }}</h3>
+                    </div>
+                    <div class="metrics-icon-box" style="background: rgba(16, 185, 129, 0.1); color: #10b981;">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-3">
+            <div class="metrics-card card p-3 border-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 font-weight-bold fs-12 uppercase tracking-wide">Inactive Child Categories</p>
+                        <h3 class="mb-0 font-weight-bold" style="color: #ef4444;">{{ $childcategories->where('status', '0')->count() }}</h3>
+                    </div>
+                    <div class="metrics-icon-box" style="background: rgba(239, 68, 68, 0.1); color: #ef4444;">
+                        <i class="fa-solid fa-circle-xmark"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-sm-6 mb-3">
+            <div class="metrics-card card p-3 border-0">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <p class="text-muted mb-1 font-weight-bold fs-12 uppercase tracking-wide">Parent Sub Categories</p>
+                        <h3 class="mb-0 font-weight-bold" style="color: #3b82f6;">{{ $subcategories->count() }}</h3>
+                    </div>
+                    <div class="metrics-icon-box" style="background: rgba(59, 130, 246, 0.1); color: #3b82f6;">
+                        <i class="fa-solid fa-tags"></i>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    {{-- Main view section --}}
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card border-0 shadow-sm" style="border-radius: 12px; overflow: hidden;">
+                <div class="card-body p-0">
+                    <div class="p-4 d-flex align-items-center justify-content-between flex-wrap border-bottom border-light gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <h4 class="mb-0 font-weight-bold" style="color: #1f2937;">Child Categories</h4>
+                        </div>
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="position-relative">
+                                <i class="fa-solid fa-magnifying-glass text-muted position-absolute" style="left: 12px; top: 12px; font-size: 14px;"></i>
+                                <input type="text" id="childSearch" class="form-control" placeholder="Search child categories..." style="padding-left: 36px; border-radius: 8px; width: 250px; font-size: 13px;">
+                            </div>
+                            <button id="AddChildCategory" class="btn btn-primary d-flex align-items-center gap-2" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #4f46e5, #6366f1); border: none; padding: 9px 18px;">
+                                <i class="fa-solid fa-plus"></i> Add Child Category
+                            </button>
+                        </div>
+                    </div>
+
+                    {{-- Dynamic Pop-up Modal --}}
+                    <div id="ChildCategoryModal" class="modal">
+                        <div class="modal-content">
+                            <div class="modal-header-custom">
+                                <h3 class="modal-title-custom">Add Child Category</h3>
+                                <button type="button" class="btn p-0 bg-transparent text-muted" id="closeModalCross" style="font-size: 20px;"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                            <form action="{{ route('child-category.store') }}" method="POST">
+                                @csrf
+
+                                <label class="form-label-custom">Select Main Category<span class="text-danger">*</span></label>
+                                <select class="form-control-custom form-select" name="category_id" required>
+                                    <option value="" selected disabled>Select Main Category</option>
+                                    @foreach ($categories as $category)
+                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                    @endforeach
+                                </select>
+
+                                <label class="form-label-custom">Select Sub Category<span class="text-danger">*</span></label>
+                                <select class="form-control-custom form-select" name="subCategory_id" required>
+                                    <option value="" selected disabled>Select Sub Category</option>
+                                    @foreach ($subcategories as $subcategory)
+                                        <option value="{{ $subcategory->id }}" data-parent="{{ $subcategory->category_id }}">{{ $subcategory->name }}</option>
+                                    @endforeach
+                                </select>
+
+                                <label class="form-label-custom">Child Category Name<span class="text-danger">*</span></label>
+                                <input type="text" name="childcategory_name" class="form-control-custom" placeholder="e.g. Slim Fit Shirts" required>
+
+                                <label class="form-label-custom">Meta Title (Optional)</label>
+                                <input type="text" name="meta_title" class="form-control-custom" placeholder="SEO Title">
+
+                                <label class="form-label-custom">Meta Description (Optional)</label>
+                                <textarea name="meta_description" class="form-control-custom" rows="3" placeholder="SEO Description"></textarea>
+
+                                <div class="modal-footer-custom">
+                                    <button type="button" class="btn-cancel-custom" id="cancelBtn">Cancel</button>
+                                    <button type="submit" class="btn-submit-custom">Submit</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-custom mb-0">
+                            <thead>
+                                <tr>
+                                    <th scope="col" style="width: 80px;">#</th>
+                                    <th scope="col">Child Category Name</th>
+                                    <th scope="col">Parent Main Category</th>
+                                    <th scope="col">Parent Sub Category</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col" style="width: 120px; text-align: right;">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="childTableBody">
+                                @forelse ($childcategories as $index => $childcategory)
+                                    <tr class="childcategory-row">
+                                        <td class="font-weight-bold">{{ $index + 1 }}</td>
+                                        <td class="font-weight-bold text-dark">{{ $childcategory->name }}</td>
+                                        <td>
+                                            <span class="badge" style="background: #f3f4f6; color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.15); font-weight: 600; padding: 5px 12px; border-radius: 6px;">
+                                                {{ $childcategory->category->name ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <span class="badge" style="background: rgba(16, 185, 129, 0.08); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.15); font-weight: 600; padding: 5px 12px; border-radius: 6px;">
+                                                {{ $childcategory->subcategory->name ?? 'N/A' }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <label class="switch mb-0">
+                                                <input class="status-switch" type="checkbox" data-id="{{ $childcategory->id }}"
+                                                    {{ $childcategory->status == '1' ? 'checked' : '' }}>
+                                                <span class="slider round"
+                                                    title="{{ $childcategory->status == '1' ? 'Click to Deactivate' : 'Click to Activate' }}">
+                                                </span>
+                                            </label>
+                                        </td>
+                                        <td style="text-align: right;">
+                                            <div class="d-inline-flex gap-2">
+                                                <a href="{{ route('child-category.edit', $childcategory->id) }}"
+                                                    class="action-icon-btn edit" title="Edit Child Category">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </a>
+                                                <a href="{{ route('child-category.destroy', $childcategory->id) }}" 
+                                                    class="action-icon-btn delete" title="Delete Child Category"
+                                                    onclick="return confirm('Are you sure you want to delete this Child Category?');">
+                                                    <i class="fa-solid fa-trash"></i>
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center py-5 text-muted">
+                                            <i class="fa-solid fa-folder-open text-muted mb-3" style="font-size: 40px; opacity: 0.5;"></i>
+                                            <p class="mb-0 font-weight-bold">No Child Categories Found</p>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const modal = document.getElementById('ChildCategoryModal');
+        const addBtn = document.getElementById('AddChildCategory');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const closeCross = document.getElementById('closeModalCross');
+
+        // Show modal
+        addBtn.onclick = function() {
+            modal.classList.add('show');
+        }
+
+        // Hide modal
+        cancelBtn.onclick = function() {
+            modal.classList.remove('show');
+        }
+        closeCross.onclick = function() {
+            modal.classList.remove('show');
+        }
+
+        // Hide modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target === modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        // Dynamic subcategory filtering in modal dropdown
+        $('select[name="category_id"]').on('change', function() {
+            var category_id = $(this).val();
+            if (category_id) {
+                $.ajax({
+                    url: '/admin/get-subcategories/' + category_id,
+                    type: "GET",
+                    dataType: "json",
+                    success: function(data) {
+                        var $select = $('select[name="subCategory_id"]');
+                        $select.empty();
+                        $select.append('<option value="" selected disabled>Select Sub Category</option>');
+                        $.each(data, function(key, value) {
+                            $select.append('<option value="' + value.id + '">' + value.name + '</option>');
+                        });
+                    }
+                });
+            }
+        });
+
+        // Search logic
+        document.getElementById('childSearch').addEventListener('keyup', function() {
+            let filter = this.value.toLowerCase();
+            let rows = document.querySelectorAll('#childTableBody .childcategory-row');
+            
+            rows.forEach(function(row) {
+                let name = row.querySelector('td:nth-child(2)').textContent.toLowerCase();
+                let parent = row.querySelector('td:nth-child(3)').textContent.toLowerCase();
+                let sub = row.querySelector('td:nth-child(4)').textContent.toLowerCase();
+                if (name.indexOf(filter) > -1 || parent.indexOf(filter) > -1 || sub.indexOf(filter) > -1) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
+    </script>
 
     <script>
         const Toast = Swal.mixin({
@@ -209,15 +472,13 @@
             timer: 2000,
             timerProgressBar: true,
         });
-    </script>
 
-    <script>
         document.querySelectorAll('.status-switch').forEach(function(btn) {
             btn.addEventListener('change', function() {
                 let id = this.getAttribute('data-id');
                 let status = this.checked ? 1 : 0;
 
-                fetch("{{ route('category.status') }}", {
+                fetch("{{ route('child-category.status') }}", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -233,8 +494,7 @@
                         if (data.success) {
                             Toast.fire({
                                 icon: 'success',
-                                title: status == 1 ? 'Status Activated Successfully' :
-                                    'Status Deactivated Successfully'
+                                title: status == 1 ? 'Child Category Activated' : 'Child Category Deactivated'
                             });
                         } else {
                             Toast.fire({
@@ -251,27 +511,5 @@
                     });
             });
         });
-    </script>
-    <script>
-        const modal = document.getElementById('ChildCategoryModal');
-        const addChildCategoryBtn = document.getElementById('AddChildCategory');
-        const cancelBtn = document.getElementById('cancelBtn');
-
-        // Show modal
-        addChildCategoryBtn.onclick = function() {
-            ChildCategoryModal.classList.add('show');
-        }
-
-        // Hide ChildCategoryModal
-        cancelBtn.onclick = function() {
-            ChildCategoryModal.classList.remove('show');
-        }
-
-        // Hide ChildCategoryModal when clicking outside
-        window.onclick = function(event) {
-            if (event.target === ChildCategoryModal) {
-                ChildCategoryModal.classList.remove('show');
-            }
-        }
     </script>
 @endsection
