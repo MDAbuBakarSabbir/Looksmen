@@ -788,7 +788,7 @@
                         <a href="javascript:void(0)"
                             class="text-reset d-block text-center pb-2 pt-3 mobile-dashboard-toggle">
                             <span class="d-block mx-auto">
-                                <img src="{{ asset('frontend') }}/assets/img/avatar-place.png"
+                                <img src="{{ asset('frontend/assets/img/avatar-place.png') }}"
                                     class="rounded-circle size-20px">
                             </span>
                             <span class="d-block fs-10 fw-600 opacity-60">Account</span>
@@ -797,7 +797,7 @@
                         <a href="{{ route('login') }}"
                             class="text-reset d-block text-center pb-2 pt-3">
                             <span class="d-block mx-auto">
-                                <img src="{{ asset('frontend') }}/assets/img/avatar-place.png"
+                                <img src="{{ asset('frontend/assets/img/avatar-place.png') }}"
                                     class="rounded-circle size-20px">
                             </span>
                             <span class="d-block fs-10 fw-600 opacity-60">Account</span>
