@@ -1078,6 +1078,10 @@
                 $('body').removeClass('overflow-hidden');
             }
 
+            // Bind Categories close events
+            $(document).on('click', '#mobile-categories-close-btn, #mobileCategoriesBackdrop', closeCategoriesDrawer);
+            $(document).on('click', '#mobileCategoriesDrawer a', closeCategoriesDrawer);
+
             // Bind click event
             $(document).on('click', '.mobile-dashboard-toggle', function(e) {
                 e.preventDefault();
