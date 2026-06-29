@@ -183,13 +183,14 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('attributes/create/{id}', 'create')->name('attribute.create')->middleware('admin.permission:create_attribute');
         Route::post('attributes/store', 'store')->name('attribute.store')->middleware('admin.permission:create_attribute');
         Route::post('attributevalues/store/{id}', 'valuestore')->name('value.store')->middleware('admin.permission:create_attribute');
-        Route::get('attributes/edit', 'edit')->name('attribute.edit')->middleware('admin.permission:manage_attribute');
-        Route::post('attributes/update', 'update')->name('attribute.update')->middleware('admin.permission:manage_attribute');
-        Route::post('attributes/destroy', 'destroy')->name('attribute.destroy')->middleware('admin.permission:manage_attribute');
+        Route::get('attributes/edit/{id}', 'edit')->name('attribute.edit')->middleware('admin.permission:manage_attribute');
+        Route::post('attributes/update/{id}', 'update')->name('attribute.update')->middleware('admin.permission:manage_attribute');
+        Route::get('attributes/destroy/{id}', 'destroy')->name('attribute.destroy')->middleware('admin.permission:manage_attribute');
+        Route::get('attributes/value/destroy/{id}', 'valueDestroy')->name('attribute.value.destroy')->middleware('admin.permission:create_attribute');
         Route::post('attributes/status', 'status')->name('attribute.status')->middleware('admin.permission:manage_attribute');
     });
 
-    // Category Routes
+    // We keep other routes intact here...
     Route::controller(CategoryController::class)->group(function () {
         Route::get('category', 'index')->name('category.index')->middleware('admin.permission:manage_category');
         Route::get('category/create', 'create')->name('category.create')->middleware('admin.permission:create_category');
@@ -225,13 +226,13 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('color', 'index')->name('color.index')->middleware('admin.permission:manage_attribute');
         Route::get('color/create', 'create')->name('color.create')->middleware('admin.permission:manage_attribute');
         Route::post('color/store', 'store')->name('color.storee')->middleware('admin.permission:manage_attribute');
-        Route::get('color/edit{id}', 'edit')->name('color.edit')->middleware('admin.permission:manage_attribute');
-        Route::post('color/update{id}', 'update')->name('color.update')->middleware('admin.permission:manage_attribute');
+        Route::get('color/edit/{id}', 'edit')->name('color.edit')->middleware('admin.permission:manage_attribute');
+        Route::post('color/update/{id}', 'update')->name('color.update')->middleware('admin.permission:manage_attribute');
         Route::post('color/joma', 'joma')->name('color.joma')->middleware('admin.permission:manage_attribute');
-        Route::get('color/destroy{id}', 'destroy')->name('color.destroy')->middleware('admin.permission:manage_attribute');
+        Route::get('color/destroy/{id}', 'destroy')->name('color.destroy')->middleware('admin.permission:manage_attribute');
         Route::post('color/status', 'status')->name('color.status')->middleware('admin.permission:manage_attribute');
 
-        Route::post('color/store', 'imgstore')->name('img.store')->middleware('admin.permission:manage_attribute');
+        Route::post('color/store-images', 'imgstore')->name('img.store')->middleware('admin.permission:manage_attribute');
     });
 
     // Reviews Routes
