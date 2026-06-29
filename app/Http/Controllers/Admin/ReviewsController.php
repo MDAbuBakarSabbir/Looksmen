@@ -10,7 +10,7 @@ class ReviewsController extends Controller
 {
     public function index()
     {
-        $reviews = Reviews::all();
+        $reviews = Reviews::with(['user', 'product'])->latest()->get();
         return view('adminDash.reviews.index', compact('reviews'));
     }
 
@@ -18,9 +18,13 @@ class ReviewsController extends Controller
     {
         //
     }
-    public function view()
+    public function view($id)
     {
-        //
+        $review = Reviews::with(['user', 'product'])->findOrFail($id);
+        return response()->json([
+            'success' => true,
+            'review' => $review
+        ]);
     }
 
     public function store(Request $request)
@@ -35,8 +39,16 @@ class ReviewsController extends Controller
 
     public function update(Request $request, $id) {}
 
-    public function admin_destroy($id) {}
-    public function destroy($id) {}
+    public function admin_destroy($id)
+    {
+        $review = Reviews::findOrFail($id);
+        $review->delete();
+        return back()->with('success', 'Review deleted successfully!');
+    }
+    public function destroy($id)
+    {
+        return $this->admin_destroy($id);
+    }
 
     public function status(Request $request)
     {
