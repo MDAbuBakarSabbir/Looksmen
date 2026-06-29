@@ -11,10 +11,12 @@ class ChildCategoryController extends Controller
 {
     public function index()
     {
+        $maincategorys = Category::all();
+        $categories = $maincategorys;
         $subcategories = SubCategory::all();
-        $categories = Category::all();
         $childcategories = ChildCategory::all();
-        return view('adminDash.category.child.index',compact('childcategories','subcategories','categories'));
+        $activeTab = 'child';
+        return view('adminDash.category.index', compact('maincategorys', 'categories', 'subcategories', 'childcategories', 'activeTab'));
     }
     public function create()
     {
