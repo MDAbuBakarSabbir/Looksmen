@@ -208,7 +208,8 @@
                 border: none !important;
                 display: block !important;
             }
-            .container .d-flex.align-items-start > .user-sidenav.show {
+            .container .d-flex.align-items-start > .user-sidenav.show,
+            #mobileCategoriesDrawer.show {
                 left: 0 !important;
             }
             .container .d-flex.align-items-start > .aiz-user-panel {
@@ -722,7 +723,7 @@
                     </a>
                 </div>
                 <div class="col">
-                    <a href="{{ route('front.allCategory') }}" class="text-reset d-block text-center pb-2 pt-3">
+                    <a href="javascript:void(0)" class="text-reset d-block text-center pb-2 pt-3" id="mobile-categories-toggle">
                         <i class="las la-list-ul fs-20 opacity-60 "></i>
                         <span class="d-block fs-10 fw-600 opacity-60 ">Categories</span>
                     </a>
@@ -991,6 +992,35 @@
     <!-- Dashboard mobile sidebar backdrop -->
     <div class="user-sidenav-backdrop" id="userSidenavBackdrop"></div>
 
+    <!-- Mobile Categories Drawer -->
+    <div class="mobile-categories-drawer bg-white shadow-lg" id="mobileCategoriesDrawer" style="position: fixed; top: 0; left: -280px; width: 280px; height: 100vh; z-index: 1050; transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1); overflow-y: auto;">
+        <div class="p-3 bg-primary text-white d-flex align-items-center justify-content-between">
+            <h5 class="mb-0 fw-600 fs-16"><i class="las la-list-ul mr-2"></i> Categories</h5>
+            <button type="button" class="btn text-white p-0" id="mobile-categories-close-btn" style="font-size: 24px; line-height: 1; background: none; border: none; outline: none; cursor: pointer;"><i class="las la-times"></i></button>
+        </div>
+        <ul class="list-unstyled mb-0 py-2">
+            @foreach ($categories as $category)
+                <li class="border-bottom-0">
+                    <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="text-reset d-flex align-items-center justify-content-between py-3 px-4 border-bottom text-dark fw-500" style="transition: all 0.2s; text-decoration: none;">
+                        <span class="d-flex align-items-center">
+                            <img class="cat-image mr-3 opacity-60 lazyload"
+                                src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
+                                data-src="{{ asset('frontend/uploads/'.$category->banner) }}"
+                                width="24"
+                                height="24"
+                                style="object-fit: cover; border-radius: 4px;"
+                                alt="{{ $category->name }}"
+                                onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
+                            <span>{{ $category->name }}</span>
+                        </span>
+                        <i class="las la-angle-right opacity-60"></i>
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    </div>
+    <div class="user-sidenav-backdrop" id="mobileCategoriesBackdrop" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); z-index: 1040; display: none; opacity: 0; transition: opacity 0.3s ease;"></div>
+
     <!-- SCRIPTS -->
     <script src="{{ asset('frontend') }}/assets/js/aiz-core.js"></script>
     <script src="{{ asset('frontend') }}/assets/js/custom.js"></script>
@@ -1015,6 +1045,36 @@
             function closeUserSidenav() {
                 $('.user-sidenav').removeClass('show');
                 $('#userSidenavBackdrop').removeClass('show');
+                $('body').removeClass('overflow-hidden');
+            }
+
+            // Mobile Categories drawer logic
+            function toggleCategoriesDrawer() {
+                var $drawer = $('#mobileCategoriesDrawer');
+                var $backdrop = $('#mobileCategoriesBackdrop');
+                if ($drawer.length > 0) {
+                    var isShowing = $drawer.hasClass('show');
+                    if (isShowing) {
+                        $drawer.removeClass('show');
+                        $backdrop.removeClass('show').fadeOut(200);
+                        $('body').removeClass('overflow-hidden');
+                    } else {
+                        $drawer.addClass('show');
+                        $backdrop.addClass('show').fadeIn(200);
+                        $('body').addClass('overflow-hidden');
+                    }
+                }
+            }
+
+            // Bind Categories toggle click
+            $('#mobile-categories-toggle').on('click', function(e) {
+                e.preventDefault();
+                toggleCategoriesDrawer();
+            });
+
+            function closeCategoriesDrawer() {
+                $('#mobileCategoriesDrawer').removeClass('show');
+                $('#mobileCategoriesBackdrop').removeClass('show').fadeOut(200);
                 $('body').removeClass('overflow-hidden');
             }
 
