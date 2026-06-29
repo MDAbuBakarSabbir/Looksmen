@@ -94,7 +94,7 @@
 
                 <!-- Quick Category Bubbles -->
                 <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="6" data-lg-items="4"
-                    data-md-items="3" data-sm-items="2" data-xs-items="2" data-arrows='true' data-autoplay="true"
+                    data-md-items="3" data-sm-items="3" data-xs-items="3" data-arrows='true' data-autoplay="true"
                     data-infinite="true" data-speed="500">
                     @foreach ($categories as $category)
                         <div class="ca-item my-3">
@@ -102,7 +102,7 @@
                                 class="d-block rounded bg-white p-2 text-reset shadow-sm text-center hov-shadow-md mr-2">
                                 <img src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                     data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
-                                    alt="{{ $category->name }}" class="lazyload img-fit mx-auto" height="78"
+                                    alt="{{ $category->name }}" class="lazyload img-fit mx-auto h-50px h-md-78px"
                                     onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';">
 
                                 <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">
