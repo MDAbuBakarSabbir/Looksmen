@@ -37,17 +37,34 @@ class AttributeController extends Controller
         ]);
         return back()->with('success','success');
     }
-    public function edit()
+    public function edit($id)
     {
-        return view('adminDash.category.main.edit');
+        $attribute = Attribute::findOrFail($id);
+        return view('adminDash.attribute.edit', compact('attribute'));
     }
-    public function update()
+    public function update(Request $request, $id)
     {
-
+        $attribute = Attribute::findOrFail($id);
+        $request->validate([
+            'attribute_name' => 'required',
+        ]);
+        $attribute->update([
+            'name' => $request->attribute_name,
+        ]);
+        return redirect()->route('attribute.index')->with('success', 'Attribute updated successfully');
     }
-    public function destroy()
+    public function destroy($id)
     {
-
+        $attribute = Attribute::findOrFail($id);
+        attributeValues::where('attribute_id', $id)->delete();
+        $attribute->delete();
+        return back()->with('success', 'Attribute deleted successfully');
+    }
+    public function valueDestroy($id)
+    {
+        $value = attributeValues::findOrFail($id);
+        $value->delete();
+        return back()->with('success', 'Attribute value deleted successfully');
     }
      public function status(Request $request)
     {
