@@ -14,7 +14,11 @@ class CategoryController extends Controller
     public function index()
     {
         $maincategorys = Category::all();
-        return view('adminDash.category.main.index', compact('maincategorys'));
+        $categories = $maincategorys;
+        $subcategories = \App\Models\SubCategory::all();
+        $childcategories = \App\Models\ChildCategory::all();
+        $activeTab = 'main';
+        return view('adminDash.category.index', compact('maincategorys', 'categories', 'subcategories', 'childcategories', 'activeTab'));
     }
 
     public function store(Request $request)
