@@ -1833,8 +1833,8 @@
             });
         });
     </script>
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v24.0"></script>
+
+    {{-- Facebook SDK removed from admin dashboard (was blocking page load) --}}
 
     <script>
         // Dark Mode Toggle Logic
