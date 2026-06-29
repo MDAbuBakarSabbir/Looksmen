@@ -5,8 +5,9 @@
 @endsection
 
 @section('content')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
     :root {
         --dash-primary: #4f46e5;
@@ -279,7 +280,7 @@
                                 <div class="text-center mb-4 p-4 bg-light" style="border-radius: 16px; border: 1px dashed #cbd5e1;">
                                     <div class="text-muted small font-weight-bold text-uppercase tracking-wide mb-1">Available to Withdraw</div>
                                     <h2 class="font-weight-bold text-success mb-0" style="font-size: 2.2rem;">
-                                        {{ single_price(Auth::user()->affiliate_user->balance ?? 0) }}
+                                        {{ single_price(optional(Auth::user()->affiliate_user)->balance ?? 0) }}
                                     </h2>
                                 </div>
 

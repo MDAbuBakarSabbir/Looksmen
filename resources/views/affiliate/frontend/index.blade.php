@@ -5,8 +5,9 @@
 @endsection
 
 @section('content')
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
 
     :root {
         --dash-primary: #4f46e5;
@@ -362,7 +363,7 @@
                         </div>
                         <div class="balance-tag">
                             <i class="fa-solid fa-coins"></i>
-                            {{ single_price(Auth::user()->affiliate_user->balance ?? 0) }}
+                            {{ single_price(optional(Auth::user()->affiliate_user)->balance ?? 0) }}
                         </div>
                     </div>
                 </div>
