@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\admin\AddressController;
+use App\Http\Controllers\Admin\AddressController;
 use App\Http\Controllers\Admin\AdminsController;
 use App\Http\Controllers\Admin\AdminSupportController;
 use App\Http\Controllers\Admin\AdminWalletPointController;
@@ -10,19 +10,19 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChildCategoryController;
-use App\Http\Controllers\admin\ColorController;
+use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CouponsController;
 use App\Http\Controllers\Admin\CourierApiController;
 use App\Http\Controllers\Admin\FeatureActivationController;
 use App\Http\Controllers\Admin\GeneralWebSettingsController;
 use App\Http\Controllers\Admin\OrderManageController;
-use App\Http\Controllers\admin\PagesController;
-use App\Http\Controllers\admin\PaymentController;
+use App\Http\Controllers\Admin\PagesController;
+use App\Http\Controllers\Admin\PaymentController;
 use App\Http\Controllers\Admin\ProductController;
 use App\Http\Controllers\Admin\ReportsController;
 use App\Http\Controllers\Admin\ReviewsController;
 use App\Http\Controllers\Admin\SliderController;
-use App\Http\Controllers\admin\SmtpController;
+use App\Http\Controllers\Admin\SmtpController;
 use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\APIController;
