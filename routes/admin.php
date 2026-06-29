@@ -393,6 +393,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('/pages/store', 'store')->name('pages.store')->middleware('admin.permission:manage_pages');
         Route::post('/pages/status', 'status')->name('pages.status')->middleware('admin.permission:manage_pages');
         Route::get('/pages/edit/{id}', 'edit')->name('pages.edit')->middleware('admin.permission:manage_pages');
+        Route::post('/pages/update/{id}', 'update')->name('pages.update')->middleware('admin.permission:manage_pages');
         Route::post('/pages/destroy/{id}', 'destroy')->name('pages.destroy')->middleware('admin.permission:manage_pages');
     });
 
