@@ -238,9 +238,9 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // Reviews Routes
     Route::controller(ReviewsController::class)->group(function () {
         Route::get('reviews', 'index')->name('reviews.index')->middleware('admin.permission:manage_reviews');
-        Route::post('reviews/view', 'view')->name('reviews.view')->middleware('admin.permission:manage_reviews');
+        Route::get('reviews/view/{id}', 'view')->name('reviews.view')->middleware('admin.permission:manage_reviews');
         Route::post('reviews/status', 'status')->name('reviews.status')->middleware('admin.permission:manage_reviews');
-        Route::post('reviews/admin?destroy', 'admin_destroy')->name('reviews.admin_destroy')->middleware('admin.permission:manage_reviews');
+        Route::get('reviews/destroy/{id}', 'admin_destroy')->name('reviews.admin_destroy')->middleware('admin.permission:manage_reviews');
     });
 
     // Promotions And Coupons
