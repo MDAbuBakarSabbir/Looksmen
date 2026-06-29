@@ -34,16 +34,50 @@ class SubCategoryController extends Controller
         ]);
         return back()->with('success','success');
     }
-    public function edit()
+    public function edit($id)
     {
-        return view('adminDash.category.sub.edit');
+        $subcategory = SubCategory::findOrFail($id);
+        $categories = Category::all();
+        return view('adminDash.category.sub.edit', compact('subcategory', 'categories'));
     }
-    public function update()
+    public function update(Request $request, $id)
     {
+        $subcategory = SubCategory::findOrFail($id);
+        $request->validate([
+            'category_id' => 'required',
+            'subcategory_name' => 'required',
+        ]);
 
+        $subcategory->update([
+            'category_id' => $request->category_id,
+            'name' => $request->subcategory_name,
+            'slug' => Str::slug($request->subcategory_name),
+            'meta_title' => $request->meta_title,
+            'meta_descritption' => $request->meta_description,
+        ]);
+
+        return redirect()->route('sub-category.index')->with('success', 'Subcategory Updated successfully');
     }
-    public function destroy()
+    public function destroy($id)
     {
+        $subcategory = SubCategory::findOrFail($id);
+        $subcategory->delete();
+        return back()->with('success', 'Subcategory Deleted successfully');
+    }
+    public function status(Request $request)
+    {
+        $subcategory = SubCategory::find($request->id);
 
+        if (!$subcategory) {
+            return response()->json(['success' => false]);
+        }
+
+        $subcategory->status = $request->status == 1 ? 1 : 0;
+        $subcategory->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => $subcategory->status
+        ]);
     }
 }
