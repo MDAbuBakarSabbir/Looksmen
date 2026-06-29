@@ -400,6 +400,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::controller(SmtpController::class)->group(function () {
         Route::get('/smtp', 'index')->name('smtp.index')->middleware('admin.permission:setup_smtp');
         Route::post('/smtp/store', 'store')->name('smtp.store')->middleware('admin.permission:setup_smtp');
+        Route::post('/sms/store', 'smsStore')->name('sms.store')->middleware('admin.permission:setup_smtp');
     });
 
     // Support Ticket & Customer Chat routes
