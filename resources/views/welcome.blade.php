@@ -494,29 +494,3 @@
     </style>
 @endsection
 
-@section('script')
-    <script>
-        $('.aiz-carousel').slick({
-            slidesToShow: 6,
-            slidesToScroll: 1,
-            autoplay: true, 
-            autoplaySpeed: 2000,
-            infinite: true,
-            arrows: true,
-            dots: false,
-            responsive: [{
-                    breakpoint: 1024,
-                    settings: {
-                        slidesToShow: 4,
-                    }
-                },
-                {
-                    breakpoint: 600,
-                    settings: {
-                        slidesToShow: 2,
-                    }
-                }
-            ]
-        });
-    </script>
-@endsection
