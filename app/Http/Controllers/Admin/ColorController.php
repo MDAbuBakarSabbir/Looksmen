@@ -32,26 +32,30 @@ class ColorController extends Controller
     }
     public function edit($id)
     {
-        $color = Color::where('id',$id)->first();
-        return view('adminDash.category.main.edit',compact('color'));
+        $color = Color::findOrFail($id);
+        return view('adminDash.colour.edit', compact('color'));
     }
 
     public function update(Request $request, $id)
     {
-        $color = Color::where('id', $id)->first();
-        Color::update([
+        $color = Color::findOrFail($id);
+        $request->validate([
+            'color_name' => 'required',
+            'color_code' => 'required',
+        ]);
+        $color->update([
             'color_name' => $request->color_name,
             'color_code' => $request->color_code,
             'updated_at' => now(),
         ]);
-        return back();
+        return redirect()->route('color.index')->with('success', 'Color updated successfully');
     }
 
     public function destroy($id)
     {
-        $color = Color::where('id', $id)->first();
-        Color::find($color->id)->delete();
-        return back();
+        $color = Color::findOrFail($id);
+        $color->delete();
+        return back()->with('success', 'Color deleted successfully');
     }
     // public function status($id) {
     //     $color = Color::where('id',$id)->first();
