@@ -974,6 +974,10 @@
         }
 
         /* Small slider bar / thin scrollbar for admin side navigation */
+        .quixnav-scroll {
+            overflow-y: auto !important;
+            height: calc(100vh - 80px) !important;
+        }
         .quixnav-scroll::-webkit-scrollbar {
             width: 5px;
             background-color: transparent;
