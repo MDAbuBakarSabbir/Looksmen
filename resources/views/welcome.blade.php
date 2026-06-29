@@ -200,7 +200,7 @@
                 <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="5"
                     data-lg-items="4" data-md-items="4" data-sm-items="2" data-xs-items="2" data-autoplay="true"
                     data-speed="500" data-arrows="true">
-                    @foreach ($newArivals as $newArival)
+                    @foreach ($newArivals->take(6) as $newArival)
                         <div class="carousel-box">
                             <div class="aiz-card-box border border-light rounded hov-shadow-md mt-1 mb-2 has-transition bg-white">
                                 <span class="badge-custom">OFF<span class="box ml-1 mr-0">&nbsp;{!! $newArival->discount_percentage !!}%</span></span>
