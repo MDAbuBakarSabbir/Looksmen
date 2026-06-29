@@ -33,13 +33,13 @@ class CategoryController extends Controller
             $image = $manager->decode($request->file('image'));
             $image->save(base_path('public/adminDash/assets/img/category/'.$imgName));
         }
-        Category::create([
+                Category::create([
                 'name' => $request->category_name,
                 'type' => $request->type,
                 'commission_rate' => $request->commission_rate,
                 'banner' => $imgName,
                 'icon' => $request->icon,
-                'slug' => Str::slug($request->name),
+                'slug' => Str::slug($request->category_name),
                 'meta_title' => $request->meta_title,
                 'meta_descritption' => $request->meta_description,
                 'created_at' => now(),
@@ -47,11 +47,46 @@ class CategoryController extends Controller
 
         return back()->with('success', 'created success');
     }
-    public function edit()
+    public function edit($id)
     {
-        return view('adminDash.category.main.edit');
+        $category = Category::findOrFail($id);
+        return view('adminDash.category.main.edit', compact('category'));
     }
-    public function update() {}
+    public function update(Request $request, $id)
+    {
+        $category = Category::findOrFail($id);
+
+        $request->validate([
+            'category_name' => 'required',
+            'type' => 'required',
+            'commission_rate' => 'required',
+            'icon' => 'required',
+        ]);
+
+        $imgName = $category->banner;
+        if ($request->hasFile('image')) {
+            $manager = new ImageManager(new Driver());
+            $imgName = Str::random(7) . '.' . $request->file('image')->getClientOriginalExtension();
+            $image = $manager->decode($request->file('image'));
+            $image->save(base_path('public/adminDash/assets/img/category/'.$imgName));
+            if (!empty($category->banner) && file_exists(base_path('public/adminDash/assets/img/category/'.$category->banner))) {
+                @unlink(base_path('public/adminDash/assets/img/category/'.$category->banner));
+            }
+        }
+
+        $category->update([
+            'name' => $request->category_name,
+            'type' => $request->type,
+            'commission_rate' => $request->commission_rate,
+            'banner' => $imgName,
+            'icon' => $request->icon,
+            'slug' => Str::slug($request->category_name),
+            'meta_title' => $request->meta_title,
+            'meta_descritption' => $request->meta_description,
+        ]);
+
+        return redirect()->route('category.index')->with('success', 'Category Updated successfully');
+    }
 
 
     public function status(Request $request)
@@ -71,5 +106,13 @@ class CategoryController extends Controller
             'status' => $category->status
         ]);
     }
-    public function destroy() {}
+    public function destroy($id)
+    {
+        $category = Category::findOrFail($id);
+        if (!empty($category->banner) && file_exists(base_path('public/adminDash/assets/img/category/'.$category->banner))) {
+            @unlink(base_path('public/adminDash/assets/img/category/'.$category->banner));
+        }
+        $category->delete();
+        return back()->with('success', 'Category Deleted successfully');
+    }
 }
