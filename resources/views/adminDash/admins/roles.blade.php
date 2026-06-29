@@ -23,8 +23,8 @@
                                 <td>{{ $role->role }}</td>
                                 <td>
                                     <label class="switch">
-                                        <input class="status-switch" type="checkbox" data-id="{{ $admin->id }}"
-                                            {{ $admin->status == '1' ? 'checked' : '' }}>
+                                        <input class="status-switch" type="checkbox" data-id="{{ $role->id }}"
+                                            {{ $role->status == '1' ? 'checked' : '' }}>
                                         <span class="slider round" title="Click to Change Status">
                                         </span>
                                     </label>
