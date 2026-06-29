@@ -19,6 +19,8 @@ use Auth;
 use DB;
 use Hash;
 use Illuminate\Auth\Events\Registered;
+use function flash;
+use function translate;
 
 class AffiliateController extends Controller
 {
