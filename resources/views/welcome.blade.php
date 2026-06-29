@@ -93,8 +93,8 @@
                 </div>
 
                 <!-- Quick Category Bubbles -->
-                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="6" data-lg-items="6"
-                    data-md-items="4" data-sm-items="2" data-xs-items="2" data-arrows='true' data-autoplay="true"
+                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="6" data-lg-items="4"
+                    data-md-items="3" data-sm-items="3" data-xs-items="3" data-arrows='true' data-autoplay="true"
                     data-infinite="true" data-speed="500">
                     @foreach ($categories as $category)
                         <div class="ca-item my-3">
@@ -494,3 +494,29 @@
     </style>
 @endsection
 
+@section('script')
+    <script>
+        $('.aiz-carousel').slick({
+            slidesToShow: 6,
+            slidesToScroll: 1,
+            autoplay: true, 
+            autoplaySpeed: 2000,
+            infinite: true,
+            arrows: true,
+            dots: false,
+            responsive: [{
+                    breakpoint: 1024,
+                    settings: {
+                        slidesToShow: 4,
+                    }
+                },
+                {
+                    breakpoint: 600,
+                    settings: {
+                        slidesToShow: 2,
+                    }
+                }
+            ]
+        });
+    </script>
+@endsection
