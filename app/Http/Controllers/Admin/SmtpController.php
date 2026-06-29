@@ -14,7 +14,8 @@ class SmtpController extends Controller
         $featuresConfig = $features->pluck('status', 'name')->toArray();
         if($featuresConfig['email_verification'] == '1' || $featuresConfig['sms_verification'] == '1'){
             $smtpSettings = GeneralWebSettings::whereIn('name', [
-                'mailhost', 'mailport', 'mailusername', 'mailpassword', 'mailaddress', 'mailencription'
+                'mailhost', 'mailport', 'mailusername', 'mailpassword', 'mailaddress', 'mailencription',
+                'sms_gateway_provider', 'sms_api_key', 'sms_sender_id', 'sms_api_url'
             ])->pluck('value', 'name')->toArray();
             return view('adminDash.settings.smtp', compact('featuresConfig', 'smtpSettings'));
         }
@@ -40,5 +41,24 @@ class SmtpController extends Controller
         }
 
         return back()->with('success', 'SMTP Settings Updated Successfully!');
+    }
+
+    public function smsStore(Request $request)
+    {
+        $smsDetails = [
+            'sms_gateway_provider' => $request->sms_gateway_provider,
+            'sms_api_key'          => $request->sms_api_key,
+            'sms_sender_id'        => $request->sms_sender_id,
+            'sms_api_url'          => $request->sms_api_url,
+        ];
+
+        foreach ($smsDetails as $name => $value) {
+            GeneralWebSettings::updateOrCreate(
+                ['name' => $name],
+                ['value' => $value ?? '', 'status' => 1]
+            );
+        }
+
+        return back()->with('success', 'SMS Settings Updated Successfully!');
     }
 }
