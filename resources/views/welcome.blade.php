@@ -93,8 +93,8 @@
                 </div>
 
                 <!-- Quick Category Bubbles -->
-                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="6" data-lg-items="4"
-                    data-md-items="3" data-sm-items="3" data-xs-items="3" data-arrows='true' data-autoplay="true"
+                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="6" data-lg-items="6"
+                    data-md-items="4" data-sm-items="2" data-xs-items="2" data-arrows='true' data-autoplay="true"
                     data-infinite="true" data-speed="500">
                     @foreach ($categories as $category)
                         <div class="ca-item my-3">
