@@ -197,105 +197,68 @@
                     </h3>
                 </div>
                 <!--Previous Code Start -->
-
-                <div class="aiz-carousel gutters-10 half-outside-arrow slick-initialized" data-items="6" data-xl-items="5"
+                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="5"
                     data-lg-items="4" data-md-items="4" data-sm-items="2" data-xs-items="2" data-autoplay="true"
                     data-speed="500" data-arrows="true">
-                    <div class="slick-list draggable">
-                        <div class="slick-track"
-                            style="opacity: 1; width: 2940px; transform: translate3d(0px, 0px, 0px);">
-                            @foreach ($newArivals as $newArival)
-                                <div class="slick-slide slick-current slick-active" data-slick-index="0"
-                                    aria-hidden="false" style="width: 245px;">
-                                    <div>
-                                        <div class="carousel-box" style="width: 100%; display: inline-block;">
-                                            <div
-                                                class="aiz-card-box border border-light rounded hov-shadow-md mt-1 mb-2 has-transition bg-white">
-                                                <span class="badge-custom">OFF<span
-                                                        class="box ml-1 mr-0">&nbsp;{!! $newArival->discount_percentage !!}%</span></span>
-                                                <div class="position-relative">
-                                                    <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}"
-                                                        class="d-block" tabindex="0">
-                                                        <img class="img-fit mx-auto h-140px h-md-210px ls-is-cached lazyload"
-                                                            src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
-                                                            data-src="{{ $newArival->firstImage ? asset('adminDash/uploads/products/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
-                                                            alt="Lenovo HE05X Wireless Neckband Earphone"
-                                                            onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
-                                                    </a>
-                                                    <div class="absolute-top-right aiz-p-hov-icon">
-                                                        <a href="javascript:void(0)" onclick="addToWishList()"
-                                                            data-toggle="tooltip" data-title="Add to wishlist"
-                                                            data-placement="left" tabindex="0">
-                                                            <i class="la la-heart-o"></i>
-                                                        </a>
-                                                        <a href="javascript:void(0)" onclick="addToCompare()"
-                                                            data-toggle="tooltip" data-title="Add to compare"
-                                                            data-placement="left" tabindex="0">
-                                                            <i class="las la-sync"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                                <div class="p-md-3 p-2 text-left">
-                                                    <div class="fs-15">
-                                                        <del
-                                                            class="fw-600 opacity-50 mr-1">৳{{ $newArival->old_price }}</del>
-                                                        <span
-                                                            class="fw-700 text-primary">৳{{ $newArival->new_price }}</span>
-                                                    </div>
-                                                    <div class="rating rating-sm mt-1">
-                                                        @php
-                                                            $avg = $newArival->getAverageRating();
-                                                            $fullStars = floor($avg);
-                                                            $fraction = $avg - $fullStars;
-                                                        @endphp
-                                                        @for ($i = 1; $i <= 5; $i++)
-                                                            @if ($i <= $fullStars)
-                                                                <i class="las la-star" style="color: #ffc107;"></i>
-                                                            @elseif ($i == $fullStars + 1)
-                                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                                    <i class="las la-star-half-alt"
-                                                                        style="color: #ffc107;"></i>
-                                                                @elseif ($fraction > 0.7)
-                                                                    <i class="las la-star" style="color: #ffc107;"></i>
-                                                                @else
-                                                                    <i class="las la-star" style="color: #ced4da;"></i>
-                                                                @endif
-                                                            @else
-                                                                <i class="las la-star" style="color: #ced4da;"></i>
-                                                            @endif
-                                                        @endfor
-                                                    </div>
-                                                    <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
-                                                        <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}"
-                                                            class="d-block text-reset"
-                                                            tabindex="0">{{ $newArival->title }}</a>
-                                                    </h3>
-
-                                                    {{-- <a href="javascript:void(0)" class="btn btn-primary mt-2"
-                                                        style="width: 100%"
-                                                        onclick="showAddToCartModal{{ $newArival->id }}"
-                                                        data-toggle="tooltip" data-title="Add to cart"
-                                                        data-placement="left" tabindex="0">Add to Cart</a> --}}
-
-                                                    <a href="javascript:void(0)"
-                                                        class="btn btn-primary add-to-cart-btn mt-2" style="width: 100%"
-                                                        data-title="Add to cart" data-id="{{ $newArival->id }}"
-                                                        data-type="product">
-                                                        Add to Cart
-                                                    </a>
-
-
-                                                </div>
-                                            </div>
-                                        </div>
+                    @foreach ($newArivals as $newArival)
+                        <div class="carousel-box">
+                            <div class="aiz-card-box border border-light rounded hov-shadow-md mt-1 mb-2 has-transition bg-white">
+                                <span class="badge-custom">OFF<span class="box ml-1 mr-0">&nbsp;{!! $newArival->discount_percentage !!}%</span></span>
+                                <div class="position-relative">
+                                    <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}" class="d-block">
+                                        <img class="img-fit mx-auto h-140px h-md-210px lazyload"
+                                            src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
+                                            data-src="{{ $newArival->firstImage ? asset('adminDash/uploads/products/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
+                                            alt="{{ $newArival->name }}"
+                                            onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
+                                    </a>
+                                    <div class="absolute-top-right aiz-p-hov-icon">
+                                        <a href="javascript:void(0)" onclick="addToWishList()">
+                                            <i class="la la-heart-o"></i>
+                                        </a>
+                                        <a href="javascript:void(0)" onclick="addToCompare()">
+                                            <i class="las la-sync"></i>
+                                        </a>
                                     </div>
                                 </div>
-                            @endforeach
-
+                                <div class="p-md-3 p-2 text-left">
+                                    <div class="fs-15">
+                                        <del class="fw-600 opacity-50 mr-1">৳{{ $newArival->old_price }}</del>
+                                        <span class="fw-700 text-primary">৳{{ $newArival->new_price }}</span>
+                                    </div>
+                                    <div class="rating rating-sm mt-1">
+                                        @php
+                                            $avg = $newArival->getAverageRating();
+                                            $fullStars = floor($avg);
+                                            $fraction = $avg - $fullStars;
+                                        @endphp
+                                        @for ($i = 1; $i <= 5; $i++)
+                                            @if ($i <= $fullStars)
+                                                <i class="las la-star" style="color: #ffc107;"></i>
+                                            @elseif ($i == $fullStars + 1)
+                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                    <i class="las la-star-half-alt" style="color: #ffc107;"></i>
+                                                @elseif ($fraction > 0.7)
+                                                    <i class="las la-star" style="color: #ffc107;"></i>
+                                                @else
+                                                    <i class="las la-star" style="color: #ced4da;"></i>
+                                                @endif
+                                            @else
+                                                <i class="las la-star" style="color: #ced4da;"></i>
+                                            @endif
+                                        @endfor
+                                    </div>
+                                    <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
+                                        <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}" class="d-block text-reset">{{ $newArival->title }}</a>
+                                    </h3>
+                                    <a href="javascript:void(0)" class="btn btn-primary add-to-cart-btn mt-2" style="width: 100%" data-title="Add to cart" data-id="{{ $newArival->id }}" data-type="product">
+                                        Add to Cart
+                                    </a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
-
                 <!--Previous Code Ends -->
 
 
@@ -321,7 +284,7 @@
 
                             <div class="row">
 
-                                @foreach ($categoryProduct->products as $product)
+                                @foreach ($categoryProduct->products->take(6) as $product)
                                     <div class="col-md-2 col-lg-2 col-6">
                                         <div
                                             class="aiz-card-box border border-light rounded hov-shadow-md mt-1 mb-2 has-transition bg-white">
