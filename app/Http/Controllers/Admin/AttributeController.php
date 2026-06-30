@@ -31,10 +31,23 @@ class AttributeController extends Controller
     }
     public function valuestore(Request $request,$id)
     {
-        AttributeValues::create([
+        $request->validate([
+            'value' => 'required',
+        ]);
+
+        $value = AttributeValues::create([
             'attribute_id'=>$id,
             'value'=>$request->value,
         ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $value,
+                'message' => 'Attribute value added successfully'
+            ]);
+        }
+
         return back()->with('success','success');
     }
     public function edit($id)
@@ -64,6 +77,14 @@ class AttributeController extends Controller
     {
         $value = AttributeValues::findOrFail($id);
         $value->delete();
+
+        if (request()->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Attribute value deleted successfully'
+            ]);
+        }
+
         return back()->with('success', 'Attribute value deleted successfully');
     }
      public function status(Request $request)

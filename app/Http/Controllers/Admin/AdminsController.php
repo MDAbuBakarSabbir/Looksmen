@@ -35,7 +35,6 @@ class AdminsController extends Controller
             return response()->json(['success' => false]);
         }
 
-        // Only allow 0 and 1
         $admin->status = $request->status == 1 ? 1 : 0;
         $admin->save();
 
@@ -44,6 +43,18 @@ class AdminsController extends Controller
             'status' => $admin->status
         ]);
     }
+
+    public function bulkStatus(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        $status = $request->status == 1 ? 1 : 0;
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No admins selected']);
+        }
+        Admins::whereIn('id', $ids)->update(['status' => $status]);
+        return response()->json(['success' => true, 'message' => count($ids) . ' admins updated']);
+    }
+
     public function create()
     {
         $roles = Roles::all();

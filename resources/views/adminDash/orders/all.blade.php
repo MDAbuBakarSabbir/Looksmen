@@ -126,6 +126,7 @@
                     success: function(response) {
                         tbody.html(response);
                         tbody.css('opacity', 1);
+                        $('#orderCheckAll').prop('checked', false);
                     },
                     error: function(xhr) {
                         console.error(xhr.responseText);
@@ -152,6 +153,57 @@
             // Date, Day & Admin Filters
             $(document).on('change', '#from_date, #to_date, .daysFilter, .adminFilter', function() {
                 applyFilters();
+            });
+
+            // Check All / Uncheck All
+            $(document).on('change', '#orderCheckAll', function() {
+                $('.order-check').prop('checked', $(this).prop('checked'));
+            });
+
+            // Sync check all with individual checkboxes
+            $(document).on('change', '.order-check', function() {
+                if ($('.order-check:checked').length === $('.order-check').length && $('.order-check').length > 0) {
+                    $('#orderCheckAll').prop('checked', true);
+                } else {
+                    $('#orderCheckAll').prop('checked', false);
+                }
+            });
+
+            // Bulk Update Handler
+            $(document).on('click', '#bulkUpdateBtn', function(e) {
+                e.preventDefault();
+                let status = $('#bulkStatus').val();
+                if (!status) {
+                    Toast.fire({ icon: 'warning', title: 'Please select a status' });
+                    return;
+                }
+                let selectedIds = [];
+                $('.order-check:checked').each(function() {
+                    selectedIds.push($(this).val());
+                });
+                if (selectedIds.length === 0) {
+                    Toast.fire({ icon: 'warning', title: 'No orders selected' });
+                    return;
+                }
+                $.ajax({
+                    url: "{{ route('admin.orders.bulk-update') }}",
+                    type: 'POST',
+                    data: {
+                        _token: "{{ csrf_token() }}",
+                        ids: selectedIds,
+                        status: status
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Toast.fire({ icon: 'success', title: 'Orders updated successfully' });
+                            applyFilters();
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText);
+                        Toast.fire({ icon: 'error', title: 'Failed to update orders' });
+                    }
+                });
             });
         });
     </script>

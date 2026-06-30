@@ -201,7 +201,7 @@
     </tr>
 @empty
     <tr>
-        <td colspan="8" class="text-center text-danger p-4" style="font-size: 13.5px; font-weight: 600;">No Orders found.</td>
+        <td colspan="9" class="text-center text-danger p-4" style="font-size: 13.5px; font-weight: 600;">No Orders found.</td>
     </tr>
 @endforelse
 

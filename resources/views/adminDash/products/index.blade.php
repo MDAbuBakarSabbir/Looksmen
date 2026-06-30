@@ -181,6 +181,15 @@
                     <a href="{{ route('product.create') }}" class="btn btn-primary"><i class="fa-solid fa-plus mr-2"></i>Add Product</a>
                 </div>
                 <div class="card-body">
+                    <div class="d-flex align-items-center mb-3">
+                        <select id="bulkProductAction" class="form-control mr-2" style="width: 180px; display: inline-block;">
+                            <option value="">Bulk Action</option>
+                            <option value="delete">Delete Selected</option>
+                        </select>
+                        <button class="btn btn-danger" id="bulkProductBtn" style="height: 38px; border-radius: 4px; padding: 0 20px;">
+                            Apply Action
+                        </button>
+                    </div>
                     <div class="table-responsive">
                         <table class="table">
                             <thead class="thead-primary">
@@ -421,6 +430,7 @@
                     },
                     success: function(html) {
                         $('#productTableBody').html(html);
+                        $('#productCheckAll').prop('checked', false);
                     },
                     error: function() {
                         Toast.fire({
@@ -444,6 +454,46 @@
             } else {
                 $('#productCheckAll').prop('checked', false);
             }
+        });
+
+        // Bulk Delete Handler
+        $(document).on('click', '#bulkProductBtn', function(e) {
+            e.preventDefault();
+            let action = $('#bulkProductAction').val();
+            if (!action) {
+                Toast.fire({ icon: 'warning', title: 'Please select an action' });
+                return;
+            }
+            let selectedIds = [];
+            $('.product-check:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+            if (selectedIds.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'No products selected' });
+                return;
+            }
+            if (!confirm('Are you sure you want to delete the selected products?')) {
+                return;
+            }
+            $.ajax({
+                url: "{{ route('product.bulk-delete') }}",
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    ids: selectedIds
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Toast.fire({ icon: 'success', title: response.message || 'Products deleted' });
+                        $('.product-check:checked').closest('tr').remove();
+                        $('#productCheckAll').prop('checked', false);
+                    }
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    Toast.fire({ icon: 'error', title: 'Failed to delete products' });
+                }
+            });
         });
 
         // Delegated todaysdeal-status toggle using jQuery

@@ -12,7 +12,6 @@
             <div class="card-body">
                 <table class="table">
                     <thead>
-                        <th scope="col"><input type="checkbox" name="" id=""></th>
                         <th scope="col">Role</th>
                         <th scope="col">Status</th>
                         <th scope="col">Action</th>
