@@ -1,4 +1,4 @@
-@extends('layouts.Backend.master')
+﻿@extends('layouts.Backend.master')
 @section('title') COURIER API @endsection
 @section('content')
 
@@ -24,7 +24,7 @@
         display: flex; align-items: center; justify-content: space-between;
     }
     .courier-hero::after {
-        content: '🚚';
+        content: 'ðŸšš';
         position: absolute; right: 32px; bottom: -10px;
         font-size: 90px; opacity: 0.08;
         pointer-events: none;
@@ -249,8 +249,8 @@
 <div class="courier-hero">
     <div>
         <h1>Courier API Configuration</h1>
-        <p>Manage delivery partner integrations — Steadfast, Pathao, RedX, Paperfly, CityFast & eCourier</p>
-        <span class="hero-badge">⚡ Only one courier can be active at a time</span>
+        <p>Manage delivery partner integrations â€” Steadfast, Pathao, RedX, Paperfly, CityFast & eCourier</p>
+        <span class="hero-badge">âš¡ Only one courier can be active at a time</span>
     </div>
     <div class="active-courier-badge">
         <div class="active-pulse"></div>
@@ -273,7 +273,7 @@
         </div>
         <p class="courier-select-name">Steadfast</p>
         <p class="courier-select-status {{ isset($courierStatusConfig['steadfast']) && $courierStatusConfig['steadfast']['status']=='1' ? 'status-on' : 'status-off' }}">
-            {{ isset($courierStatusConfig['steadfast']) && $courierStatusConfig['steadfast']['status']=='1' ? '● Active' : '○ Inactive' }}
+            {{ isset($courierStatusConfig['steadfast']) && $courierStatusConfig['steadfast']['status']=='1' ? 'â— Active' : 'â—‹ Inactive' }}
         </p>
     </div>
 
@@ -285,7 +285,7 @@
         </div>
         <p class="courier-select-name">Pathao</p>
         <p class="courier-select-status {{ isset($courierStatusConfig['pathao']) && $courierStatusConfig['pathao']['status']=='1' ? 'status-on' : 'status-off' }}">
-            {{ isset($courierStatusConfig['pathao']) && $courierStatusConfig['pathao']['status']=='1' ? '● Active' : '○ Inactive' }}
+            {{ isset($courierStatusConfig['pathao']) && $courierStatusConfig['pathao']['status']=='1' ? 'â— Active' : 'â—‹ Inactive' }}
         </p>
     </div>
 
@@ -297,7 +297,7 @@
         </div>
         <p class="courier-select-name">RedX</p>
         <p class="courier-select-status {{ isset($courierStatusConfig['redx']) && $courierStatusConfig['redx']['status']=='1' ? 'status-on' : 'status-off' }}">
-            {{ isset($courierStatusConfig['redx']) && $courierStatusConfig['redx']['status']=='1' ? '● Active' : '○ Inactive' }}
+            {{ isset($courierStatusConfig['redx']) && $courierStatusConfig['redx']['status']=='1' ? 'â— Active' : 'â—‹ Inactive' }}
         </p>
     </div>
 
@@ -309,7 +309,7 @@
         </div>
         <p class="courier-select-name">Paperfly</p>
         <p class="courier-select-status {{ isset($courierStatusConfig['paperfly']) && $courierStatusConfig['paperfly']['status']=='1' ? 'status-on' : 'status-off' }}">
-            {{ isset($courierStatusConfig['paperfly']) && $courierStatusConfig['paperfly']['status']=='1' ? '● Active' : '○ Inactive' }}
+            {{ isset($courierStatusConfig['paperfly']) && $courierStatusConfig['paperfly']['status']=='1' ? 'â— Active' : 'â—‹ Inactive' }}
         </p>
     </div>
 
@@ -321,7 +321,7 @@
         </div>
         <p class="courier-select-name">CityFast</p>
         <p class="courier-select-status {{ isset($courierStatusConfig['cityfast']) && $courierStatusConfig['cityfast']['status']=='1' ? 'status-on' : 'status-off' }}">
-            {{ isset($courierStatusConfig['cityfast']) && $courierStatusConfig['cityfast']['status']=='1' ? '● Active' : '○ Inactive' }}
+            {{ isset($courierStatusConfig['cityfast']) && $courierStatusConfig['cityfast']['status']=='1' ? 'â— Active' : 'â—‹ Inactive' }}
         </p>
     </div>
 
@@ -333,7 +333,7 @@
         </div>
         <p class="courier-select-name">eCourier</p>
         <p class="courier-select-status {{ isset($courierStatusConfig['ecourier']) && $courierStatusConfig['ecourier']['status']=='1' ? 'status-on' : 'status-off' }}">
-            {{ isset($courierStatusConfig['ecourier']) && $courierStatusConfig['ecourier']['status']=='1' ? '● Active' : '○ Inactive' }}
+            {{ isset($courierStatusConfig['ecourier']) && $courierStatusConfig['ecourier']['status']=='1' ? 'â— Active' : 'â—‹ Inactive' }}
         </p>
     </div>
 
@@ -406,25 +406,25 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">📖 API Key কিভাবে পাবেন?</div>
+                <div class="info-card-header">ðŸ“– API Key à¦•à¦¿à¦­à¦¾à¦¬à§‡ à¦ªà¦¾à¦¬à§‡à¦¨?</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#10b981;">
-                        <div class="step-num" style="background:#10b981;">১</div>
-                        <div><strong>Steadfast পোর্টালে যান</strong><p>steadfast-courier.com এ একাউন্ট খুলুন ও লগইন করুন।</p></div>
+                        <div class="step-num" style="background:#10b981;">à§§</div>
+                        <div><strong>Steadfast à¦ªà§‹à¦°à§à¦Ÿà¦¾à¦²à§‡ à¦¯à¦¾à¦¨</strong><p>steadfast-courier.com à¦ à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦–à§à¦²à§à¦¨ à¦“ à¦²à¦—à¦‡à¦¨ à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">২</div>
-                        <div><strong>API Settings</strong><p>Dashboard → Settings → API Integration এ যান।</p></div>
+                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
+                        <div><strong>API Settings</strong><p>Dashboard â†’ Settings â†’ API Integration à¦ à¦¯à¦¾à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#f59e0b;">
-                        <div class="step-num" style="background:#f59e0b;">৩</div>
-                        <div><strong>Keys কপি করুন</strong><p>API Key ও Secret Key কপি করে উপরের ফর্মে দিন।</p></div>
+                        <div class="step-num" style="background:#f59e0b;">à§©</div>
+                        <div><strong>Keys à¦•à¦ªà¦¿ à¦•à¦°à§à¦¨</strong><p>API Key à¦“ Secret Key à¦•à¦ªà¦¿ à¦•à¦°à§‡ à¦‰à¦ªà¦°à§‡à¦° à¦«à¦°à§à¦®à§‡ à¦¦à¦¿à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#f43f5e;">
-                        <div class="step-num" style="background:#f43f5e;">৪</div>
-                        <div><strong>শুধু একটি Active</strong><p>একসাথে একটিই courier API active রাখুন।</p></div>
+                        <div class="step-num" style="background:#f43f5e;">à§ª</div>
+                        <div><strong>à¦¶à§à¦§à§ à¦à¦•à¦Ÿà¦¿ Active</strong><p>à¦à¦•à¦¸à¦¾à¦¥à§‡ à¦à¦•à¦Ÿà¦¿à¦‡ courier API active à¦°à¦¾à¦–à§à¦¨à¥¤</p></div>
                     </div>
-                    <div class="info-tip"><span>💡</span><span>Keys কখনো publicly শেয়ার করবেন না।</span></div>
+                    <div class="info-tip"><span>ðŸ’¡</span><span>Keys à¦•à¦–à¦¨à§‹ publicly à¦¶à§‡à¦¯à¦¼à¦¾à¦° à¦•à¦°à¦¬à§‡à¦¨ à¦¨à¦¾à¥¤</span></div>
                     <a href="https://steadfast-courier.com" target="_blank" class="info-visit-btn" style="color:#4f46e5;border-color:#e0e7ff;background:#eff6ff;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Steadfast Portal
                     </a>
@@ -514,21 +514,21 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">📖 Pathao API সেটআপ</div>
+                <div class="info-card-header">ðŸ“– Pathao API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#e11d48;">
-                        <div class="step-num" style="background:#e11d48;">১</div>
-                        <div><strong>Pathao Merchant একাউন্ট</strong><p>courier.pathao.com এ merchant একাউন্ট খুলুন।</p></div>
+                        <div class="step-num" style="background:#e11d48;">à§§</div>
+                        <div><strong>Pathao Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>courier.pathao.com à¦ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦–à§à¦²à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">২</div>
-                        <div><strong>Developer API Access</strong><p>Support এ যোগাযোগ করুন অথবা Developer Dashboard থেকে credentials নিন।</p></div>
+                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
+                        <div><strong>Developer API Access</strong><p>Support à¦ à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦— à¦•à¦°à§à¦¨ à¦…à¦¥à¦¬à¦¾ Developer Dashboard à¦¥à§‡à¦•à§‡ credentials à¦¨à¦¿à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#f59e0b;">
-                        <div class="step-num" style="background:#f59e0b;">৩</div>
-                        <div><strong>Client ID & Secret</strong><p>পাওয়া Client ID, Secret, Username, Password দিয়ে ফর্ম পূরণ করুন।</p></div>
+                        <div class="step-num" style="background:#f59e0b;">à§©</div>
+                        <div><strong>Client ID & Secret</strong><p>à¦ªà¦¾à¦“à¦¯à¦¼à¦¾ Client ID, Secret, Username, Password à¦¦à¦¿à¦¯à¦¼à§‡ à¦«à¦°à§à¦® à¦ªà§‚à¦°à¦£ à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
-                    <div class="info-tip"><span>💡</span><span>Pathao Sandbox ব্যবহার করুন test এর জন্য।</span></div>
+                    <div class="info-tip"><span>ðŸ’¡</span><span>Pathao Sandbox à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨ test à¦à¦° à¦œà¦¨à§à¦¯à¥¤</span></div>
                     <a href="https://pathao.com" target="_blank" class="info-visit-btn" style="color:#e11d48;border-color:#fecdd3;background:#fff1f2;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Pathao Portal
                     </a>
@@ -596,21 +596,21 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">📖 RedX API সেটআপ</div>
+                <div class="info-card-header">ðŸ“– RedX API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#ef4444;">
-                        <div class="step-num" style="background:#ef4444;">১</div>
-                        <div><strong>RedX Merchant একাউন্ট</strong><p>redx.com.bd তে merchant account খুলুন।</p></div>
+                        <div class="step-num" style="background:#ef4444;">à§§</div>
+                        <div><strong>RedX Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>redx.com.bd à¦¤à§‡ merchant account à¦–à§à¦²à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">২</div>
-                        <div><strong>API Token পান</strong><p>Dashboard → Settings → API Access Token Generate করুন।</p></div>
+                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
+                        <div><strong>API Token à¦ªà¦¾à¦¨</strong><p>Dashboard â†’ Settings â†’ API Access Token Generate à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#10b981;">
-                        <div class="step-num" style="background:#10b981;">৩</div>
-                        <div><strong>Token দিয়ে Connect করুন</strong><p>API Token উপরের ফর্মে দিয়ে Save করুন।</p></div>
+                        <div class="step-num" style="background:#10b981;">à§©</div>
+                        <div><strong>Token à¦¦à¦¿à¦¯à¦¼à§‡ Connect à¦•à¦°à§à¦¨</strong><p>API Token à¦‰à¦ªà¦°à§‡à¦° à¦«à¦°à§à¦®à§‡ à¦¦à¦¿à¦¯à¦¼à§‡ Save à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
-                    <div class="info-tip"><span>💡</span><span>RedX Production ও Sandbox আলাদা token ব্যবহার করে।</span></div>
+                    <div class="info-tip"><span>ðŸ’¡</span><span>RedX Production à¦“ Sandbox à¦†à¦²à¦¾à¦¦à¦¾ token à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§‡à¥¤</span></div>
                     <a href="https://redx.com.bd" target="_blank" class="info-visit-btn" style="color:#ef4444;border-color:#fecaca;background:#fff5f5;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> RedX Portal
                     </a>
@@ -675,17 +675,17 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">📖 Paperfly API সেটআপ</div>
+                <div class="info-card-header">ðŸ“– Paperfly API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#f59e0b;">
-                        <div class="step-num" style="background:#f59e0b;">১</div>
-                        <div><strong>Paperfly Merchant একাউন্ট</strong><p>paperfly.com.bd তে merchant একাউন্ট করুন।</p></div>
+                        <div class="step-num" style="background:#f59e0b;">à§§</div>
+                        <div><strong>Paperfly Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>paperfly.com.bd à¦¤à§‡ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">২</div>
-                        <div><strong>API Credentials</strong><p>Support বা dashboard থেকে Client ID ও Secret পান।</p></div>
+                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
+                        <div><strong>API Credentials</strong><p>Support à¦¬à¦¾ dashboard à¦¥à§‡à¦•à§‡ Client ID à¦“ Secret à¦ªà¦¾à¦¨à¥¤</p></div>
                     </div>
-                    <div class="info-tip"><span>💡</span><span>Paperfly API সম্পর্কে আরও জানতে তাদের support এ যোগাযোগ করুন।</span></div>
+                    <div class="info-tip"><span>ðŸ’¡</span><span>Paperfly API à¦¸à¦®à§à¦ªà¦°à§à¦•à§‡ à¦†à¦°à¦“ à¦œà¦¾à¦¨à¦¤à§‡ à¦¤à¦¾à¦¦à§‡à¦° support à¦ à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦— à¦•à¦°à§à¦¨à¥¤</span></div>
                     <a href="https://paperfly.com.bd" target="_blank" class="info-visit-btn" style="color:#f59e0b;border-color:#fde68a;background:#fffbeb;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Paperfly Portal
                     </a>
@@ -750,17 +750,17 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">📖 CityFast API সেটআপ</div>
+                <div class="info-card-header">ðŸ“– CityFast API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#8b5cf6;">
-                        <div class="step-num" style="background:#8b5cf6;">১</div>
-                        <div><strong>CityFast Merchant একাউন্ট</strong><p>cityfast.com.bd তে merchant একাউন্ট করুন।</p></div>
+                        <div class="step-num" style="background:#8b5cf6;">à§§</div>
+                        <div><strong>CityFast Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>cityfast.com.bd à¦¤à§‡ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">২</div>
-                        <div><strong>API Credentials পান</strong><p>Dashboard → API Integration থেকে credentials নিন।</p></div>
+                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
+                        <div><strong>API Credentials à¦ªà¦¾à¦¨</strong><p>Dashboard â†’ API Integration à¦¥à§‡à¦•à§‡ credentials à¦¨à¦¿à¦¨à¥¤</p></div>
                     </div>
-                    <div class="info-tip"><span>💡</span><span>CityFast primarily ঢাকার ভেতরে same-day delivery সার্ভিস দেয়।</span></div>
+                    <div class="info-tip"><span>ðŸ’¡</span><span>CityFast primarily à¦¢à¦¾à¦•à¦¾à¦° à¦­à§‡à¦¤à¦°à§‡ same-day delivery à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸ à¦¦à§‡à¦¯à¦¼à¥¤</span></div>
                     <a href="https://cityfast.com.bd" target="_blank" class="info-visit-btn" style="color:#8b5cf6;border-color:#ddd6fe;background:#f5f3ff;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> CityFast Portal
                     </a>
@@ -828,21 +828,21 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">📖 eCourier API সেটআপ</div>
+                <div class="info-card-header">ðŸ“– eCourier API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#0ea5e9;">
-                        <div class="step-num" style="background:#0ea5e9;">১</div>
-                        <div><strong>eCourier Merchant একাউন্ট</strong><p>ecourier.com.bd তে merchant একাউন্ট খুলুন।</p></div>
+                        <div class="step-num" style="background:#0ea5e9;">à§§</div>
+                        <div><strong>eCourier Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>ecourier.com.bd à¦¤à§‡ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦–à§à¦²à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">২</div>
-                        <div><strong>API Keys পান</strong><p>Dashboard → Developer → API Key Generate করুন।</p></div>
+                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
+                        <div><strong>API Keys à¦ªà¦¾à¦¨</strong><p>Dashboard â†’ Developer â†’ API Key Generate à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
                     <div class="info-step" style="border-color:#10b981;">
-                        <div class="step-num" style="background:#10b981;">৩</div>
-                        <div><strong>Save করুন</strong><p>API Key ও Secret দিয়ে ফর্ম পূরণ করে Save করুন।</p></div>
+                        <div class="step-num" style="background:#10b981;">à§©</div>
+                        <div><strong>Save à¦•à¦°à§à¦¨</strong><p>API Key à¦“ Secret à¦¦à¦¿à¦¯à¦¼à§‡ à¦«à¦°à§à¦® à¦ªà§‚à¦°à¦£ à¦•à¦°à§‡ Save à¦•à¦°à§à¦¨à¥¤</p></div>
                     </div>
-                    <div class="info-tip"><span>💡</span><span>eCourier সারাদেশে delivery সার্ভিস প্রদান করে।</span></div>
+                    <div class="info-tip"><span>ðŸ’¡</span><span>eCourier à¦¸à¦¾à¦°à¦¾à¦¦à§‡à¦¶à§‡ delivery à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸ à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à§‡à¥¤</span></div>
                     <a href="https://ecourier.com.bd" target="_blank" class="info-visit-btn" style="color:#0ea5e9;border-color:#bae6fd;background:#f0f9ff;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> eCourier Portal
                     </a>
@@ -858,14 +858,9 @@
 $(document).ready(function() {
     $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') } });
 
-    const Toast = Swal.mixin({
-        toast: true, position: 'top-end',
-        showConfirmButton: false, timer: 3000, timerProgressBar: true,
-    });
-
     const updateUrl = "{{ route('courier.update.status') }}";
 
-    // ===== Status switch (radio behaviour — only one active) =====
+    // ===== Status switch (radio behaviour â€” only one active) =====
     $('.status-switch').on('change', function() {
         const sw = $(this);
         if (sw.is(':checked')) {
@@ -882,10 +877,10 @@ $(document).ready(function() {
                         const card = $(this).closest('.courier-select-card');
                         const name = card.attr('id').replace('tab-','');
                         if (name === selectedCourier) {
-                            $(this).removeClass('status-off').addClass('status-on').text('● Active');
+                            $(this).removeClass('status-off').addClass('status-on').text('â— Active');
                             card.addClass('enabled-courier');
                         } else {
-                            $(this).removeClass('status-on').addClass('status-off').text('○ Inactive');
+                            $(this).removeClass('status-on').addClass('status-off').text('â—‹ Inactive');
                             card.removeClass('enabled-courier');
                         }
                     });

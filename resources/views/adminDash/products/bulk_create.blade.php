@@ -1,4 +1,4 @@
-@extends('layouts.Backend.master')
+﻿@extends('layouts.Backend.master')
 @section('title')
     BULK PRODUCT CREATE
 @endsection
@@ -240,14 +240,6 @@
 
 @section('script')
     <script>
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true
-        });
-
         // Flash message handling
         @if (Session::has('success'))
             Toast.fire({

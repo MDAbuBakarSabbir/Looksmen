@@ -3,236 +3,10 @@
     ADD PRODUCT
 @endsection
 @section('content')
-    <style>
-        /* Premium UI Overrides */
-        body {
-            background-color: #f8fafc;
-        }
-        
-        .premium-card {
-            background: #ffffff;
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            margin-bottom: 1.5rem;
-            transition: all 0.3s ease;
-        }
 
-        .premium-card:hover {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-        }
-
-        .premium-card-header {
-            background-color: transparent;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 1.25rem 1.5rem;
-            font-weight: 600;
-            color: #1e293b;
-            font-size: 1.1rem;
-        }
-
-        .premium-card-body {
-            padding: 1.5rem;
-        }
-
-        .form-label {
-            font-weight: 500;
-            color: #475569;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-        }
-
-        .form-control {
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            padding: 0.6rem 1rem;
-            font-size: 0.95rem;
-            color: #334155;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .form-control:focus {
-            border-color: #6366f1;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
-            outline: none;
-        }
-
-        input:disabled {
-            opacity: 0.6;
-            background-color: #f1f5f9;
-            cursor: not-allowed;
-        }
-
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type="number"] { -moz-appearance: textfield; }
-
-        /* Premium Image Upload Area */
-        .image-upload-wrapper {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-
-        .image-upload-box {
-            width: 120px;
-            height: 120px;
-            border: 2px dashed #94a3b8;
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            background: #f8fafc;
-            transition: all 0.2s ease;
-            color: #64748b;
-        }
-
-        .image-upload-box:hover {
-            background: #f1f5f9;
-            border-color: #6366f1;
-            color: #6366f1;
-        }
-
-        .image-preview-item {
-            width: 120px;
-            height: 120px;
-            border-radius: 12px;
-            position: relative;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .image-preview-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 12px;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: -6px;
-            right: -6px;
-            background: #ef4444;
-            color: #fff;
-            width: 24px;
-            height: 24px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            font-size: 12px;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
-            transition: background 0.2s;
-            z-index: 10;
-        }
-        .delete-btn:hover { background: #dc2626; }
-
-        /* Buttons */
-        .btn-premium {
-            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 600;
-            letter-spacing: 0.3px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-premium:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
-            color: white;
-        }
-
-        .btn-cancel {
-            background: #f1f5f9;
-            color: #475569;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 0.6rem 1.5rem;
-            font-weight: 500;
-            transition: background 0.2s;
-        }
-        .btn-cancel:hover {
-            background: #e2e8f0;
-            color: #1e293b;
-        }
-
-        /* Select2 Premium Overrides */
-        .select2-container--default .select2-selection--single,
-        .select2-container--default .select2-selection--multiple {
-            border: 1px solid #cbd5e1 !important;
-            border-radius: 8px !important;
-            min-height: 42px !important;
-            display: flex !important;
-            align-items: center !important;
-            padding-left: 6px !important;
-            box-shadow: none !important;
-        }
-        .select2-container--default.select2-container--focus .select2-selection--multiple,
-        .select2-container--default.select2-container--focus .select2-selection--single {
-            border-color: #6366f1 !important;
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
-        }
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: #e0e7ff !important;
-            color: #4338ca !important;
-            border: 1px solid #c7d2fe !important;
-            border-radius: 6px !important;
-            padding: 4px 10px !important;
-            font-size: 13px !important;
-            font-weight: 500 !important;
-            margin-top: 5px !important;
-        }
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-            color: #4338ca !important;
-            margin-right: 5px !important;
-            border-right: 1px solid #c7d2fe !important;
-        }
-        
-        /* Switch Customization */
-        .switch {
-            position: relative;
-            display: inline-block;
-            width: 46px;
-            height: 24px;
-        }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider {
-            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
-            background-color: #cbd5e1; transition: .4s; border-radius: 24px;
-        }
-        .slider:before {
-            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
-            background-color: white; transition: .4s; border-radius: 50%;
-        }
-        input:checked + .slider { background-color: #6366f1; }
-        input:checked + .slider:before { transform: translateX(22px); }
-
-        .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-        .page-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #1e293b;
-            margin: 0;
-        }
-    </style>
-
-    <div class="page-header">
-        <h1 class="page-title">Create New Product</h1>
-        <a href="{{ url('/admin/products') }}" class="btn btn-cancel">
+    <div class="page-header-custom">
+        <h1 class="page-title-custom">Create New Product</h1>
+        <a href="{{ url('/admin/products') }}" class="btn-cancel-custom">
             <i class="fas fa-arrow-left"></i> Back to Products
         </a>
     </div>
@@ -276,13 +50,14 @@
                         <p class="text-muted small mb-2">Upload high-quality images. The first image will be the cover.</p>
                         
                         <div class="image-upload-wrapper" id="image-area">
-                            <!-- Image Select Label (Replaces buggy onClick) -->
+                            <!-- Image Select Label — input is OUTSIDE the label to prevent double-trigger -->
                             <label class="image-upload-box" for="image-input" title="Click to add images">
                                 <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
                                 <span style="font-size: 13px; font-weight: 500;">Add Images</span>
-                                <input type="file" name="images[]" id="image-input" multiple accept="image/*" style="display:none;">
                             </label>
                         </div>
+                        <!-- Hidden file input outside label to avoid double-trigger bug -->
+                        <input type="file" name="images[]" id="image-input" multiple accept="image/*" style="display:none;">
                     </div>
                 </div>
             </div>
@@ -374,15 +149,19 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Attribute Values</label>
-                            <select id="AttributeValue" class="form-control" name="attributeValue[]" multiple="multiple"></select>
+                            <div style="width:100%">
+                                <select id="AttributeValue" class="form-control" name="attributeValue[]" multiple="multiple" style="width:100%"></select>
+                            </div>
                         </div>
                         <div class="mb-4">
                             <label class="form-label">Colors</label>
-                            <select class="form-control" name="color[]" multiple="multiple" id="colorSelect">
-                                @foreach ($colors as $color)
-                                    <option value="{{ $color->id }}">{{ $color->color_name }}</option>
-                                @endforeach
-                            </select>
+                            <div style="width:100%">
+                                <select class="form-control" name="color[]" multiple="multiple" id="colorSelect" style="width:100%">
+                                    @foreach ($colors as $color)
+                                        <option value="{{ $color->id }}">{{ $color->color_name }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
                         </div>
                         
                         <div class="p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
@@ -404,8 +183,8 @@
         </div>
 
         <div class="d-flex justify-content-end gap-3 mb-5">
-            <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
-            <button type="submit" class="btn btn-premium">
+            <button type="button" class="btn-cancel-custom" onclick="window.history.back()">Cancel</button>
+            <button type="submit" class="btn-premium">
                 <i class="fas fa-save me-1"></i> Save Product
             </button>
         </div>
@@ -414,41 +193,36 @@
 
 @section('script')
     <script>
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
-        });
-
         $(document).ready(function() {
-            // Initialize Select2
-            $('#category').select2({ placeholder: "Select Category", allowClear: true });
-            $('#subcategory').select2({ placeholder: "Select Sub Category", allowClear: true });
-            $('#childcategory').select2({ placeholder: "Select Child Category", allowClear: true });
-            $('#brand').select2({ placeholder: "Select Brand", allowClear: true });
-            $('#attribute').select2({ placeholder: "Select Attribute", allowClear: true });
-            $('#AttributeValue').select2({ placeholder: "Select Attribute Values", allowClear: true });
-            $('#colorSelect').select2({ placeholder: "Select Colors", allowClear: true });
+            // Initialize Select2 for single selects
+            $('#category').select2({ placeholder: "Select Category", allowClear: true, width: '100%' });
+            $('#subcategory').select2({ placeholder: "Select Sub Category", allowClear: true, width: '100%' });
+            $('#childcategory').select2({ placeholder: "Select Child Category", allowClear: true, width: '100%' });
+            $('#brand').select2({ placeholder: "Select Brand", allowClear: true, width: '100%' });
+            $('#attribute').select2({ placeholder: "Select Attribute", allowClear: true, width: '100%' });
 
-            // Initialize Summernote
+            // Initialize Select2 for multi-selects
+            $('#AttributeValue').select2({ placeholder: "Select Attribute Values", allowClear: true, width: '100%' });
+            $('#colorSelect').select2({ placeholder: "Select Colors", allowClear: true, width: '100%' });
+
+            // Initialize Summernote rich text editor
             $('#summernote').summernote({
-                height: 250,
-                placeholder: 'Write premium product description details here...',
+                height: 300,
+                placeholder: 'Write product description here...',
                 toolbar: [
                     ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
                     ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['table', ['table']],
                     ['insert', ['link', 'picture']],
                     ['view', ['fullscreen', 'codeview', 'help']]
                 ]
+            });
+
+            // FIX: sync Summernote content into the real textarea before form submit
+            $('form').on('submit', function() {
+                $('#summernote').val($('#summernote').summernote('code'));
             });
 
             // Alerts
@@ -462,7 +236,7 @@
                 Toast.fire({ icon: 'error', title: 'Validation Failed: Please check the form fields.' });
             @endif
 
-            // Cascading Category
+            // Cascading Category → Subcategory
             $('#category').on('change', function() {
                 var categoryID = $(this).val();
                 $('#subcategory').html('<option selected disabled value="">Loading...</option>').trigger('change');
@@ -471,20 +245,19 @@
                 if (categoryID) {
                     $.ajax({
                         url: '/admin/get-subcategories/' + categoryID,
-                        type: "GET",
-                        dataType: "json",
+                        type: 'GET',
+                        dataType: 'json',
                         success: function(data) {
                             $('#subcategory').html('<option selected disabled value="">Select Sub Category</option>');
                             $.each(data, function(key, value) {
                                 $('#subcategory').append('<option value="' + key + '">' + value + '</option>');
                             });
-                            $('#subcategory').trigger('change');
                         }
                     });
                 }
             });
 
-            // Cascading Subcategory
+            // Cascading Subcategory → Child Category
             $('#subcategory').on('change', function() {
                 var subcategoryID = $(this).val();
                 $('#childcategory').html('<option selected disabled value="">Loading...</option>').trigger('change');
@@ -492,37 +265,50 @@
                 if (subcategoryID) {
                     $.ajax({
                         url: '/admin/get-childcategories/' + subcategoryID,
-                        type: "GET",
-                        dataType: "json",
+                        type: 'GET',
+                        dataType: 'json',
                         success: function(data) {
                             $('#childcategory').html('<option selected disabled value="">Select Child Category</option>');
                             $.each(data, function(key, value) {
                                 $('#childcategory').append('<option value="' + key + '">' + value + '</option>');
                             });
-                            $('#childcategory').trigger('change');
                         }
                     });
                 }
             });
 
-            // Cascading Attributes
+            // Cascading Attribute → Attribute Values
+            // FIX: destroy Select2, repopulate options, then re-initialize Select2
             $('#attribute').on('change', function() {
                 var attributeID = $(this).val();
-                $('#AttributeValue').html('<option selected disabled value="">Loading...</option>').trigger('change');
+
+                // Reset and show loading state
+                if ($.fn.select2 && $('#AttributeValue').data('select2')) {
+                    $('#AttributeValue').select2('destroy');
+                }
+                $('#AttributeValue').html('<option disabled>Loading values...</option>');
 
                 if (attributeID) {
                     $.ajax({
                         url: '/admin/get-attribute-values/' + attributeID,
-                        type: "GET",
-                        dataType: "json",
+                        type: 'GET',
+                        dataType: 'json',
                         success: function(data) {
                             $('#AttributeValue').html('');
                             $.each(data, function(key, value) {
                                 $('#AttributeValue').append('<option value="' + key + '">' + value + '</option>');
                             });
-                            $('#AttributeValue').trigger('change');
+                            // Re-initialize Select2 after populating options
+                            $('#AttributeValue').select2({ placeholder: 'Select Attribute Values', allowClear: true, width: '100%' });
+                        },
+                        error: function() {
+                            $('#AttributeValue').html('');
+                            $('#AttributeValue').select2({ placeholder: 'Error loading values', allowClear: true, width: '100%' });
                         }
                     });
+                } else {
+                    $('#AttributeValue').html('');
+                    $('#AttributeValue').select2({ placeholder: 'Select Attribute Values', allowClear: true, width: '100%' });
                 }
             });
         });
@@ -567,7 +353,7 @@
                 box.classList.add('image-preview-item');
                 box.innerHTML = `
                     <img src="${e.target.result}">
-                    <div class="delete-btn" onclick="removeImage(this)"><i class="fas fa-times"></i></div>
+                    <div class="img-delete-btn" onclick="removeImage(this)"><i class="fas fa-times"></i></div>
                 `;
                 document.getElementById('image-area').appendChild(box);
             };

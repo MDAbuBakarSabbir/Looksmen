@@ -1,4 +1,4 @@
-@extends('layouts.Backend.master')
+﻿@extends('layouts.Backend.master')
 @section('title')
     CUSTOM PAGES
 @endsection
@@ -254,7 +254,7 @@
                                 <label class="form-label-custom">Page Description (English)<span class="text-danger">*</span></label>
                                 <textarea name="english_description" class="form-control-custom" rows="4" placeholder="Page Content in English..." required></textarea>
 
-                                <label class="form-label-custom">Page Description (বাংলা )</label>
+                                <label class="form-label-custom">Page Description (à¦¬à¦¾à¦‚à¦²à¦¾ )</label>
                                 <textarea name="bangla_description" class="form-control-custom" rows="4" placeholder="Page Content in Bangla..."></textarea>
 
                                 <div class="modal-footer-custom">
@@ -359,14 +359,6 @@
     </script>
 
     <script>
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-        });
-
         document.querySelectorAll('.status-switch').forEach(function(btn) {
             btn.addEventListener('change', function() {
                 let id = this.getAttribute('data-id');

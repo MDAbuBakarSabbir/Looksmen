@@ -97,6 +97,8 @@
     <!-- Select2 & Summernote -->
     <link rel="stylesheet" href="{{ asset('adminDash/assets/vendor/select2/select2.min.css') }}">
     <link href="{{ asset('adminDash/assets/css/style.css') }}" rel="stylesheet">
+    <!-- Global Admin Custom Styles (shared UI components) -->
+    <link href="{{ asset('adminDash/assets/css/admin-custom.css') }}" rel="stylesheet">
 
     <!-- Font Awesome 6 Icons - loaded non-blocking -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
@@ -104,6 +106,9 @@
     <!-- Summernote CSS - non-blocking -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css"></noscript>
+    {{-- Page-specific styles injected here --}}
+    @yield('style')
+
 
     <script src="{{ asset('adminDash/assets/vendor/sweetalert2/sweetalert2.min.js') }}"></script>
     <script>

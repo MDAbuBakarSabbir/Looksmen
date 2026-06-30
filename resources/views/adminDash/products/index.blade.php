@@ -1,4 +1,4 @@
-@php
+﻿@php
     use App\Models\ProductImage;
 @endphp
 @extends('layouts.Backend.master')
@@ -236,14 +236,6 @@
     </div>
 
     <script>
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-        });
-
         @if(session('success'))
             Toast.fire({
                 icon: 'success',

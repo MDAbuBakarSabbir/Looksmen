@@ -1,4 +1,4 @@
-@extends('layouts.Backend.master')
+﻿@extends('layouts.Backend.master')
 @section('title')
     CATEGORY MANAGEMENT
 @endsection
@@ -887,14 +887,6 @@
 
     <script>
         // Ajax status switches
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-        });
-
         function setupStatusSwitch(selector, url, successMsg) {
             document.querySelectorAll(selector).forEach(function(btn) {
                 btn.addEventListener('change', function() {
