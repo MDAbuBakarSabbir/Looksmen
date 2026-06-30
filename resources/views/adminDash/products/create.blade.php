@@ -4,9 +4,61 @@
 @endsection
 @section('content')
     <style>
+        /* Premium UI Overrides */
+        body {
+            background-color: #f8fafc;
+        }
+        
+        .premium-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .premium-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+        }
+
+        .premium-card-header {
+            background-color: transparent;
+            border-bottom: 1px solid #f1f5f9;
+            padding: 1.25rem 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 1.1rem;
+        }
+
+        .premium-card-body {
+            padding: 1.5rem;
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .form-control {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            font-size: 0.95rem;
+            color: #334155;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+            outline: none;
+        }
+
         input:disabled {
-            opacity: 0.5;
-            border: 1px dashed rgba(0,0,0,0.15);
+            opacity: 0.6;
             background-color: #f1f5f9;
             cursor: not-allowed;
         }
@@ -16,262 +68,352 @@
             -webkit-appearance: none;
             margin: 0;
         }
+        input[type="number"] { -moz-appearance: textfield; }
 
-        input[type="number"] {
-            -moz-appearance: textfield;
+        /* Premium Image Upload Area */
+        .image-upload-wrapper {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
         }
 
         .image-upload-box {
             width: 120px;
             height: 120px;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
+            border: 2px dashed #94a3b8;
+            border-radius: 12px;
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             cursor: pointer;
-            position: relative;
-            margin-right: 10px;
-            margin-bottom: 5px;
             background: #f8fafc;
+            transition: all 0.2s ease;
+            color: #64748b;
         }
 
-        .image-upload-box img {
+        .image-upload-box:hover {
+            background: #f1f5f9;
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+
+        .image-preview-item {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .image-preview-item img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 6px;
+            border-radius: 12px;
         }
 
         .delete-btn {
             position: absolute;
-            top: -8px;
-            right: -8px;
-            background: red;
+            top: -6px;
+            right: -6px;
+            background: #ef4444;
             color: #fff;
-            padding: 4px 7px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             border-radius: 50%;
             font-size: 12px;
             cursor: pointer;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.4);
+            transition: background 0.2s;
+            z-index: 10;
+        }
+        .delete-btn:hover { background: #dc2626; }
+
+        /* Buttons */
+        .btn-premium {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-premium:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+            color: white;
         }
 
-        /* Premium Select2 Styling Override */
+        .btn-cancel {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        .btn-cancel:hover {
+            background: #e2e8f0;
+            color: #1e293b;
+        }
+
+        /* Select2 Premium Overrides */
         .select2-container--default .select2-selection--single,
         .select2-container--default .select2-selection--multiple {
-            border: 1px solid rgba(0, 0, 0, 0.15) !important;
-            border-radius: 6px !important;
-            min-height: 40px !important;
+            border: 1px solid #cbd5e1 !important;
+            border-radius: 8px !important;
+            min-height: 42px !important;
             display: flex !important;
             align-items: center !important;
             padding-left: 6px !important;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02) !important;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: none !important;
         }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 38px !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #495057 !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
+        .select2-container--default.select2-container--focus .select2-selection--multiple,
+        .select2-container--default.select2-container--focus .select2-selection--single {
+            border-color: #6366f1 !important;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15) !important;
         }
         .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: #4f46e5 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 20px !important;
-            padding: 2px 10px !important;
-            font-size: 12px !important;
-            font-weight: 600 !important;
+            background-color: #e0e7ff !important;
+            color: #4338ca !important;
+            border: 1px solid #c7d2fe !important;
+            border-radius: 6px !important;
+            padding: 4px 10px !important;
+            font-size: 13px !important;
+            font-weight: 500 !important;
             margin-top: 5px !important;
         }
         .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-            color: white !important;
+            color: #4338ca !important;
             margin-right: 5px !important;
+            border-right: 1px solid #c7d2fe !important;
         }
-        .select2-container {
-            width: 100% !important;
+        
+        /* Switch Customization */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 24px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1; transition: .4s; border-radius: 24px;
+        }
+        .slider:before {
+            position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px;
+            background-color: white; transition: .4s; border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #6366f1; }
+        input:checked + .slider:before { transform: translateX(22px); }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
         }
     </style>
-    <div class="back mb-3">
-        <a href="{{ url('/admin/products') }}">
-            <img height="30px" src="{{ asset('adminDash/images/svg/backbutton.png') }}" alt="">
+
+    <div class="page-header">
+        <h1 class="page-title">Create New Product</h1>
+        <a href="{{ url('/admin/products') }}" class="btn btn-cancel">
+            <i class="fas fa-arrow-left"></i> Back to Products
         </a>
     </div>
-    <div class="row">
-        <div class="col">
-            <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data">
-                @csrf
-                <div class="card">
-                    <div class="card-header">
-                        <h4>ADD Product</h4>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-3">
-                            <div class="col">
 
-                                <label class="form-label">Product Title <span class="text-danger">*</span></label>
-                                <input type="text" class="form-control" aria-describedby="emailHelp" name="title"
-                                    title="Product Title">
+    <form action="{{ route('product.store') }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        
+        <div class="row">
+            <!-- Left Column: Core Information -->
+            <div class="col-lg-8">
+                <div class="premium-card">
+                    <div class="premium-card-header">
+                        <i class="fas fa-box text-primary me-2"></i> Basic Details
+                    </div>
+                    <div class="premium-card-body">
+                        <div class="mb-4">
+                            <label class="form-label">Product Title <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" placeholder="Enter product title..." required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Product Description <span class="text-danger">*</span></label>
+                            <textarea name="description" id="summernote" required></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Video URL (Optional)</label>
+                                <input class="form-control" type="url" name="video" placeholder="https://youtube.com/...">
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label for="exampleInputCatrgory1" class="form-label">Category <span
-                                        class="text-danger">*</span></label>
-                                <select class="form-control" id="category" name="category_id">
-                                    <option selected disabled value="">Select Category</option>
-                                    @foreach ($categories as $category)
-                                        <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col">
-                                <label for="exampleInputCatrgory1" class="form-label">Sub Category</label>
-                                <select class="form-control" id="subcategory"
-                                    name="subcategory_id">
-                                    <option selected disabled value="">Select Sub Category</option>
-                                </select>
-                            </div>
-                            <div class="col">
-                                <label for="exampleInputCatrgory1" class="form-label">Child Category</label>
-                                <select class="form-control" id="childcategory"
-                                    name="childcategory_id">
-                                    <option selected disabled value="">Select Child Category</option>
-                                </select>
-                            </div>
+                    </div>
+                </div>
+
+                <div class="premium-card">
+                    <div class="premium-card-header">
+                        <i class="fas fa-images text-primary me-2"></i> Media & Gallery
+                    </div>
+                    <div class="premium-card-body">
+                        <label class="form-label">Product Images <span class="text-danger">*</span> (Max: 10)</label>
+                        <p class="text-muted small mb-2">Upload high-quality images. The first image will be the cover.</p>
+                        
+                        <div class="image-upload-wrapper" id="image-area">
+                            <!-- Image Select Label (Replaces buggy onClick) -->
+                            <label class="image-upload-box" for="image-input" title="Click to add images">
+                                <i class="fas fa-cloud-upload-alt fa-2x mb-2"></i>
+                                <span style="font-size: 13px; font-weight: 500;">Add Images</span>
+                                <input type="file" name="images[]" id="image-input" multiple accept="image/*" style="display:none;">
+                            </label>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="exampleInputCatrgory1" class="form-label">Brand</label>
-                                    <select class="form-control" name="brand_id" id="brand">
-                                        <option selected disabled value="">Select Brand</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="exampleInputCatrgory1" class="form-label">Actual Price<span
-                                            class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" name="old_price">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="exampleInputCatrgory1" class="form-label">Sale Price<span
-                                            class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" name="new_price">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="exampleInputCatrgory1" class="form-label">Stock<span
-                                            class="text-danger">*</span></label>
-                                    <input type="number" class="form-control" name="stock">
-                                </div>
-                            </div>
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label class="form-label">Custom Points</label>
-                                    <input type="number" class="form-control" name="points" placeholder="0" min="0">
-                                </div>
-                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Settings & Pricing -->
+            <div class="col-lg-4">
+                <div class="premium-card">
+                    <div class="premium-card-header">
+                        <i class="fas fa-sitemap text-primary me-2"></i> Organization
+                    </div>
+                    <div class="premium-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Category <span class="text-danger">*</span></label>
+                            <select class="form-control" id="category" name="category_id" required>
+                                <option selected disabled value="">Select Category</option>
+                                @foreach ($categories as $category)
+                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                @endforeach
+                            </select>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label for="exampleInputCatrgory1" class="form-label">Attribute</label>
-                                    <select id="attribute" class="form-control" name="attribute_id">
-                                        <option selected disabled value="">Select Attribute</option>
-                                        @foreach ($attributes as $attribute)
-                                            <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
-                                        @endforeach
-                                    </select>
+                        <div class="mb-3">
+                            <label class="form-label">Sub Category</label>
+                            <select class="form-control" id="subcategory" name="subcategory_id">
+                                <option selected disabled value="">Select Sub Category</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Child Category</label>
+                            <select class="form-control" id="childcategory" name="childcategory_id">
+                                <option selected disabled value="">Select Child Category</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Brand</label>
+                            <select class="form-control" name="brand_id" id="brand">
+                                <option selected disabled value="">Select Brand</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card">
+                    <div class="premium-card-header">
+                        <i class="fas fa-tags text-primary me-2"></i> Pricing & Inventory
+                    </div>
+                    <div class="premium-card-body">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Actual Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background:#f8fafc; border-color:#cbd5e1;">$</span>
+                                    <input type="number" class="form-control" name="old_price" required min="0" step="0.01">
                                 </div>
                             </div>
-                            <div class="col">
-                                <label for="exampleInputCatrgory1" class="form-label">Attribute Values <span
-                                        class="text-danger">*</span></label>
-                                <div class="">
-                                    <select id="AttributeValue" class="form-control js-example-theme-multiple" name="attributeValue[]"
-                                        multiple="multiple">
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col">
-                                <label for="exampleInputCatrgory1" class="form-label">Color <span
-                                        class="text-danger">*</span></label>
-                                <div class="">
-                                    <select class="form-control js-example-theme-multiple" name="color[]" multiple="multiple">
-                                        @foreach ($colors as $color)
-                                            <option value="{{ $color->id }}">{{ $color->color_name }}</option>
-                                        @endforeach
-                                    </select>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Sale Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background:#f8fafc; border-color:#cbd5e1;">$</span>
+                                    <input type="number" class="form-control" name="new_price" required min="0" step="0.01">
                                 </div>
                             </div>
                         </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <label for="exampleInputCatrgory1" class="form-label">Video (Optional)</label>
-                                <input class="form-control" type="text" name="video" id=""
-                                    placeholder="Video URL" title="Video URL">
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Stock <span class="text-danger">*</span></label>
+                                <input type="number" class="form-control" name="stock" required min="0">
                             </div>
-                            <div class="col d-flex flex-column">
-                                <label for="exampleInputCatrgory1" class="form-label">Advance (Optional)</label>
+                            <div class="col-6 mb-3">
+                                <label class="form-label">Points</label>
+                                <input type="number" class="form-control" name="points" placeholder="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="premium-card">
+                    <div class="premium-card-header">
+                        <i class="fas fa-sliders-h text-primary me-2"></i> Attributes & Settings
+                    </div>
+                    <div class="premium-card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Attribute</label>
+                            <select id="attribute" class="form-control" name="attribute_id">
+                                <option selected disabled value="">Select Attribute</option>
+                                @foreach ($attributes as $attribute)
+                                    <option value="{{ $attribute->id }}">{{ $attribute->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Attribute Values</label>
+                            <select id="AttributeValue" class="form-control" name="attributeValue[]" multiple="multiple"></select>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label">Colors</label>
+                            <select class="form-control" name="color[]" multiple="multiple" id="colorSelect">
+                                @foreach ($colors as $color)
+                                    <option value="{{ $color->id }}">{{ $color->color_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        
+                        <div class="p-3 rounded mb-3" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label mb-0">Require Advance Payment?</label>
                                 <label class="switch">
-                                    <input value="0" class="product-status" type="checkbox" name="cod"
-                                        id="codRequried" title="YES" onchange="toggleAdvanceAmount()">
-                                    <span class="slider round" title="YES"></span>
+                                    <input value="0" type="checkbox" name="cod" id="codRequried" onchange="toggleAdvanceAmount()">
+                                    <span class="slider"></span>
                                 </label>
                             </div>
-                            <div class="col">
-                                <label for="exampleInputCatrgory1" class="form-label">Advance</label>
-                                <input class="form-control" type="number" id="advance_amount" name="advance_amount"
-                                    placeholder="Advance Amount" title="Advance Amount" disabled>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <div class="col">
-                                <div class="mb-3">
-                                    <label class="form-label">Product Images<span class="text-danger">*</span> (Max:
-                                        10)</label>
-                                    <div class="d-flex gap-2 flex-wrap" id="image-area">
-
-                                        <!-- Image Select Template -->
-                                        <div class="image-upload-box" onclick="openImagePicker()">
-                                            <span style="font-size: 40px; color:#94a3b8;">+</span>
-                                            <input type="file" name="images[]" id="image-input" multiple
-                                                accept="image/*" style="display:none;">
-                                        </div>
-
-                                    </div>
-                                </div>
+                            <div>
+                                <input class="form-control" type="number" id="advance_amount" name="advance_amount" placeholder="Advance Amount" disabled min="0" step="0.01">
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="row mb-3">
-                    <div class="col">
-                        <div class="card">
-                            <div class="card-header">
-                                <h4 class="card-title">Product Description</h4>
-                            </div>
-                            <div class="card-body">
-                                <textarea name="description" id="summernote" required></textarea>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary">Submit</button>
-                <button type="submit" class="btn btn-primary">Cancel</button>
-            </form>
+                
+            </div>
         </div>
-    </div>
+
+        <div class="d-flex justify-content-end gap-3 mb-5">
+            <button type="button" class="btn btn-cancel" onclick="window.history.back()">Cancel</button>
+            <button type="submit" class="btn btn-premium">
+                <i class="fas fa-save me-1"></i> Save Product
+            </button>
+        </div>
+    </form>
 @endsection
+
 @section('script')
     <script>
-        // SweetAlert Toast Mixin
         const Toast = Swal.mixin({
             toast: true,
             position: 'top-end',
@@ -285,18 +427,18 @@
         });
 
         $(document).ready(function() {
-            // Initialize Select2 dropdown elements
+            // Initialize Select2
             $('#category').select2({ placeholder: "Select Category", allowClear: true });
             $('#subcategory').select2({ placeholder: "Select Sub Category", allowClear: true });
             $('#childcategory').select2({ placeholder: "Select Child Category", allowClear: true });
             $('#brand').select2({ placeholder: "Select Brand", allowClear: true });
             $('#attribute').select2({ placeholder: "Select Attribute", allowClear: true });
             $('#AttributeValue').select2({ placeholder: "Select Attribute Values", allowClear: true });
-            $('select[name="color[]"]').select2({ placeholder: "Select Colors", allowClear: true });
+            $('#colorSelect').select2({ placeholder: "Select Colors", allowClear: true });
 
-            // Initialize Summernote Rich Text Editor
+            // Initialize Summernote
             $('#summernote').summernote({
-                height: 200,
+                height: 250,
                 placeholder: 'Write premium product description details here...',
                 toolbar: [
                     ['style', ['style']],
@@ -309,37 +451,22 @@
                 ]
             });
 
-            // AJAX Alerts
+            // Alerts
             @if (Session::has('success'))
-                Toast.fire({
-                    icon: 'success',
-                    title: '{{ Session::get('success') }}'
-                });
+                Toast.fire({ icon: 'success', title: '{{ Session::get('success') }}' });
             @endif
-
             @if (Session::has('error'))
-                Toast.fire({
-                    icon: 'error',
-                    title: '{{ Session::get('error') }}'
-                });
+                Toast.fire({ icon: 'error', title: '{{ Session::get('error') }}' });
             @endif
-
             @if ($errors->any())
-                Toast.fire({
-                    icon: 'error',
-                    title: 'Validation Failed: Please check the form fields.'
-                });
+                Toast.fire({ icon: 'error', title: 'Validation Failed: Please check the form fields.' });
             @endif
 
-            // Dynamic category to subcategory dropdown cascading
+            // Cascading Category
             $('#category').on('change', function() {
                 var categoryID = $(this).val();
-
-                $('#subcategory').html('<option selected disabled value="">Loading...</option>');
-                $('#childcategory').html('<option selected disabled value="">Select Child Category</option>');
-                
-                $('#subcategory').trigger('change');
-                $('#childcategory').trigger('change');
+                $('#subcategory').html('<option selected disabled value="">Loading...</option>').trigger('change');
+                $('#childcategory').html('<option selected disabled value="">Select Child Category</option>').trigger('change');
 
                 if (categoryID) {
                     $.ajax({
@@ -352,24 +479,15 @@
                                 $('#subcategory').append('<option value="' + key + '">' + value + '</option>');
                             });
                             $('#subcategory').trigger('change');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error loading subcategories:", error);
-                            $('#subcategory').html('<option selected disabled value="">Error loading</option>');
-                            $('#subcategory').trigger('change');
                         }
                     });
-                } else {
-                    $('#subcategory').html('<option selected disabled value="">Select Sub Category</option>');
-                    $('#subcategory').trigger('change');
                 }
             });
 
-            // Dynamic subcategory to childcategory dropdown cascading
+            // Cascading Subcategory
             $('#subcategory').on('change', function() {
                 var subcategoryID = $(this).val();
-                $('#childcategory').html('<option selected disabled value="">Loading...</option>');
-                $('#childcategory').trigger('change');
+                $('#childcategory').html('<option selected disabled value="">Loading...</option>').trigger('change');
 
                 if (subcategoryID) {
                     $.ajax({
@@ -382,24 +500,15 @@
                                 $('#childcategory').append('<option value="' + key + '">' + value + '</option>');
                             });
                             $('#childcategory').trigger('change');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error loading child categories:", error);
-                            $('#childcategory').html('<option selected disabled value="">Error loading</option>');
-                            $('#childcategory').trigger('change');
                         }
                     });
-                } else {
-                    $('#childcategory').html('<option selected disabled value="">Select Child Category</option>');
-                    $('#childcategory').trigger('change');
                 }
             });
 
-            // Dynamic attribute values dropdown cascading
+            // Cascading Attributes
             $('#attribute').on('change', function() {
                 var attributeID = $(this).val();
-                $('#AttributeValue').html('<option selected disabled value="">Loading...</option>');
-                $('#AttributeValue').trigger('change');
+                $('#AttributeValue').html('<option selected disabled value="">Loading...</option>').trigger('change');
 
                 if (attributeID) {
                     $.ajax({
@@ -412,39 +521,25 @@
                                 $('#AttributeValue').append('<option value="' + key + '">' + value + '</option>');
                             });
                             $('#AttributeValue').trigger('change');
-                        },
-                        error: function(xhr, status, error) {
-                            console.error("Error loading Attribute Value:", error);
-                            $('#AttributeValue').html('<option selected disabled value="">Error loading</option>');
-                            $('#AttributeValue').trigger('change');
                         }
                     });
-                } else {
-                    $('#AttributeValue').html('<option selected disabled value="">Select Attribute Value</option>');
-                    $('#AttributeValue').trigger('change');
                 }
             });
         });
 
-        // Toggle advance payment amount input
         function toggleAdvanceAmount() {
             const checkbox = document.getElementById('codRequried');
             const advanceInput = document.getElementById('advance_amount');
-
             if (checkbox && advanceInput) {
                 advanceInput.disabled = !checkbox.checked;
+                if(!checkbox.checked) advanceInput.value = '';
             }
         }
-
         document.addEventListener('DOMContentLoaded', toggleAdvanceAmount);
 
-        // Multiple Images Picker & Preview Handling
+        // Multiple Images Picker (Fixed Infinite Loop)
         let selectedImages = [];
         const maxImages = 10;
-
-        function openImagePicker() {
-            document.getElementById('image-input').click();
-        }
 
         document.getElementById('image-input').addEventListener('change', function(event) {
             const files = event.target.files;
@@ -452,7 +547,7 @@
             if ((selectedImages.length + files.length) > maxImages) {
                 Toast.fire({
                     icon: 'warning',
-                    title: 'You can upload maximum 10 images!'
+                    title: `You can upload maximum ${maxImages} images!`
                 });
                 return;
             }
@@ -469,10 +564,10 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 let box = document.createElement('div');
-                box.classList.add('image-upload-box');
+                box.classList.add('image-preview-item');
                 box.innerHTML = `
                     <img src="${e.target.result}">
-                    <div class="delete-btn" onclick="removeImage(this)">x</div>
+                    <div class="delete-btn" onclick="removeImage(this)"><i class="fas fa-times"></i></div>
                 `;
                 document.getElementById('image-area').appendChild(box);
             };
@@ -481,22 +576,24 @@
 
         function removeImage(btn) {
             let box = btn.parentElement;
+            // Accounting for the first element being the add button (label)
             let index = Array.from(box.parentElement.children).indexOf(box) - 1;
 
-            selectedImages.splice(index, 1);
-            box.remove();
-            updateInputFiles();
-
-            Toast.fire({
-                icon: 'info',
-                title: 'Image removed'
-            });
+            if (index >= 0 && index < selectedImages.length) {
+                selectedImages.splice(index, 1);
+                box.remove();
+                updateInputFiles();
+                
+                Toast.fire({
+                    icon: 'info',
+                    title: 'Image removed'
+                });
+            }
         }
 
         function updateInputFiles() {
             const input = document.getElementById('image-input');
             const dt = new DataTransfer();
-
             selectedImages.forEach(img => dt.items.add(img));
             input.files = dt.files;
         }
