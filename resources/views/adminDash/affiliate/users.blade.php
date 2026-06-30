@@ -1,4 +1,4 @@
-@extends('layouts.Backend.master')
+﻿@extends('layouts.Backend.master')
 @section('title')
     AFFILIATE USERS
 @endsection
@@ -187,7 +187,7 @@
                                                 @if ($affiliate_user->balance >= 0)
                                                     {{ single_price($affiliate_user->balance) }}
                                                 @else
-                                                    ৳0.00
+                                                    à§³0.00
                                                 @endif
                                             </td>
                                             <td style="text-align: right;">
@@ -237,14 +237,6 @@
 
 @section('script')
     <script type="text/javascript">
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-        });
-
         function show_payment_modal(id){
             $.post('{{ route('affiliate_user.payment_modal') }}', {_token:'{{ csrf_token() }}', id:id}, function(data){
                 $('#payment_modal #modal-content').html(data);

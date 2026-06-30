@@ -3,143 +3,6 @@
     EDIT PRODUCT
 @endsection
 @section('content')
-    <style>
-        input:disabled {
-            opacity: 0.5;
-            border: 1px dashed rgba(0,0,0,0.15);
-            background-color: #f1f5f9;
-            cursor: not-allowed;
-        }
-
-        input[type="number"]::-webkit-outer-spin-button,
-        input[type="number"]::-webkit-inner-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-
-        input[type="number"] {
-            -moz-appearance: textfield;
-        }
-
-        .image-upload-box {
-            width: 120px;
-            height: 120px;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            position: relative;
-            margin-right: 10px;
-            margin-bottom: 5px;
-            background: #f8fafc;
-        }
-
-        .image-upload-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 6px;
-        }
-
-        .delete-btn {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: red;
-            color: #fff;
-            padding: 4px 7px;
-            border-radius: 50%;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-        /* Existing Image Box with Overlay Trash Icon */
-        .existing-image-box {
-            width: 120px;
-            height: 120px;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            position: relative;
-            margin-right: 10px;
-            margin-bottom: 5px;
-            overflow: hidden;
-            background: #f8fafc;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .existing-image-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .existing-image-box .img-delete-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
-            opacity: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: opacity 0.2s ease;
-            cursor: pointer;
-        }
-
-        .existing-image-box:hover .img-delete-overlay {
-            opacity: 1;
-        }
-
-        .existing-image-box .img-delete-overlay i {
-            color: #ffffff;
-            font-size: 20px;
-        }
-
-        /* Premium Select2 Styling Override */
-        .select2-container--default .select2-selection--single,
-        .select2-container--default .select2-selection--multiple {
-            border: 1px solid rgba(0, 0, 0, 0.15) !important;
-            border-radius: 6px !important;
-            min-height: 40px !important;
-            display: flex !important;
-            align-items: center !important;
-            padding-left: 6px !important;
-            box-shadow: inset 0 1px 2px rgba(0,0,0,0.02) !important;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__arrow {
-            height: 38px !important;
-        }
-        .select2-container--default .select2-selection--single .select2-selection__rendered {
-            color: #495057 !important;
-            font-size: 14px !important;
-            font-weight: 500 !important;
-        }
-        .select2-container--default .select2-selection--multiple .select2-selection__choice {
-            background-color: #4f46e5 !important;
-            color: white !important;
-            border: none !important;
-            border-radius: 20px !important;
-            padding: 2px 10px !important;
-            font-size: 12px !important;
-            font-weight: 600 !important;
-            margin-top: 5px !important;
-        }
-        .select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
-            color: white !important;
-            margin-right: 5px !important;
-        }
-        .select2-container {
-            width: 100% !important;
-        }
-    </style>
     <div class="back mb-3">
         <a href="{{ route('product.index') }}">
             <img height="30px" src="{{ asset('adminDash/images/svg/backbutton.png') }}" alt="Back">
@@ -301,10 +164,10 @@
                                 <div class="mb-3">
                                     <label class="form-label">Add New Images (Max Total: 10)</label>
                                     <div class="d-flex gap-2 flex-wrap" id="image-area">
-                                        <div class="image-upload-box" onclick="openImagePicker()">
+                                        <label class="image-upload-box" for="image-input" title="Click to add images">
                                             <span style="font-size: 40px; color:#94a3b8;">+</span>
-                                            <input type="file" name="images[]" id="image-input" multiple accept="image/*" style="display:none;">
-                                        </div>
+                                        </label>
+                                        <input type="file" name="images[]" id="image-input" multiple accept="image/*" style="display:none;">
                                     </div>
                                 </div>
                             </div>
@@ -337,41 +200,34 @@
 
 @section('script')
     <script>
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top-end',
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
-            }
-        });
-
         $(document).ready(function() {
             // Initialize Select2 dropdown elements
-            $('#category').select2({ placeholder: "Select Category", allowClear: true });
-            $('#subcategory').select2({ placeholder: "Select Sub Category", allowClear: true });
-            $('#childcategory').select2({ placeholder: "Select Child Category", allowClear: true });
-            $('#brand').select2({ placeholder: "Select Brand", allowClear: true });
-            $('#attribute').select2({ placeholder: "Select Attribute", allowClear: true });
-            $('#AttributeValue').select2({ placeholder: "Select Attribute Values", allowClear: true });
-            $('select[name="color[]"]').select2({ placeholder: "Select Colors", allowClear: true });
+            $('#category').select2({ placeholder: "Select Category", allowClear: true, width: '100%' });
+            $('#subcategory').select2({ placeholder: "Select Sub Category", allowClear: true, width: '100%' });
+            $('#childcategory').select2({ placeholder: "Select Child Category", allowClear: true, width: '100%' });
+            $('#brand').select2({ placeholder: "Select Brand", allowClear: true, width: '100%' });
+            $('#attribute').select2({ placeholder: "Select Attribute", allowClear: true, width: '100%' });
+            $('#AttributeValue').select2({ placeholder: "Select Attribute Values", allowClear: true, width: '100%' });
+            $('select[name="color[]"]').select2({ placeholder: "Select Colors", allowClear: true, width: '100%' });
 
             // Initialize Summernote Rich Text Editor
             $('#summernote').summernote({
-                height: 200,
-                placeholder: 'Write premium product description details here...',
+                height: 250,
+                placeholder: 'Write product description details here...',
                 toolbar: [
                     ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear']],
+                    ['font', ['bold', 'italic', 'underline', 'clear']],
                     ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['table', ['table']],
                     ['insert', ['link', 'picture']],
                     ['view', ['fullscreen', 'codeview', 'help']]
                 ]
+            });
+
+            // FIX: sync Summernote content into the real textarea before form submit
+            $('form').on('submit', function() {
+                $('#summernote').val($('#summernote').summernote('code'));
             });
 
             // AJAX Alerts
@@ -551,9 +407,6 @@
         let selectedImages = [];
         const maxImages = 10;
 
-        function openImagePicker() {
-            document.getElementById('image-input').click();
-        }
 
         document.getElementById('image-input').addEventListener('change', function(event) {
             const files = event.target.files;
@@ -581,10 +434,10 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 let box = document.createElement('div');
-                box.classList.add('image-upload-box');
+                box.classList.add('image-preview-item');
                 box.innerHTML = `
                     <img src="${e.target.result}">
-                    <div class="delete-btn" onclick="removeImage(this)">x</div>
+                    <div class="img-delete-btn" onclick="removeImage(this)"><i class="fas fa-times"></i></div>
                 `;
                 document.getElementById('image-area').appendChild(box);
             };

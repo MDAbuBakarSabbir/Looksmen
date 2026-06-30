@@ -1,4 +1,4 @@
-@extends('layouts.Backend.master')
+﻿@extends('layouts.Backend.master')
 @section('title')
     ATTRIBUTES
 @endsection
@@ -371,14 +371,6 @@
     </script>
 
     <script>
-        const Toast = Swal.mixin({
-            toast: true,
-            position: 'top',
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-        });
-
         document.querySelectorAll('.status-switch').forEach(function(btn) {
             btn.addEventListener('change', function() {
                 let id = this.getAttribute('data-id');

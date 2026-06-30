@@ -1,0 +1,182 @@
+﻿/* =============================================================
+   FreshEcom Admin - Global Custom Stylesheet
+   Shared styles extracted from individual blade views.
+   Loaded globally via layouts/Backend/master.blade.php
+   ============================================================= */
+
+/* PREMIUM CARD COMPONENT */
+.premium-card {
+    background: #ffffff;
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+    margin-bottom: 1.5rem;
+    transition: all 0.3s ease;
+}
+.premium-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.04);
+}
+.premium-card-header {
+    background-color: transparent;
+    border-bottom: 1px solid #f1f5f9;
+    padding: 1.25rem 1.5rem;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 1.1rem;
+}
+.premium-card-body { padding: 1.5rem; }
+
+/* FORM CONTROLS */
+.form-label {
+    font-weight: 500;
+    color: #475569;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.form-control {
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-size: 0.95rem;
+    color: #334155;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.form-control:focus {
+    border-color: #6366f1;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15);
+    outline: none;
+}
+input:disabled, textarea:disabled, select:disabled {
+    opacity: 0.6;
+    background-color: #f1f5f9;
+    cursor: not-allowed;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* BUTTONS */
+.btn-premium {
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+.btn-premium:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+    color: white;
+}
+.btn-premium:active { transform: translateY(0); }
+
+.btn-cancel-custom {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    transition: background 0.2s ease, color 0.2s ease;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+.btn-cancel-custom:hover { background: #e2e8f0; color: #1e293b; text-decoration: none; }
+
+/* PAGE HEADER */
+.page-header-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+.page-title-custom { font-size: 1.5rem; font-weight: 700; color: #1e293b; margin: 0; }
+
+/* IMAGE UPLOAD AREA */
+.image-upload-wrapper { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+.image-upload-box {
+    width: 120px; height: 120px;
+    border: 2px dashed #94a3b8;
+    border-radius: 12px;
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    cursor: pointer;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    color: #64748b;
+}
+.image-upload-box:hover { background: #f1f5f9; border-color: #6366f1; color: #6366f1; }
+.image-preview-item {
+    width: 120px; height: 120px;
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.image-preview-item img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.img-delete-btn {
+    position: absolute; top: -6px; right: -6px;
+    background: #ef4444; color: #fff;
+    width: 24px; height: 24px;
+    display: flex; justify-content: center; align-items: center;
+    border-radius: 50%; font-size: 12px; cursor: pointer;
+    box-shadow: 0 2px 4px rgba(239,68,68,0.4);
+    transition: background 0.2s ease;
+    z-index: 10;
+}
+.img-delete-btn:hover { background: #dc2626; }
+
+/* EXISTING IMAGE BOX (edit page) */
+.existing-image-box {
+    width: 120px; height: 120px;
+    border: 1px solid #e2e8f0; border-radius: 12px;
+    position: relative; overflow: hidden;
+    background: #f8fafc;
+    display: flex; align-items: center; justify-content: center;
+}
+.existing-image-box img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
+.existing-image-box .img-delete-overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4); opacity: 0;
+    display: flex; align-items: center; justify-content: center;
+    transition: opacity 0.2s ease; cursor: pointer;
+}
+.existing-image-box:hover .img-delete-overlay { opacity: 1; }
+.existing-image-box .img-delete-overlay i { color: #ffffff; font-size: 20px; }
+
+/* SELECT2 PREMIUM OVERRIDES */
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 8px !important;
+    min-height: 42px !important;
+    display: flex !important;
+    align-items: center !important;
+    padding-left: 6px !important;
+    box-shadow: none !important;
+}
+.select2-container--default.select2-container--focus .select2-selection--multiple,
+.select2-container--default.select2-container--focus .select2-selection--single {
+    border-color: #6366f1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.15) !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow { height: 40px !important; }
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: #e0e7ff !important;
+    color: #4338ca !important;
+    border: 1px solid #c7d2fe !important;
+    border-radius: 6px !important;
+    padding: 4px 10px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    margin-top: 5px !important;
+}
+.select2-container--default .select2-selection--multiple .select2-selection__choice__remove {
+    color: #4338ca !important;
+    margin-right: 5px !important;
+    border-right: 1px solid #c7d2fe !important;
+}
