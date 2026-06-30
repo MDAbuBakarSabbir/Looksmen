@@ -55,21 +55,21 @@
                                     <th scope="col" style="width: 120px; text-align: right;">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="attribute-values-tbody">
                                 @forelse ($attributeValues as $index => $attributeValue)
-                                    <tr>
-                                        <td class="font-weight-bold">{{ $index + 1 }}</td>
+                                    <tr id="value-row-{{ $attributeValue->id }}">
+                                        <td class="font-weight-bold sl-number">{{ $index + 1 }}</td>
                                         <td>
                                             <span class="value-badge">{{ $attributeValue->value }}</span>
                                         </td>
                                         <td style="text-align: right;">
-                                            <a class="btn btn-danger btn-sm" href="{{ route('attribute.value.destroy', $attributeValue->id) }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px;" onclick="return confirm('Are you sure you want to delete this value?');">
+                                            <a class="btn btn-danger btn-sm delete-value-btn" href="{{ route('attribute.value.destroy', $attributeValue->id) }}" data-id="{{ $attributeValue->id }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px;">
                                                 <i class="fa-solid fa-trash mr-1"></i> Delete
                                             </a>
                                         </td>
                                     </tr>
                                 @empty
-                                    <tr>
+                                    <tr id="no-values-row">
                                         <td colspan="3" class="text-center py-5 text-muted">
                                             <i class="fa-solid fa-circle-exclamation text-muted mb-3" style="font-size: 36px; opacity: 0.5;"></i>
                                             <p class="mb-0 font-weight-bold">No values found for this attribute yet</p>
@@ -89,7 +89,7 @@
                     <h4 class="mb-0 font-weight-bold" style="color: #1f2937;"><i class="fa-solid fa-circle-plus text-success mr-2"></i>Add Value</h4>
                 </div>
                 <div class="card-body p-4">
-                    <form action="{{ route('value.store', $attribute->id) }}" method="POST">
+                    <form id="add-value-form" action="{{ route('value.store', $attribute->id) }}" method="POST">
                         @csrf
                         <div class="mb-4">
                             <label class="form-label font-weight-bold text-muted" style="font-size: 13px;">Value Name<span class="text-danger">*</span></label>
@@ -103,4 +103,165 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+<script>
+    $(document).ready(function() {
+        // Setup CSRF token for ajax
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+        // Add Value
+        $('#add-value-form').on('submit', function(e) {
+            e.preventDefault();
+            
+            let form = $(this);
+            let url = form.attr('action');
+            let submitBtn = form.find('button[type="submit"]');
+            let originalBtnHtml = submitBtn.html();
+            
+            // Disable button and show spinner
+            submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-2"></i>Submitting...');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        // Show success toast
+                        if (window.Toast) {
+                            Toast.fire({
+                                icon: 'success',
+                                title: response.message || 'Value added successfully'
+                            });
+                        } else {
+                            alert(response.message || 'Value added successfully');
+                        }
+
+                        // Reset form
+                        form.trigger('reset');
+
+                        // Remove "no values" row if exists
+                        $('#no-values-row').remove();
+
+                        // Add new row to table
+                        let newRowIndex = $('#attribute-values-tbody tr').length + 1;
+                        let destroyUrl = "{{ route('attribute.value.destroy', ':id') }}".replace(':id', response.data.id);
+                        
+                        let newRow = `
+                            <tr id="value-row-${response.data.id}" style="display: none;">
+                                <td class="font-weight-bold sl-number">${newRowIndex}</td>
+                                <td>
+                                    <span class="value-badge">${response.data.value}</span>
+                                </td>
+                                <td style="text-align: right;">
+                                    <a class="btn btn-danger btn-sm delete-value-btn" href="${destroyUrl}" data-id="${response.data.id}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px;">
+                                        <i class="fa-solid fa-trash mr-1"></i> Delete
+                                    </a>
+                                </td>
+                            </tr>
+                        `;
+                        $('#attribute-values-tbody').append(newRow);
+                        $(`#value-row-${response.data.id}`).fadeIn(400);
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Something went wrong. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                    }
+                    if (window.Toast) {
+                        Toast.fire({
+                            icon: 'error',
+                            title: errorMessage
+                        });
+                    } else {
+                        alert(errorMessage);
+                    }
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html(originalBtnHtml);
+                }
+            });
+        });
+
+        // Delete Value (delegated event)
+        $(document).on('click', '.delete-value-btn', function(e) {
+            e.preventDefault();
+            let btn = $(this);
+            let url = btn.attr('href');
+            let id = btn.data('id');
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: url,
+                        type: 'GET',
+                        success: function(response) {
+                            if (response.success) {
+                                // Remove row with transition
+                                $(`#value-row-${id}`).fadeOut(400, function() {
+                                    $(this).remove();
+                                    
+                                    // Re-index SL numbers
+                                    reindexSerialNumbers();
+
+                                    // If table is empty, show empty state
+                                    if ($('#attribute-values-tbody tr').length === 0) {
+                                        let emptyState = `
+                                            <tr id="no-values-row">
+                                                <td colspan="3" class="text-center py-5 text-muted">
+                                                    <i class="fa-solid fa-circle-exclamation text-muted mb-3" style="font-size: 36px; opacity: 0.5;"></i>
+                                                    <p class="mb-0 font-weight-bold">No values found for this attribute yet</p>
+                                                </td>
+                                            </tr>
+                                        `;
+                                        $('#attribute-values-tbody').append(emptyState);
+                                    }
+                                });
+
+                                if (window.Toast) {
+                                    Toast.fire({
+                                        icon: 'success',
+                                        title: response.message || 'Value deleted successfully'
+                                    });
+                                }
+                            }
+                        },
+                        error: function() {
+                            if (window.Toast) {
+                                Toast.fire({
+                                    icon: 'error',
+                                    title: 'Failed to delete value'
+                                });
+                            } else {
+                                alert('Failed to delete value');
+                            }
+                        }
+                    });
+                }
+            });
+        });
+
+        // Function to re-index SL numbers
+        function reindexSerialNumbers() {
+            $('.sl-number').each(function(index) {
+                $(this).text(index + 1);
+            });
+        }
+    });
+</script>
 @endsection

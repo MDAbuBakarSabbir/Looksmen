@@ -84,11 +84,21 @@
             </div>
         </div>
         <div class="card-body p-4">
+            <div class="d-flex align-items-center mb-3">
+                <select id="bulkAdminAction" class="form-control mr-2" style="width: 180px; display: inline-block;">
+                    <option value="">Bulk Action</option>
+                    <option value="activate">Activate</option>
+                    <option value="deactivate">Deactivate</option>
+                </select>
+                <button class="btn btn-danger" id="bulkAdminBtn" style="height: 38px; border-radius: 4px; padding: 0 20px;">
+                    Apply Action
+                </button>
+            </div>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr class="text-uppercase" style="font-size: 12px; letter-spacing: 0.5px; color: #4b5563;">
-                            <th scope="col" style="width: 50px;"><input type="checkbox" name="" id=""></th>
+                            <th scope="col" style="width: 50px;"><input type="checkbox" id="adminCheckAll"></th>
                             <th scope="col">Name</th>
                             <th scope="col">Email</th>
                             <th scope="col">Role</th>
@@ -141,6 +151,7 @@
                     data: { search: term },
                     success: function(html) {
                         $('#employeeTableBody').html(html);
+                        $('#adminCheckAll').prop('checked', false);
                     },
                     error: function() {
                         Toast.fire({
@@ -188,6 +199,63 @@
                     title: 'Server Error'
                 });
             });
+        });
+
+        // Check All / Uncheck All
+        $(document).on('change', '#adminCheckAll', function() {
+            $('.admin-check').prop('checked', $(this).prop('checked'));
+        });
+
+        // Sync check all with individual checkboxes
+        $(document).on('change', '.admin-check', function() {
+            if ($('.admin-check:checked').length === $('.admin-check').length && $('.admin-check').length > 0) {
+                $('#adminCheckAll').prop('checked', true);
+            } else {
+                $('#adminCheckAll').prop('checked', false);
+            }
+        });
+
+        // Bulk Admin Action Handler
+        $(document).on('click', '#bulkAdminBtn', function(e) {
+            e.preventDefault();
+            let action = $('#bulkAdminAction').val();
+            if (!action) {
+                Toast.fire({ icon: 'warning', title: 'Please select an action' });
+                return;
+            }
+            let selectedIds = [];
+            $('.admin-check:checked').each(function() {
+                selectedIds.push($(this).val());
+            });
+            if (selectedIds.length === 0) {
+                Toast.fire({ icon: 'warning', title: 'No admins selected' });
+                return;
+            }
+            let status = action === 'activate' ? 1 : 0;
+            let requests = selectedIds.map(id => {
+                return fetch("{{ route('admin.status') }}", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                    },
+                    body: JSON.stringify({ id: id, status: status })
+                }).then(res => res.json());
+            });
+            Promise.all(requests).then(results => {
+                let failed = results.filter(r => !r.success).length;
+                if (failed === 0) {
+                    Toast.fire({ icon: 'success', title: selectedIds.length + ' admins updated' });
+                    $('.admin-check:checked').closest('tr').each(function() {
+                        $(this).find('.status-switch').prop('checked', status == 1);
+                    });
+                } else {
+                    Toast.fire({ icon: 'error', title: failed + ' updates failed' });
+                }
+            }).catch(() => {
+                Toast.fire({ icon: 'error', title: 'Network error' });
+            });
+            $('#adminCheckAll').prop('checked', false);
         });
     </script>
 @endsection

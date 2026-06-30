@@ -6,7 +6,7 @@
     <tr>
         <td>
             <div class="d-flex align-items-center">
-                <input type="checkbox" class="product-check">
+                <input type="checkbox" class="product-check" value="{{ $product->id }}">
             </div>
         </td>
         <td>

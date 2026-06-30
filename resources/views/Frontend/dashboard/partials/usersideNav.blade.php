@@ -57,7 +57,7 @@
 
 <div class="user-sidenav mb-4">
     <div class="user-sidenav-header">
-        <img src="{{ asset('assets/img/avatar-place.png') }}" onerror="this.src='https://www.store.looksmen.com/public/assets/img/avatar-place.png';">
+        <img src="{{ asset('frontend/assets/img/avatar-place.png') }}" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCA4MCI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiNlMmU4ZjAiLz48Y2lyY2xlIGN4PSI0MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iIzk0YTNiOCIvPjxwYXRoIGQ9Ik0xMCA3MWMwLTE2LjU3IDEzLjQzLTMwIDMwLTMwczMwIDEzLjQzIDMwIDMwIiBmaWxsPSIjOTRhM2I4Ii8+PC9zdmc+';">
         <h4 class="h5 mb-1 fw-600 text-white">{{ Auth::user()->name }}</h4>
         <div class="opacity-70 fs-14">{{ Auth::user()->email }}</div>
     </div>

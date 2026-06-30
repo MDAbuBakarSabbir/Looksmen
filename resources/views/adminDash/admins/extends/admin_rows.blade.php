@@ -1,6 +1,6 @@
 @forelse ($admins as $admin)
     <tr>
-        <td><input type="checkbox" name="" id=""></td>
+        <td><input type="checkbox" class="admin-check" value="{{ $admin->id }}"></td>
         <td class="text-dark font-weight-bold">{{ $admin->name }}</td>
         <td>{{ $admin->email }}</td>
         <td>

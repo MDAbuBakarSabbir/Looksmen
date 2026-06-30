@@ -84,6 +84,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('admins/store', 'store')->name('admin.store')->middleware('admin.permission:manage_admin');
         Route::get('admins/role', 'role')->name('admin.role')->middleware('admin.permission:manage_admin');
         Route::post('admins/status', 'status')->name('admin.status')->middleware('admin.permission:manage_admin');
+        Route::post('admins/bulk-status', 'bulkStatus')->name('admin.bulk-status')->middleware('admin.permission:manage_admin');
         Route::get('admins/permission/assaign/{id}', 'permission')->name('admin.permission')->middleware('admin.permission:manage_admin');
         Route::post('admins/permission/assaign/{id}', 'updatePermission')->name('admin.permission.update')->middleware('admin.permission:manage_admin');
 
@@ -167,6 +168,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::delete('products/destroy/{id}', 'destroy')->name('product.destroy')->middleware('admin.permission:manage_product');
         Route::post('products/status', 'status')->name('product.status')->middleware('admin.permission:manage_product');
         Route::post('products/todays_deal_status', 'todays_deal_status')->name('product.todays_deal_status')->middleware('admin.permission:manage_product');
+        Route::post('products/bulk-delete', 'bulkDelete')->name('product.bulk-delete')->middleware('admin.permission:manage_product');
         Route::post('products/image-delete/{id}', 'deleteImage')->name('product.image.delete')->middleware('admin.permission:manage_product');
 
         // Routes for Category cascading

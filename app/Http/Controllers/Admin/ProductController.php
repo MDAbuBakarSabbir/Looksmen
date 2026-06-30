@@ -649,6 +649,36 @@ class ProductController extends Controller
         return redirect()->back();
     }
 
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No products selected']);
+        }
+        foreach ($ids as $id) {
+            $product = Product::find($id);
+            if ($product) {
+                $proImages = ProductImage::where('product_id', $id)->get();
+                $proAttributes = ProductAttributes::where('product_id', $id)->get();
+                $proColors = ProductColors::where('product_id', $id)->get();
+                foreach ($proImages as $img) {
+                    if (file_exists(public_path('public/adminDash/images/product/'.$img->image))) {
+                        unlink(public_path('public/adminDash/images/product/'.$img->image));
+                    }
+                    $img->delete();
+                }
+                foreach ($proAttributes as $attr) {
+                    $attr->delete();
+                }
+                foreach ($proColors as $color) {
+                    $color->delete();
+                }
+                $product->delete();
+            }
+        }
+        return response()->json(['success' => true, 'message' => count($ids) . ' products deleted successfully']);
+    }
+
     public function todays_deal_status(Request $request)
     {
         $product = Product::find($request->id);
