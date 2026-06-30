@@ -133,15 +133,11 @@
                 data: form.serialize(),
                 success: function(response) {
                     if (response.success) {
-                        // Show success toast
-                        if (window.Toast) {
-                            Toast.fire({
-                                icon: 'success',
-                                title: response.message || 'Value added successfully'
-                            });
-                        } else {
-                            alert(response.message || 'Value added successfully');
-                        }
+                        // Show success toast using mixin
+                        window.Toast.fire({
+                            icon: 'success',
+                            title: response.message || 'Value added successfully'
+                        });
 
                         // Reset form
                         form.trigger('reset');
@@ -173,16 +169,12 @@
                 error: function(xhr) {
                     let errorMessage = 'Something went wrong. Please try again.';
                     if (xhr.responseJSON && xhr.responseJSON.errors) {
-                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join('<br>');
+                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join(' ');
                     }
-                    if (window.Toast) {
-                        Toast.fire({
-                            icon: 'error',
-                            title: errorMessage
-                        });
-                    } else {
-                        alert(errorMessage);
-                    }
+                    window.Toast.fire({
+                        icon: 'error',
+                        title: errorMessage
+                    });
                 },
                 complete: function() {
                     submitBtn.prop('disabled', false).html(originalBtnHtml);
@@ -233,23 +225,17 @@
                                     }
                                 });
 
-                                if (window.Toast) {
-                                    Toast.fire({
-                                        icon: 'success',
-                                        title: response.message || 'Value deleted successfully'
-                                    });
-                                }
+                                window.Toast.fire({
+                                    icon: 'success',
+                                    title: response.message || 'Value deleted successfully'
+                                });
                             }
                         },
                         error: function() {
-                            if (window.Toast) {
-                                Toast.fire({
-                                    icon: 'error',
-                                    title: 'Failed to delete value'
-                                });
-                            } else {
-                                alert('Failed to delete value');
-                            }
+                            window.Toast.fire({
+                                icon: 'error',
+                                title: 'Failed to delete value'
+                            });
                         }
                     });
                 }
