@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Attribute;
-use App\Models\attributeValues;
+use App\Models\AttributeValues;
 use Illuminate\Http\Request;
 
 class AttributeController extends Controller
@@ -18,7 +18,7 @@ class AttributeController extends Controller
     public function create($id)
     {
         $attribute = Attribute::where('id',$id)->first();
-        $attributeValues = attributeValues::where('attribute_id',$id)->get();
+        $attributeValues = AttributeValues::where('attribute_id',$id)->get();
         return view('adminDash.attribute.create',compact('attribute','attributeValues'));
     }
     public function store(Request $request)
@@ -31,7 +31,7 @@ class AttributeController extends Controller
     }
     public function valuestore(Request $request,$id)
     {
-        attributeValues::create([
+        AttributeValues::create([
             'attribute_id'=>$id,
             'value'=>$request->value,
         ]);
@@ -56,13 +56,13 @@ class AttributeController extends Controller
     public function destroy($id)
     {
         $attribute = Attribute::findOrFail($id);
-        attributeValues::where('attribute_id', $id)->delete();
+        AttributeValues::where('attribute_id', $id)->delete();
         $attribute->delete();
         return back()->with('success', 'Attribute deleted successfully');
     }
     public function valueDestroy($id)
     {
-        $value = attributeValues::findOrFail($id);
+        $value = AttributeValues::findOrFail($id);
         $value->delete();
         return back()->with('success', 'Attribute value deleted successfully');
     }
