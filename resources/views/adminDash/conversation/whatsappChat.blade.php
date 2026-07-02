@@ -323,13 +323,31 @@
         color: var(--wa-text-primary);
     }
 
+    .message-meta {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 4px;
+        margin-top: 4px;
+    }
+
     .message-time {
         font-size: 10px;
         color: var(--wa-text-secondary);
-        text-align: right;
-        margin-top: 4px;
-        display: block;
         font-weight: 500;
+    }
+
+    .message-status {
+        font-size: 11px;
+        display: inline-flex;
+    }
+
+    .message-status.text-info i {
+        color: #53bdeb !important;
+    }
+
+    .message-status.text-muted i {
+        color: #8696a0 !important;
     }
 
     /* Chat Input Area */
@@ -531,6 +549,30 @@
         return initials.toUpperCase() || 'W';
     }
 
+    // Helper: Generate message status HTML (gray/blue ticks)
+    function getStatusHtml(msg) {
+        if (msg.direction !== 'outbound') return '';
+        
+        let iconClass = 'fa-check';
+        let statusClass = 'text-muted';
+        
+        if (msg.status === 'sent') {
+            iconClass = 'fa-check';
+            statusClass = 'text-muted';
+        } else if (msg.status === 'delivered') {
+            iconClass = 'fa-check-double';
+            statusClass = 'text-muted';
+        } else if (msg.status === 'read') {
+            iconClass = 'fa-check-double';
+            statusClass = 'text-info';
+        } else if (msg.status === 'failed') {
+            iconClass = 'fa-exclamation-circle';
+            statusClass = 'text-danger';
+        }
+        
+        return `<span class="message-status ${statusClass}"><i class="fa ${iconClass}"></i></span>`;
+    }
+
     // Load contacts on page load
     $(document).ready(function() {
         fetchContacts();
@@ -616,9 +658,12 @@
             data.messages.forEach(function(msg) {
                 let time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 html += `
-                    <div class="message ${msg.direction}">
+                    <div class="message ${msg.direction}" data-message-id="${msg.message_id || ''}">
                         ${msg.body}
-                        <span class="message-time">${time}</span>
+                        <div class="message-meta">
+                            <span class="message-time">${time}</span>
+                            ${getStatusHtml(msg)}
+                        </div>
                     </div>
                 `;
             });
@@ -634,11 +679,26 @@
     }
 
     function appendMessage(msg) {
+        // If message already exists (e.g. status update), update its checkmark status
+        if (msg.message_id) {
+            let existing = $(`[data-message-id="${msg.message_id}"]`);
+            if (existing.length) {
+                existing.find('.message-meta').html(`
+                    <span class="message-time">${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                    ${getStatusHtml(msg)}
+                `);
+                return;
+            }
+        }
+
         let time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         let html = `
-            <div class="message ${msg.direction}">
+            <div class="message ${msg.direction}" data-message-id="${msg.message_id || ''}">
                 ${msg.body}
-                <span class="message-time">${time}</span>
+                <div class="message-meta">
+                    <span class="message-time">${time}</span>
+                    ${getStatusHtml(msg)}
+                </div>
             </div>
         `;
         let chatBox = $('#chat-messages');
@@ -677,12 +737,10 @@
             success: function(res) {
                 input.prop('disabled', false).focus();
                 btn.prop('disabled', false);
-                // Immediately append sent message to feel super instant
-                appendMessage({
-                    body: message,
-                    direction: 'outbound',
-                    created_at: new Date().toISOString()
-                });
+                // Immediately append the actual sent message returned by the server
+                if (res.success && res.message) {
+                    appendMessage(res.message);
+                }
                 fetchContacts(); // Update sidebar state
             },
             error: function(err) {

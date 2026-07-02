@@ -40,55 +40,72 @@ class ConversationController extends Controller
             $data = $request->all();
             \Log::info('WhatsApp Webhook:', $data);
 
-            if (isset($data['entry'][0]['changes'][0]['value']['messages'][0])) {
-                $value = $data['entry'][0]['changes'][0]['value'];
-                $messageData = $value['messages'][0];
+            $value = $data['entry'][0]['changes'][0]['value'] ?? null;
 
-                $wa_id = $messageData['from'];
-                $message_id = $messageData['id'];
-                $type = $messageData['type'];
+            if ($value) {
+                // Handle status updates (sent, delivered, read, failed)
+                if (isset($value['statuses'][0])) {
+                    $statusData = $value['statuses'][0];
+                    $message_id = $statusData['id'];
+                    $status = $statusData['status'];
 
-                // Get contact name if available
-                $contactName = $wa_id;
-                if (isset($value['contacts'][0]['profile']['name'])) {
-                    $contactName = $value['contacts'][0]['profile']['name'];
+                    $msg = WhatsappMessage::where('message_id', $message_id)->first();
+                    if ($msg) {
+                        $msg->update(['status' => $status]);
+                        broadcast(new NewWhatsAppMessage($msg, $msg->contact));
+                    }
                 }
 
-                // Find or create contact
-                $contact = WhatsappContact::firstOrCreate(
-                    ['phone_number' => $wa_id],
-                    ['name' => $contactName]
-                );
+                // Handle incoming messages
+                if (isset($value['messages'][0])) {
+                    $messageData = $value['messages'][0];
 
-                // Update unread count & last message time
-                $contact->unread_count += 1;
-                $contact->last_message_at = now();
-                $contact->save();
+                    $wa_id = $messageData['from'];
+                    $message_id = $messageData['id'];
+                    $type = $messageData['type'];
 
-                // Extract body based on type
-                $body = '';
-                if ($type === 'text' && isset($messageData['text']['body'])) {
-                    $body = $messageData['text']['body'];
-                } elseif ($type === 'image') {
-                    $body = '[Image Received]'; // Placeholder for media handling
-                } else {
-                    $body = '['.ucfirst($type).' Received]';
-                }
+                    // Get contact name if available
+                    $contactName = $wa_id;
+                    if (isset($value['contacts'][0]['profile']['name'])) {
+                        $contactName = $value['contacts'][0]['profile']['name'];
+                    }
 
-                // Save Message
-                $newMessage = WhatsappMessage::firstOrCreate(
-                    ['message_id' => $message_id],
-                    [
-                        'whatsapp_contact_id' => $contact->id,
-                        'body' => $body,
-                        'type' => $type,
-                        'direction' => 'inbound',
-                        'status' => 'received',
-                    ]
-                );
+                    // Find or create contact
+                    $contact = WhatsappContact::firstOrCreate(
+                        ['phone_number' => $wa_id],
+                        ['name' => $contactName]
+                    );
 
-                if ($newMessage->wasRecentlyCreated) {
-                    broadcast(new NewWhatsAppMessage($newMessage, $contact));
+                    // Update unread count & last message time
+                    $contact->unread_count += 1;
+                    $contact->last_message_at = now();
+                    $contact->save();
+
+                    // Extract body based on type
+                    $body = '';
+                    if ($type === 'text' && isset($messageData['text']['body'])) {
+                        $body = $messageData['text']['body'];
+                    } elseif ($type === 'image') {
+                        $body = '[Image Received]'; // Placeholder for media handling
+                    } else {
+                        $body = '['.ucfirst($type).' Received]';
+                    }
+
+                    // Save Message
+                    $newMessage = WhatsappMessage::firstOrCreate(
+                        ['message_id' => $message_id],
+                        [
+                            'whatsapp_contact_id' => $contact->id,
+                            'body' => $body,
+                            'type' => $type,
+                            'direction' => 'inbound',
+                            'status' => 'received',
+                        ]
+                    );
+
+                    if ($newMessage->wasRecentlyCreated) {
+                        broadcast(new NewWhatsAppMessage($newMessage, $contact));
+                    }
                 }
             }
 
