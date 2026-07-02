@@ -1,6 +1,6 @@
 @extends('layouts.Backend.master')
 
-@section('title','Facebook Conversation')
+@section('title','Facebook & Instagram Conversations')
 @section('content')
 <!-- Import modern fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -19,6 +19,12 @@
         --fb-text-secondary: #65676b;
         --fb-bubble-in: #e4e6eb;
         --fb-bubble-out-text: #ffffff;
+        
+        /* Instagram styling tokens */
+        --ig-gradient: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        --ig-bubble-out: linear-gradient(135deg, #3897f0, #bc1888);
+        --ig-bubble-in: #efefef;
+        --ig-accent: #bc1888;
     }
 
     .fb-chat-wrapper {
@@ -73,6 +79,11 @@
         background: var(--fb-active);
         color: var(--fb-blue);
     }
+    
+    .fb-tab-btn.ig-tab.active {
+        background: #fdf0f5;
+        color: var(--ig-accent);
+    }
 
     .fb-tab-content {
         flex: 1;
@@ -84,7 +95,7 @@
         display: flex;
     }
 
-    /* Messenger Pane Split Layout */
+    /* Sidebars */
     .msger-sidebar {
         width: 360px;
         border-right: 1px solid var(--fb-border);
@@ -118,6 +129,12 @@
         -webkit-text-fill-color: transparent;
     }
 
+    .ig-title-style i {
+        background: var(--ig-gradient);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
     .msger-search {
         position: relative;
     }
@@ -137,6 +154,11 @@
         background: #ffffff;
         border-color: var(--fb-blue);
         box-shadow: 0 0 0 3px rgba(0, 132, 255, 0.15);
+    }
+    
+    .ig-search input:focus {
+        border-color: var(--ig-accent);
+        box-shadow: 0 0 0 3px rgba(220, 39, 67, 0.15);
     }
 
     .msger-search i {
@@ -173,6 +195,10 @@
         background: var(--fb-active);
     }
 
+    .msger-item.active.ig-active-bg {
+        background: #faf0f5;
+    }
+
     /* Avatars */
     .avatar-frame {
         position: relative;
@@ -189,6 +215,15 @@
         border: 1px solid var(--fb-border);
         flex-shrink: 0;
         text-transform: uppercase;
+    }
+    
+    /* Instagram story active ring styling */
+    .avatar-frame.ig-story-active {
+        border: 2px solid transparent;
+        background-image: linear-gradient(#fff, #fff), var(--ig-gradient);
+        background-origin: border-box;
+        background-clip: content-box, border-box;
+        color: var(--ig-accent);
     }
 
     .avatar-badge {
@@ -253,6 +288,10 @@
         border-radius: 50%;
         flex-shrink: 0;
     }
+    
+    .ig-unread {
+        background: var(--ig-accent);
+    }
 
     /* Messenger Chat Frame */
     .msger-chat {
@@ -307,6 +346,10 @@
     .msger-header-actions i:hover {
         background: var(--fb-bg-secondary);
     }
+    
+    .ig-header-theme {
+        color: var(--ig-accent);
+    }
 
     .msger-chat-messages {
         flex: 1;
@@ -348,8 +391,23 @@
         color: var(--fb-bubble-out-text);
         border-top-right-radius: 4px;
     }
+    
+    /* Instagram specific bubble style */
+    .msger-bubble.ig-inbound {
+        background: var(--ig-bubble-in);
+        align-self: flex-start;
+        color: var(--fb-text-primary);
+        border-top-left-radius: 4px;
+    }
+    
+    .msger-bubble.ig-outbound {
+        background: var(--ig-bubble-out);
+        align-self: flex-end;
+        color: #ffffff;
+        border-top-right-radius: 4px;
+    }
 
-    /* Send/View indicators just like Messenger */
+    /* Send/View indicators */
     .msger-status-row {
         align-self: flex-end;
         display: flex;
@@ -394,6 +452,31 @@
         align-items: center;
         justify-content: center;
     }
+    
+    /* IG Seen Status Text style */
+    .ig-seen-text {
+        align-self: flex-end;
+        font-size: 11px;
+        color: var(--fb-text-secondary);
+        margin-top: -10px;
+        margin-bottom: 6px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    
+    .ig-seen-text .seen-avatar {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        background: #fce4ec;
+        color: var(--ig-accent);
+        font-size: 7px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: 700;
+    }
 
     .msger-chat-input-area {
         padding: 16px 24px;
@@ -415,6 +498,14 @@
 
     .msger-chat-input-area i:hover {
         background: var(--fb-bg-secondary);
+    }
+    
+    .ig-input-icons i {
+        color: var(--fb-text-primary);
+    }
+    
+    .ig-input-icons i:hover {
+        color: var(--ig-accent);
     }
 
     .msger-input-wrapper {
@@ -447,6 +538,10 @@
         color: var(--fb-blue);
         cursor: pointer;
         font-size: 18px;
+    }
+    
+    .msger-input-wrapper .ig-emoji-color {
+        color: var(--fb-text-secondary);
     }
 
     .msger-send-btn {
@@ -680,7 +775,7 @@
         border-color: var(--fb-blue);
     }
 
-    /* Empty state */
+    /* Empty states */
     .fb-empty-state {
         flex: 1;
         display: flex;
@@ -704,6 +799,11 @@
         margin-bottom: 20px;
         color: var(--fb-blue);
     }
+    
+    .ig-empty-icon {
+        background: #fdf0f5;
+        color: var(--ig-accent);
+    }
 
     .fb-empty-state-icon i {
         font-size: 44px;
@@ -718,11 +818,14 @@
                     
                     <!-- Tab Headers -->
                     <div class="fb-tabs-header">
-                        <button class="fb-tab-btn active" onclick="switchTab('messenger')">
+                        <button class="fb-tab-btn active" id="tab-btn-messenger" onclick="switchTab('messenger')">
                             <i class="fab fa-facebook-messenger"></i> Messenger
                         </button>
-                        <button class="fb-tab-btn" onclick="switchTab('comments')">
+                        <button class="fb-tab-btn" id="tab-btn-comments" onclick="switchTab('comments')">
                             <i class="fab fa-facebook"></i> Post Comments
+                        </button>
+                        <button class="fb-tab-btn ig-tab" id="tab-btn-instagram" onclick="switchTab('instagram')">
+                            <i class="fab fa-instagram"></i> Instagram DMs
                         </button>
                     </div>
 
@@ -741,10 +844,6 @@
                             </div>
                             <ul class="msger-list" id="contact-list">
                                 <!-- Loaded dynamically via JS -->
-                                <div class="text-center p-5 text-muted">
-                                    <i class="fa fa-circle-notch fa-spin fa-2x mb-3 text-muted"></i>
-                                    <div>Loading messages...</div>
-                                </div>
                             </ul>
                         </div>
 
@@ -825,6 +924,69 @@
                         </div>
                     </div>
 
+                    <!-- TAB 3: INSTAGRAM DIRECT MESSAGES -->
+                    <div class="fb-tab-content" id="tab-instagram">
+                        <!-- Instagram Sidebar -->
+                        <div class="msger-sidebar">
+                            <div class="msger-sidebar-header">
+                                <h4 class="msger-title ig-title-style">
+                                    <i class="fab fa-instagram"></i> Instagram DMs
+                                </h4>
+                                <div class="msger-search ig-search">
+                                    <i class="fa fa-search"></i>
+                                    <input type="text" id="ig-contact-search" placeholder="Search DMs..." autocomplete="off">
+                                </div>
+                            </div>
+                            <ul class="msger-list" id="ig-contact-list">
+                                <!-- Loaded dynamically via JS -->
+                            </ul>
+                        </div>
+
+                        <!-- Instagram Chat Pane -->
+                        <div class="msger-chat" id="ig-chat-frame" style="display: none;">
+                            <div class="msger-chat-header">
+                                <div class="msger-header-info">
+                                    <div class="avatar-frame ig-story-active" id="ig-active-avatar">IG</div>
+                                    <div>
+                                        <div class="msger-header-name" id="ig-active-contact-name">Instagram User</div>
+                                        <div class="msger-header-status" id="ig-active-status">Active now</div>
+                                    </div>
+                                </div>
+                                <div class="msger-header-actions ig-header-theme">
+                                    <i class="fa fa-phone"></i>
+                                    <i class="fa fa-video"></i>
+                                    <i class="fa fa-circle-info"></i>
+                                </div>
+                            </div>
+                            <div class="msger-chat-messages" id="ig-chat-messages">
+                                <!-- Loaded dynamically -->
+                            </div>
+                            <div class="msger-chat-input-area">
+                                <div class="ig-input-icons" style="display: flex; gap: 8px;">
+                                    <i class="fa fa-camera"></i>
+                                    <i class="fa fa-image"></i>
+                                </div>
+                                <div class="msger-input-wrapper">
+                                    <input type="text" id="ig-message-input" placeholder="Message..." autocomplete="off" onkeypress="handleIgKeyPress(event)">
+                                    <span class="emoji-trigger ig-emoji-color"><i class="far fa-smile"></i></span>
+                                </div>
+                                <div class="ig-input-icons" style="display: flex; gap: 4px; align-items: center;">
+                                    <button class="msger-send-btn" id="ig-send-btn" onclick="sendIgMessage()"><i class="fa fa-paper-plane" style="color: var(--ig-accent);"></i></button>
+                                    <i class="far fa-heart" id="ig-heart-btn" onclick="sendIgHeart()" style="font-size: 20px;"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Instagram Empty State -->
+                        <div class="fb-empty-state" id="ig-empty-state">
+                            <div class="fb-empty-state-icon ig-empty-icon">
+                                <i class="fab fa-instagram"></i>
+                            </div>
+                            <h3>Instagram Direct</h3>
+                            <p class="text-muted">Select an Instagram conversation from the list to start messaging.</p>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -836,6 +998,7 @@
 <script>
     let currentContactId = null;
     let currentPostId = null;
+    let currentIgContactId = null;
 
     // Switch Tabs helper
     function switchTab(tabName) {
@@ -843,12 +1006,16 @@
         $('.fb-tab-content').removeClass('active');
 
         if(tabName === 'messenger') {
-            $('.fb-tab-btn').first().addClass('active');
+            $('#tab-btn-messenger').addClass('active');
             $('#tab-messenger').addClass('active');
-        } else {
-            $('.fb-tab-btn').last().addClass('active');
+        } else if(tabName === 'comments') {
+            $('#tab-btn-comments').addClass('active');
             $('#tab-comments').addClass('active');
-            loadPosts(); // Load posts list on demand
+            loadPosts(); 
+        } else if(tabName === 'instagram') {
+            $('#tab-btn-instagram').addClass('active');
+            $('#tab-instagram').addClass('active');
+            renderIgContacts(mockIgContacts); // Load Instagram contacts
         }
     }
 
@@ -863,7 +1030,7 @@
         return initials.toUpperCase() || 'U';
     }
 
-    // MOCK DATA - To keep the UI high fidelity and functional before API credentials are fully active
+    // MOCK DATA - Messenger
     const mockContacts = [
         { id: 101, name: "Tanvir Rahman", phone: "Messenger Chat", unread: 2, last_msg: "Hi, is this product still available?", time: "2:31 PM", active: true },
         { id: 102, name: "Nabila Karim", phone: "Messenger Chat", unread: 0, last_msg: "Thank you so much! Received the delivery.", time: "11:15 AM", active: false },
@@ -883,6 +1050,27 @@
         ]
     };
 
+    // MOCK DATA - Instagram
+    const mockIgContacts = [
+        { id: 401, name: "sumaiya_islam", unread: 1, last_msg: "Loved your story! Is that shirt still in stock?", time: "1h ago", active: true, story: true },
+        { id: 402, name: "raihan_ahmed22", unread: 0, last_msg: "Do you ship to Chittagong?", time: "4h ago", active: false, story: true },
+        { id: 403, name: "lamia_farha", unread: 0, last_msg: "❤️ Sent a heart", time: "2 days ago", active: false, story: false }
+    ];
+
+    const mockIgMessages = {
+        401: [
+            { id: 11, body: "Hi sumaiya! Yes, that premium shirt is in stock. You can place your order.", direction: "ig-outbound", status: "seen", created_at: "Yesterday" },
+            { id: 12, body: "Loved your story! Is that shirt still in stock?", direction: "ig-inbound", status: "received", created_at: "1h ago" }
+        ],
+        402: [
+            { id: 13, body: "Do you ship to Chittagong?", direction: "ig-inbound", status: "received", created_at: "4h ago" }
+        ],
+        403: [
+            { id: 14, body: "❤️", direction: "ig-inbound", status: "received", created_at: "2 days ago" }
+        ]
+    };
+
+    // MOCK DATA - Facebook Comments
     const mockPosts = [
         { id: 201, text: "Check out our new premium denim shirts collection! 👕 Now live on website.", comments_count: 5, time: "Yesterday" },
         { id: 202, text: "Looksmen Eid Super Sale! Get up to 40% discount on all winter outfits.", comments_count: 12, time: "3 days ago" }
@@ -900,14 +1088,27 @@
         ]
     };
 
-    // Load Messenger Contacts
+    // Document Init
     $(document).ready(function() {
         renderContacts(mockContacts);
 
-        // Sidebar search filter
+        // Sidebar search filter (Messenger)
         $('#contact-search').on('input', function() {
             let val = $(this).val().toLowerCase();
-            $('.msger-item').each(function() {
+            $('#contact-list .msger-item').each(function() {
+                let name = $(this).find('.msger-name').text().toLowerCase();
+                if (name.includes(val)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        });
+
+        // Sidebar search filter (Instagram)
+        $('#ig-contact-search').on('input', function() {
+            let val = $(this).val().toLowerCase();
+            $('#ig-contact-list .msger-item').each(function() {
                 let name = $(this).find('.msger-name').text().toLowerCase();
                 if (name.includes(val)) {
                     $(this).show();
@@ -918,6 +1119,7 @@
         });
     });
 
+    // RENDER: Messenger Contacts
     function renderContacts(contacts) {
         let html = '';
         contacts.forEach(function(c) {
@@ -945,7 +1147,7 @@
         $('#contact-list').html(html);
     }
 
-    // Open Chat Frame
+    // OPEN: Messenger Chat Box
     function openChat(id, name, active) {
         currentContactId = id;
         $('#messenger-empty-state').hide();
@@ -955,29 +1157,26 @@
         $('#active-status').text(active ? "Active now" : "Active 15m ago");
 
         $('.msger-item').removeClass('active');
-        renderContacts(mockContacts); // Re-render to update active states
+        renderContacts(mockContacts); 
 
-        // Clear unread count for mock
         let contact = mockContacts.find(c => c.id === id);
         if (contact) contact.unread = 0;
 
         renderMessages(id);
     }
 
-    // Render Messages with Messenger-style sent/read checks
+    // RENDER: Messenger Message Bubbles
     function renderMessages(contactId) {
         let messages = mockMessages[contactId] || [];
         let html = '';
 
         messages.forEach(function(msg, index) {
-            let isLast = (index === messages.length - 1);
             html += `
                 <div class="msger-bubble ${msg.direction}">
                     ${msg.body}
                 </div>
             `;
 
-            // Append Messenger Status Checkmark / Read Avatar just below the bubble
             if (msg.direction === 'outbound') {
                 let statusHtml = '';
                 if (msg.status === 'sent') {
@@ -985,11 +1184,9 @@
                 } else if (msg.status === 'delivered') {
                     statusHtml = `<div class="msger-indicator delivered"><i class="fa fa-check"></i></div>`;
                 } else if (msg.status === 'read') {
-                    // Small avatar indicator representing the customer has read it
                     let initials = getInitials($('#active-contact-name').text());
                     statusHtml = `<div class="msger-indicator read-avatar">${initials}</div>`;
                 }
-
                 html += `<div class="msger-status-row">${statusHtml}</div>`;
             }
         });
@@ -999,13 +1196,14 @@
         chatBox.scrollTop(chatBox.prop("scrollHeight"));
     }
 
-    // Handle Input Sending
+    // SEND: Messenger Message
     function handleKeyPress(e) {
         if(e.key === 'Enter') {
             sendMessage();
         }
     }
 
+    // SEND: Messenger Message Helper
     function sendMessage() {
         let input = $('#message-input');
         let val = input.val().trim();
@@ -1013,7 +1211,6 @@
 
         input.val('');
 
-        // Append to mock
         mockMessages[currentContactId].push({
             id: Date.now(),
             body: val,
@@ -1022,7 +1219,6 @@
             created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
         });
 
-        // Update last message preview
         let contact = mockContacts.find(c => c.id === currentContactId);
         if (contact) {
             contact.last_msg = val;
@@ -1032,7 +1228,6 @@
         renderMessages(currentContactId);
         renderContacts(mockContacts);
 
-        // Mock a double tick / read tick transition after 1.5 seconds
         setTimeout(() => {
             let msgs = mockMessages[currentContactId];
             if(msgs && msgs.length > 0) {
@@ -1048,6 +1243,151 @@
                 renderMessages(currentContactId);
             }
         }, 3000);
+    }
+
+    // RENDER: Instagram Contacts
+    function renderIgContacts(contacts) {
+        let html = '';
+        contacts.forEach(function(c) {
+            let initials = getInitials(c.name);
+            // Story active ring indicator
+            let storyClass = c.story ? 'ig-story-active' : '';
+            let activeClass = (c.id === currentIgContactId) ? 'active ig-active-bg' : '';
+            let unreadClass = (c.unread > 0) ? 'unread-indicator ig-unread' : 'd-none';
+
+            html += `
+                <li class="msger-item ${activeClass}" onclick="openIgChat(${c.id}, '${c.name}')">
+                    <div class="avatar-frame ${storyClass}">${initials}</div>
+                    <div class="msger-details">
+                        <div class="msger-meta-info">
+                            <span class="msger-name">${c.name}</span>
+                            <span class="msger-time">${c.time}</span>
+                        </div>
+                        <div class="msger-preview-wrapper">
+                            <span class="msger-preview">${c.last_msg}</span>
+                            <span class="${unreadClass}"></span>
+                        </div>
+                    </div>
+                </li>
+            `;
+        });
+        $('#ig-contact-list').html(html);
+    }
+
+    // OPEN: Instagram Chat Box
+    function openIgChat(id, name) {
+        currentIgContactId = id;
+        $('#ig-empty-state').hide();
+        $('#ig-chat-frame').css('display', 'flex');
+        $('#ig-active-contact-name').text(name);
+        $('#ig-active-avatar').text(getInitials(name));
+        
+        let contact = mockIgContacts.find(c => c.id === id);
+        if (contact) {
+            contact.unread = 0;
+            contact.story = false;
+        }
+
+        renderIgContacts(mockIgContacts); 
+        renderIgMessages(id);
+    }
+
+    // RENDER: Instagram Messages (Seen indicator style)
+    function renderIgMessages(contactId) {
+        let messages = mockIgMessages[contactId] || [];
+        let html = '';
+
+        messages.forEach(function(msg, index) {
+            let bubbleType = (msg.direction === 'ig-outbound') ? 'ig-outbound' : 'ig-inbound';
+            html += `
+                <div class="msger-bubble ${bubbleType}">
+                    ${msg.body}
+                </div>
+            `;
+
+            if (msg.direction === 'ig-outbound') {
+                let statusHtml = '';
+                if (msg.status === 'seen') {
+                    let initials = getInitials($('#ig-active-contact-name').text());
+                    statusHtml = `<div class="ig-seen-text">Seen <span class="seen-avatar">${initials}</span></div>`;
+                }
+                html += statusHtml;
+            }
+        });
+
+        $('#ig-chat-messages').html(html);
+        let chatBox = $('#ig-chat-messages');
+        chatBox.scrollTop(chatBox.prop("scrollHeight"));
+    }
+
+    // SEND: Instagram Message
+    function handleIgKeyPress(e) {
+        if(e.key === 'Enter') {
+            sendIgMessage();
+        }
+    }
+
+    function sendIgMessage() {
+        let input = $('#ig-message-input');
+        let val = input.val().trim();
+        if(!val || !currentIgContactId) return;
+
+        input.val('');
+
+        mockIgMessages[currentIgContactId].push({
+            id: Date.now(),
+            body: val,
+            direction: 'ig-outbound',
+            status: 'sent',
+            created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        });
+
+        let contact = mockIgContacts.find(c => c.id === currentIgContactId);
+        if (contact) {
+            contact.last_msg = val;
+            contact.time = "Just now";
+        }
+
+        renderIgMessages(currentIgContactId);
+        renderIgContacts(mockIgContacts);
+
+        setTimeout(() => {
+            let msgs = mockIgMessages[currentIgContactId];
+            if(msgs && msgs.length > 0) {
+                msgs[msgs.length - 1].status = 'seen';
+                renderIgMessages(currentIgContactId);
+            }
+        }, 2500);
+    }
+
+    // SEND: Instagram Heart Reaction
+    function sendIgHeart() {
+        if(!currentIgContactId) return;
+
+        mockIgMessages[currentIgContactId].push({
+            id: Date.now(),
+            body: "❤️",
+            direction: 'ig-outbound',
+            status: 'sent',
+            created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        });
+
+        let contact = mockIgContacts.find(c => c.id === currentIgContactId);
+        if (contact) {
+            contact.last_msg = "❤️ Sent a heart";
+            contact.time = "Just now";
+        }
+
+        renderIgMessages(currentIgContactId);
+        renderIgContacts(mockIgContacts);
+
+        setTimeout(() => {
+            let msgs = mockIgMessages[currentIgContactId];
+            if(msgs && msgs.length > 0) {
+                msgs[msgs.length - 1].status = 'seen';
+                renderIgMessages(currentIgContactId);
+            }
+        }, 2500);
     }
 
     // TAB 2: POSTS & COMMENTS FUNCTIONS
@@ -1080,7 +1420,7 @@
         $('#active-post-title').html(`<i class="fab fa-facebook"></i> Post: "${post.text}"`);
 
         $('.post-item').removeClass('active');
-        loadPosts(); // Re-render to update active classes
+        loadPosts(); 
 
         renderCommentsList(postId);
     }
@@ -1106,7 +1446,6 @@
                         </div>
             `;
 
-            // Render Nested replies
             if (comment.replies && comment.replies.length > 0) {
                 html += `<div class="reply-thread">`;
                 comment.replies.forEach(function(reply) {
@@ -1130,7 +1469,7 @@
                 html += `</div>`;
             }
 
-            html += `</div></div>`; // Close comment-bubble-wrapper and card
+            html += `</div></div>`; 
         });
 
         $('#comments-thread').html(html);
@@ -1147,7 +1486,6 @@
 
         input.val('');
 
-        // Append a reply to the first comment for demonstration
         if (mockComments[currentPostId] && mockComments[currentPostId].length > 0) {
             mockComments[currentPostId][0].replies.push({
                 user: "Looksmen Support",
