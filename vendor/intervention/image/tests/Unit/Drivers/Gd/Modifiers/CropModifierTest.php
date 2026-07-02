@@ -1,0 +1,91 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Intervention\Image\Tests\Unit\Drivers\Gd\Modifiers;
+
+use Intervention\Image\Alignment;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
+use Intervention\Image\Modifiers\CropModifier;
+use Intervention\Image\Tests\GdTestCase;
+
+#[RequiresPhpExtension('gd')]
+#[CoversClass(\Intervention\Image\Modifiers\CropModifier::class)]
+#[CoversClass(\Intervention\Image\Drivers\Gd\Modifiers\CropModifier::class)]
+final class CropModifierTest extends GdTestCase
+{
+    public function testModify(): void
+    {
+        $image = $this->readTestImage('blocks.png');
+        $image = $image->modify(new CropModifier(200, 200, 0, 0, 'ffffff', Alignment::BOTTOM_RIGHT));
+        $this->assertEquals(200, $image->width());
+        $this->assertEquals(200, $image->height());
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(5, 5));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(100, 100));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(190, 190));
+    }
+
+    public function testModifyExtend(): void
+    {
+        $image = $this->readTestImage('blocks.png');
+        $image = $image->modify(new CropModifier(800, 100, -10, -10, 'ff0000', Alignment::TOP_LEFT));
+        $this->assertEquals(800, $image->width());
+        $this->assertEquals(100, $image->height());
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(9, 9));
+        $this->assertColor(0, 0, 255, 255, $image->colorAt(16, 16));
+        $this->assertColor(0, 0, 255, 255, $image->colorAt(445, 16));
+        $this->assertTransparency($image->colorAt(460, 16));
+    }
+
+    public function testModifySinglePixel(): void
+    {
+        $image = $this->createTestImage(1, 1);
+        $this->assertEquals(1, $image->width());
+        $this->assertEquals(1, $image->height());
+        $image->modify(new CropModifier(3, 3, 0, 0, 'ff0', Alignment::CENTER));
+        $this->assertEquals(3, $image->width());
+        $this->assertEquals(3, $image->height());
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(0, 0));
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(1, 1));
+        $this->assertColor(255, 255, 0, 255, $image->colorAt(2, 2));
+    }
+
+    public function testModifyKeepsResolution(): void
+    {
+        $image = $this->readTestImage('300dpi.png');
+        $this->assertEquals(300, round($image->resolution()->perInch()->x()));
+        $image = $image->modify(new CropModifier(800, 100, -10, -10, 'ff0000'));
+        $this->assertEquals(300, round($image->resolution()->perInch()->x()));
+    }
+
+    public function testHalfTransparent(): void
+    {
+        $image = $this->createTestImage(16, 16);
+        $image->modify(new CropModifier(32, 32, 0, 0, '00f3', Alignment::CENTER));
+        $this->assertEquals(32, $image->width());
+        $this->assertEquals(32, $image->height());
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(5, 5), 1);
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(16, 5), 1);
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(30, 5), 1);
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(5, 16), 1);
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(16, 16));
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(30, 16), 1);
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(5, 30), 1);
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(16, 30), 1);
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(30, 30), 1);
+    }
+
+    public function testMergeTransparentBackgrounds(): void
+    {
+        $image = $this->createTestImage(1, 1)->fill('f00');
+        $this->assertEquals(1, $image->width());
+        $this->assertEquals(1, $image->height());
+        $image->modify(new CropModifier(3, 3, 0, 0, '00f3', Alignment::CENTER));
+        $this->assertEquals(3, $image->width());
+        $this->assertEquals(3, $image->height());
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(0, 0), 1);
+        $this->assertColor(255, 0, 0, 255, $image->colorAt(1, 1));
+        $this->assertColor(0, 0, 255, 51, $image->colorAt(2, 2), 1);
+    }
+}
