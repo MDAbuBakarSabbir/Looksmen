@@ -1323,88 +1323,146 @@
         });
     }
 
-    // RENDER: Instagram Contacts
-    function renderIgContacts(contacts) {
-        let html = '';
-        contacts.forEach(function(c) {
-            let initials = getInitials(c.name);
-            // Story active ring indicator
-            let storyClass = c.story ? 'ig-story-active' : '';
-            let activeClass = (c.id === currentIgContactId) ? 'active ig-active-bg' : '';
-            let unreadClass = (c.unread > 0) ? 'unread-indicator ig-unread' : 'd-none';
+    // FETCH: Real Instagram Contacts from Database
+    function fetchIgContacts() {
+        $.get("{{ route('conversation.instagram.contacts') }}", function(data) {
+            let html = '';
+            let searchVal = $('#ig-contact-search').val().toLowerCase();
+            if(data.length === 0) {
+                html = '<div class="text-center p-5 text-muted">No conversations yet</div>';
+            } else {
+                data.forEach(function(contact) {
+                    let activeClass = (contact.id === currentIgContactId) ? 'active ig-active-bg' : '';
+                    let badgeClass = (contact.unread_count > 0) ? '' : 'd-none';
+                    let name = contact.username || 'Instagram User';
+                    let initials = getInitials(name);
+                    
+                    let isVisible = name.toLowerCase().includes(searchVal) || contact.sender_id.toLowerCase().includes(searchVal);
+                    let displayStyle = isVisible ? '' : 'style="display: none;"';
 
-            html += `
-                <li class="msger-item ${activeClass}" onclick="openIgChat(${c.id}, '${c.name}')">
-                    <div class="avatar-frame ${storyClass}">${initials}</div>
-                    <div class="msger-details">
-                        <div class="msger-meta-info">
-                            <span class="msger-name">${c.name}</span>
-                            <span class="msger-time">${c.time}</span>
-                        </div>
-                        <div class="msger-preview-wrapper">
-                            <span class="msger-preview">${c.last_msg}</span>
-                            <span class="${unreadClass}"></span>
-                        </div>
-                    </div>
-                </li>
-            `;
+                    html += `
+                        <li class="msger-item ${activeClass}" ${displayStyle} onclick="openIgChat(${contact.id}, '${name}')">
+                            <div class="avatar-frame">${initials}</div>
+                            <div class="msger-details">
+                                <div class="msger-meta-info">
+                                    <span class="msger-name">${name}</span>
+                                    <span class="msger-time">${contact.last_message_at ? new Date(contact.last_message_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+                                </div>
+                                <div class="msger-preview-wrapper">
+                                    <span class="msger-preview">ID: ${contact.sender_id}</span>
+                                    <span class="unread-indicator ig-unread ${badgeClass}">${contact.unread_count}</span>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+            }
+            $('#ig-contact-list').html(html);
+        }).fail(function() {
+            $('#ig-contact-list').html('<div class="text-center p-4 text-danger">Failed to load contacts.</div>');
         });
-        $('#ig-contact-list').html(html);
     }
 
     // OPEN: Instagram Chat Box
     function openIgChat(id, name) {
+        // Leave old channel if any
+        if (currentIgContactId) {
+            window.Echo.leave('instagram-chat.' + currentIgContactId);
+        }
+
         currentIgContactId = id;
         $('#ig-empty-state').hide();
         $('#ig-chat-frame').css('display', 'flex');
         $('#ig-active-contact-name').text(name);
         $('#ig-active-avatar').text(getInitials(name));
         
-        let contact = mockIgContacts.find(c => c.id === id);
-        if (contact) {
-            contact.unread = 0;
-            contact.story = false;
-        }
+        fetchIgContacts(); // Update active class
+        fetchIgMessages(id, true);
 
-        renderIgContacts(mockIgContacts); 
-        renderIgMessages(id);
+        // Listen for real-time messages on specific Instagram chat channel
+        window.Echo.channel('instagram-chat.' + id)
+            .listen('.instagram.message.new', (e) => {
+                appendIgMessage(e.message);
+                fetchIgContacts(); // Clear unread count
+            });
     }
 
-    // RENDER: Instagram Messages (Seen indicator style)
-    function renderIgMessages(contactId) {
-        let messages = mockIgMessages[contactId] || [];
-        let html = '';
+    // FETCH: Real Instagram Messages from Database
+    function fetchIgMessages(contactId, scrollToBottom) {
+        $.get("{{ url('admin/conversation/instagram/messages') }}/" + contactId, function(data) {
+            let html = '';
+            data.messages.forEach(function(msg) {
+                let time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                let bubbleType = msg.direction === 'outbound' ? 'ig-outbound' : 'ig-inbound';
+                
+                html += `
+                    <div class="msger-bubble ${bubbleType}" data-ig-message-id="${msg.message_id || ''}">
+                        ${msg.body}
+                    </div>
+                `;
 
-        messages.forEach(function(msg, index) {
-            let bubbleType = (msg.direction === 'ig-outbound') ? 'ig-outbound' : 'ig-inbound';
-            html += `
-                <div class="msger-bubble ${bubbleType}">
-                    ${msg.body}
-                </div>
-            `;
-
-            if (msg.direction === 'ig-outbound') {
-                let statusHtml = '';
-                if (msg.status === 'seen') {
-                    let initials = getInitials($('#ig-active-contact-name').text());
-                    statusHtml = `<div class="ig-seen-text">Seen <span class="seen-avatar">${initials}</span></div>`;
+                if (msg.direction === 'outbound') {
+                    let statusHtml = '';
+                    if (msg.status === 'read') {
+                        let initials = getInitials($('#ig-active-contact-name').text());
+                        statusHtml = `<div class="ig-seen-text">Seen <span class="seen-avatar">${initials}</span></div>`;
+                    }
+                    html += statusHtml;
                 }
-                html += statusHtml;
+            });
+
+            let chatBox = $('#ig-chat-messages');
+            let isAtBottom = chatBox.prop("scrollHeight") - chatBox.scrollTop() === chatBox.outerHeight();
+
+            chatBox.html(html);
+
+            if (scrollToBottom || isAtBottom) {
+                chatBox.scrollTop(chatBox.prop("scrollHeight"));
             }
         });
-
-        $('#ig-chat-messages').html(html);
-        let chatBox = $('#ig-chat-messages');
-        chatBox.scrollTop(chatBox.prop("scrollHeight"));
     }
 
-    // SEND: Instagram Message
-    function handleIgKeyPress(e) {
-        if(e.key === 'Enter') {
-            sendIgMessage();
+    // APPEND: Dynamically add IG message bubble in UI (real-time)
+    function appendIgMessage(msg) {
+        if (msg.message_id) {
+            let existing = $(`[data-ig-message-id="${msg.message_id}"]`);
+            if (existing.length) {
+                if (msg.status === 'read') {
+                    let initials = getInitials($('#ig-active-contact-name').text());
+                    existing.next('.ig-seen-text').remove();
+                    existing.after(`<div class="ig-seen-text">Seen <span class="seen-avatar">${initials}</span></div>`);
+                }
+                return;
+            }
+        }
+
+        let bubbleType = msg.direction === 'outbound' ? 'ig-outbound' : 'ig-inbound';
+        let html = `
+            <div class="msger-bubble ${bubbleType}" data-ig-message-id="${msg.message_id || ''}">
+                ${msg.body}
+            </div>
+        `;
+
+        if (msg.direction === 'outbound') {
+            let statusHtml = '';
+            if (msg.status === 'read') {
+                let initials = getInitials($('#ig-active-contact-name').text());
+                statusHtml = `<div class="ig-seen-text">Seen <span class="seen-avatar">${initials}</span></div>`;
+            }
+            html += statusHtml;
+        }
+
+        let chatBox = $('#ig-chat-messages');
+        let isAtBottom = chatBox.prop("scrollHeight") - chatBox.scrollTop() === chatBox.outerHeight();
+
+        chatBox.append(html);
+
+        if (isAtBottom) {
+            chatBox.scrollTop(chatBox.prop("scrollHeight"));
         }
     }
 
+    // SEND: Instagram Message through API
     function sendIgMessage() {
         let input = $('#ig-message-input');
         let val = input.val().trim();
@@ -1412,60 +1470,38 @@
 
         input.val('');
 
-        mockIgMessages[currentIgContactId].push({
-            id: Date.now(),
-            body: val,
-            direction: 'ig-outbound',
-            status: 'sent',
-            created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        });
-
-        let contact = mockIgContacts.find(c => c.id === currentIgContactId);
-        if (contact) {
-            contact.last_msg = val;
-            contact.time = "Just now";
-        }
-
-        renderIgMessages(currentIgContactId);
-        renderIgContacts(mockIgContacts);
-
-        setTimeout(() => {
-            let msgs = mockIgMessages[currentIgContactId];
-            if(msgs && msgs.length > 0) {
-                msgs[msgs.length - 1].status = 'seen';
-                renderIgMessages(currentIgContactId);
+        $.post("{{ route('conversation.instagram.send') }}", {
+            _token: "{{ csrf_token() }}",
+            contact_id: currentIgContactId,
+            message: val
+        }, function(data) {
+            if (data.success) {
+                appendIgMessage(data.message);
+                fetchIgContacts(); // Re-order contacts
             }
-        }, 2500);
+        }).fail(function(xhr) {
+            let err = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to send message.';
+            alert("Error: " + err);
+        });
     }
 
     // SEND: Instagram Heart Reaction
     function sendIgHeart() {
         if(!currentIgContactId) return;
 
-        mockIgMessages[currentIgContactId].push({
-            id: Date.now(),
-            body: "❤️",
-            direction: 'ig-outbound',
-            status: 'sent',
-            created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-        });
-
-        let contact = mockIgContacts.find(c => c.id === currentIgContactId);
-        if (contact) {
-            contact.last_msg = "❤️ Sent a heart";
-            contact.time = "Just now";
-        }
-
-        renderIgMessages(currentIgContactId);
-        renderIgContacts(mockIgContacts);
-
-        setTimeout(() => {
-            let msgs = mockIgMessages[currentIgContactId];
-            if(msgs && msgs.length > 0) {
-                msgs[msgs.length - 1].status = 'seen';
-                renderIgMessages(currentIgContactId);
+        $.post("{{ route('conversation.instagram.send') }}", {
+            _token: "{{ csrf_token() }}",
+            contact_id: currentIgContactId,
+            message: "❤️"
+        }, function(data) {
+            if (data.success) {
+                appendIgMessage(data.message);
+                fetchIgContacts();
             }
-        }, 2500);
+        }).fail(function(xhr) {
+            let err = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to send heart.';
+            alert("Error: " + err);
+        });
     }
 
     // TAB 2: POSTS & COMMENTS FUNCTIONS

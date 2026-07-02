@@ -4,10 +4,13 @@ namespace App\Http\Controllers;
 
 use App\Events\NewWhatsAppMessage;
 use App\Events\NewFacebookMessage;
+use App\Events\NewInstagramMessage;
 use App\Models\WhatsappContact;
 use App\Models\WhatsappMessage;
 use App\Models\FacebookContact;
 use App\Models\FacebookMessage;
+use App\Models\InstagramContact;
+use App\Models\InstagramMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -292,49 +295,82 @@ class ConversationController extends Controller
             return response('Forbidden', 403);
         }
 
-        // ২. মেসেঞ্জারের রিয়েল-টাইম মেসেজ রিসিভ করা (POST Request)
+        // ২. মেসেঞ্জার এবং ইনস্টাগ্রামের রিয়েল-টাইম মেসেজ রিসিভ করা (POST Request)
         if ($request->isMethod('post')) {
             $data = $request->all();
-            \Log::info('Messenger Webhook Data:', $data);
+            \Log::info('Meta Webhook Data:', $data);
+
+            $object = $data['object'] ?? '';
 
             if (isset($data['entry'][0]['messaging'][0])) {
                 $messaging = $data['entry'][0]['messaging'][0];
                 $senderId = $messaging['sender']['id'];
 
-                // কাস্টমার মেসেজ পাঠিয়েছে কি না চেক করা
                 if (isset($messaging['message']) && ! isset($messaging['message']['is_echo'])) {
                     $messageBody = $messaging['message']['text'] ?? '[Media/Attachment]';
                     $messageId = $messaging['message']['mid'];
 
-                    // Find or create contact
-                    $contact = FacebookContact::where('sender_id', $senderId)->first();
-                    if (!$contact) {
-                        $profile = $this->getFacebookProfile($senderId);
-                        $contact = FacebookContact::create([
-                            'sender_id' => $senderId,
-                            'name' => $profile['name'],
-                            'unread_count' => 0,
-                        ]);
-                    }
+                    if ($object === 'instagram') {
+                        // Find or create Instagram contact
+                        $contact = InstagramContact::where('sender_id', $senderId)->first();
+                        if (!$contact) {
+                            $profile = $this->getInstagramProfile($senderId);
+                            $contact = InstagramContact::create([
+                                'sender_id' => $senderId,
+                                'username' => $profile['username'],
+                                'unread_count' => 0,
+                            ]);
+                        }
 
-                    $contact->unread_count += 1;
-                    $contact->last_message_at = now();
-                    $contact->save();
+                        $contact->unread_count += 1;
+                        $contact->last_message_at = now();
+                        $contact->save();
 
-                    // Save message
-                    $newMessage = FacebookMessage::firstOrCreate(
-                        ['message_id' => $messageId],
-                        [
-                            'facebook_contact_id' => $contact->id,
-                            'body' => $messageBody,
-                            'type' => 'text',
-                            'direction' => 'inbound',
-                            'status' => 'received',
-                        ]
-                    );
+                        $newMessage = InstagramMessage::firstOrCreate(
+                            ['message_id' => $messageId],
+                            [
+                                'instagram_contact_id' => $contact->id,
+                                'body' => $messageBody,
+                                'type' => 'text',
+                                'direction' => 'inbound',
+                                'status' => 'received',
+                            ]
+                        );
 
-                    if ($newMessage->wasRecentlyCreated) {
-                        broadcast(new NewFacebookMessage($newMessage, $contact));
+                        if ($newMessage->wasRecentlyCreated) {
+                            broadcast(new NewInstagramMessage($newMessage, $contact));
+                        }
+                    } else {
+                        // Find or create Facebook contact
+                        $contact = FacebookContact::where('sender_id', $senderId)->first();
+                        if (!$contact) {
+                            $profile = $this->getFacebookProfile($senderId);
+                            $contact = FacebookContact::create([
+                                'sender_id' => $senderId,
+                                'name' => $profile['name'],
+                                'unread_count' => 0,
+                            ]);
+                        }
+
+                        $contact->unread_count += 1;
+                        $contact->last_message_at = now();
+                        $contact->save();
+
+                        // Save message
+                        $newMessage = FacebookMessage::firstOrCreate(
+                            ['message_id' => $messageId],
+                            [
+                                'facebook_contact_id' => $contact->id,
+                                'body' => $messageBody,
+                                'type' => 'text',
+                                'direction' => 'inbound',
+                                'status' => 'received',
+                            ]
+                        );
+
+                        if ($newMessage->wasRecentlyCreated) {
+                            broadcast(new NewFacebookMessage($newMessage, $contact));
+                        }
                     }
                 }
             }
@@ -522,5 +558,93 @@ class ConversationController extends Controller
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
+    }
+
+    private function getInstagramProfile($senderId)
+    {
+        $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+        if (!$accessToken) {
+            return ['username' => 'instagram_user'];
+        }
+
+        try {
+            $response = Http::get("https://graph.facebook.com/v20.0/{$senderId}", [
+                'fields' => 'username',
+                'access_token' => $accessToken,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return [
+                    'username' => $data['username'] ?? 'instagram_user',
+                ];
+            }
+        } catch (\Exception $e) {
+            \Log::error('Instagram Profile Fetch Error: '.$e->getMessage());
+        }
+
+        return ['username' => 'instagram_user'];
+    }
+
+    public function getInstagramContacts()
+    {
+        $contacts = InstagramContact::orderBy('last_message_at', 'desc')->get();
+
+        return response()->json($contacts);
+    }
+
+    public function getInstagramMessages($contact_id)
+    {
+        $contact = InstagramContact::findOrFail($contact_id);
+        $contact->update(['unread_count' => 0]);
+
+        $messages = InstagramMessage::where('instagram_contact_id', $contact_id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'contact' => $contact,
+            'messages' => $messages,
+        ]);
+    }
+
+    public function sendInstagramMessage(Request $request)
+    {
+        $request->validate([
+            'contact_id' => 'required|exists:instagram_contacts,id',
+            'message' => 'required|string',
+        ]);
+
+        $contact = InstagramContact::findOrFail($request->contact_id);
+        $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+
+        if (!$accessToken) {
+            return response()->json(['error' => 'Messenger Page Access Token not configured.'], 500);
+        }
+
+        $response = Http::post("https://graph.facebook.com/v20.0/me/messages?access_token={$accessToken}", [
+            'recipient' => ['id' => $contact->sender_id],
+            'message' => ['text' => $request->message],
+        ]);
+
+        if ($response->successful()) {
+            $responseData = $response->json();
+            $messageId = $responseData['message_id'] ?? uniqid('ig_out_');
+
+            $newMessage = InstagramMessage::create([
+                'instagram_contact_id' => $contact->id,
+                'message_id' => $messageId,
+                'body' => $request->message,
+                'type' => 'text',
+                'direction' => 'outbound',
+                'status' => 'sent',
+            ]);
+
+            $contact->update(['last_message_at' => now()]);
+
+            return response()->json(['success' => true, 'message' => $newMessage]);
+        }
+
+        return response()->json(['error' => 'Failed to send message: '.$response->body()], 500);
     }
 }
