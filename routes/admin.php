@@ -438,6 +438,11 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/conversation/facebook/contacts', 'getFacebookContacts')->name('conversation.facebook.contacts');
         Route::get('/conversation/facebook/messages/{contact_id}', 'getFacebookMessages')->name('conversation.facebook.messages');
         Route::post('/conversation/facebook/send', 'sendFacebookMessage')->name('conversation.facebook.send');
+
+        // Facebook comments moderation routes
+        Route::get('/conversation/facebook/posts', 'getFacebookPosts')->name('conversation.facebook.posts');
+        Route::get('/conversation/facebook/comments/{post_id}', 'getFacebookPostComments')->name('conversation.facebook.comments');
+        Route::post('/conversation/facebook/comment/reply', 'replyToFacebookComment')->name('conversation.facebook.comment.reply');
     });
 });
 Route::match(['get', 'post'], '/webhook/whatsapp', [ConversationController::class, 'handleWhatsApp']);

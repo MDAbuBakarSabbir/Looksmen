@@ -411,4 +411,116 @@ class ConversationController extends Controller
 
         return response()->json(['error' => 'Failed to send message: '.$response->body()], 500);
     }
+
+    public function getFacebookPosts()
+    {
+        $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+        if (!$accessToken) {
+            return response()->json(['error' => 'Page Access Token not configured.'], 500);
+        }
+
+        try {
+            $response = Http::get("https://graph.facebook.com/v20.0/me/posts", [
+                'fields' => 'id,message,created_time,comments.summary(true)',
+                'access_token' => $accessToken,
+            ]);
+
+            if ($response->successful()) {
+                $postsData = $response->json()['data'] ?? [];
+                $formattedPosts = [];
+                foreach ($postsData as $post) {
+                    $formattedPosts[] = [
+                        'id' => $post['id'],
+                        'text' => $post['message'] ?? '[Image/Link Post]',
+                        'comments_count' => $post['comments']['summary']['total_count'] ?? 0,
+                        'time' => isset($post['created_time']) ? \Illuminate\Support\Carbon::parse($post['created_time'])->diffForHumans() : '',
+                    ];
+                }
+                return response()->json($formattedPosts);
+            }
+            return response()->json(['error' => 'Failed to fetch posts: '.$response->body()], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function getFacebookPostComments($post_id)
+    {
+        $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+        if (!$accessToken) {
+            return response()->json(['error' => 'Page Access Token not configured.'], 500);
+        }
+
+        try {
+            $response = Http::get("https://graph.facebook.com/v20.0/{$post_id}/comments", [
+                'fields' => 'id,from,message,created_time,comments{id,from,message,created_time}',
+                'access_token' => $accessToken,
+            ]);
+
+            if ($response->successful()) {
+                $commentsData = $response->json()['data'] ?? [];
+                $formattedComments = [];
+                foreach ($commentsData as $comment) {
+                    $replies = [];
+                    if (isset($comment['comments']['data'])) {
+                        foreach ($comment['comments']['data'] as $reply) {
+                            $replies[] = [
+                                'id' => $reply['id'],
+                                'user' => $reply['from']['name'] ?? 'User',
+                                'text' => $reply['message'] ?? '',
+                                'time' => \Illuminate\Support\Carbon::parse($reply['created_time'])->diffForHumans(),
+                            ];
+                        }
+                    }
+                    $formattedComments[] = [
+                        'id' => $comment['id'],
+                        'user' => $comment['from']['name'] ?? 'User',
+                        'text' => $comment['message'] ?? '',
+                        'time' => \Illuminate\Support\Carbon::parse($comment['created_time'])->diffForHumans(),
+                        'replies' => $replies,
+                    ];
+                }
+                return response()->json($formattedComments);
+            }
+            return response()->json(['error' => 'Failed to fetch comments: '.$response->body()], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
+    public function replyToFacebookComment(Request $request)
+    {
+        $request->validate([
+            'comment_id' => 'required|string',
+            'message' => 'required|string',
+        ]);
+
+        $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+        if (!$accessToken) {
+            return response()->json(['error' => 'Page Access Token not configured.'], 500);
+        }
+
+        try {
+            $response = Http::post("https://graph.facebook.com/v20.0/{$request->comment_id}/comments", [
+                'message' => $request->message,
+                'access_token' => $accessToken,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                return response()->json([
+                    'success' => true,
+                    'reply' => [
+                        'id' => $data['id'],
+                        'user' => 'Looksmen Support',
+                        'text' => $request->message,
+                        'time' => 'Just now',
+                    ],
+                ]);
+            }
+            return response()->json(['error' => 'Failed to post reply: '.$response->body()], 500);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
 }

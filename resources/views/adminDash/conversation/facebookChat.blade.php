@@ -1469,91 +1469,126 @@
     }
 
     // TAB 2: POSTS & COMMENTS FUNCTIONS
+    let loadedPosts = [];
+    let activeReplyCommentId = null;
+
     function loadPosts() {
+        $.get("{{ route('conversation.facebook.posts') }}", function(data) {
+            loadedPosts = data;
+            let html = '';
+            data.forEach(function(post) {
+                let activeClass = (post.id === currentPostId) ? 'active' : '';
+                html += `
+                    <li class="post-item ${activeClass}" onclick="openComments('${post.id}')">
+                        <div class="post-thumbnail"><i class="fab fa-facebook"></i></div>
+                        <div class="post-details">
+                            <span class="post-text">${post.text}</span>
+                            <div class="post-stats">
+                                <span><i class="far fa-comment"></i> ${post.comments_count}</span>
+                                <span>${post.time}</span>
+                            </div>
+                        </div>
+                    </li>
+                `;
+            });
+            $('#posts-list').html(html);
+        }).fail(function() {
+            $('#posts-list').html('<div class="text-center p-4 text-danger">Failed to load posts.</div>');
+        });
+    }
+
+    function openComments(postId) {
+        currentPostId = postId;
+        activeReplyCommentId = null;
+        $('#comments-empty-state').hide();
+        $('#comments-panel').show();
+
+        let post = loadedPosts.find(p => p.id === postId);
+        let titleText = post ? post.text : 'Post Comments';
+        $('#active-post-title').html(`<i class="fab fa-facebook"></i> Post: "${titleText}"`);
+
+        $('.post-item').removeClass('active');
+        
+        // Re-render post items locally to update active class
         let html = '';
-        mockPosts.forEach(function(post) {
-            let activeClass = (post.id === currentPostId) ? 'active' : '';
+        loadedPosts.forEach(function(p) {
+            let activeClass = (p.id === currentPostId) ? 'active' : '';
             html += `
-                <li class="post-item ${activeClass}" onclick="openComments(${post.id})">
+                <li class="post-item ${activeClass}" onclick="openComments('${p.id}')">
                     <div class="post-thumbnail"><i class="fab fa-facebook"></i></div>
                     <div class="post-details">
-                        <span class="post-text">${post.text}</span>
+                        <span class="post-text">${p.text}</span>
                         <div class="post-stats">
-                            <span><i class="far fa-comment"></i> ${post.comments_count}</span>
-                            <span>${post.time}</span>
+                            <span><i class="far fa-comment"></i> ${p.comments_count}</span>
+                            <span>${p.time}</span>
                         </div>
                     </div>
                 </li>
             `;
         });
         $('#posts-list').html(html);
-    }
-
-    function openComments(postId) {
-        currentPostId = postId;
-        $('#comments-empty-state').hide();
-        $('#comments-panel').show();
-
-        let post = mockPosts.find(p => p.id === postId);
-        $('#active-post-title').html(`<i class="fab fa-facebook"></i> Post: "${post.text}"`);
-
-        $('.post-item').removeClass('active');
-        loadPosts(); 
 
         renderCommentsList(postId);
     }
 
     function renderCommentsList(postId) {
-        let comments = mockComments[postId] || [];
-        let html = '';
-
-        comments.forEach(function(comment) {
-            let initials = getInitials(comment.user);
-            html += `
-                <div class="comment-card">
-                    <div class="comment-avatar">${initials}</div>
-                    <div class="comment-bubble-wrapper">
-                        <div class="comment-bubble">
-                            <div class="comment-user-name">${comment.user}</div>
-                            <div class="comment-text">${comment.text}</div>
-                        </div>
-                        <div class="comment-actions">
-                            <span>Like</span>
-                            <span onclick="focusReply('${comment.user}')">Reply</span>
-                            <span class="text-muted">${comment.time}</span>
-                        </div>
-            `;
-
-            if (comment.replies && comment.replies.length > 0) {
-                html += `<div class="reply-thread">`;
-                comment.replies.forEach(function(reply) {
-                    let rInitials = getInitials(reply.user);
+        $('#comments-thread').html('<div class="text-center p-5"><i class="fa fa-circle-notch fa-spin fa-2x mb-2 text-muted"></i><div>Loading comments...</div></div>');
+        $.get("{{ url('admin/conversation/facebook/comments') }}/" + postId, function(comments) {
+            let html = '';
+            if (comments.length === 0) {
+                html = '<div class="text-center p-5 text-muted">No comments on this post yet.</div>';
+            } else {
+                comments.forEach(function(comment) {
+                    let initials = getInitials(comment.user);
                     html += `
                         <div class="comment-card">
-                            <div class="comment-avatar">${rInitials}</div>
+                            <div class="comment-avatar">${initials}</div>
                             <div class="comment-bubble-wrapper">
                                 <div class="comment-bubble">
-                                    <div class="comment-user-name">${reply.user}</div>
-                                    <div class="comment-text">${reply.text}</div>
+                                    <div class="comment-user-name">${comment.user}</div>
+                                    <div class="comment-text">${comment.text}</div>
                                 </div>
                                 <div class="comment-actions">
                                     <span>Like</span>
-                                    <span class="text-muted">${reply.time}</span>
+                                    <span onclick="focusReply('${comment.id}', '${comment.user}')" style="color: var(--fb-blue); cursor: pointer;">Reply</span>
+                                    <span class="text-muted">${comment.time}</span>
                                 </div>
-                            </div>
-                        </div>
                     `;
+
+                    if (comment.replies && comment.replies.length > 0) {
+                        html += `<div class="reply-thread">`;
+                        comment.replies.forEach(function(reply) {
+                            let rInitials = getInitials(reply.user);
+                            html += `
+                                <div class="comment-card">
+                                    <div class="comment-avatar">${rInitials}</div>
+                                    <div class="comment-bubble-wrapper">
+                                        <div class="comment-bubble">
+                                            <div class="comment-user-name">${reply.user}</div>
+                                            <div class="comment-text">${reply.text}</div>
+                                        </div>
+                                        <div class="comment-actions">
+                                            <span>Like</span>
+                                            <span class="text-muted">${reply.time}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        html += `</div>`;
+                    }
+
+                    html += `</div></div>`; 
                 });
-                html += `</div>`;
             }
-
-            html += `</div></div>`; 
+            $('#comments-thread').html(html);
+        }).fail(function() {
+            $('#comments-thread').html('<div class="text-center p-5 text-danger">Failed to load comments.</div>');
         });
-
-        $('#comments-thread').html(html);
     }
 
-    function focusReply(userName) {
+    function focusReply(commentId, userName) {
+        activeReplyCommentId = commentId;
         $('#comment-input').val(`@${userName} `).focus();
     }
 
@@ -1562,16 +1597,23 @@
         let val = input.val().trim();
         if(!val || !currentPostId) return;
 
-        input.val('');
+        // If activeReplyCommentId is set, reply to that comment, else post directly to the post_id
+        let targetId = activeReplyCommentId ? activeReplyCommentId : currentPostId;
 
-        if (mockComments[currentPostId] && mockComments[currentPostId].length > 0) {
-            mockComments[currentPostId][0].replies.push({
-                user: "Looksmen Support",
-                text: val,
-                time: "Just now"
-            });
-            renderCommentsList(currentPostId);
-        }
+               $.post("{{ route('conversation.facebook.comment.reply') }}", {
+            _token: "{{ csrf_token() }}",
+            comment_id: targetId,
+            message: val
+        }, function(data) {
+            if (data.success) {
+                renderCommentsList(currentPostId);
+                activeReplyCommentId = null;
+            }
+        }).fail(function(xhr) {
+            let err = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to post comment.';
+            alert("Error: " + err);
+        });
     }
+
 </script>
 @endsection
