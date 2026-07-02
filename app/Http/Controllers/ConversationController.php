@@ -72,7 +72,7 @@ class ConversationController extends Controller
                 }
 
                 // Save Message
-                \App\Models\WhatsappMessage::firstOrCreate(
+                $newMessage = \App\Models\WhatsappMessage::firstOrCreate(
                     ['message_id' => $message_id],
                     [
                         'whatsapp_contact_id' => $contact->id,
@@ -82,6 +82,10 @@ class ConversationController extends Controller
                         'status' => 'received',
                     ]
                 );
+
+                if ($newMessage->wasRecentlyCreated) {
+                    broadcast(new \App\Events\NewWhatsAppMessage($newMessage, $contact));
+                }
             }
 
             return response('EVENT_RECEIVED', 200);

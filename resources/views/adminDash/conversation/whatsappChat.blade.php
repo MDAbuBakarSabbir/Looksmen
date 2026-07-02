@@ -80,20 +80,31 @@
 @endsection
 
 @section('script')
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/laravel-echo@1.16.1/dist/echo.iife.js"></script>
 <script>
     let currentContactId = null;
-    let autoRefreshInterval = null;
+
+    // Initialize Laravel Echo with Reverb
+    window.Echo = new Echo({
+        broadcaster: 'reverb',
+        key: "{{ config('broadcasting.connections.reverb.key') }}",
+        wsHost: window.location.hostname,
+        wsPort: {{ config('broadcasting.connections.reverb.options.port', 8080) }},
+        wssPort: {{ config('broadcasting.connections.reverb.options.port', 8080) }},
+        forceTLS: (window.location.protocol === 'https:'),
+        enabledTransports: ['ws', 'wss'],
+    });
 
     // Load contacts on page load
     $(document).ready(function() {
         fetchContacts();
-        // Poll for new messages/contacts every 5 seconds
-        setInterval(fetchContacts, 5000);
-        setInterval(function() {
-            if(currentContactId) {
-                fetchMessages(currentContactId, false); // false = don't scroll to bottom if user is reading up
-            }
-        }, 5000);
+        
+        // Listen for new messages globally to update the contact list
+        window.Echo.channel('whatsapp-contacts')
+            .listen('NewWhatsAppMessage', (e) => {
+                fetchContacts();
+            });
     });
 
     function fetchContacts() {
@@ -122,6 +133,11 @@
     }
 
     function openChat(contactId, contactName) {
+        // Leave old channel if any
+        if (currentContactId) {
+            window.Echo.leave('whatsapp-chat.' + currentContactId);
+        }
+
         currentContactId = contactId;
         $('#empty-state').hide();
         $('#chat-main').css('display', 'flex');
@@ -129,6 +145,13 @@
         $('#contact-list .contact-item').removeClass('active');
         fetchContacts(); // Update active class immediately
         fetchMessages(contactId, true);
+
+        // Listen for messages on the specific chat channel
+        window.Echo.channel('whatsapp-chat.' + contactId)
+            .listen('NewWhatsAppMessage', (e) => {
+                appendMessage(e.message);
+                fetchContacts(); // Clear unread counts for this contact
+            });
     }
 
     function fetchMessages(contactId, scrollToBottom) {
@@ -152,6 +175,22 @@
                 chatBox.scrollTop(chatBox.prop("scrollHeight"));
             }
         });
+    }
+
+    function appendMessage(msg) {
+        let time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        let html = `
+            <div class="message ${msg.direction}">
+                ${msg.body}
+                <span class="message-time">${time}</span>
+            </div>
+        `;
+        let chatBox = $('#chat-messages');
+        let isAtBottom = chatBox.prop("scrollHeight") - chatBox.scrollTop() === chatBox.outerHeight();
+        chatBox.append(html);
+        if (isAtBottom) {
+            chatBox.scrollTop(chatBox.prop("scrollHeight"));
+        }
     }
 
     function handleKeyPress(e) {
@@ -182,6 +221,9 @@
             success: function(res) {
                 input.prop('disabled', false).focus();
                 btn.prop('disabled', false);
+                // We don't fetch messages here, it will be injected by the server event or we can append it directly!
+                // Assuming you're echoing your own messages from Reverb, but usually you don't.
+                // We'll just fetch again to be simple and safe, or append directly.
                 fetchMessages(currentContactId, true);
             },
             error: function(err) {
