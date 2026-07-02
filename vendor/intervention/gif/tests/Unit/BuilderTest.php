@@ -1,0 +1,99 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Intervention\Gif\Tests\Unit;
+
+use Intervention\Gif\Builder;
+use Intervention\Gif\GifDataStream;
+use Intervention\Gif\Tests\BaseTestCase;
+
+final class BuilderTest extends BaseTestCase
+{
+    public function testGetGifDataStream(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $this->assertInstanceOf(GifDataStream::class, $builder->gifDataStream());
+    }
+
+    public function testEncode(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $this->assertMatchesRegularExpression('/^\x47\x49\x46\x38(\x37|\x39)\x61/', $builder->encode());
+    }
+
+    public function testCanvas(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $this->assertInstanceOf(Builder::class, $builder);
+        $gif = $builder->gifDataStream();
+        $this->assertEquals(320, $gif->logicalScreenDescriptor()->width());
+        $this->assertEquals(240, $gif->logicalScreenDescriptor()->height());
+    }
+
+    public function testCanvasSingleLoop(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $builder->addFrame($this->imagePath('red.gif'), 0.25, 1, 2);
+        $builder->setLoops(1);
+        $gif = $builder->gifDataStream();
+
+        // one loop means no loop count in gif
+        $this->assertEquals(null, $gif->mainApplicationExtension()?->loops());
+    }
+
+    public function testCanvasMultipleLoops(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $builder->addFrame($this->imagePath('red.gif'), 0.25, 1, 2);
+        $builder->setLoops(10);
+        $gif = $builder->gifDataStream();
+
+        // 10 loops means 9 repetitions in gif
+        $this->assertEquals(9, $gif->mainApplicationExtension()->loops());
+    }
+
+    public function testCanvasInfiniteLoops(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $builder->addFrame($this->imagePath('red.gif'), 0.25, 1, 2);
+        $builder->setLoops(0);
+        $gif = $builder->gifDataStream();
+
+        // 0 loops means 0 (aka infinite) repetitions in gif
+        $this->assertEquals(0, $gif->mainApplicationExtension()->loops());
+    }
+
+    public function testAddFrame(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $result = $builder->addFrame($this->imagePath('red.gif'), 0.25, 1, 2);
+        $this->assertInstanceOf(Builder::class, $result);
+        $gif = $builder->gifDataStream();
+        $this->assertEquals(25, $gif->firstFrame()->graphicControlExtension()->delay());
+        $this->assertEquals(1, $gif->firstFrame()->imageDescriptor()->left());
+        $this->assertEquals(2, $gif->firstFrame()->imageDescriptor()->top());
+        $this->assertFalse($gif->firstFrame()->imageDescriptor()->isInterlaced());
+    }
+
+    public function testAddFrameInterlace(): void
+    {
+        $builder = Builder::canvas(320, 240);
+        $result = $builder->addFrame($this->imagePath('red.gif'), 0.25, 1, 2, true);
+        $this->assertInstanceOf(Builder::class, $result);
+        $gif = $builder->gifDataStream();
+        $this->assertEquals(25, $gif->firstFrame()->graphicControlExtension()->delay());
+        $this->assertEquals(1, $gif->firstFrame()->imageDescriptor()->left());
+        $this->assertEquals(2, $gif->firstFrame()->imageDescriptor()->top());
+        $this->assertTrue($gif->firstFrame()->imageDescriptor()->isInterlaced());
+    }
+
+    public function testAddFrameFromResource(): void
+    {
+        $stream = fopen('php://temp', 'r+');
+        fwrite($stream, file_get_contents($this->imagePath('animation1.gif')));
+        $builder = Builder::canvas(320, 240);
+        $result = $builder->addFrame($stream);
+        $this->assertInstanceOf(Builder::class, $result);
+    }
+}
