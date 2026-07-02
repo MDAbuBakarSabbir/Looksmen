@@ -1090,7 +1090,13 @@
 
     // Document Init
     $(document).ready(function() {
-        renderContacts(mockContacts);
+        fetchContacts();
+
+        // Listen for new messages globally to update the contact list
+        window.Echo.channel('facebook-contacts')
+            .listen('.facebook.message.new', (e) => {
+                fetchContacts();
+            });
 
         // Sidebar search filter (Messenger)
         $('#contact-search').on('input', function() {
@@ -1117,67 +1123,139 @@
                 }
             });
         });
+
+        // Hybrid Fallback Polling for Facebook Messenger (similar to WhatsApp)
+        setInterval(function() {
+            let isConnected = false;
+            try {
+                if (window.Echo && window.Echo.connector && window.Echo.connector.pusher && window.Echo.connector.pusher.connection) {
+                    isConnected = (window.Echo.connector.pusher.connection.state === 'connected');
+                }
+            } catch(e) {
+                isConnected = false;
+            }
+
+            if (!isConnected) {
+                fetchContacts();
+                if (currentContactId) {
+                    fetchMessages(currentContactId, false);
+                }
+            }
+        }, 6000);
     });
 
-    // RENDER: Messenger Contacts
-    function renderContacts(contacts) {
-        let html = '';
-        contacts.forEach(function(c) {
-            let initials = getInitials(c.name);
-            let activeDot = c.active ? '<span class="avatar-badge"></span>' : '';
-            let activeClass = (c.id === currentContactId) ? 'active' : '';
-            let unreadClass = (c.unread > 0) ? 'unread-indicator' : 'd-none';
+    // FETCH: Real Facebook Contacts from Database
+    function fetchContacts() {
+        $.get("{{ route('conversation.facebook.contacts') }}", function(data) {
+            let html = '';
+            let searchVal = $('#contact-search').val().toLowerCase();
+            if(data.length === 0) {
+                html = '<div class="text-center p-5 text-muted">No conversations yet</div>';
+            } else {
+                data.forEach(function(contact) {
+                    let activeClass = (contact.id === currentContactId) ? 'active' : '';
+                    let badgeClass = (contact.unread_count > 0) ? '' : 'd-none';
+                    let name = contact.name || 'Facebook User';
+                    let initials = getInitials(name);
+                    
+                    let isVisible = name.toLowerCase().includes(searchVal) || contact.sender_id.toLowerCase().includes(searchVal);
+                    let displayStyle = isVisible ? '' : 'style="display: none;"';
 
-            html += `
-                <li class="msger-item ${activeClass}" onclick="openChat(${c.id}, '${c.name}', ${c.active})">
-                    <div class="avatar-frame">${initials}${activeDot}</div>
-                    <div class="msger-details">
-                        <div class="msger-meta-info">
-                            <span class="msger-name">${c.name}</span>
-                            <span class="msger-time">${c.time}</span>
-                        </div>
-                        <div class="msger-preview-wrapper">
-                            <span class="msger-preview">${c.last_msg}</span>
-                            <span class="${unreadClass}"></span>
-                        </div>
-                    </div>
-                </li>
-            `;
+                    html += `
+                        <li class="msger-item ${activeClass}" ${displayStyle} onclick="openChat(${contact.id}, '${name}', true)">
+                            <div class="avatar-frame">${initials}</div>
+                            <div class="msger-details">
+                                <div class="msger-meta-info">
+                                    <span class="msger-name">${name}</span>
+                                    <span class="msger-time">${contact.last_message_at ? new Date(contact.last_message_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</span>
+                                </div>
+                                <div class="msger-preview-wrapper">
+                                    <span class="msger-preview">ID: ${contact.sender_id}</span>
+                                    <span class="unread-indicator ${badgeClass}">${contact.unread_count}</span>
+                                </div>
+                            </div>
+                        </li>
+                    `;
+                });
+            }
+            $('#contact-list').html(html);
+        }).fail(function() {
+            $('#contact-list').html('<div class="text-center p-4 text-danger">Failed to load contacts.</div>');
         });
-        $('#contact-list').html(html);
     }
 
-    // OPEN: Messenger Chat Box
+    // OPEN: Facebook Chat Box
     function openChat(id, name, active) {
+        // Leave old channel if any
+        if (currentContactId) {
+            window.Echo.leave('facebook-chat.' + currentContactId);
+        }
+
         currentContactId = id;
         $('#messenger-empty-state').hide();
         $('#chat-frame').css('display', 'flex');
         $('#active-contact-name').text(name);
         $('#active-avatar').text(getInitials(name));
-        $('#active-status').text(active ? "Active now" : "Active 15m ago");
+        $('#active-status').text(active ? "Active now" : "Offline");
 
         $('.msger-item').removeClass('active');
-        renderContacts(mockContacts); 
+        fetchContacts(); // Update active class state
 
-        let contact = mockContacts.find(c => c.id === id);
-        if (contact) contact.unread = 0;
+        fetchMessages(id, true);
 
-        renderMessages(id);
+        // Listen for real-time messages on specific chat channel
+        window.Echo.channel('facebook-chat.' + id)
+            .listen('.facebook.message.new', (e) => {
+                appendMessage(e.message);
+                fetchContacts(); // Clear unread count
+            });
     }
 
-    // RENDER: Messenger Message Bubbles
-    function renderMessages(contactId) {
-        let messages = mockMessages[contactId] || [];
-        let html = '';
+    // FETCH: Real Facebook Messages from Database
+    function fetchMessages(contactId, scrollToBottom) {
+        $.get("{{ url('admin/conversation/facebook/messages') }}/" + contactId, function(data) {
+            let html = '';
+            data.messages.forEach(function(msg) {
+                let time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                let bubbleClass = msg.direction === 'outbound' ? 'outbound' : 'inbound';
+                
+                html += `
+                    <div class="msger-bubble ${bubbleClass}" data-message-id="${msg.message_id || ''}">
+                        ${msg.body}
+                    </div>
+                `;
 
-        messages.forEach(function(msg, index) {
-            html += `
-                <div class="msger-bubble ${msg.direction}">
-                    ${msg.body}
-                </div>
-            `;
+                if (msg.direction === 'outbound') {
+                    let statusHtml = '';
+                    if (msg.status === 'sent') {
+                        statusHtml = `<div class="msger-indicator sent"><i class="fa fa-check"></i></div>`;
+                    } else if (msg.status === 'delivered') {
+                        statusHtml = `<div class="msger-indicator delivered"><i class="fa fa-check"></i></div>`;
+                    } else if (msg.status === 'read') {
+                        let initials = getInitials($('#active-contact-name').text());
+                        statusHtml = `<div class="msger-indicator read-avatar">${initials}</div>`;
+                    }
+                    html += `<div class="msger-status-row">${statusHtml}</div>`;
+                }
+            });
 
-            if (msg.direction === 'outbound') {
+            let chatBox = $('#chat-messages');
+            let isAtBottom = chatBox.prop("scrollHeight") - chatBox.scrollTop() === chatBox.outerHeight();
+
+            chatBox.html(html);
+
+            if (scrollToBottom || isAtBottom) {
+                chatBox.scrollTop(chatBox.prop("scrollHeight"));
+            }
+        });
+    }
+
+    // APPEND: Dynamically add message bubble in UI (real-time)
+    function appendMessage(msg) {
+        if (msg.message_id) {
+            let existing = $(`[data-message-id="${msg.message_id}"]`);
+            if (existing.length) {
+                // If it exists, update checkmarks status
                 let statusHtml = '';
                 if (msg.status === 'sent') {
                     statusHtml = `<div class="msger-indicator sent"><i class="fa fa-check"></i></div>`;
@@ -1187,23 +1265,42 @@
                     let initials = getInitials($('#active-contact-name').text());
                     statusHtml = `<div class="msger-indicator read-avatar">${initials}</div>`;
                 }
-                html += `<div class="msger-status-row">${statusHtml}</div>`;
+                existing.next('.msger-status-row').html(statusHtml);
+                return;
             }
-        });
+        }
 
-        $('#chat-messages').html(html);
+        let bubbleClass = msg.direction === 'outbound' ? 'outbound' : 'inbound';
+        let html = `
+            <div class="msger-bubble ${bubbleClass}" data-message-id="${msg.message_id || ''}">
+                ${msg.body}
+            </div>
+        `;
+
+        if (msg.direction === 'outbound') {
+            let statusHtml = '';
+            if (msg.status === 'sent') {
+                statusHtml = `<div class="msger-indicator sent"><i class="fa fa-check"></i></div>`;
+            } else if (msg.status === 'delivered') {
+                statusHtml = `<div class="msger-indicator delivered"><i class="fa fa-check"></i></div>`;
+            } else if (msg.status === 'read') {
+                let initials = getInitials($('#active-contact-name').text());
+                statusHtml = `<div class="msger-indicator read-avatar">${initials}</div>`;
+            }
+            html += `<div class="msger-status-row">${statusHtml}</div>`;
+        }
+
         let chatBox = $('#chat-messages');
-        chatBox.scrollTop(chatBox.prop("scrollHeight"));
-    }
+        let isAtBottom = chatBox.prop("scrollHeight") - chatBox.scrollTop() === chatBox.outerHeight();
 
-    // SEND: Messenger Message
-    function handleKeyPress(e) {
-        if(e.key === 'Enter') {
-            sendMessage();
+        chatBox.append(html);
+
+        if (isAtBottom) {
+            chatBox.scrollTop(chatBox.prop("scrollHeight"));
         }
     }
 
-    // SEND: Messenger Message Helper
+    // SEND: Facebook Messenger Message through API
     function sendMessage() {
         let input = $('#message-input');
         let val = input.val().trim();
@@ -1211,38 +1308,19 @@
 
         input.val('');
 
-        mockMessages[currentContactId].push({
-            id: Date.now(),
-            body: val,
-            direction: 'outbound',
-            status: 'sent',
-            created_at: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+        $.post("{{ route('conversation.facebook.send') }}", {
+            _token: "{{ csrf_token() }}",
+            contact_id: currentContactId,
+            message: val
+        }, function(data) {
+            if (data.success) {
+                appendMessage(data.message);
+                fetchContacts(); // Re-order contacts
+            }
+        }).fail(function(xhr) {
+            let err = xhr.responseJSON ? xhr.responseJSON.error : 'Failed to send message.';
+            alert("Error: " + err);
         });
-
-        let contact = mockContacts.find(c => c.id === currentContactId);
-        if (contact) {
-            contact.last_msg = val;
-            contact.time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-        }
-
-        renderMessages(currentContactId);
-        renderContacts(mockContacts);
-
-        setTimeout(() => {
-            let msgs = mockMessages[currentContactId];
-            if(msgs && msgs.length > 0) {
-                msgs[msgs.length - 1].status = 'delivered';
-                renderMessages(currentContactId);
-            }
-        }, 1500);
-
-        setTimeout(() => {
-            let msgs = mockMessages[currentContactId];
-            if(msgs && msgs.length > 0) {
-                msgs[msgs.length - 1].status = 'read';
-                renderMessages(currentContactId);
-            }
-        }, 3000);
     }
 
     // RENDER: Instagram Contacts

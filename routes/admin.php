@@ -433,6 +433,11 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/conversation/whatsapp/contacts', 'getWhatsappContacts')->name('conversation.whatsapp.contacts');
         Route::get('/conversation/whatsapp/messages/{contact_id}', 'getWhatsappMessages')->name('conversation.whatsapp.messages');
         Route::post('/conversation/whatsapp/send', 'sendWhatsappMessage')->name('conversation.whatsapp.send');
+
+        // Facebook Messenger integration routes
+        Route::get('/conversation/facebook/contacts', 'getFacebookContacts')->name('conversation.facebook.contacts');
+        Route::get('/conversation/facebook/messages/{contact_id}', 'getFacebookMessages')->name('conversation.facebook.messages');
+        Route::post('/conversation/facebook/send', 'sendFacebookMessage')->name('conversation.facebook.send');
     });
 });
 Route::match(['get', 'post'], '/webhook/whatsapp', [ConversationController::class, 'handleWhatsApp']);

@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Events\NewWhatsAppMessage;
+use App\Events\NewFacebookMessage;
 use App\Models\WhatsappContact;
 use App\Models\WhatsappMessage;
+use App\Models\FacebookContact;
+use App\Models\FacebookMessage;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
@@ -250,6 +253,28 @@ class ConversationController extends Controller
         }
     }
 
+    public function getFacebookContacts()
+    {
+        $contacts = FacebookContact::orderBy('last_message_at', 'desc')->get();
+
+        return response()->json($contacts);
+    }
+
+    public function getFacebookMessages($contact_id)
+    {
+        $contact = FacebookContact::findOrFail($contact_id);
+        $contact->update(['unread_count' => 0]);
+
+        $messages = FacebookMessage::where('facebook_contact_id', $contact_id)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return response()->json([
+            'contact' => $contact,
+            'messages' => $messages,
+        ]);
+    }
+
     public function handleMessenger(Request $request)
     {
         // ১. ফেসবুক মেসেঞ্জার ভেরিফিকেশন (GET Request)
@@ -270,19 +295,47 @@ class ConversationController extends Controller
         // ২. মেসেঞ্জারের রিয়েল-টাইম মেসেজ রিসিভ করা (POST Request)
         if ($request->isMethod('post')) {
             $data = $request->all();
-            \Log::info('Messenger Webhook Data:', $data); // লগে ডাটা চেক করার জন্য
+            \Log::info('Messenger Webhook Data:', $data);
 
             if (isset($data['entry'][0]['messaging'][0])) {
                 $messaging = $data['entry'][0]['messaging'][0];
-                $senderId = $messaging['sender']['id']; // কাস্টমারের ফেসবুক পিএসআইডি (PSID)
+                $senderId = $messaging['sender']['id'];
 
                 // কাস্টমার মেসেজ পাঠিয়েছে কি না চেক করা
                 if (isset($messaging['message']) && ! isset($messaging['message']['is_echo'])) {
                     $messageBody = $messaging['message']['text'] ?? '[Media/Attachment]';
                     $messageId = $messaging['message']['mid'];
 
-                    // TODO: এখানে হোয়াটসঅ্যাপের মতো কন্টাক্ট তৈরি/খুঁজে বের করবেন
-                    // এবং মেসেজটি ডাটাবেজে 'inbound' হিসেবে সেভ করবেন।
+                    // Find or create contact
+                    $contact = FacebookContact::where('sender_id', $senderId)->first();
+                    if (!$contact) {
+                        $profile = $this->getFacebookProfile($senderId);
+                        $contact = FacebookContact::create([
+                            'sender_id' => $senderId,
+                            'name' => $profile['name'],
+                            'unread_count' => 0,
+                        ]);
+                    }
+
+                    $contact->unread_count += 1;
+                    $contact->last_message_at = now();
+                    $contact->save();
+
+                    // Save message
+                    $newMessage = FacebookMessage::firstOrCreate(
+                        ['message_id' => $messageId],
+                        [
+                            'facebook_contact_id' => $contact->id,
+                            'body' => $messageBody,
+                            'type' => 'text',
+                            'direction' => 'inbound',
+                            'status' => 'received',
+                        ]
+                    );
+
+                    if ($newMessage->wasRecentlyCreated) {
+                        broadcast(new NewFacebookMessage($newMessage, $contact));
+                    }
                 }
             }
 
@@ -290,21 +343,72 @@ class ConversationController extends Controller
         }
     }
 
-    public function sendMessengerMessage($recipientId, $messageText)
+    private function getFacebookProfile($senderId)
     {
         $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+        if (!$accessToken) {
+            return ['name' => 'Facebook User'];
+        }
+
+        try {
+            $response = Http::get("https://graph.facebook.com/v20.0/{$senderId}", [
+                'fields' => 'first_name,last_name',
+                'access_token' => $accessToken,
+            ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                $firstName = $data['first_name'] ?? '';
+                $lastName = $data['last_name'] ?? '';
+                return [
+                    'name' => trim($firstName . ' ' . $lastName) ?: 'Facebook User',
+                ];
+            }
+        } catch (\Exception $e) {
+            \Log::error('Facebook Profile Fetch Error: '.$e->getMessage());
+        }
+
+        return ['name' => 'Facebook User'];
+    }
+
+    public function sendFacebookMessage(Request $request)
+    {
+        $request->validate([
+            'contact_id' => 'required|exists:facebook_contacts,id',
+            'message' => 'required|string',
+        ]);
+
+        $contact = FacebookContact::findOrFail($request->contact_id);
+        $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+
+        if (!$accessToken) {
+            return response()->json(['error' => 'Messenger Access Token is not configured.'], 500);
+        }
 
         $response = Http::post("https://graph.facebook.com/v20.0/me/messages?access_token={$accessToken}", [
-            'recipient' => ['id' => $recipientId], // কাস্টমারের ফেসবুক আইডি (Sender ID)
+            'recipient' => ['id' => $contact->sender_id],
             'messaging_type' => 'RESPONSE',
-            'message' => ['text' => $messageText],
+            'message' => ['text' => $request->message],
         ]);
 
         if ($response->successful()) {
-            // ডাটাবেজে 'outbound' মেসেজ হিসেবে সেভ করুন
-            return response()->json(['success' => true]);
+            $responseData = $response->json();
+            $messageId = $responseData['message_id'] ?? uniqid('fb_out_');
+
+            $newMessage = FacebookMessage::create([
+                'facebook_contact_id' => $contact->id,
+                'message_id' => $messageId,
+                'body' => $request->message,
+                'type' => 'text',
+                'direction' => 'outbound',
+                'status' => 'sent',
+            ]);
+
+            $contact->update(['last_message_at' => now()]);
+
+            return response()->json(['success' => true, 'message' => $newMessage]);
         }
 
-        return response()->json(['error' => $response->body()], 500);
+        return response()->json(['error' => 'Failed to send message: '.$response->body()], 500);
     }
 }
