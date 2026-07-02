@@ -579,7 +579,7 @@
         
         // Listen for new messages globally to update the contact list
         window.Echo.channel('whatsapp-contacts')
-            .listen('NewWhatsAppMessage', (e) => {
+            .listen('.whatsapp.message.new', (e) => {
                 fetchContacts();
             });
 
@@ -646,7 +646,7 @@
 
         // Listen for messages on the specific chat channel
         window.Echo.channel('whatsapp-chat.' + contactId)
-            .listen('NewWhatsAppMessage', (e) => {
+            .listen('.whatsapp.message.new', (e) => {
                 appendMessage(e.message);
                 fetchContacts(); // Clear unread counts for this contact
             });
