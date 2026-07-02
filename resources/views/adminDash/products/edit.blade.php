@@ -10,6 +10,15 @@
     </div>
     <div class="row">
         <div class="col">
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <form action="{{ route('product.update', $product->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="card">

@@ -542,11 +542,11 @@
                                         </a>
 
                                         <!-- Edit incomplete order -->
-                                        <button type="button" class="icon-action-btn icon-action-edit edit-incom-btn" 
-                                            data-id="{{ $incomOrder->id }}" 
-                                            data-name="{{ $incomOrder->name }}" 
-                                            data-phone="{{ $incomOrder->phone }}" 
-                                            data-address="{{ $incomOrder->address }}" 
+                                        <button type="button" class="icon-action-btn icon-action-edit edit-incom-btn"
+                                            data-id="{{ $incomOrder->id }}"
+                                            data-name="{{ $incomOrder->name }}"
+                                            data-phone="{{ $incomOrder->phone }}"
+                                            data-address="{{ $incomOrder->address }}"
                                             data-total="{{ $incomOrder->grand_total }}"
                                             title="Quick Edit">
                                             <i class="fa-solid fa-pen-to-square"></i>
@@ -594,12 +594,12 @@
                     </div>
                     <div class="modal-body p-4" style="font-family: 'Inter', sans-serif;">
                         <input type="hidden" id="edit_incom_id">
-                        
+
                         <div class="mb-3">
                             <label class="form-label font-weight-bold text-muted" style="font-size: 0.8rem;">Customer Name</label>
                             <input type="text" name="name" id="edit_incom_name" class="filter-control" required>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label font-weight-bold text-muted" style="font-size: 0.8rem;">Customer Phone</label>
                             <input type="text" name="phone" id="edit_incom_phone" class="filter-control" required>

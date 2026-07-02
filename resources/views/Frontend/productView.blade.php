@@ -523,8 +523,8 @@
                                             @foreach ($singleProduct->productImages as $key => $productImage)
                                                 <div class="carousel-box img-zoom">
                                                     <img class="img-fluid lazyload" style="width: 100%; max-height: 480px; object-fit: contain;"
-                                                        src="{{ asset('adminDash/uploads/products') }}/{{ $productImage->image }}"
-                                                        data-src="{{ asset('adminDash/uploads/products') }}/{{ $productImage->image }}"
+                                                        src="{{ asset('uploads') }}/{{ $productImage->image }}"
+                                                        data-src="{{ asset('uploads') }}/{{ $productImage->image }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
                                                 </div>
                                             @endforeach
@@ -539,7 +539,7 @@
                                             @foreach ($singleProduct->productImages as $key => $productImage)
                                                 <div class="carousel-box c-pointer">
                                                     <img class="lazyload mw-100 size-50px mx-auto" style="object-fit: cover;"
-                                                        src="{{ asset('adminDash/uploads/products') }}/{{ $productImage->image }}"
+                                                        src="{{ asset('uploads') }}/{{ $productImage->image }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
                                                 </div>
                                             @endforeach
@@ -758,7 +758,7 @@
                                                         class="d-block mini-product-img">
                                                         <img class="img-fit lazyload" style="height: 65px; width: 100%; object-fit: cover;"
                                                             src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                            data-src="{{ $product->firstImage ? asset('adminDash/uploads/products/' . $product->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                            data-src="{{ $product->firstImage ? asset('uploads/' . $product->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
                                                             alt="{{ $product->title }}"
                                                             onerror="this.onerror=null;this.src='{{ asset('frontEnd') }}/assets/img/placeholder.jpg';">
                                                     </a>
@@ -889,7 +889,7 @@
                                                     <a href="{{ route('ProductView', [$relProduct->slug, $relProduct->id]) }}" class="d-block">
                                                         <img class="img-fit lazyload mx-auto" style="height: 190px; width: 100%; object-fit: cover;"
                                                             src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                            data-src="{{ $relProduct->firstImage ? asset('adminDash/uploads/products/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                            data-src="{{ $relProduct->firstImage ? asset('uploads/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
                                                             alt="{{ $relProduct->title }}"
                                                             onerror="this.onerror=null;this.src='{{ asset('frontEnd') }}/assets/img/placeholder.jpg';">
                                                     </a>

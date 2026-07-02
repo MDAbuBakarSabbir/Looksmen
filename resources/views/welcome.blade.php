@@ -135,7 +135,7 @@
                                                 <div class="img">
                                                     <img class="lazyload img-fit h-140px h-lg-80px"
                                                         src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
-                                                        data-src="{{ $todaysDeal->firstImage ? asset('adminDash/uploads/products/' . $todaysDeal->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
+                                                        data-src="{{ $todaysDeal->firstImage ? asset('uploads/' . $todaysDeal->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                         alt="{{ $todaysDeal->title }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
                                                 </div>
@@ -206,7 +206,7 @@
                                     <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}" class="d-block">
                                         <img class="img-fit mx-auto h-140px h-md-210px lazyload"
                                             src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
-                                            data-src="{{ $newArival->firstImage ? asset('adminDash/uploads/products/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
+                                            data-src="{{ $newArival->firstImage ? asset('uploads/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                             alt="{{ $newArival->name }}"
                                             onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
                                     </a>
@@ -293,7 +293,7 @@
                                                     class="d-block">
                                                     <img class="img-fit mx-auto h-140px h-md-210px ls-is-cached lazyload"
                                                         src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
-                                                        data-src="{{ $product->firstImage ? asset('adminDash/uploads/products/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
+                                                        data-src="{{ $product->firstImage ? asset('uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                         alt="Exclusive Fu l  l Sleeve Check Formal and Casual Shirt for Men"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';"
                                                         alt="{{ $product->title }}">

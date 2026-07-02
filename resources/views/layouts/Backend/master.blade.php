@@ -95,7 +95,7 @@
     <link href="{{ asset('adminDash/assets/vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet">
 
     <!-- Select2 & Summernote -->
-    <link rel="stylesheet" href="{{ asset('adminDash/assets/vendor/select2/select2.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('adminDash/assets/vendor/select2/css/select2.min.css') }}">
     <link href="{{ asset('adminDash/assets/css/style.css') }}" rel="stylesheet">
     <!-- Global Admin Custom Styles (shared UI components) -->
     <link href="{{ asset('adminDash/assets/css/admin-custom.css') }}" rel="stylesheet">
@@ -103,14 +103,13 @@
     <!-- Font Awesome 6 Icons - loaded non-blocking -->
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"></noscript>
-    <!-- Summernote CSS - non-blocking -->
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'" crossorigin="anonymous">
-    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.css"></noscript>
+    <!-- Summernote CSS (local vendor) -->
+    <link href="{{ asset('adminDash/assets/vendor/summernote/summernote.css') }}" rel="stylesheet">
     {{-- Page-specific styles injected here --}}
     @yield('style')
 
 
-    <script src="{{ asset('adminDash/assets/vendor/sweetalert2/sweetalert2.min.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         window.Toast = Swal.mixin({
             toast: true,
@@ -1353,6 +1352,14 @@
                         </ul>
                     </li>
                     @endif
+                    @if($user?->hasPermission('manage_support_tickets'))
+                    <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa-solid fa-comment-dots mr-2"></i><span class="nav-text">Conversation</span></a>
+                        <ul aria-expanded="false">
+                            <li><a href="{{ route('conversation.facebook') }}">Facebook Massenger Instagram</a></li>
+                            <li><a href="{{ route('conversation.whatsapp') }}">Whatsapp</a></li>
+                        </ul>
+                    </li>
+                    @endif
 
                     @if (isset($featuresConfig['affiliate']) && $featuresConfig['affiliate'] == '1')
                         @if($user?->hasPermission('manage_affiliate_configs') || $user?->hasPermission('manage_affiliate_users') || $user?->hasPermission('manage_referral_users') || $user?->hasPermission('manage_affiliate_withdraw') || $user?->hasPermission('manage_affiliate_logs'))
@@ -1488,11 +1495,13 @@
     <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.min.js') }}"></script>
     <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.usa.js') }}"></script>
     <script src="{{ asset('adminDash/assets/vendor/jquery.counterup/jquery.counterup.min.js') }}"></script>
+    @if(Route::is('admin.dashboard'))
     <script src="{{ asset('adminDash/assets/js/dashboard/dashboard-1.js') }}"></script>
+    @endif
 
     <script src="{{ asset('adminDash/assets/vendor/select2/select2.full.min.js') }}"></script>
-    {{-- Summernote JS - deferred so it does not block page load --}}
-    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs4.min.js" crossorigin="anonymous"></script>
+    <!-- Summernote JS (local vendor - must NOT be deferred so it's ready for document.ready) -->
+    <script src="{{ asset('adminDash/assets/vendor/summernote/js/summernote.min.js') }}"></script>
 
     <!-- AJAX Order Alerts -->
     <script>
