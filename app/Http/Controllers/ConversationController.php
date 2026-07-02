@@ -18,7 +18,6 @@ class ConversationController extends Controller
 
     public function handleWhatsApp(Request $request)
     {
-        // ফেসবুকের ভেরিফিকেশন হ্যান্ডেল করা (GET Request)
         if ($request->isMethod('get')) {
             $mode = $request->query('hub_mode');
             $token = $request->query('hub_verify_token');
@@ -27,51 +26,140 @@ class ConversationController extends Controller
             $myVerifyToken = env('WHATSAPP_HOOK_VERIFY_TOKEN');
 
             if ($mode === 'subscribe' && $token === $myVerifyToken) {
-                // ফেসবুক শুধু এই challenge লেখাটি প্লেইন টেক্সট হিসেবে ফেরত চায়
                 return response($challenge, 200)->header('Content-Type', 'text/plain');
             }
 
             return response('Forbidden', 403);
         }
 
-        // হোয়াটসঅ্যাপের ডাটা রিসিভ করা (POST Request)
         if ($request->isMethod('post')) {
             $data = $request->all();
             \Log::info('WhatsApp Webhook:', $data);
 
+            if (isset($data['entry'][0]['changes'][0]['value']['messages'][0])) {
+                $value = $data['entry'][0]['changes'][0]['value'];
+                $messageData = $value['messages'][0];
+                
+                $wa_id = $messageData['from'];
+                $message_id = $messageData['id'];
+                $type = $messageData['type'];
+                
+                // Get contact name if available
+                $contactName = $wa_id;
+                if (isset($value['contacts'][0]['profile']['name'])) {
+                    $contactName = $value['contacts'][0]['profile']['name'];
+                }
+
+                // Find or create contact
+                $contact = \App\Models\WhatsappContact::firstOrCreate(
+                    ['phone_number' => $wa_id],
+                    ['name' => $contactName]
+                );
+
+                // Update unread count & last message time
+                $contact->unread_count += 1;
+                $contact->last_message_at = now();
+                $contact->save();
+
+                // Extract body based on type
+                $body = '';
+                if ($type === 'text' && isset($messageData['text']['body'])) {
+                    $body = $messageData['text']['body'];
+                } elseif ($type === 'image') {
+                    $body = '[Image Received]'; // Placeholder for media handling
+                } else {
+                    $body = '[' . ucfirst($type) . ' Received]';
+                }
+
+                // Save Message
+                \App\Models\WhatsappMessage::firstOrCreate(
+                    ['message_id' => $message_id],
+                    [
+                        'whatsapp_contact_id' => $contact->id,
+                        'body' => $body,
+                        'type' => $type,
+                        'direction' => 'inbound',
+                        'status' => 'received',
+                    ]
+                );
+            }
+
             return response('EVENT_RECEIVED', 200);
         }
     }
-    // public function handleWhatsApp(Request $request)
-    // {
-    //     // ১. ফেসবুকের ভেরিফিকেশন হ্যান্ডেল করা (GET Request)
-    //     if ($request->isMethod('get')) {
-    //         $mode = $request->query('hub_mode');
-    //         $token = $request->query('hub_verify_token');
-    //         $challenge = $request->query('hub_challenge');
 
-    //         // আপনার নিজের তৈরি করা একটি সিক্রেট টোকেন (যা .env-এ রাখবেন)
-    //         $myVerifyToken = env('WHATSAPP_HOOK_VERIFY_TOKEN', 'MySecretToken123');
+    // API: Get Contacts
+    public function getWhatsappContacts()
+    {
+        $contacts = \App\Models\WhatsappContact::orderBy('last_message_at', 'desc')->get();
+        return response()->json($contacts);
+    }
 
-    //         if ($mode && $token) {
-    //             if ($mode === 'subscribe' && $token === $myVerifyToken) {
-    //                 return response($challenge, 200)->header('Content-Type', 'text/plain');
-    //             }
+    // API: Get Messages for a specific contact
+    public function getWhatsappMessages($contact_id)
+    {
+        $contact = \App\Models\WhatsappContact::findOrFail($contact_id);
+        
+        // Reset unread count when opening chat
+        $contact->update(['unread_count' => 0]);
 
-    //             return response('Forbidden', 403);
-    //         }
-    //     }
+        $messages = \App\Models\WhatsappMessage::where('whatsapp_contact_id', $contact_id)
+                        ->orderBy('created_at', 'asc')
+                        ->get();
 
-    //     // ২. হোয়াটসঅ্যাপের রিয়েল-টাইম ডাটা/মেসেজ রিসিভ করা (POST Request)
-    //     if ($request->isMethod('post')) {
-    //         $data = $request->all();
+        return response()->json([
+            'contact' => $contact,
+            'messages' => $messages
+        ]);
+    }
 
-    //         // ডাটা ঠিকঠাক আসছে কি না তা লারাভেল লগে দেখার জন্য
-    //         \Log::info('WhatsApp Webhook Data:', $data);
+    // API: Send Message
+    public function sendWhatsappMessage(Request $request)
+    {
+        $request->validate([
+            'contact_id' => 'required|exists:whatsapp_contacts,id',
+            'message' => 'required|string',
+        ]);
 
-    //         // এখানে আপনি ডাটাবেজে মেসেজ সেভ করার কোড লিখবেন
+        $contact = \App\Models\WhatsappContact::findOrFail($request->contact_id);
+        $phone_number_id = env('WHATSAPP_PHONE_NUMBER_ID');
+        $access_token = env('WHATSAPP_ACCESS_TOKEN');
 
-    //         return response('EVENT_RECEIVED', 200);
-    //     }
-    // }
+        if (!$phone_number_id || !$access_token) {
+            return response()->json(['error' => 'WhatsApp API credentials not configured.'], 500);
+        }
+
+        // Send to WhatsApp API
+        $response = \Illuminate\Support\Facades\Http::withToken($access_token)->post(
+            "https://graph.facebook.com/v17.0/{$phone_number_id}/messages",
+            [
+                'messaging_product' => 'whatsapp',
+                'to' => $contact->phone_number,
+                'type' => 'text',
+                'text' => [
+                    'body' => $request->message
+                ]
+            ]
+        );
+
+        if ($response->successful()) {
+            $responseData = $response->json();
+            
+            // Save outbound message to DB
+            $newMessage = \App\Models\WhatsappMessage::create([
+                'whatsapp_contact_id' => $contact->id,
+                'message_id' => $responseData['messages'][0]['id'] ?? uniqid('out_'),
+                'body' => $request->message,
+                'type' => 'text',
+                'direction' => 'outbound',
+                'status' => 'sent',
+            ]);
+
+            $contact->update(['last_message_at' => now()]);
+
+            return response()->json(['success' => true, 'message' => $newMessage]);
+        }
+
+        return response()->json(['error' => 'Failed to send message: ' . $response->body()], 500);
+    }
 }
