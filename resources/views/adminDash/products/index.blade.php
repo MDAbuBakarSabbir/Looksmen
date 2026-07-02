@@ -1,4 +1,4 @@
-﻿@php
+@php
     use App\Models\ProductImage;
 @endphp
 @extends('layouts.Backend.master')
@@ -464,26 +464,35 @@
                 Toast.fire({ icon: 'warning', title: 'No products selected' });
                 return;
             }
-            if (!confirm('Are you sure you want to delete the selected products?')) {
-                return;
-            }
-            $.ajax({
-                url: "{{ route('product.bulk-delete') }}",
-                type: 'POST',
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    ids: selectedIds
-                },
-                success: function(response) {
-                    if (response.success) {
-                        Toast.fire({ icon: 'success', title: response.message || 'Products deleted' });
-                        $('.product-check:checked').closest('tr').remove();
-                        $('#productCheckAll').prop('checked', false);
-                    }
-                },
-                error: function(xhr) {
-                    console.error(xhr.responseText);
-                    Toast.fire({ icon: 'error', title: 'Failed to delete products' });
+            
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You are about to delete the selected products!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, Delete",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('product.bulk-delete') }}",
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: selectedIds
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Toast.fire({ icon: 'success', title: response.message || 'Products deleted' });
+                                $('.product-check:checked').closest('tr').remove();
+                                $('#productCheckAll').prop('checked', false);
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error(xhr.responseText);
+                            Toast.fire({ icon: 'error', title: 'Failed to delete products' });
+                        }
+                    });
                 }
             });
         });
@@ -576,7 +585,7 @@
             }).then((result) => {
                 if (result.isConfirmed) {
                     let form = document.getElementById('Productdelete');
-                    form.action = "/admin/products/destroy/" + id;
+                    form.action = "{{ url('admin/products/destroy') }}/" + id;
                     form.submit();
                 }
             });

@@ -287,7 +287,7 @@
                                             <a href="{{ route('ProductView', [$catProduct->slug, $catProduct->id]) }}" class="d-block text-center pt-3">
                                                 <img class="img-fit lazyload mx-auto h-160px h-md-210px"
                                                     src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                    data-src="{{ $catProduct->firstImage ? asset('adminDash/uploads/products/' . $catProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                    data-src="{{ $catProduct->firstImage ? asset('uploads/' . $catProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
                                                     alt="{{ $catProduct->title }}"
                                                     onerror="this.onerror=null;this.src='{{ asset('frontEnd') }}/assets/img/placeholder.jpg';">
                                             </a>

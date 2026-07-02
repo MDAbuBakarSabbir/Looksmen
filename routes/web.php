@@ -1,13 +1,19 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\Admin\affiliate\AffiliateController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\GeneralWebSettingsController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\CompareController;
+use App\Http\Controllers\ConversationController;
+use App\Http\Controllers\Customer\WalletPointController;
 use App\Http\Controllers\FrontCategoryController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware('guest:admin')->group(function () {
@@ -28,15 +34,15 @@ Route::middleware(['maintainance'])->group(function () {
         Route::get('/purchase-history', [ProfileController::class, 'purchaseHistory'])->name('purchaseHistory');
         Route::get('/wishlist', [ProfileController::class, 'wishlist'])->name('wishlist');
         Route::get('/compare', [ProfileController::class, 'compare'])->name('compare');
-        Route::get('/conversation', [\App\Http\Controllers\ChatController::class, 'index'])->name('conversation');
-        Route::get('/conversation/messages', [\App\Http\Controllers\ChatController::class, 'getMessages'])->name('conversation.messages');
-        Route::post('/conversation/send', [\App\Http\Controllers\ChatController::class, 'sendMessage'])->name('conversation.send');
-        Route::get('/my-wallet', [\App\Http\Controllers\Customer\WalletPointController::class, 'myWallet'])->name('myWallet');
-        Route::post('/wallet/recharge', [\App\Http\Controllers\Customer\WalletPointController::class, 'recharge'])->name('wallet.recharge');
-        Route::get('/wallet/recharge/bkash/callback', [\App\Http\Controllers\Customer\WalletPointController::class, 'bkashCallback'])->name('wallet.recharge.bkash.callback');
-        Route::post('/wallet/convert-points', [\App\Http\Controllers\Customer\WalletPointController::class, 'convertPoints'])->name('wallet.convert-points');
-        Route::get('/support-ticket', [\App\Http\Controllers\SupportTicketController::class, 'index'])->name('supportTicket');
-        Route::post('/support-ticket', [\App\Http\Controllers\SupportTicketController::class, 'store'])->name('supportTicket.store');
+        Route::get('/conversation', [ChatController::class, 'index'])->name('conversation');
+        Route::get('/conversation/messages', [ChatController::class, 'getMessages'])->name('conversation.messages');
+        Route::post('/conversation/send', [ChatController::class, 'sendMessage'])->name('conversation.send');
+        Route::get('/my-wallet', [WalletPointController::class, 'myWallet'])->name('myWallet');
+        Route::post('/wallet/recharge', [WalletPointController::class, 'recharge'])->name('wallet.recharge');
+        Route::get('/wallet/recharge/bkash/callback', [WalletPointController::class, 'bkashCallback'])->name('wallet.recharge.bkash.callback');
+        Route::post('/wallet/convert-points', [WalletPointController::class, 'convertPoints'])->name('wallet.convert-points');
+        Route::get('/support-ticket', [SupportTicketController::class, 'index'])->name('supportTicket');
+        Route::post('/support-ticket', [SupportTicketController::class, 'store'])->name('supportTicket.store');
     });
 
     Route::controller(CartController::class)->group(function () {
@@ -91,7 +97,7 @@ Route::middleware(['maintainance'])->group(function () {
         Route::delete('/addresses/destroy/{id}', 'destroy')->name('addresses.destroy');
     });
 
-    Route::controller(\App\Http\Controllers\CompareController::class)->group(function () {
+    Route::controller(CompareController::class)->group(function () {
         Route::post('/compare/add', 'addToCompare')->name('compare.add');
         Route::post('/compare/remove', 'removeFromCompare')->name('compare.remove');
         Route::get('/compare/reset', 'resetCompare')->name('compare.reset');
@@ -99,11 +105,11 @@ Route::middleware(['maintainance'])->group(function () {
     });
 
     // Affiliate System Frontend Routes
-    Route::controller(\App\Http\Controllers\Admin\affiliate\AffiliateController::class)->group(function () {
+    Route::controller(AffiliateController::class)->group(function () {
         Route::get('/affiliate', 'index')->name('affiliate.index');
         Route::get('/affiliate/apply', 'apply_for_affiliate')->name('affiliate.apply');
         Route::post('/affiliate/apply', 'store_affiliate_user')->name('affiliate.apply.store');
-        
+
         Route::middleware(['auth'])->group(function () {
             Route::get('/affiliate/dashboard', 'user_index')->name('affiliate.user.index');
             Route::get('/affiliate/payment-history', 'user_payment_history')->name('affiliate.user.payment_history');
@@ -112,6 +118,12 @@ Route::middleware(['maintainance'])->group(function () {
             Route::post('/affiliate/payment-settings', 'payment_settings_store')->name('affiliate.user.payment_settings_store');
             Route::post('/affiliate/withdraw-request', 'withdraw_request_store')->name('affiliate.user.withdraw_request_store');
         });
+    });
+
+    Route::controller(ConversationController::class)->group(function () {
+        Route::get('/conversation/facebook', 'facebook')->name('conversation.facebook');
+        Route::get('/conversation/whatsapp', 'whatsapp')->name('conversation.whatsapp');
+        Route::match(['get', 'post'], '/webhook/whatsapp', 'handleWhatsApp');
     });
 });
 

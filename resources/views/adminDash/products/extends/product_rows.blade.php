@@ -18,9 +18,9 @@
         @endphp
         <td>
             @if (!$productImage)
-                <img src="{{ asset('adminDash/images/product/demo.jpg') }}" alt="" style="height: 60px; width: 60px; object-fit: cover; border-radius: 6px;">
+                <img src="{{ asset('uploads/demo.jpg') }}" alt="" style="height: 60px; width: 60px; object-fit: cover; border-radius: 6px;">
             @else
-                <img src="{{ asset('adminDash/images/product/' . $productImage->image) }}" style="height: 60px; width: 60px; object-fit: cover; border-radius: 6px;" alt="">
+                <img src="{{ asset('uploads/' . $productImage->image) }}" style="height: 60px; width: 60px; object-fit: cover; border-radius: 6px;" alt="">
             @endif
         </td>
         <td>

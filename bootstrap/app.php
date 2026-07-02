@@ -1,9 +1,15 @@
 <?php
 
+use App\Http\Middleware\AdminPermission;
+use App\Http\Middleware\AffiliateTrackingMiddleware;
+use App\Http\Middleware\BlockIpMiddleware;
+use App\Http\Middleware\BlockUserMiddleware;
+use App\Http\Middleware\MaintainanceMiddlewere;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -11,14 +17,14 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
         then: function () {
-            \Illuminate\Support\Facades\Route::middleware('web')
+            Route::middleware('web')
                 ->group(base_path('routes/admin.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->append(\App\Http\Middleware\BlockIpMiddleware::class);
-        $middleware->append(\App\Http\Middleware\BlockUserMiddleware::class);
-        $middleware->append(\App\Http\Middleware\AffiliateTrackingMiddleware::class);
+        $middleware->append(BlockIpMiddleware::class);
+        $middleware->append(BlockUserMiddleware::class);
+        $middleware->append(AffiliateTrackingMiddleware::class);
 
         $middleware->redirectGuestsTo(function (Request $request) {
             if ($request->is('admin') || $request->is('admin/*')) {
@@ -33,8 +39,8 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $middleware->alias([
-            'admin.permission' => \App\Http\Middleware\AdminPermission::class,
-            'maintainance' => \App\Http\Middleware\MaintainanceMiddlewere::class,
+            'admin.permission' => AdminPermission::class,
+            'maintainance' => MaintainanceMiddlewere::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [
@@ -47,4 +53,11 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
-    })->create();
+    })
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'webhook/whatsapp',
+            'api/webhook/whatsapp',
+        ]);
+    })
+    ->create();

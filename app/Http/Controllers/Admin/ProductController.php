@@ -349,21 +349,16 @@ class ProductController extends Controller
         $request->validate([
             'title' => 'required',
             'category_id' => 'required',
-            'subcategory_id' => 'required',
-            'childcategory_id' => 'required',
+            'subcategory_id' => 'nullable',
+            'childcategory_id' => 'nullable',
             'description' => 'required',
             'old_price' => 'required',
             'new_price' => 'required',
             'stock' => 'required',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
-        $productcournt = Product::all()->count();
-        if ($productcournt != 1) {
-            $procount = 1;
-        } else {
-            $procount = $productcournt;
-        }
+        $maxId = Product::max('id') ?? 0;
         $currentYear = Carbon::now()->year;
         $product = Product::create([
             'title' => $request->title,
@@ -375,7 +370,7 @@ class ProductController extends Controller
             'old_price' => $request->old_price,
             'new_price' => $request->new_price,
             'stock' => $request->stock,
-            'code' => $currentYear.$procount + 1,
+            'code' => $currentYear.($maxId + 1),
             'description' => $request->description,
             'video' => $request->video ?? null,
             'cod' => $request->cod ?? 1,
@@ -388,11 +383,15 @@ class ProductController extends Controller
         // Store Images
         $manager = new ImageManager(new Driver);
         if ($request->hasFile('images')) {
-            foreach ($request->file('images') as $proimage) {
+            $destinationPath = base_path('public/uploads');
+            if (! file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
 
+            foreach ($request->file('images') as $proimage) {
                 $imgName = $product->id.'-'.uniqid().Str::random(7).'.'.$proimage->getClientOriginalExtension();
                 $image = $manager->decode($proimage);
-                $image->save(base_path('public/adminDash/images/product/'.$imgName));
+                $image->save($destinationPath.'/'.$imgName);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,
@@ -493,13 +492,13 @@ class ProductController extends Controller
         $request->validate([
             'title' => 'required',
             'category_id' => 'required',
-            'subcategory_id' => 'required',
-            'childcategory_id' => 'required',
+            'subcategory_id' => 'nullable',
+            'childcategory_id' => 'nullable',
             'description' => 'required',
             'old_price' => 'required',
             'new_price' => 'required',
             'stock' => 'required',
-            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:2048',
+            'images.*' => 'image|mimes:jpg,jpeg,png,webp|max:5120',
         ]);
 
         $product = Product::findOrFail($id);
@@ -549,10 +548,15 @@ class ProductController extends Controller
         // Store new uploaded images
         $manager = new ImageManager(new Driver);
         if ($request->hasFile('images')) {
+            $destinationPath = base_path('public/adminDash/uploads/products');
+            if (! file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+
             foreach ($request->file('images') as $proimage) {
                 $imgName = $product->id.'-'.uniqid().Str::random(7).'.'.$proimage->getClientOriginalExtension();
                 $image = $manager->decode($proimage);
-                $image->save(base_path('public/adminDash/images/product/'.$imgName));
+                $image->save($destinationPath.'/'.$imgName);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,
@@ -597,11 +601,11 @@ class ProductController extends Controller
 
         for ($i = 1; $i <= $request->copies; $i++) {
 
-            // Total Product Count
-            $total = Product::count() + 1;
+            // Max ID
+            $maxId = Product::max('id') ?? 0;
 
-            // New Product Code = Year.TotalProductCount
-            $newCode = date('Y').$total;
+            // New Product Code = Year.MaxId
+            $newCode = date('Y').($maxId + 1);
 
             // Duplicate Product
             $newProduct = $original->replicate();
@@ -676,7 +680,8 @@ class ProductController extends Controller
                 $product->delete();
             }
         }
-        return response()->json(['success' => true, 'message' => count($ids) . ' products deleted successfully']);
+
+        return response()->json(['success' => true, 'message' => count($ids).' products deleted successfully']);
     }
 
     public function todays_deal_status(Request $request)
