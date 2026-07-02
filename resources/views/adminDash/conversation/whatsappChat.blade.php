@@ -596,11 +596,31 @@
                 }
             });
         });
+
+        // Hybrid Fallback Polling: If WebSockets fail or disconnect, poll every 6 seconds
+        setInterval(function() {
+            let isConnected = false;
+            try {
+                if (window.Echo && window.Echo.connector && window.Echo.connector.pusher && window.Echo.connector.pusher.connection) {
+                    isConnected = (window.Echo.connector.pusher.connection.state === 'connected');
+                }
+            } catch(e) {
+                isConnected = false;
+            }
+
+            if (!isConnected) {
+                fetchContacts();
+                if (currentContactId) {
+                    fetchMessages(currentContactId, false);
+                }
+            }
+        }, 6000);
     });
 
     function fetchContacts() {
         $.get("{{ route('conversation.whatsapp.contacts') }}", function(data) {
             let html = '';
+            let searchVal = $('#contact-search').val().toLowerCase();
             if(data.length === 0) {
                 html = '<div class="text-center p-5 text-muted">No conversations yet</div>';
             } else {
@@ -609,8 +629,13 @@
                     let badgeClass = (contact.unread_count > 0) ? '' : 'd-none';
                     let name = contact.name || contact.phone_number;
                     let initials = getInitials(name);
+                    
+                    // Keep search filter state on update
+                    let isVisible = name.toLowerCase().includes(searchVal) || contact.phone_number.toLowerCase().includes(searchVal);
+                    let displayStyle = isVisible ? '' : 'style="display: none;"';
+
                     html += `
-                        <li class="contact-item ${activeClass}" onclick="openChat(${contact.id}, '${name}')">
+                        <li class="contact-item ${activeClass}" ${displayStyle} onclick="openChat(${contact.id}, '${name}')">
                             <div class="avatar-wrapper">${initials}</div>
                             <div class="contact-details">
                                 <div class="contact-header-info">
