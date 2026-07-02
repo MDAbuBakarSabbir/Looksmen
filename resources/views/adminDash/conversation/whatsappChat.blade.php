@@ -682,9 +682,17 @@
             let html = '';
             data.messages.forEach(function(msg) {
                 let time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                
+                let bodyContent = msg.body;
+                if (msg.type === 'image') {
+                    if (msg.body && (msg.body.startsWith('http') || msg.body.startsWith('/'))) {
+                        bodyContent = `<img src="${msg.body}" class="img-fluid rounded" style="max-width: 250px; cursor: pointer; display: block; border-radius: 8px; margin-bottom: 4px;" onclick="window.open('${msg.body}', '_blank')" />`;
+                    }
+                }
+
                 html += `
                     <div class="message ${msg.direction}" data-message-id="${msg.message_id || ''}">
-                        ${msg.body}
+                        ${bodyContent}
                         <div class="message-meta">
                             <span class="message-time">${time}</span>
                             ${getStatusHtml(msg)}
@@ -717,9 +725,17 @@
         }
 
         let time = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        let bodyContent = msg.body;
+        if (msg.type === 'image') {
+            if (msg.body && (msg.body.startsWith('http') || msg.body.startsWith('/'))) {
+                bodyContent = `<img src="${msg.body}" class="img-fluid rounded" style="max-width: 250px; cursor: pointer; display: block; border-radius: 8px; margin-bottom: 4px;" onclick="window.open('${msg.body}', '_blank')" />`;
+            }
+        }
+
         let html = `
             <div class="message ${msg.direction}" data-message-id="${msg.message_id || ''}">
-                ${msg.body}
+                ${bodyContent}
                 <div class="message-meta">
                     <span class="message-time">${time}</span>
                     ${getStatusHtml(msg)}

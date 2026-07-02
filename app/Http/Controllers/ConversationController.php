@@ -85,8 +85,12 @@ class ConversationController extends Controller
                     $body = '';
                     if ($type === 'text' && isset($messageData['text']['body'])) {
                         $body = $messageData['text']['body'];
+                    } elseif ($type === 'image' && isset($messageData['image']['id'])) {
+                        // Download media
+                        $localUrl = $this->downloadWhatsAppMedia($messageData['image']['id']);
+                        $body = $localUrl ?? '[Image Received]';
                     } elseif ($type === 'image') {
-                        $body = '[Image Received]'; // Placeholder for media handling
+                        $body = '[Image Received]';
                     } else {
                         $body = '['.ucfirst($type).' Received]';
                     }
@@ -187,5 +191,62 @@ class ConversationController extends Controller
         }
 
         return response()->json(['error' => 'Failed to send message: '.$response->body()], 500);
+    }
+
+    private function downloadWhatsAppMedia($mediaId)
+    {
+        $access_token = env('WHATSAPP_ACCESS_TOKEN');
+        if (! $access_token) {
+            return null;
+        }
+
+        try {
+            // Step 1: Get media URL
+            $urlResponse = Http::withToken($access_token)->get("https://graph.facebook.com/v17.0/{$mediaId}");
+            if (! $urlResponse->successful()) {
+                \Log::error('Failed to get WhatsApp media URL: '.$urlResponse->body());
+
+                return null;
+            }
+
+            $mediaUrl = $urlResponse->json()['url'] ?? null;
+            if (! $mediaUrl) {
+                return null;
+            }
+
+            // Step 2: Download binary data
+            $fileResponse = Http::withToken($access_token)->get($mediaUrl);
+            if (! $fileResponse->successful()) {
+                \Log::error('Failed to download WhatsApp media binary: '.$fileResponse->body());
+
+                return null;
+            }
+
+            // Step 3: Save to local storage
+            $contentType = $fileResponse->header('Content-Type');
+            $extension = 'jpg';
+            if (str_contains($contentType, 'png')) {
+                $extension = 'png';
+            } elseif (str_contains($contentType, 'gif')) {
+                $extension = 'gif';
+            } elseif (str_contains($contentType, 'webp')) {
+                $extension = 'webp';
+            }
+
+            $fileName = 'wa_'.$mediaId.'_'.time().'.'.$extension;
+            $dirPath = public_path('uploads/whatsapp');
+
+            if (! file_exists($dirPath)) {
+                mkdir($dirPath, 0755, true);
+            }
+
+            file_put_contents($dirPath.'/'.$fileName, $fileResponse->body());
+
+            return asset('uploads/whatsapp/'.$fileName);
+        } catch (\Exception $e) {
+            \Log::error('WhatsApp Media Download Exception: '.$e->getMessage());
+
+            return null;
+        }
     }
 }
