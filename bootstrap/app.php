@@ -61,4 +61,11 @@ return Application::configure(basePath: dirname(__DIR__))
             'api/webhook/whatsapp',
         ]);
     })
+    ->withMiddleware(function (Middleware $middleware) {
+        $middleware->validateCsrfTokens(except: [
+            'webhook/whatsapp',
+            'webhook/messenger', // মেসেঞ্জারের জন্য যুক্ত হলো
+        ]);
+    })
+
     ->create();
