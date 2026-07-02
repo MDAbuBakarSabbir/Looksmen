@@ -26,9 +26,9 @@ use App\Http\Controllers\Admin\SmtpController;
 use App\Http\Controllers\Admin\SocialMediaController;
 use App\Http\Controllers\Admin\SubCategoryController;
 use App\Http\Controllers\APIController;
+use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\IncompleteOrdersController;
 use App\Http\Controllers\UserController;
-use App\Http\Controllers\ConversationController;
 use App\Models\Orders;
 use App\Models\PaymentAPIS;
 use App\Models\Product;
@@ -436,3 +436,4 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     });
 });
 Route::match(['get', 'post'], '/webhook/whatsapp', [ConversationController::class, 'handleWhatsApp']);
+Route::match(['get', 'post'], '/webhook/messenger', [ConversationController::class, 'handleMessenger']);

@@ -249,4 +249,62 @@ class ConversationController extends Controller
             return null;
         }
     }
+
+    public function handleMessenger(Request $request)
+    {
+        // ১. ফেসবুক মেসেঞ্জার ভেরিফিকেশন (GET Request)
+        if ($request->isMethod('get')) {
+            $mode = $request->query('hub_mode');
+            $token = $request->query('hub_verify_token');
+            $challenge = $request->query('hub_challenge');
+
+            $myVerifyToken = env('MESSENGER_HOOK_VERIFY_TOKEN', 'MessengerSecret123');
+
+            if ($mode === 'subscribe' && $token === $myVerifyToken) {
+                return response($challenge, 200)->header('Content-Type', 'text/plain');
+            }
+
+            return response('Forbidden', 403);
+        }
+
+        // ২. মেসেঞ্জারের রিয়েল-টাইম মেসেজ রিসিভ করা (POST Request)
+        if ($request->isMethod('post')) {
+            $data = $request->all();
+            \Log::info('Messenger Webhook Data:', $data); // লগে ডাটা চেক করার জন্য
+
+            if (isset($data['entry'][0]['messaging'][0])) {
+                $messaging = $data['entry'][0]['messaging'][0];
+                $senderId = $messaging['sender']['id']; // কাস্টমারের ফেসবুক পিএসআইডি (PSID)
+
+                // কাস্টমার মেসেজ পাঠিয়েছে কি না চেক করা
+                if (isset($messaging['message']) && ! isset($messaging['message']['is_echo'])) {
+                    $messageBody = $messaging['message']['text'] ?? '[Media/Attachment]';
+                    $messageId = $messaging['message']['mid'];
+
+                    // TODO: এখানে হোয়াটসঅ্যাপের মতো কন্টাক্ট তৈরি/খুঁজে বের করবেন
+                    // এবং মেসেজটি ডাটাবেজে 'inbound' হিসেবে সেভ করবেন।
+                }
+            }
+
+            return response('EVENT_RECEIVED', 200);
+        }
+    }
+
+    public function sendMessengerMessage($recipientId, $messageText)
+    {
+        $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
+
+        $response = Http::post("https://graph.facebook.com/v20.0/me/messages?access_token={$accessToken}", [
+            'recipient' => ['id' => $recipientId], // কাস্টমারের ফেসবুক আইডি (Sender ID)
+            'messaging_type' => 'RESPONSE',
+            'message' => ['text' => $messageText],
+        ]);
+
+        if ($response->successful()) {
+            // ডাটাবেজে 'outbound' মেসেজ হিসেবে সেভ করুন
+            return response()->json(['success' => true]);
+        }
+
+        return response()->json(['error' => $response->body()], 500);
+    }
 }
