@@ -426,4 +426,12 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/wallet/points-config', 'pointConfig')->name('admin.wallet.points-config')->middleware('admin.permission:manage_wallet');
         Route::post('/wallet/points-config/store', 'pointConfigStore')->name('admin.wallet.points-config.store')->middleware('admin.permission:manage_wallet');
     });
+    Route::controller(ConversationController::class)->group(function () {
+        Route::get('/conversation/facebook', 'facebook')->name('conversation.facebook');
+        Route::get('/conversation/whatsapp', 'whatsapp')->name('conversation.whatsapp');
+        Route::get('/conversation/whatsapp/contacts', 'getWhatsappContacts')->name('conversation.whatsapp.contacts');
+        Route::get('/conversation/whatsapp/messages/{contact_id}', 'getWhatsappMessages')->name('conversation.whatsapp.messages');
+        Route::post('/conversation/whatsapp/send', 'sendWhatsappMessage')->name('conversation.whatsapp.send');
+    });
 });
+Route::match(['get', 'post'], '/webhook/whatsapp', [ConversationController::class, 'handleWhatsApp']);

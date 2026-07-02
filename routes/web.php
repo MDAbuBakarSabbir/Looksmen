@@ -8,7 +8,6 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CompareController;
-use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\Customer\WalletPointController;
 use App\Http\Controllers\FrontCategoryController;
 use App\Http\Controllers\HomeController;
@@ -120,14 +119,6 @@ Route::middleware(['maintainance'])->group(function () {
         });
     });
 
-    Route::controller(ConversationController::class)->group(function () {
-        Route::get('/conversation/facebook', 'facebook')->name('conversation.facebook');
-        Route::get('/conversation/whatsapp', 'whatsapp')->name('conversation.whatsapp');
-        Route::get('/conversation/whatsapp/contacts', 'getWhatsappContacts')->name('conversation.whatsapp.contacts');
-        Route::get('/conversation/whatsapp/messages/{contact_id}', 'getWhatsappMessages')->name('conversation.whatsapp.messages');
-        Route::post('/conversation/whatsapp/send', 'sendWhatsappMessage')->name('conversation.whatsapp.send');
-        Route::match(['get', 'post'], '/webhook/whatsapp', 'handleWhatsApp');
-    });
 });
 
 Route::get('/under-maintainance', [GeneralWebSettingsController::class, 'maintainance'])->name('maintainance.mode');

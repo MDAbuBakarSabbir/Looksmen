@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\NewWhatsAppMessage;
+use App\Models\WhatsappContact;
+use App\Models\WhatsappMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
 
 class ConversationController extends Controller
 {
@@ -39,11 +43,11 @@ class ConversationController extends Controller
             if (isset($data['entry'][0]['changes'][0]['value']['messages'][0])) {
                 $value = $data['entry'][0]['changes'][0]['value'];
                 $messageData = $value['messages'][0];
-                
+
                 $wa_id = $messageData['from'];
                 $message_id = $messageData['id'];
                 $type = $messageData['type'];
-                
+
                 // Get contact name if available
                 $contactName = $wa_id;
                 if (isset($value['contacts'][0]['profile']['name'])) {
@@ -51,7 +55,7 @@ class ConversationController extends Controller
                 }
 
                 // Find or create contact
-                $contact = \App\Models\WhatsappContact::firstOrCreate(
+                $contact = WhatsappContact::firstOrCreate(
                     ['phone_number' => $wa_id],
                     ['name' => $contactName]
                 );
@@ -68,11 +72,11 @@ class ConversationController extends Controller
                 } elseif ($type === 'image') {
                     $body = '[Image Received]'; // Placeholder for media handling
                 } else {
-                    $body = '[' . ucfirst($type) . ' Received]';
+                    $body = '['.ucfirst($type).' Received]';
                 }
 
                 // Save Message
-                $newMessage = \App\Models\WhatsappMessage::firstOrCreate(
+                $newMessage = WhatsappMessage::firstOrCreate(
                     ['message_id' => $message_id],
                     [
                         'whatsapp_contact_id' => $contact->id,
@@ -84,7 +88,7 @@ class ConversationController extends Controller
                 );
 
                 if ($newMessage->wasRecentlyCreated) {
-                    broadcast(new \App\Events\NewWhatsAppMessage($newMessage, $contact));
+                    broadcast(new NewWhatsAppMessage($newMessage, $contact));
                 }
             }
 
@@ -95,25 +99,26 @@ class ConversationController extends Controller
     // API: Get Contacts
     public function getWhatsappContacts()
     {
-        $contacts = \App\Models\WhatsappContact::orderBy('last_message_at', 'desc')->get();
+        $contacts = WhatsappContact::orderBy('last_message_at', 'desc')->get();
+
         return response()->json($contacts);
     }
 
     // API: Get Messages for a specific contact
     public function getWhatsappMessages($contact_id)
     {
-        $contact = \App\Models\WhatsappContact::findOrFail($contact_id);
-        
+        $contact = WhatsappContact::findOrFail($contact_id);
+
         // Reset unread count when opening chat
         $contact->update(['unread_count' => 0]);
 
-        $messages = \App\Models\WhatsappMessage::where('whatsapp_contact_id', $contact_id)
-                        ->orderBy('created_at', 'asc')
-                        ->get();
+        $messages = WhatsappMessage::where('whatsapp_contact_id', $contact_id)
+            ->orderBy('created_at', 'asc')
+            ->get();
 
         return response()->json([
             'contact' => $contact,
-            'messages' => $messages
+            'messages' => $messages,
         ]);
     }
 
@@ -125,32 +130,32 @@ class ConversationController extends Controller
             'message' => 'required|string',
         ]);
 
-        $contact = \App\Models\WhatsappContact::findOrFail($request->contact_id);
+        $contact = WhatsappContact::findOrFail($request->contact_id);
         $phone_number_id = env('WHATSAPP_PHONE_NUMBER_ID');
         $access_token = env('WHATSAPP_ACCESS_TOKEN');
 
-        if (!$phone_number_id || !$access_token) {
+        if (! $phone_number_id || ! $access_token) {
             return response()->json(['error' => 'WhatsApp API credentials not configured.'], 500);
         }
 
         // Send to WhatsApp API
-        $response = \Illuminate\Support\Facades\Http::withToken($access_token)->post(
+        $response = Http::withToken($access_token)->post(
             "https://graph.facebook.com/v17.0/{$phone_number_id}/messages",
             [
                 'messaging_product' => 'whatsapp',
                 'to' => $contact->phone_number,
                 'type' => 'text',
                 'text' => [
-                    'body' => $request->message
-                ]
+                    'body' => $request->message,
+                ],
             ]
         );
 
         if ($response->successful()) {
             $responseData = $response->json();
-            
+
             // Save outbound message to DB
-            $newMessage = \App\Models\WhatsappMessage::create([
+            $newMessage = WhatsappMessage::create([
                 'whatsapp_contact_id' => $contact->id,
                 'message_id' => $responseData['messages'][0]['id'] ?? uniqid('out_'),
                 'body' => $request->message,
@@ -164,6 +169,6 @@ class ConversationController extends Controller
             return response()->json(['success' => true, 'message' => $newMessage]);
         }
 
-        return response()->json(['error' => 'Failed to send message: ' . $response->body()], 500);
+        return response()->json(['error' => 'Failed to send message: '.$response->body()], 500);
     }
 }
