@@ -457,6 +457,107 @@
         font-size: 14px;
         line-height: 1.6;
     }
+
+    /* Mobile Responsive styles */
+    .back-btn {
+        display: none;
+        background: none;
+        border: none;
+        padding: 8px 12px 8px 0;
+        cursor: pointer;
+        color: var(--wa-text-secondary);
+        font-size: 18px;
+        align-items: center;
+        justify-content: center;
+        transition: color 0.2s;
+    }
+
+    .back-btn:hover {
+        color: var(--wa-text-primary);
+    }
+
+    @media (max-width: 767.98px) {
+        .chat-wrapper {
+            padding: 0;
+        }
+        .chat-wrapper .container-fluid {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .chat-wrapper .row {
+            margin-left: 0;
+            margin-right: 0;
+        }
+        .chat-wrapper .col-lg-12 {
+            padding-left: 0;
+            padding-right: 0;
+        }
+        .chat-container {
+            height: calc(100vh - 110px);
+            min-height: 450px;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+        }
+        .chat-sidebar {
+            width: 100% !important;
+            flex-shrink: unset;
+        }
+        .chat-sidebar-header {
+            padding: 16px;
+            gap: 8px;
+        }
+        .contact-item {
+            padding: 12px 16px;
+        }
+        .contact-item::after {
+            right: 16px;
+            left: 70px;
+        }
+        .chat-main {
+            width: 100% !important;
+        }
+        .empty-state {
+            display: none !important;
+        }
+        
+        /* Toggle views: by default in mobile, show sidebar. When show-chat is active, show chat-main and hide sidebar. */
+        .chat-container:not(.show-chat) .chat-main {
+            display: none !important;
+        }
+        .chat-container.show-chat .chat-sidebar {
+            display: none !important;
+        }
+        .chat-container.show-chat .chat-main {
+            display: flex !important;
+        }
+        
+        .back-btn {
+            display: inline-flex;
+        }
+        .message {
+            max-width: 85%;
+        }
+        .chat-messages {
+            padding: 16px;
+            gap: 8px;
+        }
+        .chat-header {
+            padding: 12px 16px;
+        }
+        .chat-input-area {
+            padding: 10px 12px;
+            gap: 8px;
+        }
+        .chat-input-area input {
+            padding: 10px 16px;
+            font-size: 14px;
+        }
+        .chat-input-area button {
+            width: 40px;
+            height: 40px;
+        }
+    }
 </style>
 
 <div class="page-wrapper chat-wrapper">
@@ -489,6 +590,9 @@
                     <div class="chat-main" id="chat-main" style="display: none;">
                         <div class="chat-header">
                             <div class="chat-header-info">
+                                <button class="back-btn" onclick="closeChat()">
+                                    <i class="fa fa-arrow-left"></i>
+                                </button>
                                 <div class="avatar-wrapper" id="active-avatar">W</div>
                                 <div>
                                     <div class="chat-header-name" id="active-contact-name">Select a contact</div>
@@ -663,6 +767,7 @@
         currentContactId = contactId;
         $('#empty-state').hide();
         $('#chat-main').css('display', 'flex');
+        $('.chat-container').addClass('show-chat');
         $('#active-contact-name').text(contactName);
         $('#active-avatar').text(getInitials(contactName));
         $('#contact-list .contact-item').removeClass('active');
@@ -791,6 +896,15 @@
                 console.error(err);
             }
         });
+    }
+
+    function closeChat() {
+        if (currentContactId) {
+            window.Echo.leave('whatsapp-chat.' + currentContactId);
+            currentContactId = null;
+        }
+        $('.chat-container').removeClass('show-chat');
+        $('#contact-list .contact-item').removeClass('active');
     }
 </script>
 @endsection

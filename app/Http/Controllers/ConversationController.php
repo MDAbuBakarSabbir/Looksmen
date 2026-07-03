@@ -2,16 +2,17 @@
 
 namespace App\Http\Controllers;
 
-use App\Events\NewWhatsAppMessage;
 use App\Events\NewFacebookMessage;
 use App\Events\NewInstagramMessage;
-use App\Models\WhatsappContact;
-use App\Models\WhatsappMessage;
+use App\Events\NewWhatsAppMessage;
 use App\Models\FacebookContact;
 use App\Models\FacebookMessage;
 use App\Models\InstagramContact;
 use App\Models\InstagramMessage;
+use App\Models\WhatsappContact;
+use App\Models\WhatsappMessage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 
 class ConversationController extends Controller
@@ -313,7 +314,7 @@ class ConversationController extends Controller
                     if ($object === 'instagram') {
                         // Find or create Instagram contact
                         $contact = InstagramContact::where('sender_id', $senderId)->first();
-                        if (!$contact) {
+                        if (! $contact) {
                             $profile = $this->getInstagramProfile($senderId);
                             $contact = InstagramContact::create([
                                 'sender_id' => $senderId,
@@ -343,7 +344,7 @@ class ConversationController extends Controller
                     } else {
                         // Find or create Facebook contact
                         $contact = FacebookContact::where('sender_id', $senderId)->first();
-                        if (!$contact) {
+                        if (! $contact) {
                             $profile = $this->getFacebookProfile($senderId);
                             $contact = FacebookContact::create([
                                 'sender_id' => $senderId,
@@ -382,7 +383,7 @@ class ConversationController extends Controller
     private function getFacebookProfile($senderId)
     {
         $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
-        if (!$accessToken) {
+        if (! $accessToken) {
             return ['name' => 'Facebook User'];
         }
 
@@ -396,8 +397,9 @@ class ConversationController extends Controller
                 $data = $response->json();
                 $firstName = $data['first_name'] ?? '';
                 $lastName = $data['last_name'] ?? '';
+
                 return [
-                    'name' => trim($firstName . ' ' . $lastName) ?: 'Facebook User',
+                    'name' => trim($firstName.' '.$lastName) ?: 'Facebook User',
                 ];
             }
         } catch (\Exception $e) {
@@ -417,7 +419,7 @@ class ConversationController extends Controller
         $contact = FacebookContact::findOrFail($request->contact_id);
         $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
 
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json(['error' => 'Messenger Access Token is not configured.'], 500);
         }
 
@@ -465,16 +467,17 @@ class ConversationController extends Controller
                 'text' => 'Looksmen Eid Super Sale! Get up to 40% discount on all winter outfits.',
                 'comments_count' => 1,
                 'time' => '3 days ago',
-            ]
+            ],
         ];
 
-        if (!$accessToken) {
+        if (! $accessToken) {
             \Log::warning('Facebook Page Access Token not configured. Using mock posts fallback.');
+
             return response()->json($mockPosts);
         }
 
         try {
-            $response = Http::get("https://graph.facebook.com/v20.0/me/posts", [
+            $response = Http::get('https://graph.facebook.com/v20.0/me/posts', [
                 'fields' => 'id,message,created_time,comments.summary(true)',
                 'access_token' => $accessToken,
             ]);
@@ -490,15 +493,18 @@ class ConversationController extends Controller
                         'id' => $post['id'],
                         'text' => $post['message'] ?? '[Image/Link Post]',
                         'comments_count' => $post['comments']['summary']['total_count'] ?? 0,
-                        'time' => isset($post['created_time']) ? \Illuminate\Support\Carbon::parse($post['created_time'])->diffForHumans() : '',
+                        'time' => isset($post['created_time']) ? Carbon::parse($post['created_time'])->diffForHumans() : '',
                     ];
                 }
+
                 return response()->json($formattedPosts);
             }
             \Log::error('Facebook Posts API Error: '.$response->body());
+
             return response()->json($mockPosts);
         } catch (\Exception $e) {
             \Log::error('Facebook Posts Exception: '.$e->getMessage());
+
             return response()->json($mockPosts);
         }
     }
@@ -526,9 +532,9 @@ class ConversationController extends Controller
                             'user' => 'Looksmen Support',
                             'text' => 'Yes Sultana! XL size is available. You can place your order now.',
                             'time' => '2h ago',
-                        ]
+                        ],
                     ],
-                ]
+                ],
             ],
             'mock_post_2' => [
                 [
@@ -537,8 +543,8 @@ class ConversationController extends Controller
                     'text' => 'Is delivery free in Dhaka?',
                     'time' => '2 days ago',
                     'replies' => [],
-                ]
-            ]
+                ],
+            ],
         ];
 
         if (str_starts_with($post_id, 'mock_')) {
@@ -546,8 +552,9 @@ class ConversationController extends Controller
         }
 
         $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
-        if (!$accessToken) {
+        if (! $accessToken) {
             \Log::warning('Facebook Page Access Token not configured. Using mock comments fallback.');
+
             return response()->json($mockComments['mock_post_1']);
         }
 
@@ -568,7 +575,7 @@ class ConversationController extends Controller
                                 'id' => $reply['id'],
                                 'user' => $reply['from']['name'] ?? 'User',
                                 'text' => $reply['message'] ?? '',
-                                'time' => \Illuminate\Support\Carbon::parse($reply['created_time'])->diffForHumans(),
+                                'time' => Carbon::parse($reply['created_time'])->diffForHumans(),
                             ];
                         }
                     }
@@ -576,16 +583,19 @@ class ConversationController extends Controller
                         'id' => $comment['id'],
                         'user' => $comment['from']['name'] ?? 'User',
                         'text' => $comment['message'] ?? '',
-                        'time' => \Illuminate\Support\Carbon::parse($comment['created_time'])->diffForHumans(),
+                        'time' => Carbon::parse($comment['created_time'])->diffForHumans(),
                         'replies' => $replies,
                     ];
                 }
+
                 return response()->json($formattedComments);
             }
             \Log::error('Facebook Comments API Error: '.$response->body());
+
             return response()->json($mockComments['mock_post_1']);
         } catch (\Exception $e) {
             \Log::error('Facebook Comments Exception: '.$e->getMessage());
+
             return response()->json($mockComments['mock_post_1']);
         }
     }
@@ -610,7 +620,7 @@ class ConversationController extends Controller
         }
 
         $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json(['error' => 'Page Access Token not configured.'], 500);
         }
 
@@ -622,6 +632,7 @@ class ConversationController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return response()->json([
                     'success' => true,
                     'reply' => [
@@ -632,6 +643,7 @@ class ConversationController extends Controller
                     ],
                 ]);
             }
+
             return response()->json(['error' => 'Failed to post reply: '.$response->body()], 500);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
@@ -641,7 +653,7 @@ class ConversationController extends Controller
     private function getInstagramProfile($senderId)
     {
         $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
-        if (!$accessToken) {
+        if (! $accessToken) {
             return ['username' => 'instagram_user'];
         }
 
@@ -653,6 +665,7 @@ class ConversationController extends Controller
 
             if ($response->successful()) {
                 $data = $response->json();
+
                 return [
                     'username' => $data['username'] ?? 'instagram_user',
                 ];
@@ -696,7 +709,7 @@ class ConversationController extends Controller
         $contact = InstagramContact::findOrFail($request->contact_id);
         $accessToken = env('MESSENGER_PAGE_ACCESS_TOKEN');
 
-        if (!$accessToken) {
+        if (! $accessToken) {
             return response()->json(['error' => 'Messenger Page Access Token not configured.'], 500);
         }
 
