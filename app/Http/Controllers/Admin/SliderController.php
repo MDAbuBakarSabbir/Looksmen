@@ -34,7 +34,7 @@ class SliderController extends Controller
         if ($request->hasFile('image')) {
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/adminDash/uploads/slider&banner/'.$newname));
+            $image->save(base_path('public/uploads/'.$newname));
         }
 
         $sliders = new Slider;
@@ -85,7 +85,7 @@ class SliderController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $oldPath = base_path('public/adminDash/uploads/slider&banner/'.$slider->image);
+            $oldPath = base_path('public/uploads/'.$slider->image);
             if ($slider->image && file_exists($oldPath) && is_file($oldPath)) {
                 unlink($oldPath);
             }
@@ -93,7 +93,7 @@ class SliderController extends Controller
             $manager = new ImageManager(new Driver);
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/adminDash/uploads/slider&banner/'.$newname));
+            $image->save(base_path('public/uploads/'.$newname));
             $slider->image = $newname;
         }
 
@@ -107,7 +107,7 @@ class SliderController extends Controller
     {
         $slider = Slider::findOrFail($id);
 
-        $oldPath = base_path('public/adminDash/uploads/slider&banner/'.$slider->image);
+        $oldPath = base_path('public/uploads/'.$slider->image);
         if ($slider->image && file_exists($oldPath) && is_file($oldPath)) {
             unlink($oldPath);
         }
