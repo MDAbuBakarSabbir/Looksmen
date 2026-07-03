@@ -548,7 +548,7 @@ class ProductController extends Controller
         // Store new uploaded images
         $manager = new ImageManager(new Driver);
         if ($request->hasFile('images')) {
-            $destinationPath = base_path('public/adminDash/uploads/products');
+            $destinationPath = base_path('public/uploads');
             if (! file_exists($destinationPath)) {
                 mkdir($destinationPath, 0777, true);
             }
@@ -609,7 +609,7 @@ class ProductController extends Controller
             // Duplicate Product
             $newProduct = $original->replicate();
             $newProduct->code = $newCode;
-            $newProduct->slug = Str::slug($original->title) . '-' . uniqid();
+            $newProduct->slug = Str::slug($original->title).'-'.uniqid();
             $newProduct->created_at = now();
             $newProduct->save();
 
