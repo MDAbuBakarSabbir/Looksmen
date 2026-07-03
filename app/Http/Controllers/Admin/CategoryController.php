@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Category;
+use App\Models\ChildCategory;
+use App\Models\SubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class CategoryController extends Controller
 {
@@ -15,15 +17,16 @@ class CategoryController extends Controller
     {
         $maincategorys = Category::all();
         $categories = $maincategorys;
-        $subcategories = \App\Models\SubCategory::all();
-        $childcategories = \App\Models\ChildCategory::all();
+        $subcategories = SubCategory::all();
+        $childcategories = ChildCategory::all();
         $activeTab = 'main';
+
         return view('adminDash.category.index', compact('maincategorys', 'categories', 'subcategories', 'childcategories', 'activeTab'));
     }
 
     public function store(Request $request)
     {
-        $manager = new ImageManager(new Driver());
+        $manager = new ImageManager(new Driver);
 
         $request->validate([
             'category_name' => 'required',
@@ -33,29 +36,32 @@ class CategoryController extends Controller
             'icon' => 'required',
         ]);
         if ($request->hasFile('image')) {
-            $imgName = Str::random(7) . '.' . $request->file('image')->getClientOriginalExtension();
+            $imgName = Str::random(7).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/adminDash/assets/img/category/'.$imgName));
+            $image->save(base_path('public/uploads/'.$imgName));
         }
-                Category::create([
-                'name' => $request->category_name,
-                'type' => $request->type,
-                'commission_rate' => $request->commission_rate,
-                'banner' => $imgName,
-                'icon' => $request->icon,
-                'slug' => Str::slug($request->category_name),
-                'meta_title' => $request->meta_title,
-                'meta_descritption' => $request->meta_description,
-                'created_at' => now(),
-            ]);
+        Category::create([
+            'name' => $request->category_name,
+            'type' => $request->type,
+            'commission_rate' => $request->commission_rate,
+            'banner' => $imgName,
+            'icon' => $request->icon,
+            'slug' => Str::slug($request->category_name),
+            'meta_title' => $request->meta_title,
+            'meta_descritption' => $request->meta_description,
+            'created_at' => now(),
+        ]);
 
         return back()->with('success', 'created success');
     }
+
     public function edit($id)
     {
         $category = Category::findOrFail($id);
+
         return view('adminDash.category.main.edit', compact('category'));
     }
+
     public function update(Request $request, $id)
     {
         $category = Category::findOrFail($id);
@@ -69,12 +75,12 @@ class CategoryController extends Controller
 
         $imgName = $category->banner;
         if ($request->hasFile('image')) {
-            $manager = new ImageManager(new Driver());
-            $imgName = Str::random(7) . '.' . $request->file('image')->getClientOriginalExtension();
+            $manager = new ImageManager(new Driver);
+            $imgName = Str::random(7).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/adminDash/assets/img/category/'.$imgName));
-            if (!empty($category->banner) && file_exists(base_path('public/adminDash/assets/img/category/'.$category->banner))) {
-                @unlink(base_path('public/adminDash/assets/img/category/'.$category->banner));
+            $image->save(base_path('public/uploads/'.$imgName));
+            if (! empty($category->banner) && file_exists(base_path('public/uploads/'.$category->banner))) {
+                @unlink(base_path('public/uploads/'.$category->banner));
             }
         }
 
@@ -92,12 +98,11 @@ class CategoryController extends Controller
         return redirect()->route('category.index')->with('success', 'Category Updated successfully');
     }
 
-
     public function status(Request $request)
     {
         $category = Category::find($request->id);
 
-        if (!$category) {
+        if (! $category) {
             return response()->json(['success' => false]);
         }
 
@@ -107,16 +112,18 @@ class CategoryController extends Controller
 
         return response()->json([
             'success' => true,
-            'status' => $category->status
+            'status' => $category->status,
         ]);
     }
+
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-        if (!empty($category->banner) && file_exists(base_path('public/adminDash/assets/img/category/'.$category->banner))) {
-            @unlink(base_path('public/adminDash/assets/img/category/'.$category->banner));
+        if (! empty($category->banner) && file_exists(base_path('public/uploads/'.$category->banner))) {
+            @unlink(base_path('public/uploads/'.$category->banner));
         }
         $category->delete();
+
         return back()->with('success', 'Category Deleted successfully');
     }
 }

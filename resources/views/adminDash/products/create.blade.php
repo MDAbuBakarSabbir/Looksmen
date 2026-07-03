@@ -39,8 +39,30 @@
                         
                         <div class="mb-4">
                             <label class="form-label">Product Description <span class="text-danger">*</span></label>
-                            <textarea name="description" id="summernote" required></textarea>
+                            <textarea id="summernote-editor" style="width:100%;"></textarea>
+                            <input type="hidden" name="description" id="summernote-hidden">
                         </div>
+                        <script>
+                            window.addEventListener('load', function() {
+                                if (typeof $.fn.summernote !== 'undefined') {
+                                    $('#summernote-editor').summernote({
+                                        height: 300,
+                                        placeholder: 'Write product description here...',
+                                        toolbar: [
+                                            ['style', ['style']],
+                                            ['font', ['bold', 'italic', 'underline', 'clear']],
+                                            ['color', ['color']],
+                                            ['para', ['ul', 'ol', 'paragraph']],
+                                            ['table', ['table']],
+                                            ['insert', ['link', 'picture']],
+                                            ['view', ['fullscreen', 'codeview', 'help']]
+                                        ]
+                                    });
+                                } else {
+                                    console.error('Summernote not loaded!');
+                                }
+                            });
+                        </script>
 
                         <div class="row">
                             <div class="col-md-6 mb-3">
@@ -215,24 +237,21 @@
             $('#AttributeValue').select2({ placeholder: "Select Attribute Values", allowClear: true, width: '100%' });
             $('#colorSelect').select2({ placeholder: "Select Colors", allowClear: true, width: '100%' });
 
-            // Initialize Summernote rich text editor
-            $('#summernote').summernote({
-                height: 300,
-                placeholder: 'Write product description here...',
-                toolbar: [
-                    ['style', ['style']],
-                    ['font', ['bold', 'italic', 'underline', 'clear']],
-                    ['color', ['color']],
-                    ['para', ['ul', 'ol', 'paragraph']],
-                    ['table', ['table']],
-                    ['insert', ['link', 'picture']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ]
-            });
 
-            // FIX: sync Summernote content into the real textarea before form submit
-            $('form').on('submit', function() {
-                $('#summernote').val($('#summernote').summernote('code'));
+
+            // Sync content to hidden input and validate before submit
+            $('form').on('submit', function(e) {
+                let code = $('#summernote-editor').summernote('code');
+                let isEmpty = $('#summernote-editor').summernote('isEmpty');
+                if (isEmpty) {
+                    e.preventDefault();
+                    Toast.fire({
+                        icon: 'warning',
+                        title: 'Product description is required!'
+                    });
+                    return false;
+                }
+                $('#summernote-hidden').val(code);
             });
 
             // Alerts

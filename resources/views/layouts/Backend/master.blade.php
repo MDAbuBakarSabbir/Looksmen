@@ -92,7 +92,7 @@
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('adminDash/assets/img/layouts/favicon.png') }}">
     <script src="{{ asset('adminDash/assets/vendor/jquery/jquery.min.js') }}"></script>
-    <link href="{{ asset('adminDash/assets/vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet">
+    {{-- <link href="{{ asset('adminDash/assets/vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet"> --}}
 
     <!-- Select2 & Summernote -->
     <link rel="stylesheet" href="{{ asset('adminDash/assets/vendor/select2/css/select2.min.css') }}">
@@ -1486,20 +1486,20 @@
     <script src="{{ asset('adminDash/assets/js/custom.min.js') }}"></script>
     <script src="{{ asset('adminDash/assets/vendor/raphael/raphael.min.js') }}"></script>
     <script src="{{ asset('adminDash/assets/vendor/morris/morris.min.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/circle-progress/circle-progress.min.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/chart.js/Chart.bundle.min.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/gaugeJS/dist/gauge.min.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/flot/jquery.flot.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/flot/jquery.flot.resize.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/owl-carousel/js/owl.carousel.min.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.min.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.usa.js') }}"></script>
-    <script src="{{ asset('adminDash/assets/vendor/jquery.counterup/jquery.counterup.min.js') }}"></script>
+    {{-- <script src="{{ asset('adminDash/assets/vendor/circle-progress/circle-progress.min.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/chart.js/Chart.bundle.min.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/gaugeJS/dist/gauge.min.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/flot/jquery.flot.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/flot/jquery.flot.resize.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/owl-carousel/js/owl.carousel.min.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.min.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.usa.js') }}"></script> --}}
+    {{-- <script src="{{ asset('adminDash/assets/vendor/jquery.counterup/jquery.counterup.min.js') }}"></script> --}}
     @if(Route::is('admin.dashboard'))
     <script src="{{ asset('adminDash/assets/js/dashboard/dashboard-1.js') }}"></script>
     @endif
 
-    <script src="{{ asset('adminDash/assets/vendor/select2/select2.full.min.js') }}"></script>
+    <script src="{{ asset('adminDash/assets/vendor/select2/js/select2.full.min.js') }}"></script>
     <!-- Summernote JS (local vendor - must NOT be deferred so it's ready for document.ready) -->
     <script src="{{ asset('adminDash/assets/vendor/summernote/js/summernote.min.js') }}"></script>
 
