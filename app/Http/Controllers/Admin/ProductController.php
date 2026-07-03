@@ -576,7 +576,7 @@ class ProductController extends Controller
     {
         $image = ProductImage::findOrFail($id);
 
-        $filePath = base_path('public/adminDash/images/product/'.$image->image);
+        $filePath = base_path('public/uploads/'.$image->image);
         if (file_exists($filePath)) {
             unlink($filePath);
         }
@@ -660,8 +660,8 @@ class ProductController extends Controller
         $proColors = ProductColors::where('product_id', $id)->get();
 
         foreach ($proImages as $img) {
-            if (file_exists(public_path('public/adminDash/images/product/'.$img->image))) {
-                unlink(public_path('public/adminDash/images/product/'.$img->image));
+            if (file_exists(public_path('public/uploads/'.$img->image))) {
+                unlink(public_path('public/uploads/'.$img->image));
             }
             $img->delete();
         }
@@ -696,8 +696,8 @@ class ProductController extends Controller
                 $proAttributes = ProductAttributes::where('product_id', $id)->get();
                 $proColors = ProductColors::where('product_id', $id)->get();
                 foreach ($proImages as $img) {
-                    if (file_exists(public_path('public/adminDash/images/product/'.$img->image))) {
-                        unlink(public_path('public/adminDash/images/product/'.$img->image));
+                    if (file_exists(public_path('public/uploads/'.$img->image))) {
+                        unlink(public_path('public/uploads/'.$img->image));
                     }
                     $img->delete();
                 }
