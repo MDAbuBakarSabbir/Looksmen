@@ -154,7 +154,7 @@
                                     <div class="d-flex gap-2 flex-wrap mb-3" id="existing-images-area">
                                         @forelse($productImages as $img)
                                             <div class="existing-image-box" id="image-container-{{ $img->id }}">
-                                                <img src="{{ asset('adminDash/images/product/' . $img->image) }}" alt="Product Image">
+                                                <img src="{{ asset('uploads/' . $img->image) }}" alt="Product Image">
                                                 <div class="img-delete-overlay" onclick="deleteExistingImage({{ $img->id }})" title="Delete Image">
                                                     <i class="fa-solid fa-trash-can"></i>
                                                 </div>
