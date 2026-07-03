@@ -590,5 +590,75 @@
                 }
             });
         }
+
+        // Copy Product SweetAlert Modal
+        function openCopyModal(id) {
+            Swal.fire({
+                title: 'Copy Product',
+                text: 'How many copies of this product do you want to create?',
+                input: 'number',
+                inputAttributes: {
+                    min: 1,
+                    max: 20,
+                    step: 1
+                },
+                inputValue: 1,
+                showCancelButton: true,
+                confirmButtonText: 'Copy',
+                cancelButtonText: 'Cancel',
+                inputValidator: (value) => {
+                    if (!value || isNaN(value) || value < 1) {
+                        return 'Please enter a valid number of copies (minimum 1)';
+                    }
+                    if (value > 20) {
+                        return 'You can copy a maximum of 20 products at a time';
+                    }
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let copies = result.value;
+                    Swal.fire({
+                        title: 'Copying...',
+                        text: 'Please wait while duplicating the products.',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    $.ajax({
+                        url: "{{ route('product.copy') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            product_id: id,
+                            copies: copies
+                        },
+                        success: function(response) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message || 'Product copied successfully!',
+                                confirmButtonText: 'OK'
+                            }).then(() => {
+                                location.reload();
+                            });
+                        },
+                        error: function(xhr) {
+                            console.error(xhr.responseText);
+                            let errorMsg = 'Failed to copy product.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: errorMsg
+                            });
+                        }
+                    });
+                }
+            });
+        }
     </script>
 @endsection

@@ -600,7 +600,6 @@ class ProductController extends Controller
         }
 
         for ($i = 1; $i <= $request->copies; $i++) {
-
             // Max ID
             $maxId = Product::max('id') ?? 0;
 
@@ -610,8 +609,39 @@ class ProductController extends Controller
             // Duplicate Product
             $newProduct = $original->replicate();
             $newProduct->code = $newCode;
+            $newProduct->slug = Str::slug($original->title) . '-' . uniqid();
             $newProduct->created_at = now();
             $newProduct->save();
+
+            // Replicate images
+            $originalImages = ProductImage::where('product_id', $original->id)->get();
+            foreach ($originalImages as $img) {
+                ProductImage::create([
+                    'product_id' => $newProduct->id,
+                    'image' => $img->image,
+                ]);
+            }
+
+            // Replicate colors
+            $originalColors = ProductColors::where('product_id', $original->id)->get();
+            foreach ($originalColors as $color) {
+                ProductColors::create([
+                    'product_id' => $newProduct->id,
+                    'color_id' => $color->color_id,
+                    'created_at' => now(),
+                ]);
+            }
+
+            // Replicate attributes
+            $originalAttributes = ProductAttributes::where('product_id', $original->id)->get();
+            foreach ($originalAttributes as $attr) {
+                ProductAttributes::create([
+                    'product_id' => $newProduct->id,
+                    'attribute_id' => $attr->attribute_id,
+                    'attribute_value' => $attr->attribute_value,
+                    'created_at' => now(),
+                ]);
+            }
         }
 
         return response()->json([
