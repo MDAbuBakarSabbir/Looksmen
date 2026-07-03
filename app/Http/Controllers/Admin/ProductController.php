@@ -613,14 +613,6 @@ class ProductController extends Controller
             $newProduct->created_at = now();
             $newProduct->save();
 
-            // Replicate images
-            $originalImages = ProductImage::where('product_id', $original->id)->get();
-            foreach ($originalImages as $img) {
-                ProductImage::create([
-                    'product_id' => $newProduct->id,
-                    'image' => $img->image,
-                ]);
-            }
 
             // Replicate colors
             $originalColors = ProductColors::where('product_id', $original->id)->get();
