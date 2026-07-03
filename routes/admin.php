@@ -296,6 +296,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('banners/edit/{id}', 'edit')->name('banner.edit')->middleware('admin.permission:manage_banner');
         Route::post('banners/update/{id}', 'update')->name('banner.update')->middleware('admin.permission:manage_banner');
         Route::get('banners/destroy/{id}', 'destroy')->name('banner.destroy')->middleware('admin.permission:manage_banner');
+        Route::get('uploads', 'alluploads')->name('alluploads.index')->middleware('admin.permission:manage_banner');
     });
 
     // Affiliate Routes
