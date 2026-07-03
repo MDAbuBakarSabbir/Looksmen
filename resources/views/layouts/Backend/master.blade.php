@@ -1283,7 +1283,11 @@
                         </ul>
                     </li>
                     @endif
-
+                    <li>
+                        <a href="{{ route('alluploads.index') }}" aria-expanded="false">
+                            <i class="fa-solid fa-image mr-2"></i><span class="nav-text">Uploads</span>
+                        </a>
+                    </li>
                     @if (isset($featuresConfig['coupon']) && $featuresConfig['coupon'] == '1')
                         @if($user?->hasPermission('manage_coupons'))
                         <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i

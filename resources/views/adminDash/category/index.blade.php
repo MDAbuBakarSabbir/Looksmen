@@ -382,7 +382,7 @@
                                             <td class="font-weight-bold text-dark">{{ $maincategory->name }}</td>
                                             <td>
                                                 @if($maincategory->banner)
-                                                    <img class="cat-avatar shadow-sm" src="{{ asset('adminDash/assets/img/category') }}/{{ $maincategory->banner }}" alt="{{ $maincategory->name }}">
+                                                    <img class="cat-avatar shadow-sm" src="{{ asset('uploads') }}/{{ $maincategory->banner }}" alt="{{ $maincategory->name }}">
                                                 @else
                                                     <div class="d-flex align-items-center justify-content-center bg-light text-muted font-weight-bold" style="width: 50px; height: 50px; border-radius: 8px;">N/A</div>
                                                 @endif
