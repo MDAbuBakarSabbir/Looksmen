@@ -1568,7 +1568,10 @@
 
         // ৪. কার্ট মডেল দেখানো
         function showCartModal() {
-            if ($(window).width() <= 768) return false;
+            if ($(window).width() <= 768) {
+                window.location.href = "{{ route('cartView') }}";
+                return false;
+            }
 
             $.get('{{ route('cart.showModal') }}', function(data) {
                 $('#cart-modal-content').html(data);

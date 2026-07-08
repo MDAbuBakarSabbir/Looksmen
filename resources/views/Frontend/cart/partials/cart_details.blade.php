@@ -172,12 +172,12 @@
                             $id = $isDb ? $rawItem->cart_id : $key;
 
                             // ৩. ডাটা ম্যাপিং (লগআউট অবস্থায় অ্যারে ইন্ডেক্স ব্যবহার করা হয়েছে)
-                            $name = $isDb ? $rawItem->product->title ?? $rawItem->name : $rawItem['name'];
-                            $image = $isDb ? $rawItem->product->thumbnail_img ?? $rawItem->image : $rawItem['image'];
-                            $price = $isDb ? $rawItem->product->new_price ?? $rawItem->price : $rawItem['price'];
+                            $name = $isDb ? ($rawItem->product?->title ?? $rawItem->name ?? 'N/A') : $rawItem['name'];
+                            $image = $isDb ? ($rawItem->product?->thumbnail_img ?? $rawItem->image ?? '') : $rawItem['image'];
+                            $price = $isDb ? ($rawItem->product?->new_price ?? $rawItem->price ?? 0) : $rawItem['price'];
                             $qty = $isDb ? $rawItem->quantity : $rawItem['quantity'];
-                            $stock = $isDb ? $rawItem->product->stock ?? 10 : $rawItem['stock'] ?? 10;
-                            $code = $isDb ? $rawItem->product->code ?? 'N/A' : $rawItem['code'] ?? 'N/A';
+                            $stock = $isDb ? ($rawItem->product?->stock ?? 10) : ($rawItem['stock'] ?? 10);
+                            $code = $isDb ? ($rawItem->product?->code ?? 'N/A') : ($rawItem['code'] ?? 'N/A');
 
                             $cleanPrice = (float) str_replace(',', '', $price);
                             $line_total = $cleanPrice * (int) $qty;
