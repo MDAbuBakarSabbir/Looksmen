@@ -23,7 +23,7 @@ class CartController extends Controller
 
     public function addToCart(Request $request)
     {
-        $product = Product::with(['productAttributes.attribute', 'productColors.color'])->findOrFail($request->id);
+        $product = Product::with(['productAttributes.attribute', 'productAttributes.attributeVal', 'productColors.color'])->findOrFail($request->id);
 
         $hasAttributes = $product->productAttributes->count() > 0;
         $hasColors = $product->productColors->count() > 0;
