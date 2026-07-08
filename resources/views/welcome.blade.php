@@ -80,7 +80,7 @@
                         <div class="carousel-box">
                             <a href="{{ $slider->url ? $slider->url : 'javascript:void(0)' }}">
                                 <img class="d-block mw-100 img-fit rounded shadow-sm overflow-hidden"
-                                    src="{{ asset('adminDash/uploads/slider&banner') }}/{{ $slider->image }}"
+                                    src="{{ asset('uploads') }}/{{ $slider->image }}"
                                     alt="LOOKSMEN promo" height="315"
                                     onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder-rect.jpg';">
                             </a>
