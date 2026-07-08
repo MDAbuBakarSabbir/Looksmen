@@ -32,8 +32,8 @@ class SliderController extends Controller
             'image' => 'required|image',
         ]);
         if ($request->hasFile('image')) {
-            $dir = base_path('public/uploads');
-            if (!file_exists($dir)) {
+            $dir = base_path('public/Uploads');
+            if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
@@ -89,8 +89,8 @@ class SliderController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $dir = base_path('public/uploads');
-            if (!file_exists($dir)) {
+            $dir = base_path('public/Uploads');
+            if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
             $oldPath = $dir.'/'.$slider->image;
@@ -115,7 +115,7 @@ class SliderController extends Controller
     {
         $slider = Slider::findOrFail($id);
 
-        $oldPath = base_path('public/uploads/'.$slider->image);
+        $oldPath = base_path('public/Uploads/'.$slider->image);
         if ($slider->image && file_exists($oldPath) && is_file($oldPath)) {
             unlink($oldPath);
         }

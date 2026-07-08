@@ -30,7 +30,7 @@ class BannerController extends Controller
             'image' => 'required|image',
         ]);
         if ($request->hasFile('image')) {
-            $dir = base_path('public/adminDash/uploads/slider&banner');
+            $dir = base_path('public/Uploads');
             if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
@@ -83,7 +83,7 @@ class BannerController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $dir = base_path('public/adminDash/uploads/slider&banner');
+            $dir = base_path('public/Uploads');
             if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
@@ -109,7 +109,7 @@ class BannerController extends Controller
     {
         $banner = Banner::findOrFail($id);
 
-        $oldPath = base_path('public/adminDash/uploads/slider&banner/'.$banner->image);
+        $oldPath = base_path('public/Uploads/'.$banner->image);
         if ($banner->image && file_exists($oldPath) && is_file($oldPath)) {
             unlink($oldPath);
         }
