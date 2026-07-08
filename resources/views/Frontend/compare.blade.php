@@ -43,7 +43,7 @@
                                                 <i class="las la-times"></i>
                                             </button>
                                             <div class="mb-3 mt-3">
-                                                <img src="{{ $product->firstImage ? asset('uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}" alt="{{ $product->title }}" class="img-fluid rounded mx-auto d-block" style="height: 150px; object-fit: contain;">
+                                                <img src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}" alt="{{ $product->title }}" class="img-fluid rounded mx-auto d-block" style="height: 150px; object-fit: contain;">
                                             </div>
                                             <h5 class="fs-15 fw-600 text-dark text-truncate-2 px-3" style="line-height: 1.4; height: 42px;">{{ $product->title }}</h5>
                                         </th>

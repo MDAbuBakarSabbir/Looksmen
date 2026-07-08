@@ -241,7 +241,7 @@ class ConversationController extends Controller
             }
 
             $fileName = 'wa_'.$mediaId.'_'.time().'.'.$extension;
-            $dirPath = public_path('uploads/whatsapp');
+            $dirPath = public_path('Uploads');
 
             if (! file_exists($dirPath)) {
                 mkdir($dirPath, 0755, true);
@@ -249,7 +249,7 @@ class ConversationController extends Controller
 
             file_put_contents($dirPath.'/'.$fileName, $fileResponse->body());
 
-            return asset('uploads/whatsapp/'.$fileName);
+            return asset('Uploads/'.$fileName);
         } catch (\Exception $e) {
             \Log::error('WhatsApp Media Download Exception: '.$e->getMessage());
 

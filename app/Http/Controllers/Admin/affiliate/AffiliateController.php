@@ -240,7 +240,10 @@ class AffiliateController extends Controller
             } elseif ($element->type == 'file') {
                 $item['type'] = 'file';
                 $item['label'] = $element->label;
-                $item['value'] = $request['element_'.$i]->store('uploads/affiliate_verification_form');
+                $file = $request['element_'.$i];
+                $fileName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+                $file->move(public_path('Uploads'), $fileName);
+                $item['value'] = 'Uploads/' . $fileName;
             }
             array_push($data, $item);
             $i++;

@@ -497,10 +497,10 @@
                                                 $imageSrc = asset('favicon.png');
                                                 if ($product->firstImage) {
                                                     $imgName = $product->firstImage->image;
-                                                    if (file_exists(public_path('adminDash/images/product/' . $imgName))) {
-                                                        $imageSrc = asset('adminDash/images/product/' . $imgName);
+                                                    if (file_exists(public_path('Uploads/' . $imgName))) {
+                                                        $imageSrc = asset('Uploads/' . $imgName);
                                                     } else {
-                                                        $imageSrc = asset('adminDash/uploads/products/' . $imgName);
+                                                        $imageSrc = asset('Uploads/' . $imgName);
                                                     }
                                                 }
                                             @endphp
