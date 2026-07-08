@@ -372,7 +372,7 @@
                 <div class="brand-logo">
                     @php
                         $webLogo = \App\Models\GeneralWebSettings::where('name', 'web_logo')->first();
-                        $logoPath = 'frontend/uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png';
+                        $logoPath = 'Uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png';
                         if ($webLogo && !empty($webLogo->value) && file_exists(public_path('adminDash/assets/img/layouts/' . $webLogo->value))) {
                             $logoPath = 'adminDash/assets/img/layouts/' . $webLogo->value;
                         }

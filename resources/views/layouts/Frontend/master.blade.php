@@ -1073,7 +1073,7 @@
                         <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="text-reset text-dark fw-600 flex-grow-1 d-flex align-items-center" style="text-decoration: none;">
                             <img class="cat-image mr-3 opacity-60 lazyload"
                                 src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
-                                data-src="{{ asset('frontend/uploads/'.$category->banner) }}"
+                                data-src="{{ asset('Uploads/'.$category->banner) }}"
                                 width="24"
                                 height="24"
                                 style="object-fit: cover; border-radius: 4px;"

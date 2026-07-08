@@ -80,7 +80,7 @@
                         <div class="carousel-box">
                             <a href="{{ $slider->url ? $slider->url : 'javascript:void(0)' }}">
                                 <img class="d-block mw-100 img-fit rounded shadow-sm overflow-hidden"
-                                    src="{{ asset('uploads') }}/{{ $slider->image }}"
+                                    src="{{ asset('Uploads') }}/{{ $slider->image }}"
                                     alt="LOOKSMEN promo" height="315"
                                     onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder-rect.jpg';">
                             </a>
@@ -502,7 +502,7 @@
                                     <a href="javascript:void(0)" class="bg-white border border-light d-block text-reset p-3 rounded-lg transition-all brand-card h-100">
                                         <div class="d-flex align-items-center">
                                             <div class="brand-logo text-center mr-3 border-right pr-3" style="width: 70px;">
-                                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ asset('frontend/uploads/' . $staticImgs[$index]) }}" alt="{{ $brand }}" class="img-fluid lazyload" style="max-height: 40px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ asset('Uploads/' . $staticImgs[$index]) }}" alt="{{ $brand }}" class="img-fluid lazyload" style="max-height: 40px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                             </div>
                                             <div class="brand-name flex-grow-1">
                                                 <h4 class="fs-15 fw-700 text-dark mb-0">{{ $brand }}</h4>
