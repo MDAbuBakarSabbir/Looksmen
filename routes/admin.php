@@ -328,6 +328,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/affiliate/withdraw_request/reject/{id}', 'reject_withdraw_request')->name('affiliate.withdraw_request.reject')->middleware('admin.permission:manage_affiliate_withdraw');
 
         Route::get('/affiliate/logs', 'affiliate_logs_admin')->name('affiliate.logs')->middleware('admin.permission:manage_affiliate_logs');
+        Route::get('/affiliate/smtp', 'affiliate_smtp')->name('affiliate.smtp')->middleware('admin.permission:manage_affiliate_logs');
     });
 
     Route::controller(SocialMediaController::class)->group(function () {
