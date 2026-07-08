@@ -157,6 +157,36 @@
         .toggle-childcategories-btn.active i {
             transform: rotate(180deg);
         }
+        .subcategory-list {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            background-color: #f8fafc;
+            padding-left: 1.5rem;
+            padding-right: 1rem;
+            padding-top: 0;
+            padding-bottom: 0;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, padding 0.3s ease;
+        }
+        .subcategory-list.show {
+            opacity: 1;
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
+        }
+        .childcategory-list {
+            max-height: 0;
+            overflow: hidden;
+            opacity: 0;
+            padding-left: 1rem;
+            padding-top: 0;
+            padding-bottom: 0;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease, padding 0.3s ease;
+        }
+        .childcategory-list.show {
+            opacity: 1;
+            padding-top: 0.25rem;
+            padding-bottom: 0.25rem;
+        }
     </style>
 
 
@@ -1059,7 +1089,7 @@
                     </div>
                     
                     @if ($category->subcategories->count() > 0)
-                        <ul class="list-unstyled pl-4 pr-3 pb-3 subcategory-list" style="display: none; background-color: #f8fafc;">
+                        <ul class="list-unstyled subcategory-list">
                             @foreach ($category->subcategories as $subCat)
                                 <li class="py-2 border-bottom-0">
                                     <div class="d-flex align-items-center justify-content-between">
@@ -1074,7 +1104,7 @@
                                     </div>
                                     
                                     @if ($subCat->childcategories->count() > 0)
-                                        <ul class="list-unstyled pl-3 py-1 childcategory-list" style="display: none;">
+                                        <ul class="list-unstyled childcategory-list">
                                             @foreach ($subCat->childcategories as $childCat)
                                                 <li class="py-1">
                                                     <a href="{{ route('childCatProductView', [$childCat->slug, $childCat->id]) }}" class="text-reset text-muted fs-13 py-1 d-block" style="text-decoration: none;">
@@ -1161,8 +1191,23 @@
                 e.stopPropagation();
                 
                 var $btn = $(this);
+                var $subList = $btn.closest('li').find('> .subcategory-list');
+                
                 $btn.toggleClass('active');
-                $btn.closest('li').find('> .subcategory-list').slideToggle(200);
+                $subList.toggleClass('show');
+                
+                if ($subList.hasClass('show')) {
+                    $subList.css('max-height', $subList[0].scrollHeight + 'px');
+                    setTimeout(function() {
+                        if ($subList.hasClass('show')) {
+                            $subList.css('max-height', 'none');
+                        }
+                    }, 300);
+                } else {
+                    $subList.css('max-height', $subList[0].scrollHeight + 'px');
+                    $subList[0].offsetHeight; // force reflow
+                    $subList.css('max-height', '0px');
+                }
             });
 
             // Toggle Child categories in mobile drawer
@@ -1171,8 +1216,40 @@
                 e.stopPropagation();
                 
                 var $btn = $(this);
+                var $childList = $btn.closest('li').find('> .childcategory-list');
+                var $parentSubList = $btn.closest('.subcategory-list');
+                
                 $btn.toggleClass('active');
-                $btn.closest('li').find('> .childcategory-list').slideToggle(200);
+                $childList.toggleClass('show');
+                
+                if ($childList.hasClass('show')) {
+                    if ($parentSubList.css('max-height') === 'none') {
+                        $parentSubList.css('max-height', $parentSubList[0].scrollHeight + 'px');
+                    }
+                    $childList.css('max-height', $childList[0].scrollHeight + 'px');
+                    
+                    setTimeout(function() {
+                        if ($childList.hasClass('show')) {
+                            $childList.css('max-height', 'none');
+                        }
+                        if ($parentSubList.length > 0 && $parentSubList.hasClass('show')) {
+                            $parentSubList.css('max-height', 'none');
+                        }
+                    }, 300);
+                } else {
+                    if ($parentSubList.css('max-height') === 'none') {
+                        $parentSubList.css('max-height', $parentSubList[0].scrollHeight + 'px');
+                    }
+                    $childList.css('max-height', $childList[0].scrollHeight + 'px');
+                    $childList[0].offsetHeight; // force reflow
+                    $childList.css('max-height', '0px');
+                    
+                    setTimeout(function() {
+                        if ($parentSubList.length > 0 && $parentSubList.hasClass('show')) {
+                            $parentSubList.css('max-height', 'none');
+                        }
+                    }, 300);
+                }
             });
 
             // Bind click event
