@@ -165,7 +165,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
         Route::post('products/store', 'store')->name('product.store')->middleware('admin.permission:create_product');
         Route::get('products/edit{id}', 'edit')->name('product.edit')->middleware('admin.permission:manage_product');
-        Route::post('products/update{id}', 'update')->name('product.update')->middleware('admin.permission:manage_product');
+        Route::put('products/update{id}', 'update')->name('product.update')->middleware('admin.permission:manage_product');
         Route::delete('products/destroy/{id}', 'destroy')->name('product.destroy')->middleware('admin.permission:manage_product');
         Route::post('products/status', 'status')->name('product.status')->middleware('admin.permission:manage_product');
         Route::post('products/todays_deal_status', 'todays_deal_status')->name('product.todays_deal_status')->middleware('admin.permission:manage_product');
