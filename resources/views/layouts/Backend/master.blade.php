@@ -1361,6 +1361,7 @@
                         <ul aria-expanded="false">
                             <li><a href="{{ route('conversation.facebook') }}">Facebook Massenger Instagram</a></li>
                             <li><a href="{{ route('conversation.whatsapp') }}">Whatsapp</a></li>
+                            <li><a href="{{ route('conversation.facebookBusinessSuit') }}">Facebook Business Suite</a></li>
                         </ul>
                     </li>
                     @endif
@@ -1384,6 +1385,7 @@
                                 @endif
                                 @if($user?->hasPermission('manage_affiliate_logs'))
                                 <li><a href="{{ Route::has('affiliate.logs') ? route('affiliate.logs') : '#' }}">Affiliate Logs</a></li>
+                                <li><a href="">Affiliate SMTP Configuration</a></li>
                                 @endif
                             </ul>
                         </li>
@@ -1506,6 +1508,7 @@
     <script src="{{ asset('adminDash/assets/vendor/select2/js/select2.full.min.js') }}"></script>
     <!-- Summernote JS (local vendor - must NOT be deferred so it's ready for document.ready) -->
     <script src="{{ asset('adminDash/assets/vendor/summernote/js/summernote.min.js') }}"></script>
+    
 
     <!-- AJAX Order Alerts -->
     <script>

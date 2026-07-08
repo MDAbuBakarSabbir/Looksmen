@@ -738,4 +738,9 @@ class ConversationController extends Controller
 
         return response()->json(['error' => 'Failed to send message: '.$response->body()], 500);
     }
+
+    public function metaBusinessSuit()
+    {
+        return view('adminDash.conversation.metaBusinessSuit');
+    }
 }

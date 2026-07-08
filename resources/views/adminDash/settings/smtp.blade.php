@@ -176,4 +176,80 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col-lg">
+            <div class="card">
+                <div class="card-header">
+                    Mail Templetes
+                </div>
+                <div class="card-body">
+                    <div class="templete">
+                        <label for="mailService">
+                            Welcome Mail Template
+                        </label>
+                        <textarea name="welcomMail" id="welcomeMail" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            Verification Mail Template
+                        </label>
+                        <textarea name="verificationMail" id="verificationMail" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            OTP Mail Template
+                        </label>
+                        <textarea name="otpMail" id="otpMail" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            Order Confirmation Mail Template
+                        </label>
+                        <textarea name="orderConfirmationMail" id="orderConfirmationMail" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            Order Cancelled Mail Template
+                        </label>
+                        <textarea name="orderCancelMail" id="orderCancelMail" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            Order Delivered Mail Template
+                        </label>
+                        <textarea name="orderDeliveredMail" id="orderDeliveredMail" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg">
+            <div class="card">
+                <div class="card-header">
+                    SMS Templates
+                </div>
+                <div class="card-body">
+                    <div class="templete">
+                        <label for="mailService">
+                            Welcome SMS Template
+                        </label>
+                        <textarea name="welcomeSms" id="welcomeSms" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            Order Confirmation SMS Template
+                        </label>
+                        <textarea name="orderConfirmationSms" id="orderConfirmationSms" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

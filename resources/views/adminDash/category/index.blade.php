@@ -371,6 +371,8 @@
                                         <th scope="col">Image</th>
                                         <th scope="col">Type</th>
                                         <th scope="col">Icon Class</th>
+                                        <th scope="col">Commission Rate</th>
+                                        <th scope="col">Front View</th>
                                         <th scope="col">Status</th>
                                         <th scope="col" style="width: 120px; text-align: right;">Action</th>
                                     </tr>
@@ -395,6 +397,13 @@
                                                 @endif
                                             </td>
                                             <td><code style="background: #f3f4f6; color: #e11d48; padding: 4px 8px; border-radius: 4px; font-weight: 600;">{{ $maincategory->icon }}</code></td>
+                                            <td>{{ $maincategory->commission_rate ?? 'N/A' }} %</td>
+                                            <td>
+                                                <label class="switch mb-0">
+                                                    <input class="status-switch status-switch-main" type="checkbox" data-id="{{ $maincategory->id }}" {{ $maincategory->status == '1' ? 'checked' : '' }}>
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </td>
                                             <td>
                                                 <label class="switch mb-0">
                                                     <input class="status-switch status-switch-main" type="checkbox" data-id="{{ $maincategory->id }}" {{ $maincategory->status == '1' ? 'checked' : '' }}>

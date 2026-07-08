@@ -330,7 +330,7 @@
                         <i class="las la-bars"></i>
                     </button>
                     <a class="d-block py-20px mr-3 ml-0" href="{{ url('/') }}">
-                        <img src="{{ asset('frontend') }}/uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png"
+                        <img src="{{ asset('adminDash/assets/img/layouts') }}/Logo.png"
                             alt="LOOKSMEN" class="mw-100 h-40px h-md-60px" height="40">
                     </a>
 
