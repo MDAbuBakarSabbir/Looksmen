@@ -89,23 +89,25 @@
                 </div>
 
                 <!-- Quick Category Bubbles -->
-                        <ul class="list-unstyled mb-0 row gutters-5">
+                <div class="aiz-carousel gutters-10 half-outside-arrow" data-items="6" data-xl-items="6" data-lg-items="4"
+                    data-md-items="3" data-sm-items="3" data-xs-items="3" data-arrows='true' data-autoplay="true"
+                    data-infinite="true" data-speed="500">
                     @foreach ($categories as $category)
-                        <li class="minw-0 col-4 col-md mt-3">
-                                    <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm">
-                                        <img
-                                            src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
-                                            data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
-                                            alt="{{ $category->name }}"
-                                            class="lazyload img-fit"
-                                            height="78"
-                                            onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';"
-                                        >
-                                        <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">{{ $category->name }}</div>
-                                    </a>
-                                </li>
+                        <div class="ca-item my-3">
+                            <a href="{{ route('catProductView', [$category->slug, $category->id]) }}"
+                                class="d-block rounded bg-white p-2 text-reset shadow-sm text-center hov-shadow-md mr-2">
+                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
+                                    data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
+                                    alt="{{ $category->name }}" class="lazyload img-fit mx-auto" height="78"
+                                    onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';">
+                                <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">
+                                    {{ $category->name }}
+                                </div>
+                            </a>
+                        </div>
                     @endforeach
-                    </ul>
+                </div>
+                
             </div>
 
             <div class="col-lg-2 order-3 mt-3 mt-lg-0">
