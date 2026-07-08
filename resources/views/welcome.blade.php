@@ -116,14 +116,13 @@
                         @foreach ($categories->chunk(6) as $chunkIndex => $categoryChunk)
                             <div class="carousel-item {{ $chunkIndex == 0 ? 'active' : '' }}">
                                 <div class="row gutters-5">
-                                    
                                     @foreach ($categoryChunk as $category)
                                         {{-- col-md-2 দিলে ডেক্সটপে ৬টি কলাম শো করবে (১২ / ২ = ৬) --}}
                                         <div class="col-4 col-md-2 mt-3 minw-0">
                                             <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm text-center">
                                                 <img
                                                     src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
-                                                    data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
+                                                    data-src="{{ asset('Uploads') }}/{{ $category->banner }}"
                                                     alt="{{ $category->name }}"
                                                     class="lazyload img-fit"
                                                     height="78"
@@ -133,7 +132,6 @@
                                             </a>
                                         </div>
                                     @endforeach
-
                                 </div>
                             </div>
                         @endforeach
