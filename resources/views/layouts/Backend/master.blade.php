@@ -1385,8 +1385,8 @@
                                 @endif
                                 @if($user?->hasPermission('manage_affiliate_logs'))
                                 <li><a href="{{ Route::has('affiliate.logs') ? route('affiliate.logs') : '#' }}">Affiliate Logs</a></li>
-                                <li><a href="">Affiliate SMTP Configuration</a></li>
                                 @endif
+                                <li><a href="{{ Route::has('affiliate.smtp') ? route('affiliate.smtp') : '#' }}">Affiliate SMTP Configuration</a></li>
                             </ul>
                         </li>
                         @endif
