@@ -87,7 +87,7 @@
                         </div>
                     @endforeach
                 </div> --}}
-                <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                <div id="carouselExampleControls" class="carousel slide mobile-img-auto-height" data-ride="carousel" data-autoplay="true">
                     <div class="carousel-inner">
                     @foreach ($sliders as $slider)
                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
