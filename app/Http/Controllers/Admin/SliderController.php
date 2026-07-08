@@ -32,9 +32,13 @@ class SliderController extends Controller
             'image' => 'required|image',
         ]);
         if ($request->hasFile('image')) {
+            $dir = base_path('public/uploads');
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/uploads/'.$newname));
+            $image->save($dir.'/'.$newname);
         }
 
         $sliders = new Slider;
@@ -85,7 +89,11 @@ class SliderController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $oldPath = base_path('public/uploads/'.$slider->image);
+            $dir = base_path('public/uploads');
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $oldPath = $dir.'/'.$slider->image;
             if ($slider->image && file_exists($oldPath) && is_file($oldPath)) {
                 unlink($oldPath);
             }
@@ -93,7 +101,7 @@ class SliderController extends Controller
             $manager = new ImageManager(new Driver);
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/uploads/'.$newname));
+            $image->save($dir.'/'.$newname);
             $slider->image = $newname;
         }
 

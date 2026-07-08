@@ -30,9 +30,13 @@ class BannerController extends Controller
             'image' => 'required|image',
         ]);
         if ($request->hasFile('image')) {
+            $dir = base_path('public/adminDash/uploads/slider&banner');
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/adminDash/uploads/slider&banner/'.$newname));
+            $image->save($dir.'/'.$newname);
         }
 
         $banners = new Banner;
@@ -79,7 +83,11 @@ class BannerController extends Controller
         ]);
 
         if ($request->hasFile('image')) {
-            $oldPath = base_path('public/uploads/'.$banner->image);
+            $dir = base_path('public/adminDash/uploads/slider&banner');
+            if (!file_exists($dir)) {
+                mkdir($dir, 0755, true);
+            }
+            $oldPath = $dir.'/'.$banner->image;
             if ($banner->image && file_exists($oldPath) && is_file($oldPath)) {
                 unlink($oldPath);
             }
@@ -87,7 +95,7 @@ class BannerController extends Controller
             $manager = new ImageManager(new Driver);
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/uploads/'.$newname));
+            $image->save($dir.'/'.$newname);
             $banner->image = $newname;
         }
 
@@ -101,7 +109,7 @@ class BannerController extends Controller
     {
         $banner = Banner::findOrFail($id);
 
-        $oldPath = base_path('public/uploads/'.$banner->image);
+        $oldPath = base_path('public/adminDash/uploads/slider&banner/'.$banner->image);
         if ($banner->image && file_exists($oldPath) && is_file($oldPath)) {
             unlink($oldPath);
         }
