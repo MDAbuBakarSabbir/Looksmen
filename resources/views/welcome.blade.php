@@ -164,7 +164,7 @@
 
                             @foreach ($todaysDeals as $todaysDeal)
                                 <div class="col mb-2" title="{{ $todaysDeal->title }}">
-                                    <a href="{{ route('ProductView', [$todaysDeal->slug, $todaysDeal->id]) }}"
+                                    <a href="{{ route('ProductView', [$todaysDeal->id, $todaysDeal->slug]) }}"
                                         class="d-block p-2 text-reset bg-white h-100 rounded">
                                         <div class="row gutters-5 align-items-center">
                                             <div class="col-xxl">
@@ -239,7 +239,7 @@
                             <div class="aiz-card-box border border-light rounded hov-shadow-md mt-1 mb-2 has-transition bg-white">
                                 <span class="badge-custom">OFF<span class="box ml-1 mr-0">&nbsp;{!! $newArival->discount_percentage !!}%</span></span>
                                 <div class="position-relative">
-                                    <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}" class="d-block">
+                                    <a href="{{ route('ProductView', [$newArival->id, $newArival->slug]) }}" class="d-block">
                                         <img class="img-fit mx-auto h-140px h-md-210px lazyload"
                                             src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                             data-src="{{ $newArival->firstImage ? asset('Uploads/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
@@ -312,7 +312,7 @@
                                     <span
                                         class="border-bottom border-primary border-width-2 pb-3 d-inline-block">{{ $categoryProduct->name }}</span>
                                 </h3>
-                                <a href="{{ route('catProductView', [$categoryProduct->slug, $categoryProduct->id]) }}"
+                                <a href="{{ route('catProductView', [$categoryProduct->id, $categoryProduct->slug]) }}"
                                     class="ml-auto mr-0 btn btn-primary btn-sm shadow-md">View More</a>
                             </div>
 
@@ -325,7 +325,7 @@
                                             <span class="badge-custom">OFF<span
                                                     class="box ml-1 mr-0">&nbsp;{!! $product->discount_percentage !!}%</span></span>
                                             <div class="position-relative">
-                                                <a href="{{ route('ProductView', [$product->slug, $product->id]) }}"
+                                                <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                     class="d-block">
                                                     <img class="img-fit mx-auto h-140px h-md-210px ls-is-cached lazyload"
                                                         src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
@@ -376,7 +376,7 @@
                                                     @endfor
                                                 </div>
                                                 <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
-                                                    <a href="{{ route('ProductView', [$product->slug, $product->id]) }}"
+                                                    <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                         class="d-block text-reset">{{ $product->title }}</a>
                                                 </h3>
 
