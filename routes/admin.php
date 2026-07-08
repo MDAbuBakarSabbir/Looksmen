@@ -449,6 +449,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/conversation/instagram/contacts', 'getInstagramContacts')->name('conversation.instagram.contacts');
         Route::get('/conversation/instagram/messages/{contact_id}', 'getInstagramMessages')->name('conversation.instagram.messages');
         Route::post('/conversation/instagram/send', 'sendInstagramMessage')->name('conversation.instagram.send');
+
+        Route::get('/conversation/facebook-business-suit', 'metaBusinessSuit')->name('conversation.facebookBusinessSuit');
     });
 });
 Route::match(['get', 'post'], '/webhook/whatsapp', [ConversationController::class, 'handleWhatsApp']);

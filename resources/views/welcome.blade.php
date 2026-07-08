@@ -27,11 +27,7 @@
                             <li class="category-nav-element" data-id="{{ $category->id }}">
                                 <a href="{{ route('catProductView', [$category->slug, $category->id]) }}"
                                     class="text-truncate text-reset py-2 px-3 d-block">
-                                    <img class="cat-image lazyload mr-2 opacity-60"
-                                        src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
-                                        data-src="{{ asset('frontend') }}/uploads/jWfNXjIDci5blBvokxp9u0RS89WqXeoBNws92KlQ.svg"
-                                        width="16" alt="{{ $category->name }}"
-                                        onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
+                                    <i class="cat-image lazyload mr-2 opacity-60 fa-regular {{ $category->icon }}"></i>
                                     <span class="cat-name">{{ $category->name }}</span>
                                 </a>
                                 <div class="sub-cat-menu c-scrollbar-light rounded shadow-lg p-4">

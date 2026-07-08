@@ -1,4 +1,4 @@
-﻿@extends('layouts.Backend.master')
+@extends('layouts.Backend.master')
 @section('title')
     BANNER
 @endsection
@@ -272,3 +272,149 @@
 @section('script')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+$(document).ready(function() {
+    
+    // ১. মোডাল ওপেন করা (Add Banner Button Click)
+    $('#addBanner').on('click', function() {
+        $('#bannerModal').addClass('show');
+    });
+
+    // ২. মোডাল বন্ধ করা (Cancel Button Click)
+    $('#cancelBtn').on('click', function() {
+        closeModal();
+    });
+
+    // মোডালের বাইরে ক্লিক করলে বন্ধ হবে
+    $(window).on('click', function(e) {
+        if ($(e.target).is('#bannerModal')) {
+            closeModal();
+        }
+    });
+
+    function closeModal() {
+        $('#bannerModal').removeClass('show');
+        $('#addBannerForm')[0].reset(); // ফর্মের ডাটা ক্লিয়ার করবে
+        $('.image-upload-box').html('<i class="fa fa-cloud-upload-alt"></i>'); // ইমেজ বক্স রিসেট
+    }
+
+    // ৩. ইমেজ সিলেক্ট করলে বক্সের ভেতর প্রিভিউ দেখানো
+    $('#image-input').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                $('.image-upload-box').html(`<img src="${event.target.result}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 14px;">`);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // ৪. রিলোড ছাড়া ফর্ম সাবমিশন (AJAX)
+    $('#addBannerForm').on('submit', function(e) {
+        e.preventDefault();
+
+        let formData = new FormData(this);
+        let submitBtn = $('.submit-btn');
+        
+        // সাবমিট বাটন লোডিং স্টেট
+        submitBtn.prop('disabled', true).text('Saving...');
+
+        $.ajax({
+            url: "{{ route('banner.store') }}",
+            type: "POST",
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                submitBtn.prop('disabled', false).text('Save Banner');
+
+                if(response.success) {
+                    // মোডাল বন্ধ করা
+                    closeModal();
+
+                    // টেবিলে যদি "No Banners Found" লেখা থাকে তা রিমুভ করা
+                    if ($('#bannerTableBody tr td').hasClass('text-center')) {
+                        $('#bannerTableBody').empty();
+                    }
+
+                    // সিরিয়াল নাম্বার হিসাব করা
+                    let nextIndex = $('#bannerTableBody tr').length + 1;
+                    
+                    // এডিট ও ডিলিট রাউট ডাইনামিক করা
+                    let editUrl = "{{ route('banner.edit', ':id') }}".replace(':id', response.data.id);
+                    let deleteUrl = "{{ route('banner.destroy', ':id') }}".replace(':id', response.data.id);
+                    let assetUrl = "{{ asset('adminDash/uploads/slider&banner') }}/" + response.data.image;
+                    let editIcon = "{{ asset('adminDash/assets/img/layouts/edit.png') }}";
+                    let deleteIcon = "{{ asset('adminDash/assets/img/layouts/delete.png') }}";
+
+                    // নতুন ব্যানারের ডাটা টেবিলে অ্যাপেন্ড (Append) করা
+                    let newRow = `
+                        <tr>
+                            <td>${nextIndex}</td>
+                            <td>
+                                <img class="thumbnail-img" src="${assetUrl}" alt="Banner">
+                            </td>
+                            <td>
+                                <a href="${response.data.url ? response.data.url : '#'}" target="_blank" class="text-primary text-decoration-none">
+                                    ${response.data.url ? response.data.url : 'No Link'}
+                                </a>
+                            </td>
+                            <td>
+                                <label class="switch">
+                                    <input class="status-switch" type="checkbox" data-id="${response.data.id}" ${response.data.status == '1' ? 'checked' : ''}>
+                                    <span class="slider round"></span>
+                                </label>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <a class="action-icon mr-2" href="${editUrl}">
+                                        <img src="${editIcon}" alt="Edit">
+                                    </a>
+                                    <a class="action-icon delete-btn" href="${deleteUrl}" onclick="return confirm('Are you sure you want to delete this banner?');">
+                                        <img src="${deleteIcon}" alt="Delete">
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+
+                    $('#bannerTableBody').append(newRow);
+
+                    // SweetAlert সাকসেস নোটিফিকেশন
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Success!',
+                        text: response.message || 'Banner added successfully!',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Something went wrong. Please try again.',
+                    });
+                }
+            },
+            error: function(xhr) {
+                submitBtn.prop('disabled', false).text('Save Banner');
+                
+                // ভ্যালিডেশন এরর মেসেজ হ্যান্ডেলিং
+                let errors = xhr.responseJSON.errors;
+                let errorMsg = 'Validation Error!';
+                if(errors) {
+                    errorMsg = Object.values(errors).flat().join('\n');
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: errorMsg,
+                });
+            }
+        });
+    });
+});
+</script>
+@endsection
