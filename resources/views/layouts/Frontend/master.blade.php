@@ -147,6 +147,16 @@
         .pac-container {
             z-index: 100000;
         }
+
+        /* Mobile category drawer styling */
+        .toggle-subcategories-btn i, 
+        .toggle-childcategories-btn i {
+            transition: transform 0.2s ease;
+        }
+        .toggle-subcategories-btn.active i, 
+        .toggle-childcategories-btn.active i {
+            transform: rotate(180deg);
+        }
     </style>
 
 
@@ -1026,11 +1036,11 @@
             <h5 class="mb-0 fw-600 fs-16"><i class="las la-list-ul mr-2"></i> Categories</h5>
             <button type="button" class="btn text-white p-0" id="mobile-categories-close-btn" style="font-size: 24px; line-height: 1; background: none; border: none; outline: none; cursor: pointer;"><i class="las la-times"></i></button>
         </div>
-        <ul class="list-unstyled mb-0 py-2">
+        <ul class="list-unstyled mb-0 py-2 mobile-category-list">
             @foreach ($categories as $category)
-                <li class="border-bottom-0">
-                    <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="text-reset d-flex align-items-center justify-content-between py-3 px-4 border-bottom text-dark fw-500" style="transition: all 0.2s; text-decoration: none;">
-                        <span class="d-flex align-items-center">
+                <li class="border-bottom">
+                    <div class="d-flex align-items-center justify-content-between py-3 px-4">
+                        <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="text-reset text-dark fw-600 flex-grow-1 d-flex align-items-center" style="text-decoration: none;">
                             <img class="cat-image mr-3 opacity-60 lazyload"
                                 src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                 data-src="{{ asset('frontend/uploads/'.$category->banner) }}"
@@ -1040,9 +1050,44 @@
                                 alt="{{ $category->name }}"
                                 onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
                             <span>{{ $category->name }}</span>
-                        </span>
-                        <i class="las la-angle-right opacity-60"></i>
-                    </a>
+                        </a>
+                        @if ($category->subcategories->count() > 0)
+                            <button type="button" class="btn p-0 text-muted toggle-subcategories-btn" style="font-size: 18px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; background: none; border: none; outline: none;">
+                                <i class="las la-angle-down"></i>
+                            </button>
+                        @endif
+                    </div>
+                    
+                    @if ($category->subcategories->count() > 0)
+                        <ul class="list-unstyled pl-4 pr-3 pb-3 subcategory-list" style="display: none; background-color: #f8fafc;">
+                            @foreach ($category->subcategories as $subCat)
+                                <li class="py-2 border-bottom-0">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <a href="{{ route('subCatProductView', [$subCat->slug, $subCat->id]) }}" class="text-reset text-dark fs-14 fw-500 py-1 flex-grow-1" style="text-decoration: none;">
+                                            {{ $subCat->name }}
+                                        </a>
+                                        @if ($subCat->childcategories->count() > 0)
+                                            <button type="button" class="btn p-0 text-muted toggle-childcategories-btn" style="font-size: 16px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; background: none; border: none; outline: none;">
+                                                <i class="las la-angle-down"></i>
+                                            </button>
+                                        @endif
+                                    </div>
+                                    
+                                    @if ($subCat->childcategories->count() > 0)
+                                        <ul class="list-unstyled pl-3 py-1 childcategory-list" style="display: none;">
+                                            @foreach ($subCat->childcategories as $childCat)
+                                                <li class="py-1">
+                                                    <a href="{{ route('childCatProductView', [$childCat->slug, $childCat->id]) }}" class="text-reset text-muted fs-13 py-1 d-block" style="text-decoration: none;">
+                                                        <i class="las la-minus mr-1 fs-10 opacity-50"></i> {{ $childCat->name }}
+                                                    </a>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
                 </li>
             @endforeach
         </ul>
@@ -1108,7 +1153,27 @@
 
             // Bind Categories close events
             $(document).on('click', '#mobile-categories-close-btn, #mobileCategoriesBackdrop', closeCategoriesDrawer);
-            $(document).on('click', '#mobileCategoriesDrawer a', closeCategoriesDrawer);
+            $(document).on('click', '#mobileCategoriesDrawer a:not(.toggle-subcategories-btn, .toggle-childcategories-btn)', closeCategoriesDrawer);
+
+            // Toggle Subcategories in mobile drawer
+            $(document).on('click', '.toggle-subcategories-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var $btn = $(this);
+                $btn.toggleClass('active');
+                $btn.closest('li').find('> .subcategory-list').slideToggle(200);
+            });
+
+            // Toggle Child categories in mobile drawer
+            $(document).on('click', '.toggle-childcategories-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                var $btn = $(this);
+                $btn.toggleClass('active');
+                $btn.closest('li').find('> .childcategory-list').slideToggle(200);
+            });
 
             // Bind click event
             $(document).on('click', '.mobile-dashboard-toggle', function(e) {
