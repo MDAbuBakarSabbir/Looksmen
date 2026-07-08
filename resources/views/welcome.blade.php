@@ -74,7 +74,7 @@
 
 
             <div class=" col-lg-7 ">
-                <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true"
+                <div class="home-slider aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true"
                     data-autoplay="true" data-infinite="true">
                     @foreach ($sliders as $slider)
                         <div class="carousel-box">
@@ -89,7 +89,7 @@
                 </div>
 
                 <!-- Quick Category Bubbles -->
-                <div class="category-carousel gutters-10 half-outside-arrow">
+                <div class="category-carousel gutters-10 half-outside-arrow mt-3">
                     @foreach ($categories as $category)
                         <div class="ca-item my-3">
                             <a href="{{ route('catProductView', [$category->slug, $category->id]) }}"
@@ -105,7 +105,6 @@
                         </div>
                     @endforeach
                 </div>
-                
             </div>
 
             <div class="col-lg-2 order-3 mt-3 mt-lg-0">
@@ -490,27 +489,41 @@
 
 @section('script')
     <script>
-        $('.category-carousel').slick({
-            slidesToShow: 6,
-            slidesToScroll: 1,
-            autoplay: true, 
-            autoplaySpeed: 2000,
-            infinite: true,
-            arrows: true,
-            dots: false,
-            responsive: [{
-                    breakpoint: 1024,
-                    settings: {
-                        slidesToShow: 4,
+        $(document).ready(function() {
+            // Main Banner Slider - 1 slide
+            $('.home-slider').slick({
+                slidesToShow: 1,
+                slidesToScroll: 1,
+                autoplay: true,
+                autoplaySpeed: 3000,
+                infinite: true,
+                arrows: true,
+                dots: true
+            });
+
+            // Quick Category Carousel - 6 slides
+            $('.category-carousel').slick({
+                slidesToShow: 6,
+                slidesToScroll: 1,
+                autoplay: true, 
+                autoplaySpeed: 2000,
+                infinite: true,
+                arrows: true,
+                dots: false,
+                responsive: [{
+                        breakpoint: 1024,
+                        settings: {
+                            slidesToShow: 4,
+                        }
+                    },
+                    {
+                        breakpoint: 600,
+                        settings: {
+                            slidesToShow: 2,
+                        }
                     }
-                },
-                {
-                    breakpoint: 600,
-                    settings: {
-                        slidesToShow: 2,
-                    }
-                }
-            ]
+                ]
+            });
         });
     </script>
 @endsection
