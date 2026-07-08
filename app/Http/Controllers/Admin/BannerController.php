@@ -31,7 +31,7 @@ class BannerController extends Controller
         ]);
         if ($request->hasFile('image')) {
             $dir = base_path('public/adminDash/uploads/slider&banner');
-            if (!file_exists($dir)) {
+            if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
             $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
@@ -84,7 +84,7 @@ class BannerController extends Controller
 
         if ($request->hasFile('image')) {
             $dir = base_path('public/adminDash/uploads/slider&banner');
-            if (!file_exists($dir)) {
+            if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
             $oldPath = $dir.'/'.$banner->image;
@@ -121,7 +121,7 @@ class BannerController extends Controller
 
     public function alluploads()
     {
-        $uploadPath = public_path('uploads');
+        $uploadPath = public_path('Uploads');
         $extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp'];
 
         $files = [];
