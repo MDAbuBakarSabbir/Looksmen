@@ -97,6 +97,11 @@
 
     <script src="{{ asset('frontend') }}/assets/js/jquryui.js"></script>
     <script>
+        // Resolve conflict between jQuery UI and Bootstrap tooltip
+        if (typeof $.widget !== 'undefined' && typeof $.widget.bridge === 'function') {
+            $.widget.bridge('uitooltip', $.ui.tooltip);
+        }
+
         var AIZ = AIZ || {};
         AIZ.local = {
             nothing_selected: 'Nothing selected',
