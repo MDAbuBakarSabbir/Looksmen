@@ -80,11 +80,11 @@ Route::middleware(['maintainance'])->group(function () {
 
     Route::controller(FrontCategoryController::class)->group(function () {
         Route::get('/all-category', 'allcategory')->name('front.allCategory');
-        Route::get('/category/{slug}-{id}', 'catProductView')->name('catProductView')->where('id', '[0-9]+');
-        Route::get('/category/sub-{slug}-{id}', 'subCatProductView')->name('subCatProductView')->where('id', '[0-9]+');
-        Route::get('/category/child-{slug}-{id}', 'childCatProductView')->name('childCatProductView')->where('id', '[0-9]+');
+        Route::get('/category/{id}/{slug}', 'catProductView')->name('catProductView')->where('id', '[0-9]+');
+        Route::get('/sub-category/{id}/{slug}', 'subCatProductView')->name('subCatProductView')->where('id', '[0-9]+');
+        Route::get('/child-category/{id}/{slug}', 'childCatProductView')->name('childCatProductView')->where('id', '[0-9]+');
         Route::get('/product/compare', 'ProductCompare')->name('ProductCompare');
-        Route::get('/product/{slug}-{id}', 'ProductView')->name('ProductView')->where('id', '[0-9]+');
+        Route::get('/product/{id}/{slug}', 'ProductView')->name('ProductView')->where('id', '[0-9]+');
         Route::get('/page/{slug}', 'pages')->name('pages');
     });
 
