@@ -38,7 +38,7 @@ class CategoryController extends Controller
         if ($request->hasFile('image')) {
             $imgName = Str::random(7).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/uploads/'.$imgName));
+            $image->save(base_path('public/Uploads/'.$imgName));
         }
         Category::create([
             'name' => $request->category_name,
