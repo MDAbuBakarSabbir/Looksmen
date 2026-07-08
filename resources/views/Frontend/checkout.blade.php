@@ -699,21 +699,25 @@
                     $('#successRate').text(res.data.success_rate);
 
                     // Success rate color logic
+                    if (res.data.total === 0) {
+                        $('#successRateText').css('color', 'green');
+                    } else if (res.data.success_rate < res.min_rate) {
+                        $('#successRateText').css('color', 'red');
+                    } else {
+                        $('#successRateText').css('color', 'green');
+                    }
+
                     if ($featuresConfig['payment_api'] == '1') {
                         if (res.data.total === 0) {
-                            $('#successRateText').css('color', 'green');
                             $('#cod').prop('disabled', false).prop('checked', true);
                             $('#prepaid').prop('disabled', false);
                             $('#confirm_order_btn,#proceed_payment_btn').removeClass('disabled')
                                 .removeAttr('disabled');
                             updateOrderButtons();
                         } else if (res.data.success_rate < res.min_rate) {
-                            $('#successRateText').css('color', 'red');
-
                             $('#cod').prop('disabled', true);
                             $('#prepaid').prop('disabled', false).prop('checked', true);
-                            $('#proceed_payment_btn').removeClass('disabled').removeAttr(
-                                'disabled');
+                            $('#proceed_payment_btn').removeClass('disabled').removeAttr('disabled');
                             updateOrderButtons();
 
                             Swal.fire({
@@ -722,24 +726,16 @@
                                 text: 'Cash on Delivery is disabled. Please use Prepayment.'
                             });
                         } else {
-                            $('#successRateText').css('color', 'green');
                             $('#cod').prop('disabled', false).prop('checked', true);
                             $('#prepaid').prop('disabled', false);
                             $('#confirm_order_btn,#proceed_payment_btn').removeClass('disabled')
                                 .removeAttr('disabled');
                             updateOrderButtons();
                         }
-
-                        // Total parcel = 0 → COD allowed
-                        if (res.data.total === 0) {
-                            $('#cod').prop('disabled', false);
-                        }
                     } else {
-                        $('#confirm_order_btn').removeClass('disabled')
-                            .removeAttr('disabled');
-                        $('#cod').prop('disabled', false);
+                        $('#confirm_order_btn').removeClass('disabled').removeAttr('disabled');
+                        $('#cod').prop('disabled', false).prop('checked', true);
                         updateOrderButtons();
-
                     }
 
                 }).fail(function() {
