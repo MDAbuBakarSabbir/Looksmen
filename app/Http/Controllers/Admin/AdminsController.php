@@ -127,6 +127,7 @@ class AdminsController extends Controller
             'email' => 'required|string|email|max:255|unique:admins,email,' . $admin->id,
             'number' => 'required|string|max:20|unique:admins,number,' . $admin->id,
             'password' => 'nullable|string|min:8|confirmed',
+            'profile_pic' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
         ]);
 
         $admin->name = $request->name;
@@ -137,12 +138,25 @@ class AdminsController extends Controller
             $admin->password = \Illuminate\Support\Facades\Hash::make($request->password);
         }
 
+        if ($request->hasFile('profile_pic')) {
+            // Delete old profile picture if exists
+            if ($admin->profile_pic && file_exists(public_path('Uploads/' . $admin->profile_pic))) {
+                @unlink(public_path('Uploads/' . $admin->profile_pic));
+            }
+
+            $file = $request->file('profile_pic');
+            $imgName = 'admin-' . $admin->id . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $file->move(public_path('Uploads'), $imgName);
+            $admin->profile_pic = $imgName;
+        }
+
         $admin->save();
 
         if ($request->ajax()) {
             return response()->json([
                 'success' => true,
-                'message' => 'Admin profile updated successfully!'
+                'message' => 'Admin profile updated successfully!',
+                'profile_pic_url' => $admin->profile_pic ? asset('Uploads/' . $admin->profile_pic) : null
             ]);
         }
 
