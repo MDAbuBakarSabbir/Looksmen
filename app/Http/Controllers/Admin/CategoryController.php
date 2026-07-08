@@ -78,9 +78,9 @@ class CategoryController extends Controller
             $manager = new ImageManager(new Driver);
             $imgName = Str::random(7).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/uploads/'.$imgName));
-            if (! empty($category->banner) && file_exists(base_path('public/uploads/'.$category->banner))) {
-                @unlink(base_path('public/uploads/'.$category->banner));
+            $image->save(base_path('public/Uploads/'.$imgName));
+            if (! empty($category->banner) && file_exists(base_path('public/Uploads/'.$category->banner))) {
+                @unlink(base_path('public/Uploads/'.$category->banner));
             }
         }
 
@@ -119,8 +119,8 @@ class CategoryController extends Controller
     public function destroy($id)
     {
         $category = Category::findOrFail($id);
-        if (! empty($category->banner) && file_exists(base_path('public/uploads/'.$category->banner))) {
-            @unlink(base_path('public/uploads/'.$category->banner));
+        if (! empty($category->banner) && file_exists(base_path('public/Uploads/'.$category->banner))) {
+            @unlink(base_path('public/Uploads/'.$category->banner));
         }
         $category->delete();
 
