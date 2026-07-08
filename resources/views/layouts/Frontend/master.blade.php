@@ -401,7 +401,7 @@
                                         <ul class="list-unstyled categories no-scrollbar py-2 mb-0 text-left">
                                             @foreach ($categories as $category)
                                                 <li class="category-nav-element" data-id="{{ $category->id }}">
-                                                    <a href="{{ route('catProductView', [$category->slug, $category->id]) }}"
+                                                    <a href="{{ route('catProductView', [$category->id, $category->slug]) }}"
                                                         class="text-truncate text-reset py-2 px-3 d-block">
                                                         <img class="cat-image mr-2 opacity-60 ls-is-cached lazyloaded"
                                                             src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
@@ -419,7 +419,7 @@
                                                                         @foreach ($category->subcategories as $subCat)
                                                                             <li class="fw-600 border-bottom pb-2 mb-3">
                                                                                 <a class="text-reset"
-                                                                                    href="{{ route('subCatProductView', [$subCat->slug, $subCat->id]) }}">
+                                                                                    href="{{ route('subCatProductView', [$subCat->id, $subCat->slug]) }}">
                                                                                     {{ $subCat->name }}</a>
                                                                             </li>
                                                                         @endforeach
@@ -1070,7 +1070,7 @@
             @foreach ($categories as $category)
                 <li class="border-bottom">
                     <div class="d-flex align-items-center justify-content-between py-3 px-4">
-                        <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="text-reset text-dark fw-600 flex-grow-1 d-flex align-items-center" style="text-decoration: none;">
+                        <a href="{{ route('catProductView', [$category->id, $category->slug]) }}" class="text-reset text-dark fw-600 flex-grow-1 d-flex align-items-center" style="text-decoration: none;">
                             <img class="cat-image mr-3 opacity-60 lazyload"
                                 src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                 data-src="{{ asset('Uploads/'.$category->banner) }}"
@@ -1093,7 +1093,7 @@
                             @foreach ($category->subcategories as $subCat)
                                 <li class="py-2 border-bottom-0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <a href="{{ route('subCatProductView', [$subCat->slug, $subCat->id]) }}" class="text-reset text-dark fs-14 fw-500 py-1 flex-grow-1" style="text-decoration: none;">
+                                        <a href="{{ route('subCatProductView', [$subCat->id, $subCat->slug]) }}" class="text-reset text-dark fs-14 fw-500 py-1 flex-grow-1" style="text-decoration: none;">
                                             {{ $subCat->name }}
                                         </a>
                                         @if ($subCat->childcategories->count() > 0)
@@ -1107,7 +1107,7 @@
                                         <ul class="list-unstyled childcategory-list">
                                             @foreach ($subCat->childcategories as $childCat)
                                                 <li class="py-1">
-                                                    <a href="{{ route('childCatProductView', [$childCat->slug, $childCat->id]) }}" class="text-reset text-muted fs-13 py-1 d-block" style="text-decoration: none;">
+                                                    <a href="{{ route('childCatProductView', [$childCat->id, $childCat->slug]) }}" class="text-reset text-muted fs-13 py-1 d-block" style="text-decoration: none;">
                                                         <i class="las la-minus mr-1 fs-10 opacity-50"></i> {{ $childCat->name }}
                                                     </a>
                                                 </li>
@@ -1420,7 +1420,39 @@
             // ১. Add to Cart Click
             $(document).on('click', '.add-to-cart-btn', function() {
                 let id = $(this).data('id');
-                addToCart(id);
+                let quantity = $('input[name="quantity"]').val() || 1;
+                addToCart(id, { quantity: quantity });
+            });
+
+            // Quantity picker plus/minus buttons handler
+            $(document).on('click', '.quantity-picker-btn', function(e) {
+                e.preventDefault();
+                let type = $(this).data('type');
+                let field = $(this).data('field');
+                let input = $('input[name="' + field + '"]');
+                let currentVal = parseInt(input.val()) || 1;
+                
+                if (type === 'minus') {
+                    if (currentVal > 1) {
+                        input.val(currentVal - 1).change();
+                    }
+                } else if (type === 'plus') {
+                    let maxVal = parseInt(input.attr('max')) || 10;
+                    if (currentVal < maxVal) {
+                        input.val(currentVal + 1).change();
+                    }
+                }
+            });
+
+            // Toggle disabled state of minus button based on quantity value
+            $(document).on('change', 'input[name="quantity"]', function() {
+                let val = parseInt($(this).val()) || 1;
+                let minusBtn = $('.quantity-picker-btn[data-type="minus"]');
+                if (val <= 1) {
+                    minusBtn.attr('disabled', true);
+                } else {
+                    minusBtn.removeAttr('disabled');
+                }
             });
         });
 
@@ -1462,6 +1494,7 @@
             let isValid = true;
             let attributes = []; // আমরা লুপ করে এখানে ডাটা রাখব
             let colorName = $('input[name="color_id"]:checked').data('name') || ""; // কালার নাম ধরার জন্য
+            let quantity = $('input[name="quantity"]').val() || 1; // মেইন পেজের কোয়ান্টিটি
 
             // ১. অ্যাট্রিবিউট চেক এবং ডাটা নেওয়া
             $('.attribute-select').each(function() {
@@ -1469,7 +1502,11 @@
                 let attrValue = $(this).val();
 
                 if (attrValue === "null" || attrValue === null || attrValue === "") {
-                    alert("Please select " + attrLabel);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: "Please select " + attrLabel
+                    });
                     isValid = false;
                     return false;
                 }
@@ -1479,7 +1516,11 @@
 
             // ২. কালার চেক (যদি থাকে)
             if ($('input[name="color_id"]').length > 0 && !$('input[name="color_id"]:checked').val()) {
-                alert("Please select a color");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: "Please select a color"
+                });
                 isValid = false;
             }
 
@@ -1492,7 +1533,7 @@
                 option_selected: true, // কন্ট্রোলারের কন্ডিশন চেক করার জন্য
                 attribute_value: attributes.join(', '), // "Size: M, Fabric: Cotton" হিসেবে পাঠাবে
                 color_name: colorName,
-                quantity: 1
+                quantity: quantity
             }, function(data) {
                 if (data.status === 'success') {
                     $('#cart-modal').modal('hide');

@@ -25,7 +25,7 @@
                     <ul class="list-unstyled categories no-scrollbar py-2 mb-0 text-left">
                         @foreach ($categories as $category)
                             <li class="category-nav-element" data-id="{{ $category->id }}">
-                                <a href="{{ route('catProductView', [$category->slug, $category->id]) }}"
+                                <a href="{{ route('catProductView', [$category->id, $category->slug]) }}"
                                     class="text-truncate text-reset py-2 px-3 d-block">
                                     <i class="cat-image lazyload mr-2 opacity-60 fa-regular {{ $category->icon }}"></i>
                                     <span class="cat-name">{{ $category->name }}</span>
@@ -39,7 +39,7 @@
                                                     <div class="p-2">
                                                         <h6 class="mb-3">
                                                             <a class="text-reset fw-600 fs-14"
-                                                                href="{{ route('subCatProductView', [$subCat->slug, $subCat->id]) }}">
+                                                                href="{{ route('subCatProductView', [$subCat->id, $subCat->slug]) }}">
                                                                 {{ $subCat->name }}
                                                             </a>
                                                         </h6>
@@ -47,7 +47,7 @@
                                                             @foreach ($subCat->childcategories as $childCat)
                                                                 <li class="mb-2">
                                                                     <a class="text-reset opacity-60 hov-opacity-100"
-                                                                        href="{{ route('childCatProductView', [$childCat->slug, $childCat->id]) }}">
+                                                                        href="{{ route('childCatProductView', [$childCat->id, $childCat->slug]) }}">
                                                                         {{ $childCat->name }}
                                                                     </a>
                                                                 </li>
@@ -119,7 +119,7 @@
                                     @foreach ($categoryChunk as $category)
                                         {{-- col-md-2 দিলে ডেক্সটপে ৬টি কলাম শো করবে (১২ / ২ = ৬) --}}
                                         <div class="col-4 col-md-2 mt-3 minw-0">
-                                            <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm text-center">
+                                            <a href="{{ route('catProductView', [$category->id, $category->slug]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm text-center">
                                                 <img
                                                     src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
                                                     data-src="{{ asset('Uploads') }}/{{ $category->banner }}"
@@ -283,7 +283,7 @@
                                         @endfor
                                     </div>
                                     <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
-                                        <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}" class="d-block text-reset">{{ $newArival->title }}</a>
+                                        <a href="{{ route('ProductView', [$newArival->id, $newArival->slug]) }}" class="d-block text-reset">{{ $newArival->title }}</a>
                                     </h3>
                                     <a href="javascript:void(0)" class="btn btn-primary add-to-cart-btn mt-2" style="width: 100%" data-title="Add to cart" data-id="{{ $newArival->id }}" data-type="product">
                                         Add to Cart

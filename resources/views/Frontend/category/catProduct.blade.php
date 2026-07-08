@@ -176,14 +176,14 @@
                                             </li>
                                             <li class="mb-3">
                                                 <a class="text-primary fs-14 fw-700"
-                                                    href="{{ route('catProductView', [$category->slug, $category->id]) }}">
+                                                    href="{{ route('catProductView', [$category->id, $category->slug]) }}">
                                                     <i class="las la-angle-down mr-1"></i>{{ $category->name }}
                                                 </a>
                                             </li>
                                             @foreach ($category->subcategories as $subcat)
                                                 <li class="ml-4 mb-2">
                                                     <a class="text-secondary fs-14 fw-500"
-                                                        href="{{ route('subCatProductView', [$subcat->slug, $subcat->id]) }}">{{ $subcat->name }}</a>
+                                                         href="{{ route('subCatProductView', [$subcat->id, $subcat->slug]) }}">{{ $subcat->name }}</a>
                                                 </li>
                                             @endforeach
                                         </ul>
@@ -228,7 +228,7 @@
                                 <a href="{{ route('front.allCategory') }}">All categories</a>
                             </li>
                             <li class="breadcrumb-item active">
-                                <a href="{{ route('catProductView', [$category->slug, $category->id]) }}">{{ $category->name }}</a>
+                                <a href="{{ route('catProductView', [$category->id, $category->slug]) }}">{{ $category->name }}</a>
                             </li>
                         </ul>
                         
@@ -284,7 +284,7 @@
                                             <span class="badge-discount">-{{ $catProduct->discount_percentage }}%</span>
                                         @endif
                                         <div class="position-relative overflow-hidden">
-                                            <a href="{{ route('ProductView', [$catProduct->slug, $catProduct->id]) }}" class="d-block text-center pt-3">
+                                            <a href="{{ route('ProductView', [$catProduct->id, $catProduct->slug]) }}" class="d-block text-center pt-3">
                                                 <img class="img-fit lazyload mx-auto h-160px h-md-210px"
                                                     src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
                                                     data-src="{{ $catProduct->firstImage ? asset('Uploads/' . $catProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
@@ -318,7 +318,7 @@
                                                 @endfor
                                             </div>
                                             <h3 class="fw-600 fs-14 text-truncate-2 lh-1-4 mb-2 flex-grow-1">
-                                                <a href="{{ route('ProductView', [$catProduct->slug, $catProduct->id]) }}" class="product-title-link">{{ $catProduct->title }}</a>
+                                                <a href="{{ route('ProductView', [$catProduct->id, $catProduct->slug]) }}" class="product-title-link">{{ $catProduct->title }}</a>
                                             </h3>
                                             <div class="fs-15 mb-3 d-flex align-items-center">
                                                 <span class="price-new mr-2">৳{{ $catProduct->new_price }}</span>
