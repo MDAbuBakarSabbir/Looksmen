@@ -1,7 +1,7 @@
 
 
 <div class="modal-header">
-    <h6 class="modal-title fw-600">{{ $product->name }}</h6>
+    <h6 class="modal-title fw-600">{{ $product->title }}</h6>
     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
 </div>
 <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">

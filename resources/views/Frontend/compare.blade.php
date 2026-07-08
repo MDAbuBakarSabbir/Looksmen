@@ -68,7 +68,7 @@
                                     <td class="text-left fw-600 bg-light">Action</td>
                                     @foreach($products as $product)
                                         <td>
-                                            <a href="{{ route('ProductView', [$product->slug, $product->id]) }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-600">View Product</a>
+                                            <a href="{{ route('ProductView', [$product->id, $product->slug]) }}" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-600">View Product</a>
                                         </td>
                                     @endforeach
                                 </tr>

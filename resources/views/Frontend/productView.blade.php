@@ -754,7 +754,7 @@
                                         <li class="list-group-item-modern list-group-item border-0">
                                             <div class="row gutters-10 align-items-center">
                                                 <div class="col-4">
-                                                    <a href="{{ route('ProductView', [$product->slug, $product->id]) }}"
+                                                    <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                         class="d-block mini-product-img">
                                                         <img class="img-fit lazyload" style="height: 65px; width: 100%; object-fit: cover;"
                                                             src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
@@ -765,7 +765,7 @@
                                                 </div>
                                                 <div class="col-8 text-left">
                                                     <h4 class="fs-13 fw-600 mb-1" style="line-height: 1.3;">
-                                                        <a href="{{ route('ProductView', [$product->slug, $product->id]) }}"
+                                                        <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                             class="d-block text-reset" style="color: #0f172a; text-decoration: none;">{{ Str::limit($product->title, 32) }}</a>
                                                     </h4>
                                                     <div class="rating-stars-gold mb-1" style="font-size: 0.75rem;">
@@ -886,7 +886,7 @@
                                         <div class="carousel-box">
                                             <div class="rel-product-card">
                                                 <div class="rel-product-img-box">
-                                                    <a href="{{ route('ProductView', [$relProduct->slug, $relProduct->id]) }}" class="d-block">
+                                                    <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}" class="d-block">
                                                         <img class="img-fit lazyload mx-auto" style="height: 190px; width: 100%; object-fit: cover;"
                                                             src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
                                                             data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
@@ -926,7 +926,7 @@
                                                     </div>
                                                     
                                                     <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0" style="height: 38px;">
-                                                        <a href="{{ route('ProductView', [$relProduct->slug, $relProduct->id]) }}"
+                                                        <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}"
                                                             class="d-block text-reset" style="color: #0f172a; text-decoration: none;">{{ $relProduct->title }}</a>
                                                     </h3>
                                                 </div>
