@@ -74,7 +74,7 @@
 
 
             <div class=" col-lg-7 ">
-                <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true"
+                {{-- <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true"
                     data-autoplay="true" data-infinite="true">
                     @foreach ($sliders as $slider)
                         <div class="carousel-box">
@@ -86,32 +86,69 @@
                             </a>
                         </div>
                     @endforeach
+                </div> --}}
+                <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner">
+                    @foreach ($sliders as $slider)
+                        <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
+                            <a href="{{ $slider->url ? $slider->url : 'javascript:void(0)' }}">
+                                <img class="d-block w-100" src="{{ asset('uploads') }}/{{ $slider->image }}" alt="LOOKSMEN promo" height="315"
+                                    onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder-rect.jpg';">
+                            </a>
+                        </div>
+                    @endforeach
+                    </div>
+                    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
                 </div>
 
                 <!-- Quick Category Bubbles -->
-                <ul class="list-unstyled mb-0 row gutters-5">
-                    @foreach ($categories as $category)
-                        <li class="minw-0 col-4 col-md mt-3">
-                            <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
-                                <div class="carousel-inner">
-                                    <div class="carousel-item active">
-                                        <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm">
-                                            <img
-                                                src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
-                                                data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
-                                                alt="{{ $category->name }}"
-                                                class="lazyload img-fit"
-                                                height="78"
-                                                onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';"
-                                            >
-                                            <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">{{ $category->name }}</div>
-                                        </a>
-                                    </div>
+
+                <div id="carouselExampleControls2" class="carousel slide" data-ride="carousel">
+                    <div class="carousel-inner">
+                        {{-- ক্যাটেগরিগুলোকে ৬টি করে গ্রুপে (chunk) ভাগ করা হচ্ছে --}}
+                        @foreach ($categories->chunk(6) as $chunkIndex => $categoryChunk)
+                            <div class="carousel-item {{ $chunkIndex == 0 ? 'active' : '' }}">
+                                <div class="row gutters-5">
+                                    
+                                    @foreach ($categoryChunk as $category)
+                                        {{-- col-md-2 দিলে ডেক্সটপে ৬টি কলাম শো করবে (১২ / ২ = ৬) --}}
+                                        <div class="col-4 col-md-2 mt-3 minw-0">
+                                            <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm text-center">
+                                                <img
+                                                    src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
+                                                    data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
+                                                    alt="{{ $category->name }}"
+                                                    class="lazyload img-fit"
+                                                    height="78"
+                                                    onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';"
+                                                >
+                                                <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">{{ $category->name }}</div>
+                                            </a>
+                                        </div>
+                                    @endforeach
+
                                 </div>
                             </div>
-                        </li>
-                    @endforeach
-                </ul>
+                        @endforeach
+                    </div>
+
+                    {{-- স্লাইড কন্ট্রোল বাটন --}}
+                    <a class="carousel-control-prev" href="#carouselExampleControls2" role="button" data-slide="prev">
+                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Previous</span>
+                    </a>
+                    <a class="carousel-control-next" href="#carouselExampleControls2" role="button" data-slide="next">
+                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                        <span class="sr-only">Next</span>
+                    </a>
+                </div>
                 
             </div>
 
