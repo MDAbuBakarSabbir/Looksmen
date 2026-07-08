@@ -489,7 +489,7 @@
 
                                 <div class="cart-item-modern cart-row-{{ $id }}">
                                     <div class="cart-img-wrap">
-                                        <img src="{{ asset($image) }}" alt="product">
+                                        <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" alt="product">
                                     </div>
                                     <div class="cart-details">
                                         <div class="cart-title text-truncate" style="max-width: 180px;">{{ $name }}</div>
@@ -552,9 +552,11 @@
                                 <button type="submit" id="confirm_order_btn" class="btn btn-chk-primary" disabled="disabled">
                                     <i class="las la-check-circle me-1"></i> Confirm Order
                                 </button>
+                                @if ($featuresConfig['payment_api'] == '1')
                                 <button type="submit" id="proceed_payment_btn" class="btn btn-chk-primary" style="display: none;">
                                     <i class="las la-credit-card me-1"></i> Proceed to Payment
                                 </button>
+                                @endif
                             @endif
                         </div>
                         
