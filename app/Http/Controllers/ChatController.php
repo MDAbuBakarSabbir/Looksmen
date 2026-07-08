@@ -78,13 +78,13 @@ class ChatController extends Controller
             $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $fileName);
             
             // Ensure directory exists
-            $uploadPath = public_path('uploads/chat');
+            $uploadPath = public_path('Uploads');
             if (!file_exists($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
             
             $file->move($uploadPath, $safeName);
-            $filePath = 'uploads/chat/' . $safeName;
+            $filePath = 'Uploads/' . $safeName;
             
             // Categorize file type
             $mime = $file->getClientMimeType();

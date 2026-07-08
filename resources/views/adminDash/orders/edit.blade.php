@@ -401,12 +401,10 @@
                                                     $imageSrc = asset('frontend/assets/img/placeholder.jpg');
                                                     if ($detail->orderProduct->firstImage) {
                                                         $imgName = $detail->orderProduct->firstImage->image;
-                                                        if (file_exists(public_path('adminDash/uploads/products/' . $imgName))) {
-                                                            $imageSrc = asset('adminDash/uploads/products/' . $imgName);
-                                                        } elseif (file_exists(public_path('adminDash/images/product/' . $imgName))) {
-                                                            $imageSrc = asset('adminDash/images/product/' . $imgName);
+                                                        if (file_exists(public_path('Uploads/' . $imgName))) {
+                                                            $imageSrc = asset('Uploads/' . $imgName);
                                                         } else {
-                                                            $imageSrc = asset('adminDash/uploads/products/' . $imgName);
+                                                            $imageSrc = asset('Uploads/' . $imgName);
                                                         }
                                                     }
                                                 @endphp

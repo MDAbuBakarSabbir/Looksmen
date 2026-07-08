@@ -383,7 +383,7 @@ class ProductController extends Controller
         // Store Images
         $manager = new ImageManager(new Driver);
         if ($request->hasFile('images')) {
-            $destinationPath = base_path('public/uploads');
+            $destinationPath = base_path('public/Uploads');
             if (! file_exists($destinationPath)) {
                 mkdir($destinationPath, 0777, true);
             }
@@ -548,7 +548,7 @@ class ProductController extends Controller
         // Store new uploaded images
         $manager = new ImageManager(new Driver);
         if ($request->hasFile('images')) {
-            $destinationPath = base_path('public/uploads');
+            $destinationPath = base_path('public/Uploads');
             if (! file_exists($destinationPath)) {
                 mkdir($destinationPath, 0777, true);
             }
@@ -576,7 +576,7 @@ class ProductController extends Controller
     {
         $image = ProductImage::findOrFail($id);
 
-        $filePath = base_path('public/uploads/'.$image->image);
+        $filePath = base_path('public/Uploads/'.$image->image);
         if (file_exists($filePath)) {
             unlink($filePath);
         }
@@ -651,8 +651,8 @@ class ProductController extends Controller
         $proColors = ProductColors::where('product_id', $id)->get();
 
         foreach ($proImages as $img) {
-            if (file_exists(public_path('public/uploads/'.$img->image))) {
-                unlink(public_path('public/uploads/'.$img->image));
+            if (file_exists(base_path('public/Uploads/'.$img->image))) {
+                unlink(base_path('public/Uploads/'.$img->image));
             }
             $img->delete();
         }
@@ -687,8 +687,8 @@ class ProductController extends Controller
                 $proAttributes = ProductAttributes::where('product_id', $id)->get();
                 $proColors = ProductColors::where('product_id', $id)->get();
                 foreach ($proImages as $img) {
-                    if (file_exists(public_path('public/uploads/'.$img->image))) {
-                        unlink(public_path('public/uploads/'.$img->image));
+                    if (file_exists(base_path('public/Uploads/'.$img->image))) {
+                        unlink(base_path('public/Uploads/'.$img->image));
                     }
                     $img->delete();
                 }

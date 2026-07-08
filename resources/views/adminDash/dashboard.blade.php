@@ -692,7 +692,7 @@
                                     <tr>
                                         <td>
                                             <img class="modern-pro-img"
-                                                src="{{ $topSellingProduct->firstImage ? asset('adminDash/uploads/products/' . $topSellingProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                src="{{ $topSellingProduct->firstImage ? asset('Uploads/' . $topSellingProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
                                                 alt="Product">
                                         </td>
                                         <td>

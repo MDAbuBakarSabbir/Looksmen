@@ -171,7 +171,7 @@
                                                 <div class="img">
                                                     <img class="lazyload img-fit h-140px h-lg-80px"
                                                         src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
-                                                        data-src="{{ $todaysDeal->firstImage ? asset('uploads/' . $todaysDeal->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
+                                                        data-src="{{ $todaysDeal->firstImage ? asset('Uploads/' . $todaysDeal->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                         alt="{{ $todaysDeal->title }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
                                                 </div>
@@ -242,7 +242,7 @@
                                     <a href="{{ route('ProductView', [$newArival->slug, $newArival->id]) }}" class="d-block">
                                         <img class="img-fit mx-auto h-140px h-md-210px lazyload"
                                             src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
-                                            data-src="{{ $newArival->firstImage ? asset('uploads/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
+                                            data-src="{{ $newArival->firstImage ? asset('Uploads/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                             alt="{{ $newArival->name }}"
                                             onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
                                     </a>
@@ -329,7 +329,7 @@
                                                     class="d-block">
                                                     <img class="img-fit mx-auto h-140px h-md-210px ls-is-cached lazyload"
                                                         src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
-                                                        data-src="{{ $product->firstImage ? asset('uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
+                                                        data-src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                         alt="Exclusive Fu l  l Sleeve Check Formal and Casual Shirt for Men"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';"
                                                         alt="{{ $product->title }}">
@@ -405,7 +405,7 @@
                             <div class="banner-wrapper">
                                 <a href="{{ $currentBanner->url ? $currentBanner->url : 'javascript:void(0)' }}">
                                     <img style="height: 100px"
-                                        src="{{ asset('adminDash/uploads/slider&banner/' . $currentBanner->image) }}"
+                                        src="{{ asset('Uploads/' . $currentBanner->image) }}"
                                         class="img-fluid w-100 rounded shadow-sm" alt="Banner"
                                         onerror="this.onerror=null;this.src='{{ asset('public/assets/img/placeholder.jpg') }}';">
                                 </a>
@@ -454,7 +454,7 @@
                                     <a href="{{ $cat['url'] }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
                                         <div class="d-flex align-items-center">
                                             <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; min-width: 50px;">
-                                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ $cat['img'] == 'placeholder.jpg' ? asset('frontend/assets/img/placeholder.jpg') : asset('frontend/uploads/'.$cat['img']) }}" alt="{{ $cat['name'] }}" class="img-fluid lazyload" style="max-height: 25px; max-width: 25px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ $cat['img'] == 'placeholder.jpg' ? asset('frontend/assets/img/placeholder.jpg') : asset('Uploads/'.$cat['img']) }}" alt="{{ $cat['name'] }}" class="img-fluid lazyload" style="max-height: 25px; max-width: 25px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                             </div>
                                             <div class="category-name flex-grow-1">
                                                 <h4 class="fs-14 fw-600 mb-0 text-dark">{{ $cat['name'] }}</h4>

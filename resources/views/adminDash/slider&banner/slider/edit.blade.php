@@ -119,7 +119,7 @@
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Update Image <small class="text-muted">(Optional)</small></label>
                         <div class="image-upload-box" onclick="document.getElementById('image-input').click()" style="border: none;">
-                            <img src="{{ asset('uploads/' . $slider->image) }}" alt="Current Image" id="preview-img">
+                            <img src="{{ asset('Uploads/' . $slider->image) }}" alt="Current Image" id="preview-img">
                             <div class="overlay">
                                 <i class="fa fa-camera me-2"></i> Click to change image
                             </div>

@@ -343,7 +343,7 @@ $(document).ready(function() {
                     // এডিট ও ডিলিট রাউট ডাইনামিক করা
                     let editUrl = "{{ route('banner.edit', ':id') }}".replace(':id', response.data.id);
                     let deleteUrl = "{{ route('banner.destroy', ':id') }}".replace(':id', response.data.id);
-                    let assetUrl = "{{ asset('adminDash/uploads/slider&banner') }}/" + response.data.image;
+                    let assetUrl = "{{ asset('Uploads') }}/" + response.data.image;
                     let editIcon = "{{ asset('adminDash/assets/img/layouts/edit.png') }}";
                     let deleteIcon = "{{ asset('adminDash/assets/img/layouts/delete.png') }}";
 

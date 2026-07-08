@@ -221,7 +221,7 @@
                             <div class="image-upload-wrapper" id="existing-images-area">
                                 @forelse($productImages as $img)
                                     <div class="existing-image-box" id="image-container-{{ $img->id }}">
-                                        <img src="{{ asset('uploads/' . $img->image) }}" alt="Product Image">
+                                        <img src="{{ asset('Uploads/' . $img->image) }}" alt="Product Image">
                                         <div class="img-delete-overlay"
                                              onclick="deleteExistingImage({{ $img->id }})"
                                              title="Delete Image">

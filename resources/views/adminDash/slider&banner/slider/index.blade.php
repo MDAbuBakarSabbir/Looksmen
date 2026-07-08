@@ -336,7 +336,7 @@ $(document).ready(function() {
                     // এডিট ও ডিলিট রাউট ডাইনামিক করা (জাভাস্ক্রিপ্ট ভ্যারিয়েবল ট্রিক)
                     let editUrl = "{{ route('slider.edit', ':id') }}".replace(':id', response.data.id);
                     let deleteUrl = "{{ route('slider.destroy', ':id') }}".replace(':id', response.data.id);
-                    let assetUrl = "{{ asset('uploads') }}/" + response.data.image;
+                    let assetUrl = "{{ asset('Uploads') }}/" + response.data.image;
                     let editIcon = "{{ asset('adminDash/assets/img/layouts/edit.png') }}";
                     let deleteIcon = "{{ asset('adminDash/assets/img/layouts/delete.png') }}";
 

@@ -138,7 +138,7 @@ class AdminSupportController extends Controller
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
-                'avatar' => $user->profile_pic ? asset('uploads/profile/' . $user->profile_pic) : null,
+                'avatar' => $user->profile_pic ? asset('Uploads/' . $user->profile_pic) : null,
                 'last_message' => $lastMessage ? ($lastMessage->message ?? '[Attachment]') : '',
                 'last_message_time' => $lastMessage ? $lastMessage->created_at->toISOString() : null,
                 'last_message_timestamp' => $lastMessage ? $lastMessage->created_at->timestamp : 0,
@@ -213,13 +213,13 @@ class AdminSupportController extends Controller
             $fileName = $file->getClientOriginalName();
             $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $fileName);
             
-            $uploadPath = public_path('uploads/chat');
+            $uploadPath = public_path('Uploads');
             if (!file_exists($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
             
             $file->move($uploadPath, $safeName);
-            $filePath = 'uploads/chat/' . $safeName;
+            $filePath = 'Uploads/' . $safeName;
             
             $mime = $file->getClientMimeType();
             if (str_starts_with($mime, 'image/')) {
