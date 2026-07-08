@@ -42,6 +42,142 @@
         .btn-submit-custom:hover {
             opacity: 0.95;
         }
+
+        /* Template Redesign CSS */
+        .template-item {
+            background: #ffffff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .template-item:hover {
+            border-color: #cbd5e1;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+            transform: translateY(-2px);
+        }
+        .template-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .template-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: #374151;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .textarea-custom {
+            width: 100%;
+            border-radius: 8px;
+            padding: 12px 14px;
+            font-size: 14px;
+            border: 1px solid #cbd5e1;
+            color: #1f2937;
+            resize: vertical;
+            min-height: 110px;
+            transition: all 0.2s ease;
+            background-color: #f8fafc;
+        }
+        .textarea-custom:focus {
+            background-color: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+        .template-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 12px;
+        }
+        .btn-save-template {
+            font-size: 13px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #ffffff;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.2);
+        }
+        .btn-save-template:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 10px -1px rgba(99, 102, 241, 0.3);
+            color: #ffffff;
+        }
+        .btn-save-template:active {
+            transform: translateY(0);
+        }
+        .btn-save-template-sms {
+            background: linear-gradient(135deg, #10b981, #059669);
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2);
+        }
+        .btn-save-template-sms:hover {
+            box-shadow: 0 6px 10px -1px rgba(16, 185, 129, 0.3);
+            color: #ffffff;
+        }
+        
+        /* Modern Switch Styles */
+        .switch-custom {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            margin-bottom: 0;
+            gap: 8px;
+        }
+        .switch-custom input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch-slider {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 22px;
+            background-color: #cbd5e1;
+            border-radius: 34px;
+            transition: background-color 0.2s ease;
+        }
+        .switch-slider::before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+        .switch-custom input:checked + .switch-slider {
+            background-color: #6366f1;
+        }
+        .switch-custom input:checked + .switch-slider-sms {
+            background-color: #10b981;
+        }
+        .switch-custom input:checked + .switch-slider::before {
+            transform: translateX(18px);
+        }
+        .switch-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: #4b5563;
+        }
     </style>
 
     <div class="row">
@@ -177,110 +313,197 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-lg">
-            <div class="card">
-                <div class="card-header">
-                    Mail Templetes
+        {{-- Mail Templates Section --}}
+        <div class="col-lg-6 mb-4">
+            <div class="settings-card card border-0">
+                <div class="card-header bg-white border-bottom border-light p-4 d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0 font-weight-bold" style="color: #1f2937;"><i class="fa-solid fa-envelope-open-text text-primary mr-2"></i>Mail Templates</h4>
                 </div>
-                <div class="card-body">
-                    <div class="templete">
-                        <label for="mailService">
-                            Welcome Mail Template
-                        </label>
-                        <textarea name="welcomMail" id="welcomeMail" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="welcomeMail" id="welcomeMail"> <!-- checkbox -->
-                        <label for="welcomeMail">Active</label>
+                <div class="card-body p-4">
+                    {{-- Welcome Mail --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-handshake text-indigo"></i> Welcome Mail Template</span>
+                        </div>
+                        <textarea name="welcomMail" id="welcomeMail" class="textarea-custom" placeholder="Write welcome email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="welcomeMail" id="welcomeMailCheckbox">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            Verification Mail Template
-                        </label>
-                        <textarea name="verificationMail" id="verificationMail" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="verificationMail" id="verificationMail"> <!-- checkbox -->
-                        <label for="verificationMail">Active</label>
+
+                    {{-- Verification Mail --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-user-check text-indigo"></i> Verification Mail Template</span>
+                        </div>
+                        <textarea name="verificationMail" id="verificationMail" class="textarea-custom" placeholder="Write verification email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="verificationMail" id="verificationMailCheckbox">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            OTP Mail Template
-                        </label>
-                        <textarea name="otpMail" id="otpMail" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="otpMail" id="otpMail"> <!-- checkbox -->
-                        <label for="otpMail">Active</label>
+
+                    {{-- OTP Mail --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-key text-indigo"></i> OTP Mail Template</span>
+                        </div>
+                        <textarea name="otpMail" id="otpMail" class="textarea-custom" placeholder="Write OTP email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="otpMail" id="otpMailCheckbox">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            Order Confirmation Mail Template
-                        </label>
-                        <textarea name="orderConfirmationMail" id="orderConfirmationMail" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="orderConfirmationMail" id="orderConfirmationMail"> <!-- checkbox -->
-                        <label for="orderConfirmationMail">Active</label>
+
+                    {{-- Order Confirmation Mail --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-cart-check text-indigo"></i> Order Confirmation Mail Template</span>
+                        </div>
+                        <textarea name="orderConfirmationMail" id="orderConfirmationMail" class="textarea-custom" placeholder="Write order confirmation email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="orderConfirmationMail" id="orderConfirmationMailCheckbox">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            Order Cancelled Mail Template
-                        </label>
-                        <textarea name="orderCancelMail" id="orderCancelMail" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="orderCancelMail" id="orderCancelMail"> <!-- checkbox -->
-                        <label for="orderCancelMail">Active</label>
+
+                    {{-- Order Cancelled Mail --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-cart-xmark text-indigo"></i> Order Cancelled Mail Template</span>
+                        </div>
+                        <textarea name="orderCancelMail" id="orderCancelMail" class="textarea-custom" placeholder="Write order cancelled email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="orderCancelMail" id="orderCancelMailCheckbox">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            Order Delivered Mail Template
-                        </label>
-                        <textarea name="orderDeliveredMail" id="orderDeliveredMail" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="orderDeliveredMail" id="orderDeliveredMail"> <!-- checkbox -->
-                        <label for="orderDeliveredMail">Active</label>
+
+                    {{-- Order Delivered Mail --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-truck-ramp-box text-indigo"></i> Order Delivered Mail Template</span>
+                        </div>
+                        <textarea name="orderDeliveredMail" id="orderDeliveredMail" class="textarea-custom" placeholder="Write order delivered email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="orderDeliveredMail" id="orderDeliveredMailCheckbox">
+                                <span class="switch-slider"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-lg">
-            <div class="card">
-                <div class="card-header">
-                    SMS Templates
+
+        {{-- SMS Templates Section --}}
+        <div class="col-lg-6 mb-4">
+            <div class="settings-card card border-0">
+                <div class="card-header bg-white border-bottom border-light p-4 d-flex align-items-center justify-content-between">
+                    <h4 class="mb-0 font-weight-bold" style="color: #1f2937;"><i class="fa-solid fa-message-sms text-success mr-2"></i>SMS Templates</h4>
                 </div>
-                <div class="card-body">
-                    <div class="templete">
-                        <label for="mailService">
-                            Welcome SMS Template
-                        </label>
-                        <textarea name="welcomeSms" id="welcomeSms" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="welcomeSms" id="welcomeSms"> <!-- checkbox -->
-                        <label for="welcomeSms">Active</label>
+                <div class="card-body p-4">
+                    {{-- Welcome SMS --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-comment-dots text-emerald"></i> Welcome SMS Template</span>
+                        </div>
+                        <textarea name="welcomeSms" id="welcomeSms" class="textarea-custom" placeholder="Write welcome SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="welcomeSms" id="welcomeSmsCheckbox">
+                                <span class="switch-slider switch-slider-sms"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            Order Confirmation SMS Template
-                        </label>
-                        <textarea name="orderConfirmationSms" id="orderConfirmationSms" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="orderConfirmationSms" id="orderConfirmationSms"> <!-- checkbox -->
-                        <label for="orderConfirmationSms">Active</label>
+
+                    {{-- Order Confirmation SMS --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-comment-check text-emerald"></i> Order Confirmation SMS Template</span>
+                        </div>
+                        <textarea name="orderConfirmationSms" id="orderConfirmationSms" class="textarea-custom" placeholder="Write order confirmation SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="orderConfirmationSms" id="orderConfirmationSmsCheckbox">
+                                <span class="switch-slider switch-slider-sms"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            OTP SMS Template
-                        </label>
-                        <textarea name="otpSms" id="otpSms" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="otpSms" id="otpSms"> <!-- checkbox -->
-                        <label for="otpSms">Active</label>
+
+                    {{-- OTP SMS --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-shield-keyhole text-emerald"></i> OTP SMS Template</span>
+                        </div>
+                        <textarea name="otpSms" id="otpSms" class="textarea-custom" placeholder="Write OTP SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="otpSms" id="otpSmsCheckbox">
+                                <span class="switch-slider switch-slider-sms"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
-                    <div class="templete">
-                        <label for="mailService">
-                            Order Delivered SMS Template
-                        </label>
-                        <textarea name="orderDeliveredSms" id="orderDeliveredSms" cols="30" rows="10"></textarea>
-                        <button class="btn btn-sm btn-primary">Save</button>
-                        <input type="checkbox" name="orderDeliveredSms" id="orderDeliveredSms"> <!-- checkbox -->
-                        <label for="orderDeliveredSms">Active</label>
+
+                    {{-- Order Cancel SMS --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-comment-xmark text-emerald"></i> Order Cancel SMS Template</span>
+                        </div>
+                        <textarea name="orderCancelSms" id="orderCancelSms" class="textarea-custom" placeholder="Write order cancel SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="orderCancelSms" id="orderCancelSmsCheckbox">
+                                <span class="switch-slider switch-slider-sms"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    {{-- Order Delivered SMS --}}
+                    <div class="template-item">
+                        <div class="template-header">
+                            <span class="template-title"><i class="fa-solid fa-truck-fast text-emerald"></i> Order Delivered SMS Template</span>
+                        </div>
+                        <textarea name="orderDeliveredSms" id="orderDeliveredSms" class="textarea-custom" placeholder="Write order delivered SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <label class="switch-custom mb-0">
+                                <input type="checkbox" name="orderDeliveredSms" id="orderDeliveredSmsCheckbox">
+                                <span class="switch-slider switch-slider-sms"></span>
+                                <span class="switch-text">Active</span>
+                            </label>
+                        </div>
                     </div>
                 </div>
             </div>
