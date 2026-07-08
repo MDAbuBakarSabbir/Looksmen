@@ -690,6 +690,7 @@ namespace App\Models {
      * @property string|null $permission_id
      * @property string $role_id
      * @property string $number
+     * @property string|null $profile_pic
      * @property string $email
      * @property string $name
      * @property int $id
@@ -698,6 +699,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Admins>|Admins whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Admins>|Admins whereName($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Admins>|Admins whereEmail($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Admins>|Admins whereProfilePic($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Admins>|Admins whereNumber($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Admins>|Admins whereRoleId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Admins>|Admins wherePermissionId($value)
@@ -13329,6 +13331,7 @@ namespace App\Models {
      * @property string $product_id
      * @property int $id
      * @property-read \App\Models\Attribute $attribute
+     * @property-read \App\Models\AttributeValues $attributeVal
      * @method static \Illuminate\Database\Eloquent\Builder<ProductAttributes>|ProductAttributes whereId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<ProductAttributes>|ProductAttributes whereProductId($value)
      * @method static \Illuminate\Database\Eloquent\Builder<ProductAttributes>|ProductAttributes whereAttributeId($value)

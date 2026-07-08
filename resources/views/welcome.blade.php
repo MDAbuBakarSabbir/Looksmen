@@ -74,19 +74,6 @@
 
 
             <div class=" col-lg-7 ">
-                {{-- <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true"
-                    data-autoplay="true" data-infinite="true">
-                    @foreach ($sliders as $slider)
-                        <div class="carousel-box">
-                            <a href="{{ $slider->url ? $slider->url : 'javascript:void(0)' }}">
-                                <img class="d-block mw-100 img-fit rounded shadow-sm overflow-hidden"
-                                    src="{{ asset('Uploads') }}/{{ $slider->image }}"
-                                    alt="LOOKSMEN promo" height="315"
-                                    onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder-rect.jpg';">
-                            </a>
-                        </div>
-                    @endforeach
-                </div> --}}
                 <div id="carouselExampleControls" class="carousel slide mobile-img-auto-height" data-ride="carousel" data-autoplay="true">
                     <div class="carousel-inner">
                     @foreach ($sliders as $slider)
@@ -196,33 +183,6 @@
 
     </div>
     </div>
-
-    {{-- <div class="mb-5 mt-2">
-        <div class="container">
-            <div class="row gutters-10">
-                <div class="col-xl col-md-3 col-sm-12">
-                    <!--<div class="col-sm-12 col-md-4 col-lg-4">-->
-                    <div class="mb-3 mb-lg-0">
-                        <a href="" class="d-block text-reset">
-                            <img src="https://www.store.looksmen.com/public/uploads/all/nrQdkljWGpUmNJW7q4pOt56592493rOzbdHTe8AT.jpg"
-                                data-src="https://www.store.looksmen.com/public/uploads/all/nrQdkljWGpUmNJW7q4pOt56592493rOzbdHTe8AT.jpg"
-                                alt="LOOKSMEN promo" class="img-fluid w-100 ls-is-cached lazyloaded">
-                        </a>
-                    </div>
-                </div>
-                <div class="col-xl col-md-3 col-sm-12">
-                    <!--<div class="col-sm-12 col-md-4 col-lg-4">-->
-                    <div class="mb-3 mb-lg-0">
-                        <a href="" class="d-block text-reset">
-                            <img src="https://www.store.looksmen.com/public/uploads/all/HwliQME2juoqeaYigL71C2O121jkXJIRjpCFgZLf.jpg"
-                                data-src="https://www.store.looksmen.com/public/uploads/all/HwliQME2juoqeaYigL71C2O121jkXJIRjpCFgZLf.jpg"
-                                alt="LOOKSMEN promo" class="img-fluid w-100 ls-is-cached lazyloaded">
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> --}}
 
     <section class="mb-4">
         <div class="container">

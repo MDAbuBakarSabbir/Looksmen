@@ -28,7 +28,7 @@
             <select class="form-control attribute-select" data-id="{{ $attr_id }}">
                 <option value="null" selected disabled>Select {{$values->first()->attribute->name}}</option>
                 @foreach($values as $v)
-                    <option value="{{ $v->attribute_value }}">{{ $v->attribute_value }}</option>
+                    <option value="{{ $v->attributeVal->value ?? $v->attribute_value }}">{{ $v->attributeVal->value ?? $v->attribute_value }}</option>
                 @endforeach
             </select>
         </div>
