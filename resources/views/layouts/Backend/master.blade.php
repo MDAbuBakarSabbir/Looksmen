@@ -1140,16 +1140,24 @@
 
                             <li class="nav-item dropdown header-profile">
                                 <a class="nav-link profile-trigger" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <div class="profile-avatar-nav">
-                                        {{ strtoupper(substr(auth()->guard('admin')->user()?->name ?? 'A', 0, 1)) }}
+                                    <div class="profile-avatar-nav d-flex align-items-center justify-content-center overflow-hidden">
+                                        @if (auth()->guard('admin')->user()?->profile_pic)
+                                            <img src="{{ asset('Uploads/' . auth()->guard('admin')->user()->profile_pic) }}" id="navbar-profile-avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                        @else
+                                            <span id="navbar-profile-initials">{{ strtoupper(substr(auth()->guard('admin')->user()?->name ?? 'A', 0, 1)) }}</span>
+                                        @endif
                                     </div>
                                     <span class="profile-name-nav d-none d-md-inline-block">{{ auth()->guard('admin')->user()?->name ?? 'Admin' }}</span>
                                     <i class="fa-solid fa-chevron-down nav-chevron"></i>
-                                </a>
-                                <div class="dropdown-menu dropdown-menu-right">
+                                    </a>
+                                    <div class="dropdown-menu dropdown-menu-right">
                                     <div class="profile-dropdown-header">
-                                        <div class="profile-dropdown-avatar">
-                                            {{ strtoupper(substr(auth()->guard('admin')->user()?->name ?? 'A', 0, 1)) }}
+                                        <div class="profile-dropdown-avatar d-flex align-items-center justify-content-center overflow-hidden">
+                                            @if (auth()->guard('admin')->user()?->profile_pic)
+                                                <img src="{{ asset('Uploads/' . auth()->guard('admin')->user()->profile_pic) }}" id="dropdown-profile-avatar" style="width: 100%; height: 100%; object-fit: cover;">
+                                            @else
+                                                <span id="dropdown-profile-initials">{{ strtoupper(substr(auth()->guard('admin')->user()?->name ?? 'A', 0, 1)) }}</span>
+                                            @endif
                                         </div>
                                         <div class="profile-dropdown-meta">
                                             <span class="profile-dropdown-name">{{ auth()->guard('admin')->user()?->name ?? 'Admin' }}</span>
