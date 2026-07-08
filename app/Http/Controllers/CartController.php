@@ -13,7 +13,7 @@ class CartController extends Controller
     public function cartView()
     {
         if (auth()->check()) {
-            $cart = Cart::where('user_id', auth()->id())->with('product')->get();
+            $cart = Cart::where('user_id', auth()->id())->with('product.firstImage')->get();
         } else {
             $cart = session()->get('cart', []);
         }
@@ -85,7 +85,7 @@ class CartController extends Controller
                     "quantity" => $qty,
                     'stock' => (int)$product->stock,
                     "price" => (float)$product->new_price,
-                    "image" => $product->thumbnail_img,
+                    "image" => $product->firstImage?->image ?? '',
                     "attribute" => $attribute, // যেমন: Size: M
                     "color" => $color,
                 ];
@@ -103,7 +103,7 @@ class CartController extends Controller
     public function showModal()
     {
         if (auth()->check()) {
-            $cart = Cart::where('user_id', auth()->id())->with('product')->get();
+            $cart = Cart::where('user_id', auth()->id())->with('product.firstImage')->get();
         } else {
             $cart = session()->get('cart', []);
         }

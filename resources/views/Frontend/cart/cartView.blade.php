@@ -280,7 +280,7 @@
                                     $isDb = is_object($rawItem);
                                     $id = $isDb ? $rawItem->cart_id : $key;
                                     $name = $isDb ? $rawItem->product->title ?? $rawItem->name : $rawItem['name'];
-                                    $image = $isDb ? $rawItem->product->thumbnail_img ?? $rawItem->image : $rawItem['image'];
+                                    $image = $isDb ? ($rawItem->product?->firstImage?->image ?? $rawItem->image) : $rawItem['image'];
                                     $price = $isDb ? $rawItem->product->new_price ?? $rawItem->price : $rawItem['price'];
                                     $qty = $isDb ? $rawItem->quantity : $rawItem['quantity'];
                                     $stock = $isDb ? $rawItem->product->stock ?? 10 : $rawItem['stock'] ?? 10;
@@ -295,7 +295,7 @@
                                     
                                     <!-- Product Info -->
                                     <div class="d-flex align-items-center flex-grow-1 mb-3 mb-md-0">
-                                        <img src="{{ asset($image) }}" class="product-img mr-4" alt="{{ $name }}">
+                                        <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="product-img mr-4" alt="{{ $name }}">
                                         <div>
                                             <h4 class="product-title">{{ $name }}</h4>
                                             <div class="product-code mt-1"><i class="las la-barcode mr-1"></i> Code: {{ $code }}</div>

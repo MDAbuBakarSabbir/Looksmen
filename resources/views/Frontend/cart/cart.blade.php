@@ -124,7 +124,7 @@
                                 // ৩. ডাটা ম্যাপিং (লগআউট অবস্থায় অ্যারে ইন্ডেক্স ব্যবহার করা হয়েছে)
                                 $name = $isDb ? $rawItem->product->title ?? $rawItem->name : $rawItem['name'];
                                 $image = $isDb
-                                    ? $rawItem->product->thumbnail_img ?? $rawItem->image
+                                    ? ($rawItem->product?->firstImage?->image ?? $rawItem->image)
                                     : $rawItem['image'];
                                 $price = $isDb ? $rawItem->product->new_price ?? $rawItem->price : $rawItem['price'];
                                 $qty = $isDb ? $rawItem->quantity : $rawItem['quantity'];
@@ -139,7 +139,7 @@
                             <tr class="border-bottom cart-row-{{ $id }}">
                                 <td>
                                     <div class="d-flex align-items-center">
-                                        <img src="{{ asset($image) }}" class="size-60px mr-2 rounded">
+                                        <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="size-60px mr-2 rounded">
                                         <div>
                                             <span class="fs-14 fw-600 d-block">{{ $name }}</span>
                                             <small class="text-info font-weight-bold">Code: {{ $code }}</small>
