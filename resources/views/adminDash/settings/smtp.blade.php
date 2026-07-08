@@ -323,16 +323,19 @@
                     {{-- Welcome Mail --}}
                     <div class="template-item">
                         <div class="template-header">
-                            <span class="template-title"><i class="fa-solid fa-handshake text-indigo"></i> Welcome Mail Template</span>
-                        </div>
-                        <textarea name="welcomMail" id="welcomeMail" class="textarea-custom" placeholder="Write welcome email content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            <span class="template-title"><i class="fa-solid fa-handshake text-indigo"></i> 
+                                Welcome Mail Template
+                            </span>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="welcomeMail" id="welcomeMailCheckbox">
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="welcomMail" id="welcomeMail" class="textarea-custom" placeholder="Write welcome email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
+                            
                         </div>
                     </div>
 
@@ -340,15 +343,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-user-check text-indigo"></i> Verification Mail Template</span>
-                        </div>
-                        <textarea name="verificationMail" id="verificationMail" class="textarea-custom" placeholder="Write verification email content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="verificationMail" id="verificationMailCheckbox">
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="verificationMail" id="verificationMail" class="textarea-custom" placeholder="Write verification email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -356,15 +359,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-key text-indigo"></i> OTP Mail Template</span>
-                        </div>
-                        <textarea name="otpMail" id="otpMail" class="textarea-custom" placeholder="Write OTP email content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="otpMail" id="otpMailCheckbox">
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="otpMail" id="otpMail" class="textarea-custom" placeholder="Write OTP email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -372,15 +375,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-cart-check text-indigo"></i> Order Confirmation Mail Template</span>
-                        </div>
-                        <textarea name="orderConfirmationMail" id="orderConfirmationMail" class="textarea-custom" placeholder="Write order confirmation email content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="orderConfirmationMail" id="orderConfirmationMailCheckbox">
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="orderConfirmationMail" id="orderConfirmationMail" class="textarea-custom" placeholder="Write order confirmation email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -388,15 +391,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-cart-xmark text-indigo"></i> Order Cancelled Mail Template</span>
-                        </div>
-                        <textarea name="orderCancelMail" id="orderCancelMail" class="textarea-custom" placeholder="Write order cancelled email content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="orderCancelMail" id="orderCancelMailCheckbox">
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="orderCancelMail" id="orderCancelMail" class="textarea-custom" placeholder="Write order cancelled email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -404,15 +407,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-truck-ramp-box text-indigo"></i> Order Delivered Mail Template</span>
-                        </div>
-                        <textarea name="orderDeliveredMail" id="orderDeliveredMail" class="textarea-custom" placeholder="Write order delivered email content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="orderDeliveredMail" id="orderDeliveredMailCheckbox">
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="orderDeliveredMail" id="orderDeliveredMail" class="textarea-custom" placeholder="Write order delivered email content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
                 </div>
@@ -430,15 +433,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-comment-dots text-emerald"></i> Welcome SMS Template</span>
-                        </div>
-                        <textarea name="welcomeSms" id="welcomeSms" class="textarea-custom" placeholder="Write welcome SMS content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="welcomeSms" id="welcomeSmsCheckbox">
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="welcomeSms" id="welcomeSms" class="textarea-custom" placeholder="Write welcome SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -446,15 +449,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-comment-check text-emerald"></i> Order Confirmation SMS Template</span>
-                        </div>
-                        <textarea name="orderConfirmationSms" id="orderConfirmationSms" class="textarea-custom" placeholder="Write order confirmation SMS content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="orderConfirmationSms" id="orderConfirmationSmsCheckbox">
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="orderConfirmationSms" id="orderConfirmationSms" class="textarea-custom" placeholder="Write order confirmation SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -462,15 +465,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-shield-keyhole text-emerald"></i> OTP SMS Template</span>
-                        </div>
-                        <textarea name="otpSms" id="otpSms" class="textarea-custom" placeholder="Write OTP SMS content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="otpSms" id="otpSmsCheckbox">
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="otpSms" id="otpSms" class="textarea-custom" placeholder="Write OTP SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -478,15 +481,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-comment-xmark text-emerald"></i> Order Cancel SMS Template</span>
-                        </div>
-                        <textarea name="orderCancelSms" id="orderCancelSms" class="textarea-custom" placeholder="Write order cancel SMS content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="orderCancelSms" id="orderCancelSmsCheckbox">
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="orderCancelSms" id="orderCancelSms" class="textarea-custom" placeholder="Write order cancel SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
 
@@ -494,15 +497,15 @@
                     <div class="template-item">
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-truck-fast text-emerald"></i> Order Delivered SMS Template</span>
-                        </div>
-                        <textarea name="orderDeliveredSms" id="orderDeliveredSms" class="textarea-custom" placeholder="Write order delivered SMS content..."></textarea>
-                        <div class="template-footer">
-                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                             <label class="switch-custom mb-0">
                                 <input type="checkbox" name="orderDeliveredSms" id="orderDeliveredSmsCheckbox">
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
+                        </div>
+                        <textarea name="orderDeliveredSms" id="orderDeliveredSms" class="textarea-custom" placeholder="Write order delivered SMS content..."></textarea>
+                        <div class="template-footer">
+                            <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
                     </div>
                 </div>
