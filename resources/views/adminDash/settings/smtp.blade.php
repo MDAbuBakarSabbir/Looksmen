@@ -189,6 +189,8 @@
                         </label>
                         <textarea name="welcomMail" id="welcomeMail" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="welcomeMail" id="welcomeMail"> <!-- checkbox -->
+                        <label for="welcomeMail">Active</label>
                     </div>
                     <div class="templete">
                         <label for="mailService">
@@ -196,6 +198,8 @@
                         </label>
                         <textarea name="verificationMail" id="verificationMail" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="verificationMail" id="verificationMail"> <!-- checkbox -->
+                        <label for="verificationMail">Active</label>
                     </div>
                     <div class="templete">
                         <label for="mailService">
@@ -203,6 +207,8 @@
                         </label>
                         <textarea name="otpMail" id="otpMail" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="otpMail" id="otpMail"> <!-- checkbox -->
+                        <label for="otpMail">Active</label>
                     </div>
                     <div class="templete">
                         <label for="mailService">
@@ -210,6 +216,8 @@
                         </label>
                         <textarea name="orderConfirmationMail" id="orderConfirmationMail" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="orderConfirmationMail" id="orderConfirmationMail"> <!-- checkbox -->
+                        <label for="orderConfirmationMail">Active</label>
                     </div>
                     <div class="templete">
                         <label for="mailService">
@@ -217,6 +225,8 @@
                         </label>
                         <textarea name="orderCancelMail" id="orderCancelMail" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="orderCancelMail" id="orderCancelMail"> <!-- checkbox -->
+                        <label for="orderCancelMail">Active</label>
                     </div>
                     <div class="templete">
                         <label for="mailService">
@@ -224,6 +234,8 @@
                         </label>
                         <textarea name="orderDeliveredMail" id="orderDeliveredMail" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="orderDeliveredMail" id="orderDeliveredMail"> <!-- checkbox -->
+                        <label for="orderDeliveredMail">Active</label>
                     </div>
                 </div>
             </div>
