@@ -252,6 +252,8 @@
                         </label>
                         <textarea name="welcomeSms" id="welcomeSms" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="welcomeSms" id="welcomeSms"> <!-- checkbox -->
+                        <label for="welcomeSms">Active</label>
                     </div>
                     <div class="templete">
                         <label for="mailService">
@@ -259,6 +261,26 @@
                         </label>
                         <textarea name="orderConfirmationSms" id="orderConfirmationSms" cols="30" rows="10"></textarea>
                         <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="orderConfirmationSms" id="orderConfirmationSms"> <!-- checkbox -->
+                        <label for="orderConfirmationSms">Active</label>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            OTP SMS Template
+                        </label>
+                        <textarea name="otpSms" id="otpSms" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="otpSms" id="otpSms"> <!-- checkbox -->
+                        <label for="otpSms">Active</label>
+                    </div>
+                    <div class="templete">
+                        <label for="mailService">
+                            Order Delivered SMS Template
+                        </label>
+                        <textarea name="orderDeliveredSms" id="orderDeliveredSms" cols="30" rows="10"></textarea>
+                        <button class="btn btn-sm btn-primary">Save</button>
+                        <input type="checkbox" name="orderDeliveredSms" id="orderDeliveredSms"> <!-- checkbox -->
+                        <label for="orderDeliveredSms">Active</label>
                     </div>
                 </div>
             </div>

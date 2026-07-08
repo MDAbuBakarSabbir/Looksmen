@@ -408,6 +408,51 @@ $(document).ready(function() {
             }
         });
     });
+
+    // ৫. স্ট্যাটাস সুইচ পরিবর্তন করা (Status Switch Change)
+    $(document).on('change', '.status-switch', function() {
+        let sliderId = $(this).data('id');
+        let isChecked = $(this).is(':checked');
+        let newStatus = isChecked ? 1 : 0;
+        let checkbox = $(this);
+
+        $.ajax({
+            url: "{{ route('slider.status') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                id: sliderId,
+                status: newStatus
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'success',
+                        title: 'Status updated successfully!',
+                        showConfirmButton: false,
+                        timer: 1500
+                    });
+                } else {
+                    checkbox.prop('checked', !isChecked);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error!',
+                        text: 'Failed to update status. Please try again.',
+                    });
+                }
+            },
+            error: function() {
+                checkbox.prop('checked', !isChecked);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Something went wrong. Please try again.',
+                });
+            }
+        });
+    });
 });
 </script>
 @endsection
