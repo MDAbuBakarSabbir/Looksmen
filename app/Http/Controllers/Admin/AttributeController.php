@@ -118,9 +118,4 @@ class AttributeController extends Controller
             'status' => $attribute->status,
         ]);
     }
-
-    public function affiliate_smtp()
-    {
-        return view('adminDash.affiliate.affiliateSmtp');
-    }
 }
