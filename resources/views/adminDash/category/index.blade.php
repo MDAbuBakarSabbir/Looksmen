@@ -1,4 +1,4 @@
-﻿@extends('layouts.Backend.master')
+@extends('layouts.Backend.master')
 @section('title')
     CATEGORY MANAGEMENT
 @endsection
@@ -851,7 +851,7 @@
                         $select.empty();
                         $select.append('<option value="" selected disabled>Select Sub Category</option>');
                         $.each(data, function(key, value) {
-                            $select.append('<option value="' + value.id + '">' + value.name + '</option>');
+                            $select.append('<option value="' + key + '">' + value + '</option>');
                         });
                     }
                 });

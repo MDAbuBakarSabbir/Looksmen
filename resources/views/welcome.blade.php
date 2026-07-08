@@ -74,7 +74,7 @@
 
 
             <div class=" col-lg-7 ">
-                <div class="home-slider aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true"
+                <div class="aiz-carousel dots-inside-bottom mobile-img-auto-height" data-arrows="true" data-dots="true"
                     data-autoplay="true" data-infinite="true">
                     @foreach ($sliders as $slider)
                         <div class="carousel-box">
@@ -89,22 +89,30 @@
                 </div>
 
                 <!-- Quick Category Bubbles -->
-                <div class="category-carousel gutters-10 half-outside-arrow mt-3">
+                <ul class="list-unstyled mb-0 row gutters-5">
                     @foreach ($categories as $category)
-                        <div class="ca-item my-3">
-                            <a href="{{ route('catProductView', [$category->slug, $category->id]) }}"
-                                class="d-block rounded bg-white p-2 text-reset shadow-sm text-center hov-shadow-md mr-2">
-                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
-                                    data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
-                                    alt="{{ $category->name }}" class="lazyload img-fit mx-auto" height="78"
-                                    onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';">
-                                <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">
-                                    {{ $category->name }}
+                        <li class="minw-0 col-4 col-md mt-3">
+                            <div id="carouselExampleSlidesOnly" class="carousel slide" data-ride="carousel">
+                                <div class="carousel-inner">
+                                    <div class="carousel-item active">
+                                        <a href="{{ route('catProductView', [$category->slug, $category->id]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm">
+                                            <img
+                                                src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
+                                                data-src="{{ asset('adminDash/assets/img/category') }}/{{ $category->banner }}"
+                                                alt="{{ $category->name }}"
+                                                class="lazyload img-fit"
+                                                height="78"
+                                                onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';"
+                                            >
+                                            <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">{{ $category->name }}</div>
+                                        </a>
+                                    </div>
                                 </div>
-                            </a>
-                        </div>
+                            </div>
+                        </li>
                     @endforeach
-                </div>
+                </ul>
+                
             </div>
 
             <div class="col-lg-2 order-3 mt-3 mt-lg-0">
@@ -489,41 +497,27 @@
 
 @section('script')
     <script>
-        $(document).ready(function() {
-            // Main Banner Slider - 1 slide
-            $('.home-slider').slick({
-                slidesToShow: 1,
-                slidesToScroll: 1,
-                autoplay: true,
-                autoplaySpeed: 3000,
-                infinite: true,
-                arrows: true,
-                dots: true
-            });
-
-            // Quick Category Carousel - 6 slides
-            $('.category-carousel').slick({
-                slidesToShow: 6,
-                slidesToScroll: 1,
-                autoplay: true, 
-                autoplaySpeed: 2000,
-                infinite: true,
-                arrows: true,
-                dots: false,
-                responsive: [{
-                        breakpoint: 1024,
-                        settings: {
-                            slidesToShow: 4,
-                        }
-                    },
-                    {
-                        breakpoint: 600,
-                        settings: {
-                            slidesToShow: 2,
-                        }
+        $('.aiz-carousel').slick({
+            slidesToShow: 6,
+            slidesToScroll: 1,
+            autoplay: true, 
+            autoplaySpeed: 2000,
+            infinite: true,
+            arrows: true,
+            dots: false,
+            responsive: [{
+                    breakpoint: 1024,
+                    settings: {
+                        slidesToShow: 4,
                     }
-                ]
-            });
+                },
+                {
+                    breakpoint: 600,
+                    settings: {
+                        slidesToShow: 2,
+                    }
+                }
+            ]
         });
     </script>
 @endsection
