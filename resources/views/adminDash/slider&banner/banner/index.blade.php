@@ -201,7 +201,7 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>
-                                        <img class="thumbnail-img" src="{{ asset('adminDash/uploads/slider&banner/' . $banner->image) }}" alt="Banner">
+                                        <img class="thumbnail-img" src="{{ asset('Uploads/' . $banner->image) }}" alt="Banner">
                                     </td>
                                     <td>
                                         <a href="{{ $banner->url }}" target="_blank" class="text-primary text-decoration-none">

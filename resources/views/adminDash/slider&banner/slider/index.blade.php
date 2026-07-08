@@ -194,7 +194,7 @@
                                 <tr>
                                     <td>{{ $index + 1 }}</td>
                                     <td>
-                                        <img class="thumbnail-img" src="{{ asset('uploads/' . $slider->image) }}" alt="Slider">
+                                        <img class="thumbnail-img" src="{{ asset('Uploads/' . $slider->image) }}" alt="Slider">
                                     </td>
                                     <td>
                                         <a href="{{ $slider->url }}" target="_blank" class="text-primary text-decoration-none">
