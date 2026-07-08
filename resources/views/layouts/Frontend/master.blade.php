@@ -847,8 +847,6 @@
             </div>
         </div>
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
-
 
 
         <button onclick="topFunction()" id="myBtn" title="Go to top"><i class="fa fa-angles-up"></i></button>
