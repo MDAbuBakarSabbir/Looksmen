@@ -90,7 +90,7 @@
 
     <title>{{ $webConfig['web_name'] }} | @yield('title') </title>
     <!-- Favicon icon -->
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('adminDash/assets/img/layouts/favicon.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('adminDash/assets/img/layouts') }}/{{ $webConfig['web_favicon'] ?? 'favicon.png' }}">
     <script src="{{ asset('adminDash/assets/vendor/jquery/jquery.min.js') }}"></script>
     {{-- <link href="{{ asset('adminDash/assets/vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet"> --}}
 
@@ -1046,9 +1046,9 @@
         <!-- Nav Header -->
         <div class="nav-header">
             <a href="{{ route('admin.dashboard') }}" class="brand-logo">
-                <img class="logo-abbr" src="{{ asset('adminDash/assets/img/layouts/favicon.png') }}" alt="Logo">
-                <img class="logo-compact" style="height: 25px; width: auto;" src="{{ asset('adminDash/assets/img/layouts/logo.png') }}" alt="Logo Compact">
-                <img class="brand-title" style="height: 25px; width: auto;" src="{{ asset('adminDash/assets/img/layouts/logo.png') }}" alt="Brand Title">
+                <img class="logo-abbr" src="{{ asset('adminDash/assets/img/layouts') }}/{{ $webConfig['web_favicon'] ?? 'favicon.png' }}" alt="Logo">
+                <img class="logo-compact" style="height: 25px; width: auto;" src="{{ asset('adminDash/assets/img/layouts') }}/{{ $webConfig['web_logo'] ?? 'Logo.png' }}" alt="Logo Compact">
+                <img class="brand-title" style="height: 25px; width: auto;" src="{{ asset('adminDash/assets/img/layouts') }}/{{ $webConfig['web_logo'] ?? 'Logo.png' }}" alt="Brand Title">
             </a>
             <div class="nav-control">
                 <div class="hamburger">

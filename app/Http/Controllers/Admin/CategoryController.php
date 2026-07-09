@@ -36,7 +36,7 @@ class CategoryController extends Controller
             'icon' => 'required',
         ]);
         if ($request->hasFile('image')) {
-            $imgName = Str::random(7).'.'.$request->file('image')->getClientOriginalExtension();
+            $imgName = 'category_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
             $image->save(base_path('public/Uploads/'.$imgName));
         }
@@ -76,7 +76,7 @@ class CategoryController extends Controller
         $imgName = $category->banner;
         if ($request->hasFile('image')) {
             $manager = new ImageManager(new Driver);
-            $imgName = Str::random(7).'.'.$request->file('image')->getClientOriginalExtension();
+            $imgName = 'category_'.$category->id.'_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
             $image->save(base_path('public/Uploads/'.$imgName));
             if (! empty($category->banner) && file_exists(base_path('public/Uploads/'.$category->banner))) {
