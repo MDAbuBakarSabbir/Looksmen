@@ -943,3 +943,24 @@
     </div>
 @endsection
 
+@section('script')
+    <script>
+        $(document).ready(function() {
+            $('.product-gallery').on('afterChange setPosition lazyLoaded', function() {
+                if ($('.img-zoom')[0]) {
+                    $('.img-zoom').trigger('zoom.destroy');
+                    $('.img-zoom').zoom({
+                        magnify: 1.5
+                    });
+                    setTimeout(function() {
+                        $('.img-zoom').trigger('zoom.destroy');
+                        $('.img-zoom').zoom({
+                            magnify: 1.5
+                        });
+                    }, 300);
+                }
+            });
+        });
+    </script>
+@endsection
+

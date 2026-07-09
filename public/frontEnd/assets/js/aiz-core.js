@@ -1313,6 +1313,11 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                         },
                     ],
                 });
+                $this.on('afterChange setPosition lazyLoaded', function () {
+                    if ($this.find('.img-zoom')[0]) {
+                        AIZ.plugins.zoom();
+                    }
+                });
             });
         },
         chart: function (selector, config) {
@@ -1355,6 +1360,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
         },
         zoom: function(){
             if($('.img-zoom')[0]){
+                $('.img-zoom').trigger('zoom.destroy');
                 $('.img-zoom').zoom({
                     magnify:1.5
                 });
