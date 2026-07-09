@@ -326,7 +326,7 @@
                                                     <del class="price-old">৳{{ $catProduct->old_price }}</del>
                                                 @endif
                                             </div>
-                                            <button class="btn-gradient-primary w-100 add-to-cart-btn" data-id="{{ $catProduct->id }}" data-type="product">
+                                            <button type="button" class="btn-gradient-primary w-100 add-to-cart-btn" data-id="{{ $catProduct->id }}" data-type="product">
                                                 <i class="las la-shopping-cart mr-1"></i> Add to Cart
                                             </button>
                                         </div>

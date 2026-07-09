@@ -1421,7 +1421,8 @@
     <script>
         $(document).ready(function() {
             // ১. Add to Cart Click
-            $(document).on('click', '.add-to-cart-btn', function() {
+            $(document).on('click', '.add-to-cart-btn', function(e) {
+                e.preventDefault();
                 let id = $(this).data('id');
                 let quantity = $('input[name="quantity"]').val() || 1;
                 addToCart(id, { quantity: quantity });
