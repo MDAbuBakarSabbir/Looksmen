@@ -389,7 +389,7 @@ class ProductController extends Controller
             }
 
             foreach ($request->file('images') as $proimage) {
-                $imgName = $product->id.'-'.uniqid().Str::random(7).'.'.$proimage->getClientOriginalExtension();
+                $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.'.$proimage->getClientOriginalExtension();
                 $image = $manager->decode($proimage);
                 $image->save($destinationPath.'/'.$imgName);
                 ProductImage::create([
@@ -554,7 +554,7 @@ class ProductController extends Controller
             }
 
             foreach ($request->file('images') as $proimage) {
-                $imgName = $product->id.'-'.uniqid().Str::random(7).'.'.$proimage->getClientOriginalExtension();
+                $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.'.$proimage->getClientOriginalExtension();
                 $image = $manager->decode($proimage);
                 $image->save($destinationPath.'/'.$imgName);
                 ProductImage::create([

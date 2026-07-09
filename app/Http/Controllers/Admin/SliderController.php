@@ -36,7 +36,7 @@ class SliderController extends Controller
             if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
-            $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
+            $newname = 'slider_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
             $image->save($dir.'/'.$newname);
         }
@@ -99,7 +99,7 @@ class SliderController extends Controller
             }
 
             $manager = new ImageManager(new Driver);
-            $newname = Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
+            $newname = 'slider_'.$slider->id.'_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
             $image = $manager->decode($request->file('image'));
             $image->save($dir.'/'.$newname);
             $slider->image = $newname;

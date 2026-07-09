@@ -36,6 +36,18 @@ class GeneralWebSettingsController extends Controller
         if ($request->hasFile('header_logo_image')) {
             $file = $request->file('header_logo_image');
             $newname = 'logo_'.time().'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
+
+            // Delete old logo file if it exists and is not a default seeded file
+            $setting = GeneralWebSettings::where('name', 'web_logo')->first();
+            if ($setting && $setting->value) {
+                $oldPath = public_path('adminDash/assets/img/layouts/'.$setting->value);
+                if (file_exists($oldPath) && is_file($oldPath)) {
+                    if (! in_array($setting->value, ['Logo.png', 'footer_logo.png', 'favicon.png'])) {
+                        unlink($oldPath);
+                    }
+                }
+            }
+
             $file->move(public_path('adminDash/assets/img/layouts'), $newname);
 
             GeneralWebSettings::where('name', 'web_logo')->update([
@@ -64,6 +76,18 @@ class GeneralWebSettingsController extends Controller
         if ($request->hasFile('footer_logo_image')) {
             $file = $request->file('footer_logo_image');
             $newname = 'footer_'.time().'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
+
+            // Delete old footer logo file if it exists and is not a default seeded file
+            $setting = GeneralWebSettings::where('name', 'footer_logo')->first();
+            if ($setting && $setting->value) {
+                $oldPath = public_path('adminDash/assets/img/layouts/'.$setting->value);
+                if (file_exists($oldPath) && is_file($oldPath)) {
+                    if (! in_array($setting->value, ['Logo.png', 'footer_logo.png', 'favicon.png'])) {
+                        unlink($oldPath);
+                    }
+                }
+            }
+
             $file->move(public_path('adminDash/assets/img/layouts'), $newname);
 
             GeneralWebSettings::where('name', 'footer_logo')->update([
@@ -92,6 +116,18 @@ class GeneralWebSettingsController extends Controller
         if ($request->hasFile('favicon_image')) {
             $file = $request->file('favicon_image');
             $newname = 'favicon_'.time().'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
+
+            // Delete old favicon file if it exists and is not a default seeded file
+            $setting = GeneralWebSettings::where('name', 'web_favicon')->first();
+            if ($setting && $setting->value) {
+                $oldPath = public_path('adminDash/assets/img/layouts/'.$setting->value);
+                if (file_exists($oldPath) && is_file($oldPath)) {
+                    if (! in_array($setting->value, ['Logo.png', 'footer_logo.png', 'favicon.png'])) {
+                        unlink($oldPath);
+                    }
+                }
+            }
+
             $file->move(public_path('adminDash/assets/img/layouts'), $newname);
 
             GeneralWebSettings::where('name', 'web_favicon')->update([
