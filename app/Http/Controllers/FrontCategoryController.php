@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Category;
 use App\Models\Pages;
 use App\Models\Product;
+use App\Models\SubCategory;
+use App\Models\ChildCategory;
 
 class FrontCategoryController extends Controller
 {
@@ -12,18 +14,34 @@ class FrontCategoryController extends Controller
     {
         $category = Category::with('subcategories.childcategories')->findOrFail($id);
         $catProducts = Product::where('category_id', $category->id)->where('status', '1')->latest()->paginate(12);
+        
+        $categoryType = 'category';
+        $parentCategory = $category;
 
-        return view('Frontend.category.catProduct', compact('catProducts', 'category'));
-
+        return view('Frontend.category.catProduct', compact('catProducts', 'category', 'categoryType', 'parentCategory'));
     }
 
     public function subCatProductView($id, $slug)
     {
-        $subcategory = Category::with('subcategories.childcategories')->findOrFail($id);
-        $subcatProducts = Product::where('subcategory_id', $subcategory->subcategories->id)->where('status', '1')->latest()->paginate(12);
+        $category = SubCategory::with('childcategories', 'category.subcategories')->findOrFail($id);
+        $catProducts = Product::where('subcategory_id', $category->id)->where('status', '1')->latest()->paginate(12);
+        
+        $categoryType = 'subcategory';
+        $parentCategory = $category->category;
 
-        return view('Frontend.category.subcatProduct', compact('subcatProducts', 'subcategory'));
+        return view('Frontend.category.catProduct', compact('catProducts', 'category', 'categoryType', 'parentCategory'));
+    }
 
+    public function childCatProductView($id, $slug)
+    {
+        $category = ChildCategory::with('subcategory.category.subcategories', 'subcategory.childcategories')->findOrFail($id);
+        $catProducts = Product::where('childcategory_id', $category->id)->where('status', '1')->latest()->paginate(12);
+        
+        $categoryType = 'childcategory';
+        $parentSubCategory = $category->subcategory;
+        $parentCategory = $category->subcategory->category;
+
+        return view('Frontend.category.catProduct', compact('catProducts', 'category', 'categoryType', 'parentCategory', 'parentSubCategory'));
     }
 
     public function ProductView($id, $slug)
