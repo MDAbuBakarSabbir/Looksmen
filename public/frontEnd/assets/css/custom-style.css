@@ -58,9 +58,10 @@
     /* পিসি বা বড় স্ক্রিনে হোভার ইফেক্ট */
     @media (min-width: 768px) {
         .payment-card:hover {
-            border-color: #d1007e !important; /* bKash Color */
+            border-color: #d1007e !important;
+            /* bKash Color */
             transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
     }
 
@@ -70,19 +71,29 @@
         transform: scale(0.95);
     }
 
-    .fw-600 { font-weight: 600; }
-    .cursor-pointer { cursor: pointer; }
+    .fw-600 {
+        font-weight: 600;
+    }
+
+    .cursor-pointer {
+        cursor: pointer;
+    }
 
     /* ছোট মোবাইলের জন্য ইমেজ সাইজ ঠিক করা */
     @media (max-width: 576px) {
-        .modal-dialog { margin: 1.75rem auto; }
-        .payment-card span { font-size: 11px; }
+        .modal-dialog {
+            margin: 1.75rem auto;
+        }
+
+        .payment-card span {
+            font-size: 11px;
+        }
     }
 
     .product-gallery .carousel-box img {
-    width: 100%;
-    height: auto;
-    max-height: 500px; /* আপনার প্রয়োজন মতো */
-    object-fit: contain;
-}
-
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        /* আপনার প্রয়োজন মতো */
+        object-fit: contain;
+    }
