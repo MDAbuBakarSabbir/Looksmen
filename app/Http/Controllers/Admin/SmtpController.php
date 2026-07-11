@@ -13,13 +13,37 @@ class SmtpController extends Controller
         $features = FeatureActivation::all();
         $featuresConfig = $features->pluck('status', 'name')->toArray();
         if($featuresConfig['email_verification'] == '1' || $featuresConfig['sms_verification'] == '1'){
-            $smtpSettings = GeneralWebSettings::whereIn('name', [
-                'mailhost', 'mailport', 'mailusername', 'mailpassword', 'mailaddress', 'mailencription',
-                'sms_gateway_provider', 'sms_api_key', 'sms_sender_id', 'sms_api_url'
-            ])->pluck('value', 'name')->toArray();
+            $smtpSettings = GeneralWebSettings::pluck('value', 'name')->toArray();
             return view('adminDash.settings.smtp', compact('featuresConfig', 'smtpSettings'));
         }
         abort(404);
+    }
+
+    public function saveTemplate(Request $request)
+    {
+        $name = $request->name; // e.g. welcomeMail
+        $active = $request->active; // 1 or 0
+        $body = $request->body;
+
+        // Convert welcomeMail to welcome_mail
+        $snake = strtolower(preg_replace('/(?<!^)[A-Z]/', '_$0', $name));
+
+        // Save active status
+        GeneralWebSettings::updateOrCreate(
+            ['name' => $snake . '_active'],
+            ['value' => $active, 'status' => 1]
+        );
+
+        // Save template body
+        GeneralWebSettings::updateOrCreate(
+            ['name' => $snake . '_template'],
+            ['value' => $body ?? '', 'status' => 1]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Template Saved Successfully!'
+        ]);
     }
 
     public function store(Request $request)

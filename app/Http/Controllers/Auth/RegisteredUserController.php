@@ -52,6 +52,16 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
+        // Send Welcome Mail
+        try {
+            send_template_mail($user->email, 'welcome_mail', [
+                'customer_name' => $user->name,
+                'customer_email' => $user->email,
+            ]);
+        } catch (\Exception $e) {
+            \Log::error('Welcome Mail Trigger Error: ' . $e->getMessage());
+        }
+
         Auth::login($user);
 
         return redirect(route('dashboard', absolute: true));

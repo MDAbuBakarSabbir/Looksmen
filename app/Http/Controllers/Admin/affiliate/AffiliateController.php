@@ -250,6 +250,23 @@ class AffiliateController extends Controller
         }
         $affiliate_user->informations = json_encode($data);
         if ($affiliate_user->save()) {
+            // Send Verification & Registration Mails
+            try {
+                $user = Auth::user();
+                if ($user && $user->email) {
+                    send_template_mail($user->email, 'verify_mail', [
+                        'customer_name' => $user->name,
+                        'customer_email' => $user->email,
+                    ]);
+                    send_template_mail($user->email, 'register_mail', [
+                        'customer_name' => $user->name,
+                        'customer_email' => $user->email,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Affiliate Application Mails Error: ' . $e->getMessage());
+            }
+
             flash(translate('Your verification request has been submitted successfully!'))->success();
 
             return redirect()->route('home');
@@ -284,6 +301,20 @@ class AffiliateController extends Controller
                 $user->referral_code = strtoupper(substr(md5($user->id.time()), 0, 10));
                 $user->save();
             }
+
+            // Send Affiliate Approval Mail
+            try {
+                if ($user && $user->email) {
+                    send_template_mail($user->email, 'approve_mail', [
+                        'customer_name' => $user->name,
+                        'customer_email' => $user->email,
+                        'referral_code' => $user->referral_code
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Affiliate Approval Mail Error: ' . $e->getMessage());
+            }
+
             flash(translate('Affiliate user has been approved successfully'))->success();
 
             return redirect()->route('affiliate.users');
@@ -617,6 +648,21 @@ class AffiliateController extends Controller
             $affiliate_withdraw_request = AffiliateWithdrawRequest::findOrFail($request->affiliate_withdraw_request_id);
             $affiliate_withdraw_request->status = 1;
             $affiliate_withdraw_request->save();
+
+            // Send Payment Mail
+            try {
+                $user = \App\Models\User::find($affiliate_withdraw_request->user_id);
+                if ($user && $user->email) {
+                    send_template_mail($user->email, 'payment_mail', [
+                        'customer_name' => $user->name,
+                        'customer_email' => $user->email,
+                        'amount' => single_price($affiliate_payment->amount),
+                        'payment_method' => $affiliate_payment->payment_method
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Affiliate Payment Mail Error: ' . $e->getMessage());
+            }
         }
 
         flash(translate('Payment completed'))->success();
@@ -645,6 +691,7 @@ class AffiliateController extends Controller
 
     public function affiliate_smtp()
     {
-        return view('adminDash.affiliate.affiliateSmtp');
+        $smtpSettings = \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        return view('adminDash.affiliate.affiliateSmtp', compact('smtpSettings'));
     }
 }

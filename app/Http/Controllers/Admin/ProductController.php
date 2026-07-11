@@ -722,6 +722,23 @@ class ProductController extends Controller
         ]);
     }
 
+    public function flash_sale_status(Request $request)
+    {
+        $product = Product::find($request->id);
+
+        if (! $product) {
+            return response()->json(['success' => false]);
+        }
+
+        $product->flash_sale = $request->status == 1 ? 1 : 0;
+        $product->save();
+
+        return response()->json([
+            'success' => true,
+            'status' => $product->flash_sale,
+        ]);
+    }
+
     public function status(Request $request)
     {
         $product = Product::find($request->id);

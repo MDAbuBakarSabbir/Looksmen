@@ -181,6 +181,30 @@ class OrderManageController extends Controller
         $logs->order_status = $order->delivery_status;
         $logs->save();
 
+        // Send Order Status Change Mails (Delivered or Cancelled)
+        try {
+            if ($order->user_id && $order->user_id != '0') {
+                $user = \App\Models\User::find($order->user_id);
+                if ($user && $user->email) {
+                    if ($order->delivery_status == 'delivered') {
+                        send_template_mail($user->email, 'order_delivered_mail', [
+                            'customer_name' => $order->name,
+                            'order_id' => $order->id,
+                            'order_total' => $order->grand_total,
+                        ]);
+                    } elseif (in_array($order->delivery_status, ['cancel', 'cancelled'])) {
+                        send_template_mail($user->email, 'order_cancel_mail', [
+                            'customer_name' => $order->name,
+                            'order_id' => $order->id,
+                            'order_total' => $order->grand_total,
+                        ]);
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            \Log::error('Order Status Mail Trigger Error: ' . $e->getMessage());
+        }
+
         if ($order->delivery_status == 'delivered') {
             try {
                 $affiliateController = new \App\Http\Controllers\Admin\affiliate\AffiliateController();
@@ -221,10 +245,46 @@ class OrderManageController extends Controller
                     \Log::error('Affiliate bulk processing error: ' . $e->getMessage());
                 }
                 $this->processOrderPoints($order);
+
+                // Send delivered mail
+                try {
+                    if ($order->user_id && $order->user_id != '0') {
+                        $user = \App\Models\User::find($order->user_id);
+                        if ($user && $user->email) {
+                            send_template_mail($user->email, 'order_delivered_mail', [
+                                'customer_name' => $order->name,
+                                'order_id' => $order->id,
+                                'order_total' => $order->grand_total,
+                            ]);
+                        }
+                    }
+                } catch (\Exception $e) {
+                    \Log::error('Bulk Order Delivered Mail Error: ' . $e->getMessage());
+                }
             }
         } else {
             Orders::whereIn('id', $request->ids)
                 ->update(['delivery_status' => $request->status]);
+
+            if (in_array($request->status, ['cancel', 'cancelled'])) {
+                $orders = Orders::whereIn('id', $request->ids)->get();
+                foreach ($orders as $order) {
+                    try {
+                        if ($order->user_id && $order->user_id != '0') {
+                            $user = \App\Models\User::find($order->user_id);
+                            if ($user && $user->email) {
+                                send_template_mail($user->email, 'order_cancel_mail', [
+                                    'customer_name' => $order->name,
+                                    'order_id' => $order->id,
+                                    'order_total' => $order->grand_total,
+                                ]);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Bulk Order Cancel Mail Error: ' . $e->getMessage());
+                    }
+                }
+            }
         }
 
         return response()->json(['success' => true]);
@@ -667,6 +727,7 @@ class OrderManageController extends Controller
 
             $order = new Orders();
             $order->user_id = 0; // Created by admin
+            $order->ip_address = $request->ip();
             $order->name = $request->name;
             $order->phone = $request->phone;
             $order->address = $request->address;

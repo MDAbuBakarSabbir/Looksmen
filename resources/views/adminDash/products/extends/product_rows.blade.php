@@ -45,6 +45,12 @@
         </td>
         <td>
             <label class="switch">
+                <input class="flashsale-status" type="checkbox" data-id="{{ $product->id }}" {{ $product->flash_sale == '1' ? 'checked' : '' }}>
+                <span class="slider round" title="{{ $product->flash_sale == '1' ? 'Click to Deactivate' : 'Click to Activate' }}"></span>
+            </label>
+        </td>
+        <td>
+            <label class="switch">
                 <input class="product-status" type="checkbox" data-id="{{ $product->id }}" {{ $product->status == '1' ? 'checked' : '' }}>
                 <span class="slider round" title="{{ $product->status == '1' ? 'Click to Deactivate' : 'Click to Activate' }}"></span>
             </label>

@@ -14,7 +14,19 @@ class ChatController extends Controller
      */
     public function index()
     {
-        return view('Frontend.dashboard.conversation');
+        $userId = Auth::id();
+        
+        $hasClosedTicket = \App\Models\SupportTicket::where('user_id', $userId)
+            ->where('status', 'closed')
+            ->exists();
+            
+        $hasActiveTicket = \App\Models\SupportTicket::where('user_id', $userId)
+            ->whereIn('status', ['open', 'pending'])
+            ->exists();
+
+        $ticketClosed = ($hasClosedTicket && !$hasActiveTicket);
+
+        return view('Frontend.dashboard.conversation', compact('ticketClosed'));
     }
 
     /**
@@ -37,7 +49,7 @@ class ChatController extends Controller
         ChatMessage::where('receiver_id', $userId)
             ->where('receiver_type', 'user')
             ->where('is_read', false)
-            ->update(['is_read' => true]);
+            ->update(['is_read', true]);
 
         return response()->json([
             'success' => true,
@@ -63,6 +75,22 @@ class ChatController extends Controller
         }
 
         $userId = Auth::id();
+        
+        // Check if the user has a closed ticket and no active open/pending ticket
+        $hasClosedTicket = \App\Models\SupportTicket::where('user_id', $userId)
+            ->where('status', 'closed')
+            ->exists();
+            
+        $hasActiveTicket = \App\Models\SupportTicket::where('user_id', $userId)
+            ->whereIn('status', ['open', 'pending'])
+            ->exists();
+
+        if ($hasClosedTicket && !$hasActiveTicket) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Your support ticket has been closed. You cannot send messages.'
+            ], 403);
+        }
         
         // Default receiver: First Admin in the system or ID 1
         $admin = Admins::where('role_id', 'admin')->first() ?? Admins::first();
