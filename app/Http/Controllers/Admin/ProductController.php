@@ -674,6 +674,64 @@ class ProductController extends Controller
         return redirect()->back();
     }
 
+    public function bulkAction(Request $request)
+    {
+        $action = $request->input('action');
+        $ids = $request->input('ids', []);
+
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No products selected']);
+        }
+
+        if ($action === 'delete') {
+            foreach ($ids as $id) {
+                $product = Product::find($id);
+                if ($product) {
+                    $proImages = ProductImage::where('product_id', $id)->get();
+                    $proAttributes = ProductAttributes::where('product_id', $id)->get();
+                    $proColors = ProductColors::where('product_id', $id)->get();
+                    foreach ($proImages as $img) {
+                        if (file_exists(base_path('public/Uploads/'.$img->image))) {
+                            unlink(base_path('public/Uploads/'.$img->image));
+                        }
+                        $img->delete();
+                    }
+                    foreach ($proAttributes as $attr) {
+                        $attr->delete();
+                    }
+                    foreach ($proColors as $color) {
+                        $color->delete();
+                    }
+                    $product->delete();
+                }
+            }
+            return response()->json(['success' => true, 'message' => count($ids).' products deleted successfully']);
+        }
+
+        if ($action === 'todayDeals') {
+            $status = $request->input('status'); // 1 or 0
+            Product::whereIn('id', $ids)->update(['todays_deal' => $status == 1 ? '1' : '0']);
+            return response()->json(['success' => true, 'message' => 'Todays Deal status updated successfully']);
+        }
+
+        if ($action === 'flashSale') {
+            $status = $request->input('status'); // 1 or 0
+            Product::whereIn('id', $ids)->update(['flash_sale' => $status == 1 ? '1' : '0']);
+            return response()->json(['success' => true, 'message' => 'Flash Sale status updated successfully']);
+        }
+
+        if ($action === 'stockStatus') {
+            $stock = $request->input('stock');
+            if ($stock === null || !is_numeric($stock) || $stock < 0) {
+                return response()->json(['success' => false, 'message' => 'Invalid stock quantity']);
+            }
+            Product::whereIn('id', $ids)->update(['stock' => (int)$stock]);
+            return response()->json(['success' => true, 'message' => 'Stock quantity updated successfully']);
+        }
+
+        return response()->json(['success' => false, 'message' => 'Invalid action selected']);
+    }
+
     public function bulkDelete(Request $request)
     {
         $ids = $request->input('ids', []);

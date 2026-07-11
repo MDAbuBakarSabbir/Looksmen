@@ -369,7 +369,7 @@
                 <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="gallery-main" id="mainGalleryBox">
                         @if($proImages->isNotEmpty())
-                            <img id="mainGalleryImage" src="{{ asset('adminDash/images/product/' . $proImages->first()->image) }}" alt="{{ $product->title }}">
+                            <img id="mainGalleryImage" src="{{ asset('Uploads/' . $proImages->first()->image) }}" alt="{{ $product->title }}">
                         @else
                             <img id="mainGalleryImage" src="{{ asset('adminDash/images/product/demo.jpg') }}" alt="Demo Product">
                         @endif

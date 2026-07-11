@@ -171,6 +171,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('products/todays_deal_status', 'todays_deal_status')->name('product.todays_deal_status')->middleware('admin.permission:manage_product');
         Route::post('products/flash_sale_status', 'flash_sale_status')->name('product.flash_sale_status')->middleware('admin.permission:manage_product');
         Route::post('products/bulk-delete', 'bulkDelete')->name('product.bulk-delete')->middleware('admin.permission:manage_product');
+        Route::post('products/bulk-action', 'bulkAction')->name('product.bulk-action')->middleware('admin.permission:manage_product');
         Route::post('products/image-delete/{id}', 'deleteImage')->name('product.image.delete')->middleware('admin.permission:manage_product');
 
         // Routes for Category cascading
