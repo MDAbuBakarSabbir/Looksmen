@@ -21,6 +21,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        \Illuminate\Pagination\Paginator::useBootstrapFour();
+
         if (class_exists('App\Models\GeneralWebSettings')) {
             try {
                 $settings = \App\Models\GeneralWebSettings::all()->pluck('value', 'name')->toArray();

@@ -183,8 +183,11 @@
                 <div class="card-body">
                     <div class="d-flex align-items-center mb-3">
                         <select id="bulkProductAction" class="form-control mr-2" style="width: 180px; display: inline-block;">
-                            <option value="">Bulk Action</option>
-                            <option value="delete">Delete Selected</option>
+                            <option value="" selected disabled>Bulk Action</option>
+                            <option value="todayDeals">Change Todays Deal Status</option>
+                            <option value="flashSale">Change Flash Sale Status</option>
+                            <option value="stockStatus">Update Stock Quantity</option>
+                            <option value="delete">Delete</option>
                         </select>
                         <button class="btn btn-danger" id="bulkProductBtn" style="height: 38px; border-radius: 4px; padding: 0 20px;">
                             Apply Action
@@ -449,7 +452,7 @@
             }
         });
 
-        // Bulk Delete Handler
+        // Bulk Action Handler
         $(document).on('click', '#bulkProductBtn', function(e) {
             e.preventDefault();
             let action = $('#bulkProductAction').val();
@@ -466,37 +469,119 @@
                 return;
             }
             
-            Swal.fire({
-                title: "Are you sure?",
-                text: "You are about to delete the selected products!",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Yes, Delete",
-                cancelButtonText: "Cancel"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: "{{ route('product.bulk-delete') }}",
-                        type: 'POST',
-                        data: {
-                            _token: "{{ csrf_token() }}",
-                            ids: selectedIds
-                        },
-                        success: function(response) {
-                            if (response.success) {
-                                Toast.fire({ icon: 'success', title: response.message || 'Products deleted' });
-                                $('.product-check:checked').closest('tr').remove();
-                                $('#productCheckAll').prop('checked', false);
-                            }
-                        },
-                        error: function(xhr) {
-                            console.error(xhr.responseText);
-                            Toast.fire({ icon: 'error', title: 'Failed to delete products' });
+            if (action === 'delete') {
+                Swal.fire({
+                    title: "Are you sure?",
+                    text: "This will delete the selected products along with their images, attributes, and colors!",
+                    icon: "warning",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, Delete",
+                    cancelButtonText: "Cancel"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitBulkAction(action, selectedIds);
+                    }
+                });
+            } else if (action === 'todayDeals' || action === 'flashSale') {
+                let actionName = action === 'todayDeals' ? "Today's Deal" : "Flash Sale";
+                Swal.fire({
+                    title: `Update ${actionName} Status`,
+                    text: `Do you want to activate or deactivate ${actionName} for the selected products?`,
+                    icon: "question",
+                    showCancelButton: true,
+                    showDenyButton: true,
+                    confirmButtonText: "Activate",
+                    denyButtonText: "Deactivate",
+                    cancelButtonText: "Cancel",
+                    confirmButtonColor: "#28a745",
+                    denyButtonColor: "#dc3545"
+                }).then((result) => {
+                    let status = null;
+                    if (result.isConfirmed) {
+                        status = 1;
+                    } else if (result.isDenied) {
+                        status = 0;
+                    } else {
+                        return; // Cancelled
+                    }
+                    submitBulkAction(action, selectedIds, { status: status });
+                });
+            } else if (action === 'stockStatus') {
+                Swal.fire({
+                    title: "Update Stock Quantity",
+                    text: "Enter new stock quantity for selected products:",
+                    input: "number",
+                    inputAttributes: {
+                        min: 0,
+                        step: 1
+                    },
+                    showCancelButton: true,
+                    confirmButtonText: "Update",
+                    cancelButtonText: "Cancel",
+                    inputValidator: (value) => {
+                        if (value === "" || isNaN(value) || value < 0) {
+                            return 'Please enter a valid stock quantity (minimum 0)';
                         }
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitBulkAction(action, selectedIds, { stock: parseInt(result.value) });
+                    }
+                });
+            }
+        });
+
+        function submitBulkAction(action, ids, extraData = {}) {
+            Swal.fire({
+                title: 'Processing...',
+                text: 'Please wait while updating the products.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            $.ajax({
+                url: "{{ route('product.bulk-action') }}",
+                type: 'POST',
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    action: action,
+                    ids: ids,
+                    ...extraData
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: response.message || 'Action applied successfully!',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: response.message || 'Something went wrong'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    console.error(xhr.responseText);
+                    let errorMsg = 'Failed to apply bulk action.';
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    }
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: errorMsg
                     });
                 }
             });
-        });
+        }
 
         // Delegated todaysdeal-status toggle using jQuery
         $(document).on('change', '.todaysdeal-status', function() {

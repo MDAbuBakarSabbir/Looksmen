@@ -405,7 +405,7 @@
                         
                         <div class="aiz-pagination aiz-pagination-center mt-5 mb-4">
                             <nav>
-                                {{ $catProducts->links() }}
+                                {{ $catProducts->links('pagination::bootstrap-4') }}
                             </nav>
                         </div>
                     </div>
