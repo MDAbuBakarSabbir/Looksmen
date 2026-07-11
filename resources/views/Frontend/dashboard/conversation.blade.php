@@ -272,13 +272,16 @@
                             <form id="chatForm" enctype="multipart/form-data">
                                 @csrf
                                 <input type="file" id="chatFileInput" name="file" style="display: none;">
-                                <button type="button" class="chat-btn" id="attachFileBtn" title="Attach file or image">
+                                <button type="button" class="chat-btn" id="attachFileBtn" title="Attach file or image" @if($ticketClosed) disabled style="opacity: 0.5; cursor: not-allowed;" @endif>
                                     <i class="las la-paperclip"></i>
                                 </button>
                                 
-                                <input type="text" id="chatMessageInput" name="message" class="chat-input-field" placeholder="Type a message" autocomplete="off">
+                                <input type="text" id="chatMessageInput" name="message" class="chat-input-field" 
+                                    placeholder="{{ $ticketClosed ? 'Your support ticket has been closed. You cannot send messages.' : 'Type a message' }}" 
+                                    autocomplete="off" 
+                                    @if($ticketClosed) disabled style="background-color: #e2e8f0; cursor: not-allowed;" @endif>
                                 
-                                <button type="submit" class="chat-btn chat-send-btn" id="sendBtn">
+                                <button type="submit" class="chat-btn chat-send-btn" id="sendBtn" @if($ticketClosed) disabled style="opacity: 0.5; cursor: not-allowed;" @endif>
                                     <i class="las la-paper-plane" style="font-size: 16px;"></i>
                                 </button>
                             </form>
@@ -473,7 +476,11 @@
                         }
                     },
                     error: function(err) {
-                        alert("Error sending message. Please try again.");
+                        if (err.responseJSON && err.responseJSON.message) {
+                            alert(err.responseJSON.message);
+                        } else {
+                            alert("Error sending message. Please try again.");
+                        }
                         console.error(err);
                     }
                 });

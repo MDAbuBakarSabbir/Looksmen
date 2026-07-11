@@ -219,6 +219,7 @@ class CheckoutController extends Controller
             // ২. Orders টেবিলে ডাটা ইনসার্ট
             $order = new Orders();
             $order->user_id = auth()->id() ?? 0;
+            $order->ip_address = $request->ip();
             $order->name = $request->name;
             $order->phone = $request->phone;
             $order->district = $request->district; // আপনার ফর্ম থেকে আসা ডিস্ট্রিক্ট নাম
@@ -290,6 +291,19 @@ class CheckoutController extends Controller
             }
 
             DB::commit();
+
+            // Send Order Confirmation Mail
+            try {
+                if (auth()->check() && auth()->user()->email) {
+                    send_template_mail(auth()->user()->email, 'order_confirmation_mail', [
+                        'customer_name' => $order->name,
+                        'order_id' => $order->id,
+                        'order_total' => $order->grand_total,
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Order Confirmation Mail Trigger Error: ' . $e->getMessage());
+            }
 
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');
@@ -393,6 +407,7 @@ class CheckoutController extends Controller
             // গ. Orders টেবিলে ডাটা ইনসার্ট
             $order = new Orders();
             $order->user_id = auth()->id() ?? 0;
+            $order->ip_address = $request->ip();
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
             $order->address = $orderData['address'];
@@ -507,6 +522,7 @@ class CheckoutController extends Controller
 
             $order = new Orders();
             $order->user_id = auth()->id() ?? 0;
+            $order->ip_address = $request->ip();
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
             // $order->district = $orderData['district'];
@@ -562,6 +578,16 @@ class CheckoutController extends Controller
     {
         $order = Orders::where('id', $id)->first();
         return view('Frontend.order.success', compact('order'));
+    }
+
+    public function printInvoice($id)
+    {
+        $order = Orders::where('id', $id)->firstOrFail();
+        $webConfig = [];
+        if (\Illuminate\Support\Facades\Schema::hasTable('general_web_settings')) {
+            $webConfig = \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        }
+        return view('Frontend.order.invoice', compact('order', 'webConfig'));
     }
 
 

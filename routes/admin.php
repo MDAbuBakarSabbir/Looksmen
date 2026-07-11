@@ -169,6 +169,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::delete('products/destroy/{id}', 'destroy')->name('product.destroy')->middleware('admin.permission:manage_product');
         Route::post('products/status', 'status')->name('product.status')->middleware('admin.permission:manage_product');
         Route::post('products/todays_deal_status', 'todays_deal_status')->name('product.todays_deal_status')->middleware('admin.permission:manage_product');
+        Route::post('products/flash_sale_status', 'flash_sale_status')->name('product.flash_sale_status')->middleware('admin.permission:manage_product');
         Route::post('products/bulk-delete', 'bulkDelete')->name('product.bulk-delete')->middleware('admin.permission:manage_product');
         Route::post('products/image-delete/{id}', 'deleteImage')->name('product.image.delete')->middleware('admin.permission:manage_product');
 
@@ -406,6 +407,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/smtp', 'index')->name('smtp.index')->middleware('admin.permission:setup_smtp');
         Route::post('/smtp/store', 'store')->name('smtp.store')->middleware('admin.permission:setup_smtp');
         Route::post('/sms/store', 'smsStore')->name('sms.store')->middleware('admin.permission:setup_smtp');
+        Route::post('/smtp/template/save', 'saveTemplate')->name('smtp.template.save')->middleware('admin.permission:setup_smtp');
     });
 
     // Support Ticket & Customer Chat routes

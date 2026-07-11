@@ -20,6 +20,19 @@ class Orders extends Model
         return $this->belongsTo(Admins::class, 'updated_by');
     }
 
+    protected static function booted()
+    {
+        static::created(function ($order) {
+            try {
+                dispatch(function () use ($order) {
+                    $order->getCourierHistoryData();
+                })->afterResponse();
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Deferred courier history check error: ' . $e->getMessage());
+            }
+        });
+    }
+
     public function getCourierHistoryData()
     {
         // If already exists in database and is not empty, decode and return it

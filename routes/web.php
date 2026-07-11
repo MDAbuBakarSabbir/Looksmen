@@ -24,6 +24,8 @@ Route::middleware(['maintainance'])->group(function () {
 
     Route::get('/user-dashboard', [HomeController::class, 'userDash'])->middleware(['auth', 'verified'])->name('dashboard');
     Route::get('/', [HomeController::class, 'home'])->name('home');
+    Route::match(['get', 'post'], '/track-order', [HomeController::class, 'trackOrder'])->name('front.trackOrder');
+    Route::get('/flash-sale', [HomeController::class, 'flashSale'])->name('front.flashSale');
 
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -75,6 +77,7 @@ Route::middleware(['maintainance'])->group(function () {
 
         Route::post('/storeOrder/test', 'storeOrderTest')->name('order.store.test');
         Route::get('/order/success/{id}', 'showInvoice')->name('order.invoice');
+        Route::get('/order/print/{id}', 'printInvoice')->name('order.print');
         Route::post('/test-run', 'testrun')->name('check.test');
     });
 

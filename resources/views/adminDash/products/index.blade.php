@@ -200,6 +200,7 @@
                                     <th scope="col">Sales Info</th>
                                     <th scope="col">Stock</th>
                                     <th scope="col">Todays Deal</th>
+                                    <th scope="col">Flash Sale</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Action</th>
                                 </tr>
@@ -519,6 +520,44 @@
                     Toast.fire({
                         icon: 'success',
                         title: status == 1 ? 'Todays Deal Status Activated' : 'Todays Deal Status Deactivated'
+                    });
+                } else {
+                    Toast.fire({
+                        icon: 'error',
+                        title: 'Something went wrong'
+                    });
+                }
+            })
+            .catch(err => {
+                Toast.fire({
+                    icon: 'error',
+                    title: 'Server Error'
+                });
+            });
+        });
+
+        // Delegated flashsale-status toggle using jQuery
+        $(document).on('change', '.flashsale-status', function() {
+            let id = $(this).data('id');
+            let status = this.checked ? 1 : 0;
+
+            fetch("{{ route('product.flash_sale_status') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    id: id,
+                    status: status
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    Toast.fire({
+                        icon: 'success',
+                        title: status == 1 ? 'Flash Sale Status Activated' : 'Flash Sale Status Deactivated'
                     });
                 } else {
                     Toast.fire({

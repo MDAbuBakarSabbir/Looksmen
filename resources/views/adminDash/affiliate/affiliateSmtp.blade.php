@@ -148,12 +148,12 @@
                     <div class="template-header">
                         <span class="template-title"><i class="fa-solid fa-envelope-circle-check text-indigo"></i> Verification Mail Template</span>
                         <label class="switch-custom mb-0">
-                            <input type="checkbox" name="verifyMailActive" id="verifyMailActive" checked>
+                            <input type="checkbox" name="verifyMail" id="verifyMailCheckbox" {{ (isset($smtpSettings['verify_mail_active']) && $smtpSettings['verify_mail_active'] == '1') ? 'checked' : '' }}>
                             <span class="switch-slider"></span>
                             <span class="switch-text">Active</span>
                         </label>
                     </div>
-                    <textarea name="verifyMail" id="verifyMail" class="textarea-custom" placeholder="Write verification email content..."></textarea>
+                    <textarea name="verifyMail" id="verifyMail" class="textarea-custom" placeholder="Write verification email content...">{{ $smtpSettings['verify_mail_template'] ?? '' }}</textarea>
                     <div class="template-footer">
                         <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                     </div>
@@ -164,12 +164,12 @@
                     <div class="template-header">
                         <span class="template-title"><i class="fa-solid fa-id-card text-indigo"></i> Registration Mail Template</span>
                         <label class="switch-custom mb-0">
-                            <input type="checkbox" name="registerMailActive" id="registerMailActive" checked>
+                            <input type="checkbox" name="registerMail" id="registerMailCheckbox" {{ (isset($smtpSettings['register_mail_active']) && $smtpSettings['register_mail_active'] == '1') ? 'checked' : '' }}>
                             <span class="switch-slider"></span>
                             <span class="switch-text">Active</span>
                         </label>
                     </div>
-                    <textarea name="registerMail" id="registerMail" class="textarea-custom" placeholder="Write registration success email content..."></textarea>
+                    <textarea name="registerMail" id="registerMail" class="textarea-custom" placeholder="Write registration success email content...">{{ $smtpSettings['register_mail_template'] ?? '' }}</textarea>
                     <div class="template-footer">
                         <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                     </div>
@@ -190,12 +190,12 @@
                     <div class="template-header">
                         <span class="template-title"><i class="fa-solid fa-square-check text-indigo"></i> Approval Mail Template</span>
                         <label class="switch-custom mb-0">
-                            <input type="checkbox" name="approveMailActive" id="approveMailActive" checked>
+                            <input type="checkbox" name="approveMail" id="approveMailCheckbox" {{ (isset($smtpSettings['approve_mail_active']) && $smtpSettings['approve_mail_active'] == '1') ? 'checked' : '' }}>
                             <span class="switch-slider"></span>
                             <span class="switch-text">Active</span>
                         </label>
                     </div>
-                    <textarea name="approveMail" id="approveMail" class="textarea-custom" placeholder="Write approval email content..."></textarea>
+                    <textarea name="approveMail" id="approveMail" class="textarea-custom" placeholder="Write approval email content...">{{ $smtpSettings['approve_mail_template'] ?? '' }}</textarea>
                     <div class="template-footer">
                         <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                     </div>
@@ -206,12 +206,12 @@
                     <div class="template-header">
                         <span class="template-title"><i class="fa-solid fa-money-bill-transfer text-indigo"></i> Payment Mail Template</span>
                         <label class="switch-custom mb-0">
-                            <input type="checkbox" name="paymentMailActive" id="paymentMailActive" checked>
+                            <input type="checkbox" name="paymentMail" id="paymentMailCheckbox" {{ (isset($smtpSettings['payment_mail_active']) && $smtpSettings['payment_mail_active'] == '1') ? 'checked' : '' }}>
                             <span class="switch-slider"></span>
                             <span class="switch-text">Active</span>
                         </label>
                     </div>
-                    <textarea name="paymentMail" id="paymentMail" class="textarea-custom" placeholder="Write payment release email content..."></textarea>
+                    <textarea name="paymentMail" id="paymentMail" class="textarea-custom" placeholder="Write payment release email content...">{{ $smtpSettings['payment_mail_template'] ?? '' }}</textarea>
                     <div class="template-footer">
                         <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                     </div>
@@ -220,4 +220,47 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('script')
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.btn-save-template', function() {
+                let card = $(this).closest('.template-item');
+                let checkbox = card.find('input[type="checkbox"]');
+                let textarea = card.find('textarea');
+                
+                let template_name = checkbox.attr('name');
+                let active = checkbox.is(':checked') ? '1' : '0';
+                let body = textarea.val();
+
+                $.post('{{ route('smtp.template.save') }}', {
+                    _token: '{{ csrf_token() }}',
+                    name: template_name,
+                    active: active,
+                    body: body
+                }, function(res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: res.message
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to save template.'
+                        });
+                    }
+                }).fail(function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong.'
+                    });
+                });
+            });
+        });
+    </script>
 @endsection

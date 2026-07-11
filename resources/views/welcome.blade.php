@@ -27,7 +27,7 @@
                             <li class="category-nav-element" data-id="{{ $category->id }}">
                                 <a href="{{ route('catProductView', [$category->id, $category->slug]) }}"
                                     class="text-truncate text-reset py-2 px-3 d-block">
-                                    <i class="cat-image lazyload mr-2 opacity-60 fa-regular {{ $category->icon }}"></i>
+                                    <i class="cat-image lazyload mr-2 opacity-60 {{ (str_starts_with($category->icon, 'fa-') && !str_contains($category->icon, ' ')) ? 'fa-solid ' . $category->icon : $category->icon }}"></i>
                                     <span class="cat-name">{{ $category->name }}</span>
                                 </a>
                                 <div class="sub-cat-menu c-scrollbar-light rounded shadow-lg p-4">

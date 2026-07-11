@@ -560,24 +560,17 @@
                     </a>
                 </li>
                 <li class="list-inline-item mr-0">
-                    <a href="track-your-order.html"
+                    <a href="{{ route('front.trackOrder') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
                         <!--text-reset-->
                         Track Order
                     </a>
                 </li>
                 <li class="list-inline-item mr-0">
-                    <a href="flash-deal/flash-sale-84ExG.html"
+                    <a href="{{ route('front.flashSale') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
                         <!--text-reset-->
                         Flash Sale
-                    </a>
-                </li>
-                <li class="list-inline-item mr-0">
-                    <a href="blog.html"
-                        class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
-                        <!--text-reset-->
-                        Blogs
                     </a>
                 </li>
                 <li class="list-inline-item mr-0">
@@ -714,7 +707,7 @@
                                     </a>
                                 </li>
                                 <li class="mb-2">
-                                    <a class="opacity-50 hov-opacity-100 text-reset" href="">
+                                    <a class="opacity-50 hov-opacity-100 text-reset" href="{{ route('front.trackOrder') }}">
                                         Track Order
                                     </a>
                                 </li>

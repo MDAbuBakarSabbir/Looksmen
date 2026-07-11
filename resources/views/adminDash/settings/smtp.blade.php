@@ -327,15 +327,14 @@
                                 Welcome Mail Template
                             </span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="welcomeMail" id="welcomeMailCheckbox">
+                                <input type="checkbox" name="welcomeMail" id="welcomeMailCheckbox" {{ (isset($smtpSettings['welcome_mail_active']) && $smtpSettings['welcome_mail_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="welcomMail" id="welcomeMail" class="textarea-custom" placeholder="Write welcome email content..."></textarea>
+                        <textarea name="welcomeMail" id="welcomeMail" class="textarea-custom" placeholder="Write welcome email content...">{{ $smtpSettings['welcome_mail_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
-                            
                         </div>
                     </div>
 
@@ -344,12 +343,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-user-check text-indigo"></i> Verification Mail Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="verificationMail" id="verificationMailCheckbox">
+                                <input type="checkbox" name="verificationMail" id="verificationMailCheckbox" {{ (isset($smtpSettings['verification_mail_active']) && $smtpSettings['verification_mail_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="verificationMail" id="verificationMail" class="textarea-custom" placeholder="Write verification email content..."></textarea>
+                        <textarea name="verificationMail" id="verificationMail" class="textarea-custom" placeholder="Write verification email content...">{{ $smtpSettings['verification_mail_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -360,12 +359,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-key text-indigo"></i> OTP Mail Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="otpMail" id="otpMailCheckbox">
+                                <input type="checkbox" name="otpMail" id="otpMailCheckbox" {{ (isset($smtpSettings['otp_mail_active']) && $smtpSettings['otp_mail_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="otpMail" id="otpMail" class="textarea-custom" placeholder="Write OTP email content..."></textarea>
+                        <textarea name="otpMail" id="otpMail" class="textarea-custom" placeholder="Write OTP email content...">{{ $smtpSettings['otp_mail_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -376,12 +375,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-cart-check text-indigo"></i> Order Confirmation Mail Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="orderConfirmationMail" id="orderConfirmationMailCheckbox">
+                                <input type="checkbox" name="orderConfirmationMail" id="orderConfirmationMailCheckbox" {{ (isset($smtpSettings['order_confirmation_mail_active']) && $smtpSettings['order_confirmation_mail_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="orderConfirmationMail" id="orderConfirmationMail" class="textarea-custom" placeholder="Write order confirmation email content..."></textarea>
+                        <textarea name="orderConfirmationMail" id="orderConfirmationMail" class="textarea-custom" placeholder="Write order confirmation email content...">{{ $smtpSettings['order_confirmation_mail_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -392,12 +391,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-cart-xmark text-indigo"></i> Order Cancelled Mail Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="orderCancelMail" id="orderCancelMailCheckbox">
+                                <input type="checkbox" name="orderCancelMail" id="orderCancelMailCheckbox" {{ (isset($smtpSettings['order_cancel_mail_active']) && $smtpSettings['order_cancel_mail_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="orderCancelMail" id="orderCancelMail" class="textarea-custom" placeholder="Write order cancelled email content..."></textarea>
+                        <textarea name="orderCancelMail" id="orderCancelMail" class="textarea-custom" placeholder="Write order cancelled email content...">{{ $smtpSettings['order_cancel_mail_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -408,12 +407,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-truck-ramp-box text-indigo"></i> Order Delivered Mail Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="orderDeliveredMail" id="orderDeliveredMailCheckbox">
+                                <input type="checkbox" name="orderDeliveredMail" id="orderDeliveredMailCheckbox" {{ (isset($smtpSettings['order_delivered_mail_active']) && $smtpSettings['order_delivered_mail_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="orderDeliveredMail" id="orderDeliveredMail" class="textarea-custom" placeholder="Write order delivered email content..."></textarea>
+                        <textarea name="orderDeliveredMail" id="orderDeliveredMail" class="textarea-custom" placeholder="Write order delivered email content...">{{ $smtpSettings['order_delivered_mail_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -434,12 +433,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-comment-dots text-emerald"></i> Welcome SMS Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="welcomeSms" id="welcomeSmsCheckbox">
+                                <input type="checkbox" name="welcomeSms" id="welcomeSmsCheckbox" {{ (isset($smtpSettings['welcome_sms_active']) && $smtpSettings['welcome_sms_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="welcomeSms" id="welcomeSms" class="textarea-custom" placeholder="Write welcome SMS content..."></textarea>
+                        <textarea name="welcomeSms" id="welcomeSms" class="textarea-custom" placeholder="Write welcome SMS content...">{{ $smtpSettings['welcome_sms_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -450,12 +449,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-comment-check text-emerald"></i> Order Confirmation SMS Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="orderConfirmationSms" id="orderConfirmationSmsCheckbox">
+                                <input type="checkbox" name="orderConfirmationSms" id="orderConfirmationSmsCheckbox" {{ (isset($smtpSettings['order_confirmation_sms_active']) && $smtpSettings['order_confirmation_sms_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="orderConfirmationSms" id="orderConfirmationSms" class="textarea-custom" placeholder="Write order confirmation SMS content..."></textarea>
+                        <textarea name="orderConfirmationSms" id="orderConfirmationSms" class="textarea-custom" placeholder="Write order confirmation SMS content...">{{ $smtpSettings['order_confirmation_sms_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -466,12 +465,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-shield-keyhole text-emerald"></i> OTP SMS Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="otpSms" id="otpSmsCheckbox">
+                                <input type="checkbox" name="otpSms" id="otpSmsCheckbox" {{ (isset($smtpSettings['otp_sms_active']) && $smtpSettings['otp_sms_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="otpSms" id="otpSms" class="textarea-custom" placeholder="Write OTP SMS content..."></textarea>
+                        <textarea name="otpSms" id="otpSms" class="textarea-custom" placeholder="Write OTP SMS content...">{{ $smtpSettings['otp_sms_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -482,12 +481,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-comment-xmark text-emerald"></i> Order Cancel SMS Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="orderCancelSms" id="orderCancelSmsCheckbox">
+                                <input type="checkbox" name="orderCancelSms" id="orderCancelSmsCheckbox" {{ (isset($smtpSettings['order_cancel_sms_active']) && $smtpSettings['order_cancel_sms_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="orderCancelSms" id="orderCancelSms" class="textarea-custom" placeholder="Write order cancel SMS content..."></textarea>
+                        <textarea name="orderCancelSms" id="orderCancelSms" class="textarea-custom" placeholder="Write order cancel SMS content...">{{ $smtpSettings['order_cancel_sms_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -498,12 +497,12 @@
                         <div class="template-header">
                             <span class="template-title"><i class="fa-solid fa-truck-fast text-emerald"></i> Order Delivered SMS Template</span>
                             <label class="switch-custom mb-0">
-                                <input type="checkbox" name="orderDeliveredSms" id="orderDeliveredSmsCheckbox">
+                                <input type="checkbox" name="orderDeliveredSms" id="orderDeliveredSmsCheckbox" {{ (isset($smtpSettings['order_delivered_sms_active']) && $smtpSettings['order_delivered_sms_active'] == '1') ? 'checked' : '' }}>
                                 <span class="switch-slider switch-slider-sms"></span>
                                 <span class="switch-text">Active</span>
                             </label>
                         </div>
-                        <textarea name="orderDeliveredSms" id="orderDeliveredSms" class="textarea-custom" placeholder="Write order delivered SMS content..."></textarea>
+                        <textarea name="orderDeliveredSms" id="orderDeliveredSms" class="textarea-custom" placeholder="Write order delivered SMS content...">{{ $smtpSettings['order_delivered_sms_template'] ?? '' }}</textarea>
                         <div class="template-footer">
                             <button type="button" class="btn-save-template btn-save-template-sms"><i class="fa-solid fa-floppy-disk"></i> Save Template</button>
                         </div>
@@ -512,4 +511,47 @@
             </div>
         </div>
     </div>
+@endsection
+
+@section('script')
+    <script>
+        $(document).ready(function() {
+            $(document).on('click', '.btn-save-template', function() {
+                let card = $(this).closest('.template-item');
+                let checkbox = card.find('input[type="checkbox"]');
+                let textarea = card.find('textarea');
+                
+                let template_name = checkbox.attr('name');
+                let active = checkbox.is(':checked') ? '1' : '0';
+                let body = textarea.val();
+
+                $.post('{{ route('smtp.template.save') }}', {
+                    _token: '{{ csrf_token() }}',
+                    name: template_name,
+                    active: active,
+                    body: body
+                }, function(res) {
+                    if (res.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: res.message
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Failed to save template.'
+                        });
+                    }
+                }).fail(function(xhr) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Something went wrong.'
+                    });
+                });
+            });
+        });
+    </script>
 @endsection
