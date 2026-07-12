@@ -138,9 +138,19 @@ class OrderManageController extends Controller
             $query->where('updated_by', $request->admin_id);
         }
 
-        $orders = $query->latest()->get();
+        $page  = request('page', 1);
+        $orders = $query->latest()->paginate(20)->withQueryString();
 
-        return view('adminDash.orders.extends.order_rows', compact('orders'))->render();
+        $html = view('adminDash.orders.extends.order_rows', compact('orders'))->render();
+
+        return response()->json([
+            'html'         => $html,
+            'current_page' => $orders->currentPage(),
+            'last_page'    => $orders->lastPage(),
+            'total'        => $orders->total(),
+            'from'         => $orders->firstItem() ?? 0,
+            'to'           => $orders->lastItem() ?? 0,
+        ]);
     }
 
     public function updateStatus(Request $request)
@@ -329,7 +339,7 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('manage_order')) {
             abort(403, 'You do not have permission to manage orders.');
         }
-        $countorders = Orders::with('admin')->latest()->get();
+        $countorders = Orders::with('admin')->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('countorders'));
     }
     public function new()
@@ -337,8 +347,8 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('hold_order')) {
             abort(403, 'You do not have permission to view hold orders.');
         }
-        $countorders = Orders::all();
-        $orders = Orders::where('delivery_status', 'new')->latest()->get();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
+        $orders = Orders::where('delivery_status', 'new')->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
     public function pending()
@@ -346,8 +356,8 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('pending_order')) {
             abort(403, 'You do not have permission to view pending orders.');
         }
-        $countorders = Orders::all();
-        $orders = Orders::where('delivery_status', 'pending')->latest()->get();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
+        $orders = Orders::where('delivery_status', 'pending')->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
     public function approved()
@@ -355,8 +365,8 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('approved_order')) {
             abort(403, 'You do not have permission to view approved orders.');
         }
-        $countorders = Orders::all();
-        $orders = Orders::where('delivery_status', 'approved')->latest()->get();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
+        $orders = Orders::where('delivery_status', 'approved')->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
     public function packaging()
@@ -364,8 +374,8 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('packaging_order')) {
             abort(403, 'You do not have permission to view packaging orders.');
         }
-        $countorders = Orders::all();
-        $orders = Orders::where('delivery_status', 'packaging')->latest()->get();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
+        $orders = Orders::where('delivery_status', 'packaging')->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
     public function incourier()
@@ -373,12 +383,12 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('shipment_order')) {
             abort(403, 'You do not have permission to view in-courier orders.');
         }
-        $countorders = Orders::all();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
         $orders = Orders::whereIn('delivery_status', [
             'in_courier', 'unknown', 'in_review', 'hold',
             'unknown_approval_pending', 'cancelled_approval_pending',
             'partial_delivered_approval_pending', 'delivered_approval_pending', 'pending'
-        ])->latest()->get();
+        ])->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
     public function delivered()
@@ -386,8 +396,8 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('delivered_order')) {
             abort(403, 'You do not have permission to view delivered orders.');
         }
-        $countorders = Orders::all();
-        $orders = Orders::whereIn('delivery_status', ['delivered', 'partial_delivered'])->latest()->get();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
+        $orders = Orders::whereIn('delivery_status', ['delivered', 'partial_delivered'])->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
     public function canceled()
@@ -395,8 +405,8 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('canceled_order')) {
             abort(403, 'You do not have permission to view canceled orders.');
         }
-        $countorders = Orders::all();
-        $orders = Orders::whereIn('delivery_status', ['cancel', 'cancelled'])->latest()->get();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
+        $orders = Orders::whereIn('delivery_status', ['cancel', 'cancelled'])->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
     public function returned()
@@ -404,8 +414,8 @@ class OrderManageController extends Controller
         if (!auth()->guard('admin')->user()->hasPermission('return_order')) {
             abort(403, 'You do not have permission to view returned orders.');
         }
-        $countorders = Orders::all();
-        $orders = Orders::where('delivery_status', 'returned')->latest()->get();
+        $countorders = Orders::latest()->paginate(20)->withQueryString();
+        $orders = Orders::where('delivery_status', 'returned')->latest()->paginate(20)->withQueryString();
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
@@ -955,7 +965,12 @@ class OrderManageController extends Controller
             abort(404);
         }
         $this->checkOrderAccess($order);
-        return view('adminDash.orders.invoice', compact('order'));
+
+        $webSettings = \App\Models\GeneralWebSettings::whereIn('name', [
+            'web_name', 'web_logo', 'contact_address', 'contact_phone', 'contact_email',
+        ])->pluck('value', 'name');
+
+        return view('adminDash.orders.invoice', compact('order', 'webSettings'));
     }
 
     public function refreshCourierHistory($id)

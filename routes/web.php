@@ -89,6 +89,7 @@ Route::middleware(['maintainance'])->group(function () {
         Route::get('/product/compare', 'ProductCompare')->name('ProductCompare');
         Route::get('/product/{id}/{slug}', 'ProductView')->name('ProductView')->where('id', '[0-9]+');
         Route::get('/page/{slug}', 'pages')->name('pages');
+        Route::get('/category-filter', 'filterProducts')->name('front.category.filter');
     });
 
     Route::controller(AddressController::class)->group(function () {

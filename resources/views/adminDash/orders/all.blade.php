@@ -77,6 +77,39 @@
                     </tbody>
                 </table>
             </div>
+            <!-- Pagination Area -->
+            @php $pg = $orders ?? $countorders; @endphp
+            <div class="d-flex align-items-center justify-content-between flex-wrap mt-3 px-1" id="orderPaginationMeta" style="font-size:13px; color:#6c757d;">
+                <span id="orderPaginationInfo">
+                    Showing <strong>{{ $pg->firstItem() ?? 0 }}</strong> &ndash; <strong>{{ $pg->lastItem() ?? 0 }}</strong>
+                    of <strong>{{ $pg->total() }}</strong> orders
+                </span>
+                <div id="orderPaginationLinks" class="d-flex align-items-center flex-wrap" style="gap:4px;">
+                    @if($pg->lastPage() > 1)
+                        @if($pg->currentPage() > 1)
+                            <button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="{{ $pg->currentPage() - 1 }}" style="min-width:36px; border-radius:6px;"><i class="fa-solid fa-chevron-left"></i></button>
+                        @endif
+                        @php
+                            $start = max(1, $pg->currentPage() - 2);
+                            $end   = min($pg->lastPage(), $pg->currentPage() + 2);
+                        @endphp
+                        @if($start > 1)
+                            <button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="1" style="min-width:36px; border-radius:6px;">1</button>
+                            @if($start > 2)<span class="btn btn-sm disabled" style="min-width:36px;">…</span>@endif
+                        @endif
+                        @for($p = $start; $p <= $end; $p++)
+                            <button class="btn btn-sm order-paginator-btn {{ $p == $pg->currentPage() ? 'btn-primary' : 'btn-outline-secondary' }}" data-page="{{ $p }}" style="min-width:36px; border-radius:6px;">{{ $p }}</button>
+                        @endfor
+                        @if($end < $pg->lastPage())
+                            @if($end < $pg->lastPage() - 1)<span class="btn btn-sm disabled" style="min-width:36px;">…</span>@endif
+                            <button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="{{ $pg->lastPage() }}" style="min-width:36px; border-radius:6px;">{{ $pg->lastPage() }}</button>
+                        @endif
+                        @if($pg->currentPage() < $pg->lastPage())
+                            <button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="{{ $pg->currentPage() + 1 }}" style="min-width:36px; border-radius:6px;"><i class="fa-solid fa-chevron-right"></i></button>
+                        @endif
+                    @endif
+                </div>
+            </div>
         </div>
     </div>
 @endsection
@@ -100,16 +133,48 @@
             let initialStatus = routeToStatus[currentRoute] || '';
             $('.quixnav').data('active-status', initialStatus);
 
+            let currentPage = 1;
+
+            function buildPaginationButtons(data) {
+                if (data.last_page <= 1) {
+                    $('#orderPaginationLinks').html('');
+                    return;
+                }
+                let html = '';
+                if (data.current_page > 1) {
+                    html += '<button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="' + (data.current_page - 1) + '" style="min-width:36px;border-radius:6px;"><i class="fa-solid fa-chevron-left"></i></button>';
+                }
+                let s = Math.max(1, data.current_page - 2);
+                let e = Math.min(data.last_page, data.current_page + 2);
+                if (s > 1) {
+                    html += '<button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="1" style="min-width:36px;border-radius:6px;">1</button>';
+                    if (s > 2) html += '<span class="btn btn-sm disabled" style="min-width:36px;">…</span>';
+                }
+                for (let p = s; p <= e; p++) {
+                    let cls = (p === data.current_page) ? 'btn-primary' : 'btn-outline-secondary';
+                    html += '<button class="btn btn-sm ' + cls + ' order-paginator-btn" data-page="' + p + '" style="min-width:36px;border-radius:6px;">' + p + '</button>';
+                }
+                if (e < data.last_page) {
+                    if (e < data.last_page - 1) html += '<span class="btn btn-sm disabled" style="min-width:36px;">…</span>';
+                    html += '<button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="' + data.last_page + '" style="min-width:36px;border-radius:6px;">' + data.last_page + '</button>';
+                }
+                if (data.current_page < data.last_page) {
+                    html += '<button class="btn btn-sm btn-outline-secondary order-paginator-btn" data-page="' + (data.current_page + 1) + '" style="min-width:36px;border-radius:6px;"><i class="fa-solid fa-chevron-right"></i></button>';
+                }
+                $('#orderPaginationLinks').html(html);
+            }
+
             function applyFilters(statusVal) {
                 let tbody = $('.oldData');
-                tbody.css('opacity', 0.5);
+                tbody.html('<tr><td colspan="9" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading orders...</td></tr>');
 
                 let data = {
                     search: $('#orderSearch').val(),
                     from: $('#from_date').val(),
                     to: $('#to_date').val(),
                     days: $('.daysFilter').val(),
-                    admin_id: $('.adminFilter').val()
+                    admin_id: $('.adminFilter').val(),
+                    page: currentPage
                 };
 
                 if (statusVal !== undefined) {
@@ -124,34 +189,48 @@
                     type: 'GET',
                     data: data,
                     success: function(response) {
-                        tbody.html(response);
-                        tbody.css('opacity', 1);
+                        tbody.html(response.html);
                         $('#orderCheckAll').prop('checked', false);
+
+                        $('#orderPaginationInfo').html(
+                            'Showing <strong>' + response.from + '</strong> &ndash; <strong>' + response.to + '</strong> of <strong>' + response.total + '</strong> orders'
+                        );
+                        buildPaginationButtons(response);
                     },
                     error: function(xhr) {
                         console.error(xhr.responseText);
-                        tbody.css('opacity', 1);
+                        tbody.html('<tr><td colspan="9" class="text-center text-danger">Failed to load orders.</td></tr>');
                     }
                 });
             }
 
-            // Status Card Clicks
+            // Pagination click (delegated)
+            $(document).on('click', '.order-paginator-btn', function() {
+                currentPage = parseInt($(this).data('page'));
+                applyFilters();
+                $('html, body').animate({ scrollTop: $('.oldData').offset().top - 100 }, 300);
+            });
+
+            // Status Card Clicks — reset page
             $(document).on('click', '.order-status-btn', function(e) {
                 e.preventDefault();
+                currentPage = 1;
                 applyFilters($(this).data('status'));
             });
 
-            // Delay Search Inputs
+            // Delay Search Inputs — reset page
             let delayTimer;
             $(document).on('keyup input', '#orderSearch', function() {
                 clearTimeout(delayTimer);
                 delayTimer = setTimeout(function() {
+                    currentPage = 1;
                     applyFilters();
                 }, 300);
             });
 
-            // Date, Day & Admin Filters
+            // Date, Day & Admin Filters — reset page
             $(document).on('change', '#from_date, #to_date, .daysFilter, .adminFilter', function() {
+                currentPage = 1;
                 applyFilters();
             });
 
@@ -196,6 +275,7 @@
                     success: function(response) {
                         if (response.success) {
                             Toast.fire({ icon: 'success', title: 'Orders updated successfully' });
+                            currentPage = 1;
                             applyFilters();
                         }
                     },
@@ -206,6 +286,7 @@
                 });
             });
         });
+
     </script>
 @endsection
 

@@ -12,16 +12,81 @@ class HomeController extends Controller
 {
     public function home()
     {
-        $categories = Category::with('subcategories.childcategories')->get()->take(11);
-        $products = Product::where('status', '1')->get();
-        $categoryProducts = Category::with(['products' => function ($query) {
-            $query->where('status', '1')->with('firstImage');
-        }])->get();
+        $categories = \Illuminate\Support\Facades\Cache::remember('home_categories_tree_11', 3600, function () {
+            return Category::with('subcategories.childcategories')->take(11)->get();
+        });
+        if (!($categories instanceof \Illuminate\Support\Collection)) {
+            \Illuminate\Support\Facades\Cache::forget('home_categories_tree_11');
+            $categories = Category::with('subcategories.childcategories')->take(11)->get();
+            \Illuminate\Support\Facades\Cache::put('home_categories_tree_11', $categories, 3600);
+        }
 
-        $todaysDeals = Product::with('firstImage')->where('todays_deal', '1')->where('status', '1')->take(4)->get();
-        $newArivals = Product::with('firstImage')->where('status', '1')->latest()->take(10)->get();
-        $banners = Banner::inRandomOrder()->where('status', '1')->get();
-        $sliders = Slider::inRandomOrder()->where('status', '1')->get();
+        $categoryProducts = \Illuminate\Support\Facades\Cache::remember('home_category_products_v2', 600, function () {
+            return Category::whereHas('products', function ($query) {
+                $query->where('status', '1');
+            })->with(['products' => function ($query) {
+                $query->where('status', '1')
+                      ->with('firstImage')
+                      ->withAvg(['reviews' => function ($q) {
+                          $q->where('status', '1');
+                      }], 'review_star')
+                      ->latest()
+                      ->take(12);
+            }])->get();
+        });
+        if (!($categoryProducts instanceof \Illuminate\Support\Collection)) {
+            \Illuminate\Support\Facades\Cache::forget('home_category_products_v2');
+            $categoryProducts = Category::whereHas('products', fn ($query) => $query->where('status', '1'))
+                ->with(['products' => fn ($query) => $query->where('status', '1')->with('firstImage')->withAvg(['reviews' => fn ($q) => $q->where('status', '1')], 'review_star')->latest()->take(12)])
+                ->get();
+            \Illuminate\Support\Facades\Cache::put('home_category_products_v2', $categoryProducts, 600);
+        }
+
+        $todaysDeals = \Illuminate\Support\Facades\Cache::remember('home_todays_deals_v2', 600, function () {
+            return Product::with('firstImage')
+                ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
+                ->where('todays_deal', '1')
+                ->where('status', '1')
+                ->take(4)
+                ->get();
+        });
+        if (!($todaysDeals instanceof \Illuminate\Support\Collection)) {
+            \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
+            $todaysDeals = Product::with('firstImage')->withAvg(['reviews' => fn ($q) => $q->where('status', '1')], 'review_star')->where('todays_deal', '1')->where('status', '1')->take(4)->get();
+            \Illuminate\Support\Facades\Cache::put('home_todays_deals_v2', $todaysDeals, 600);
+        }
+
+        $newArivals = \Illuminate\Support\Facades\Cache::remember('home_new_arrivals_v2', 600, function () {
+            return Product::with('firstImage')
+                ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
+                ->where('status', '1')
+                ->latest()
+                ->take(10)
+                ->get();
+        });
+        if (!($newArivals instanceof \Illuminate\Support\Collection)) {
+            \Illuminate\Support\Facades\Cache::forget('home_new_arrivals_v2');
+            $newArivals = Product::with('firstImage')->withAvg(['reviews' => fn ($q) => $q->where('status', '1')], 'review_star')->where('status', '1')->latest()->take(10)->get();
+            \Illuminate\Support\Facades\Cache::put('home_new_arrivals_v2', $newArivals, 600);
+        }
+
+        $banners = \Illuminate\Support\Facades\Cache::remember('home_banners_v2', 600, function () {
+            return Banner::inRandomOrder()->where('status', '1')->get();
+        });
+        if (!($banners instanceof \Illuminate\Support\Collection)) {
+            \Illuminate\Support\Facades\Cache::forget('home_banners_v2');
+            $banners = Banner::inRandomOrder()->where('status', '1')->get();
+            \Illuminate\Support\Facades\Cache::put('home_banners_v2', $banners, 600);
+        }
+
+        $sliders = \Illuminate\Support\Facades\Cache::remember('home_sliders_v2', 600, function () {
+            return Slider::inRandomOrder()->where('status', '1')->get();
+        });
+        if (!($sliders instanceof \Illuminate\Support\Collection)) {
+            \Illuminate\Support\Facades\Cache::forget('home_sliders_v2');
+            $sliders = Slider::inRandomOrder()->where('status', '1')->get();
+            \Illuminate\Support\Facades\Cache::put('home_sliders_v2', $sliders, 600);
+        }
 
         return view('welcome', compact('categories', 'todaysDeals', 'newArivals', 'categoryProducts', 'banners', 'sliders'));
     }
@@ -62,6 +127,7 @@ class HomeController extends Controller
         $products = Product::where('status', '1')
             ->where('flash_sale', '1')
             ->with('firstImage')
+            ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
             ->paginate(12);
 
         return view('Frontend.flash_sale', compact('products'));

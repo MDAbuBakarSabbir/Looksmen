@@ -17,8 +17,10 @@ if (!function_exists('addon_is_activated')) {
         if ($addon === 'affiliate_system') {
             if (class_exists('App\Models\FeatureActivation')) {
                 try {
-                    $feature = \App\Models\FeatureActivation::where('name', 'affiliate')->first();
-                    return $feature && $feature->status == '1';
+                    $features = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+                        return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+                    });
+                    return ($features['affiliate'] ?? '0') == '1';
                 } catch (\Exception $e) {}
             }
             return true;
@@ -47,14 +49,16 @@ if ( !function_exists('flash')) {
 if (!function_exists('send_custom_mail')) {
     function send_custom_mail($to, $subject, $body) {
         try {
-            $features = \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+            $features = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+                return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+            });
             if (($features['email_verification'] ?? '0') !== '1') {
                 return false;
             }
 
-            $settings = \App\Models\GeneralWebSettings::whereIn('name', [
-                'mailhost', 'mailport', 'mailusername', 'mailpassword', 'mailaddress', 'mailencription'
-            ])->pluck('value', 'name')->toArray();
+            $settings = \Illuminate\Support\Facades\Cache::rememberForever('boot_general_web_settings_map', function () {
+                return \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+            });
 
             if (empty($settings['mailhost']) || empty($settings['mailusername'])) {
                 return false;
@@ -103,9 +107,9 @@ if (!function_exists('parse_template')) {
 
 if (!function_exists('send_template_mail')) {
     function send_template_mail($toEmail, $templateName, $data) {
-        $settings = \App\Models\GeneralWebSettings::whereIn('name', [
-            $templateName . '_active', $templateName . '_template'
-        ])->pluck('value', 'name')->toArray();
+        $settings = \Illuminate\Support\Facades\Cache::rememberForever('boot_general_web_settings_map', function () {
+            return \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        });
 
         if (isset($settings[$templateName . '_active']) && $settings[$templateName . '_active'] == '1' && !empty($settings[$templateName . '_template'])) {
             $body = parse_template($settings[$templateName . '_template'], $data);

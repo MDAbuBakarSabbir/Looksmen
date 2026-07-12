@@ -42,6 +42,12 @@ class Product extends Model
     }
     public function getAverageRating()
     {
+        if (isset($this->reviews_avg_review_star)) {
+            return (float) $this->reviews_avg_review_star;
+        }
+        if ($this->relationLoaded('reviews')) {
+            return (float) $this->reviews->where('status', '1')->avg('review_star') ?: 0;
+        }
         return (float) $this->reviews()->where('status', '1')->avg('review_star') ?: 0;
     }
     public function getDiscountPercentageAttribute()
@@ -54,9 +60,17 @@ class Product extends Model
         return 0;
     }
 
-    public function orderProduct()
+    protected static function booted()
     {
-        return $this->belongsTo(OrderDetails::class, 'product_id');
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
+            \Illuminate\Support\Facades\Cache::forget('home_new_arrivals_v2');
+            \Illuminate\Support\Facades\Cache::forget('home_category_products_v2');
+        });
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
+            \Illuminate\Support\Facades\Cache::forget('home_new_arrivals_v2');
+            \Illuminate\Support\Facades\Cache::forget('home_category_products_v2');
+        });
     }
-
 }

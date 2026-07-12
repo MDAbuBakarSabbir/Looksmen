@@ -2,12 +2,37 @@
     use App\Models\GeneralWebSettings;
     use App\Models\Pages;
     use App\Models\Category;
+    use Illuminate\Support\Facades\Cache;
 
-    $webinfo = GeneralWebSettings::first();
-    $webConfig = GeneralWebSettings::first()->pluck('value', 'name', 'status')->toArray();
-    $pages = Pages::where('status', 1)->get();
-    $categories = Category::with('subcategories.childcategories')->get()->take(11);
-
+    $webinfo = Cache::remember('global_webinfo_first', 3600, function () {
+        return GeneralWebSettings::first();
+    });
+    if (!($webinfo instanceof GeneralWebSettings)) {
+        Cache::forget('global_webinfo_first');
+        $webinfo = GeneralWebSettings::first();
+        Cache::put('global_webinfo_first', $webinfo, 3600);
+    }
+    $webConfig = Cache::remember('global_webconfig_pluck', 3600, function () {
+        $first = GeneralWebSettings::first();
+        return $first ? $first->pluck('value', 'name', 'status')->toArray() : [];
+    });
+    $pages = Cache::remember('global_pages_list', 3600, function () {
+        return Pages::where('status', 1)->get();
+    });
+    if (!($pages instanceof \Illuminate\Support\Collection)) {
+        Cache::forget('global_pages_list');
+        $pages = Pages::where('status', 1)->get();
+        Cache::put('global_pages_list', $pages, 3600);
+    }
+    $categories = Cache::remember('global_categories_tree_11', 3600, function () {
+        return Category::with('subcategories.childcategories')->take(11)->get();
+    });
+    if (!($categories instanceof \Illuminate\Support\Collection)) {
+        Cache::forget('global_categories_tree_11');
+        $categories = Category::with('subcategories.childcategories')->take(11)->get();
+        Cache::put('global_categories_tree_11', $categories, 3600);
+    }
+    $cartCount = auth()->check() ? \App\Models\Cart::where('user_id', auth()->id())->count() : count(session('cart', []));
 @endphp
 
 <!DOCTYPE html>
@@ -534,11 +559,7 @@
                             <i class="la la-shopping-cart la-2x opacity-80"></i>
                             <span class="flex-grow-1 ml-1">
                                 <span class="badge badge-primary badge-inline badge-pill cart-count">
-                                    @if (auth()->check())
-                                        {{ \App\Models\Cart::where('user_id', auth()->id())->count() }}
-                                    @else
-                                        {{ count(session('cart', [])) }}
-                                    @endif
+                                    {{ $cartCount }}
                                 </span>
                                 <span class="nav-box-text d-none d-xl-block">Cart</span>
                             </span>
@@ -804,11 +825,7 @@
                         <span class="d-block mt-1 fs-10 fw-600 opacity-60 ">
                             Cart
                             (<span class="cart-count">
-                                @if (auth()->check())
-                                    {{ \App\Models\Cart::where('user_id', auth()->id())->count() }}
-                                @else
-                                    {{ count(session('cart', [])) }}
-                                @endif
+                                {{ $cartCount }}
                             </span>)
                         </span>
                     </a>
