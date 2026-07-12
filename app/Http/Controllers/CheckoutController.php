@@ -28,14 +28,16 @@ class CheckoutController extends Controller
     {
         if (auth()->check()) {
             $cart = Cart::where('user_id', auth()->id())->with('product')->get();
+            $cartEmpty = $cart->isEmpty();
         } else {
             $cart = session()->get('cart', []);
+            $cartEmpty = empty($cart);
         }
         $districts = District::where('status', '1')->get();
-        $addresses = Address::where('user_id',auth()->id())->get();
+        $addresses = auth()->check() ? Address::where('user_id', auth()->id())->get() : collect();
         $features = FeatureActivation::all();
         $featuresConfig = $features->pluck('status', 'name')->toArray();
-        if (empty($cart)) {
+        if ($cartEmpty) {
             return redirect()->route('cartView')->with('error', 'Your cart is empty! Please add products first.');
         }
         return view('Frontend.checkout', compact('districts', 'cart','addresses','featuresConfig'));
@@ -208,9 +210,28 @@ class CheckoutController extends Controller
             'address' => 'required',
         ]);
 
-        $cart = session()->get('cart', []);
-        if (empty($cart)) {
-            return redirect()->back()->with('error', 'Cart is empty!');
+        // Logged-in user হলে DB থেকে, না হলে session থেকে cart নেওয়া
+        if (auth()->check()) {
+            $dbCart = Cart::where('user_id', auth()->id())->with('product')->get();
+            if ($dbCart->isEmpty()) {
+                return redirect()->back()->with('error', 'Cart is empty!');
+            }
+            // DB cart কে array format এ convert করা
+            $cart = [];
+            foreach ($dbCart as $item) {
+                $cart[] = [
+                    'id'        => $item->product_id,
+                    'price'     => $item->product->new_price,
+                    'quantity'  => $item->quantity,
+                    'attribute' => $item->attributes ?? 'N/A',
+                    'color'     => $item->color ?? 'N/A',
+                ];
+            }
+        } else {
+            $cart = session()->get('cart', []);
+            if (empty($cart)) {
+                return redirect()->back()->with('error', 'Cart is empty!');
+            }
         }
 
         try {
@@ -307,6 +328,9 @@ class CheckoutController extends Controller
 
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');
+            if (auth()->check()) {
+                Cart::where('user_id', auth()->id())->delete();
+            }
 
             return redirect()->route('order.invoice', $order->id)->with('success', 'Order placed successfully!');
         } catch (\Exception $e) {
