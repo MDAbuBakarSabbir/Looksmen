@@ -213,7 +213,25 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                    <!-- Pagination Area -->
+                    <div class="d-flex align-items-center justify-content-between flex-wrap mt-3 px-1" id="paginationMeta" style="font-size:13px; color:#6c757d;">
+                        <span id="paginationInfo">
+                            Showing <strong>{{ $products->firstItem() ?? 0 }}</strong> &ndash; <strong>{{ $products->lastItem() ?? 0 }}</strong>
+                            of <strong>{{ $products->total() }}</strong> products
+                        </span>
+                        <div id="paginationLinks" class="d-flex align-items-center flex-wrap" style="gap:4px;">
+                            @if($products->lastPage() > 1)
+                                @for($p = 1; $p <= $products->lastPage(); $p++)
+                                    <button
+                                        class="btn btn-sm paginator-btn {{ $p == $products->currentPage() ? 'btn-primary' : 'btn-outline-secondary' }}"
+                                        data-page="{{ $p }}"
+                                        style="min-width:36px; border-radius:6px;"
+                                    >{{ $p }}</button>
+                                @endfor
+                            @endif
+                        </div>
+                    </div>
+
             </div>
         </div>
     </div>
@@ -372,6 +390,7 @@
 
             // Trigger filter when dropdowns change
             $('#filterCategory, #filterSubCategory, #filterChildCategory, #filterStatus, #filterTodaysDeal, #filterStockStatus, #filterSortBy').on('change', function() {
+                currentPage = 1;
                 filterProducts();
             });
 
@@ -379,11 +398,22 @@
             let filterTimeout;
             $('#filterSearch, #filterMinPrice, #filterMaxPrice').on('input', function() {
                 clearTimeout(filterTimeout);
-                filterTimeout = setTimeout(filterProducts, 300);
+                filterTimeout = setTimeout(function() {
+                    currentPage = 1;
+                    filterProducts();
+                }, 300);
+            });
+
+            // Pagination click handler (delegated)
+            $(document).on('click', '.paginator-btn', function() {
+                currentPage = parseInt($(this).data('page'));
+                filterProducts();
+                $('html, body').animate({ scrollTop: $('#productTableBody').offset().top - 100 }, 300);
             });
 
             // Reset filters
             $('#btnResetFilters').on('click', function() {
+                currentPage = 1;
                 $('#filterSearch').val('');
                 $('#filterCategory').val('').trigger('change.select2');
                 $('#filterSubCategory').html('<option value="">All Sub Categories</option>').trigger('change.select2');
@@ -397,6 +427,8 @@
                 filterProducts();
             });
 
+            let currentPage = 1;
+
             function filterProducts() {
                 let search = $('#filterSearch').val();
                 let category_id = $('#filterCategory').val();
@@ -408,6 +440,9 @@
                 let min_price = $('#filterMinPrice').val();
                 let max_price = $('#filterMaxPrice').val();
                 let sort_by = $('#filterSortBy').val();
+
+                // Show loading state
+                $('#productTableBody').html('<tr><td colspan="9" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading products...</td></tr>');
 
                 $.ajax({
                     url: "{{ route('product.index') }}",
@@ -422,13 +457,49 @@
                         stock_status: stock_status,
                         min_price: min_price,
                         max_price: max_price,
-                        sort_by: sort_by
+                        sort_by: sort_by,
+                        page: currentPage
                     },
-                    success: function(html) {
-                        $('#productTableBody').html(html);
+                    success: function(data) {
+                        $('#productTableBody').html(data.html);
                         $('#productCheckAll').prop('checked', false);
+
+                        // Update info text
+                        $('#paginationInfo').html(
+                            'Showing <strong>' + data.from + '</strong> &ndash; <strong>' + data.to + '</strong> of <strong>' + data.total + '</strong> products'
+                        );
+
+                        // Rebuild pagination buttons
+                        let linksHtml = '';
+                        if (data.last_page > 1) {
+                            // Previous button
+                            if (data.current_page > 1) {
+                                linksHtml += '<button class="btn btn-sm btn-outline-secondary paginator-btn" data-page="' + (data.current_page - 1) + '" style="min-width:36px; border-radius:6px;"><i class="fa-solid fa-chevron-left"></i></button>';
+                            }
+                            // Page number buttons (show window of 5)
+                            let startPage = Math.max(1, data.current_page - 2);
+                            let endPage   = Math.min(data.last_page, data.current_page + 2);
+                            if (startPage > 1) {
+                                linksHtml += '<button class="btn btn-sm btn-outline-secondary paginator-btn" data-page="1" style="min-width:36px; border-radius:6px;">1</button>';
+                                if (startPage > 2) linksHtml += '<span class="btn btn-sm disabled" style="min-width:36px;">…</span>';
+                            }
+                            for (let p = startPage; p <= endPage; p++) {
+                                let active = (p === data.current_page) ? 'btn-primary' : 'btn-outline-secondary';
+                                linksHtml += '<button class="btn btn-sm ' + active + ' paginator-btn" data-page="' + p + '" style="min-width:36px; border-radius:6px;">' + p + '</button>';
+                            }
+                            if (endPage < data.last_page) {
+                                if (endPage < data.last_page - 1) linksHtml += '<span class="btn btn-sm disabled" style="min-width:36px;">…</span>';
+                                linksHtml += '<button class="btn btn-sm btn-outline-secondary paginator-btn" data-page="' + data.last_page + '" style="min-width:36px; border-radius:6px;">' + data.last_page + '</button>';
+                            }
+                            // Next button
+                            if (data.current_page < data.last_page) {
+                                linksHtml += '<button class="btn btn-sm btn-outline-secondary paginator-btn" data-page="' + (data.current_page + 1) + '" style="min-width:36px; border-radius:6px;"><i class="fa-solid fa-chevron-right"></i></button>';
+                            }
+                        }
+                        $('#paginationLinks').html(linksHtml);
                     },
                     error: function() {
+                        $('#productTableBody').html('<tr><td colspan="9" class="text-center text-danger">Failed to load products.</td></tr>');
                         Toast.fire({
                             icon: 'error',
                             title: 'Failed to filter products.'
