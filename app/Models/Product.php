@@ -36,14 +36,6 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
-    public function subcategory()
-    {
-        return $this->belongsTo(SubCategory::class, 'subcategory_id');
-    }
-    public function childcategory()
-    {
-        return $this->belongsTo(ChildCategory::class, 'childcategory_id');
-    }
     public function reviews()
     {
         return $this->hasMany(Reviews::class, 'product_id')->where('status', '1')->latest();

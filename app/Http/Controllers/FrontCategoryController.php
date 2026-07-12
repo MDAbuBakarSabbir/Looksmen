@@ -62,43 +62,15 @@ class FrontCategoryController extends Controller
 
     public function ProductView($id, $slug)
     {
-        $singleProduct = Product::with('productImages', 'reviews', 'category', 'subcategory.category', 'childcategory.subcategory.category')->findOrFail($id);
-        
-        $mainCategory = $singleProduct->category ?? ($singleProduct->subcategory->category ?? ($singleProduct->childcategory->category ?? ($singleProduct->childcategory->subcategory->category ?? null)));
-        $mainCategoryId = $mainCategory ? $mainCategory->id : $singleProduct->category_id;
-
-        $subCategoryIds = [];
-        $childCategoryIds = [];
-        if ($mainCategoryId) {
-            $subCategoryIds = \App\Models\SubCategory::where('category_id', $mainCategoryId)->pluck('id')->toArray();
-            $childCategoryIds = \App\Models\ChildCategory::where('category_id', $mainCategoryId)->pluck('id')->toArray();
-        }
-
-        $relProducts = Product::where('id', '!=', $id)
+        $singleProduct = Product::with('productImages', 'reviews', 'category')->findOrFail($id);
+        $relProducts = Product::where('category_id', $singleProduct->category_id)
+            ->where('id', '!=', $id)
             ->where('status', '1')
-            ->where(function ($q) use ($mainCategoryId, $subCategoryIds, $childCategoryIds, $singleProduct) {
-                if ($mainCategoryId) {
-                    $q->where('category_id', $mainCategoryId);
-                }
-                if (!empty($subCategoryIds)) {
-                    $q->orWhereIn('subcategory_id', $subCategoryIds);
-                }
-                if (!empty($childCategoryIds)) {
-                    $q->orWhereIn('childcategory_id', $childCategoryIds);
-                }
-                if ($singleProduct->subcategory_id) {
-                    $q->orWhere('subcategory_id', $singleProduct->subcategory_id);
-                }
-                if ($singleProduct->childcategory_id) {
-                    $q->orWhere('childcategory_id', $singleProduct->childcategory_id);
-                }
-            })
             ->with('firstImage')
             ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
             ->latest()
-            ->take(18)
+            ->take(6)
             ->get();
-
         $topSellingProducts = Product::where('status', '1')->where('id', '!=', $id)
             ->with('firstImage')
             ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
@@ -107,7 +79,7 @@ class FrontCategoryController extends Controller
             ->take(5)
             ->get();
 
-        return view('Frontend.productView', compact('singleProduct', 'relProducts', 'topSellingProducts', 'mainCategory'));
+        return view('Frontend.productView', compact('singleProduct', 'relProducts', 'topSellingProducts'));
     }
 
     public function allcategory()
