@@ -179,16 +179,28 @@ class CartController extends Controller
     public function removeFromCart(Request $request)
     {
         if (auth()->check()) {
+            $deleted = Cart::where('user_id', auth()->id())
+                ->where('cart_id', $request->id)
+                ->delete();
 
+            $totalCount = Cart::where('user_id', auth()->id())->count();
+
+            return response()->json([
+                'status' => 'success',
+                'cart_count' => $totalCount
+            ]);
         } else {
             $cart = session()->get('cart');
             if (isset($cart[$request->id])) {
                 unset($cart[$request->id]);
                 session()->put('cart', $cart);
             }
-            return response()->json(['status' => 'success']);
+            $totalCount = count(session()->get('cart', []));
+            return response()->json([
+                'status' => 'success',
+                'cart_count' => $totalCount
+            ]);
         }
-
     }
 
     // কার্টের আইটেম সংখ্যা রিটার্ন করার জন্য
