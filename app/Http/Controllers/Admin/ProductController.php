@@ -99,10 +99,19 @@ class ProductController extends Controller
             $query->latest(); // Default: latest
         }
 
-        $products = $query->get();
+        $perPage = 15;
+        $products = $query->paginate($perPage)->withQueryString();
 
         if ($request->ajax()) {
-            return view('adminDash.products.extends.product_rows', compact('products'));
+            $html = view('adminDash.products.extends.product_rows', compact('products'))->render();
+            return response()->json([
+                'html'         => $html,
+                'current_page' => $products->currentPage(),
+                'last_page'    => $products->lastPage(),
+                'total'        => $products->total(),
+                'from'         => $products->firstItem() ?? 0,
+                'to'           => $products->lastItem() ?? 0,
+            ]);
         }
 
         return view('adminDash.products.index', compact('categories', 'products', 'attributes'));
