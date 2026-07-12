@@ -874,68 +874,74 @@
                         </div>
 
                         <!-- Related Products Card List -->
-                        <div class="related-card-modern text-left">
-                            <div class="related-title-modern">
-                                Related Products
-                            </div>
-                            <div class="p-3">
-                                <div class="aiz-carousel gutters-5 half-outside-arrow" data-items="4" data-xl-items="3"
-                                    data-lg-items="4" data-md-items="3" data-sm-items="2" data-xs-items="2"
-                                    data-arrows='true' data-infinite='true' data-autoplay="true" data-speed="500">
-                                    @foreach ($relProducts as $relProduct)
-                                        <div class="carousel-box">
-                                            <div class="rel-product-card">
-                                                <div class="rel-product-img-box">
-                                                    <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}" class="d-block">
-                                                        <img class="img-fit lazyload mx-auto" style="height: 190px; width: 100%; object-fit: cover;"
-                                                            src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                            data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
-                                                            alt="{{ $relProduct->title }}"
-                                                            onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
-                                                    </a>
-                                                </div>
-                                                <div class="rel-product-details">
-                                                    <div class="mb-2">
-                                                        @if($relProduct->old_price > $relProduct->new_price)
-                                                            <del class="text-muted mr-2" style="font-size: 0.85rem;">৳{{ $relProduct->old_price }}</del>
-                                                        @endif
-                                                        <span class="fw-700" style="color: #044244; font-size: 1.05rem;">৳{{ $relProduct->new_price }}</span>
+                        @if($relProducts && $relProducts->count() > 0)
+                            <div class="related-card-modern text-left">
+                                <div class="related-title-modern d-flex justify-content-between align-items-center">
+                                    <span>Related Products</span>
+                                    <a href="{{ route('catProductView', [$singleProduct->category_id, $singleProduct->category->slug ?? 'category']) }}" 
+                                       class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
+                                        View More <i class="las la-angle-right ml-1 fs-14"></i>
+                                    </a>
+                                </div>
+                                <div class="p-3">
+                                    <div class="aiz-carousel gutters-5 half-outside-arrow" data-items="4" data-xl-items="3"
+                                        data-lg-items="4" data-md-items="3" data-sm-items="2" data-xs-items="2"
+                                        data-arrows='true' data-infinite='true' data-autoplay="true" data-speed="500">
+                                        @foreach ($relProducts as $relProduct)
+                                            <div class="carousel-box">
+                                                <div class="rel-product-card">
+                                                    <div class="rel-product-img-box">
+                                                        <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}" class="d-block">
+                                                            <img class="img-fit lazyload mx-auto" style="height: 190px; width: 100%; object-fit: cover;"
+                                                                src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
+                                                                data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                                alt="{{ $relProduct->title }}"
+                                                                onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
+                                                        </a>
                                                     </div>
-                                                    
-                                                    <div class="rating-stars-gold mb-2" style="font-size: 0.75rem;">
-                                                        @php
-                                                            $avg = $relProduct->getAverageRating();
-                                                            $fullStars = floor($avg);
-                                                            $fraction = $avg - $fullStars;
-                                                        @endphp
-                                                        @for ($i = 1; $i <= 5; $i++)
-                                                            @if ($i <= $fullStars)
-                                                                <i class="las la-star"></i>
-                                                            @elseif ($i == $fullStars + 1)
-                                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                                    <i class="las la-star-half-alt"></i>
-                                                                @elseif ($fraction > 0.7)
+                                                    <div class="rel-product-details">
+                                                        <div class="mb-2">
+                                                            @if($relProduct->old_price > $relProduct->new_price)
+                                                                <del class="text-muted mr-2" style="font-size: 0.85rem;">৳{{ $relProduct->old_price }}</del>
+                                                            @endif
+                                                            <span class="fw-700" style="color: #044244; font-size: 1.05rem;">৳{{ $relProduct->new_price }}</span>
+                                                        </div>
+                                                        
+                                                        <div class="rating-stars-gold mb-2" style="font-size: 0.75rem;">
+                                                            @php
+                                                                $avg = $relProduct->getAverageRating();
+                                                                $fullStars = floor($avg);
+                                                                $fraction = $avg - $fullStars;
+                                                            @endphp
+                                                            @for ($i = 1; $i <= 5; $i++)
+                                                                @if ($i <= $fullStars)
                                                                     <i class="las la-star"></i>
+                                                                @elseif ($i == $fullStars + 1)
+                                                                    @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                                        <i class="las la-star-half-alt"></i>
+                                                                    @elseif ($fraction > 0.7)
+                                                                        <i class="las la-star"></i>
+                                                                    @else
+                                                                        <i class="las la-star" style="color: #ced4da;"></i>
+                                                                    @endif
                                                                 @else
                                                                     <i class="las la-star" style="color: #ced4da;"></i>
                                                                 @endif
-                                                            @else
-                                                                <i class="las la-star" style="color: #ced4da;"></i>
-                                                            @endif
-                                                        @endfor
+                                                            @endfor
+                                                        </div>
+                                                        
+                                                        <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0" style="height: 38px;">
+                                                            <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}"
+                                                                class="d-block text-reset" style="color: #0f172a; text-decoration: none;">{{ $relProduct->title }}</a>
+                                                        </h3>
                                                     </div>
-                                                    
-                                                    <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0" style="height: 38px;">
-                                                        <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}"
-                                                            class="d-block text-reset" style="color: #0f172a; text-decoration: none;">{{ $relProduct->title }}</a>
-                                                    </h3>
                                                 </div>
                                             </div>
-                                        </div>
-                                    @endforeach
+                                        @endforeach
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
