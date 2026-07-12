@@ -333,80 +333,52 @@
                         
                         <input type="hidden" name="min_price" value="">
                         <input type="hidden" name="max_price" value="">
-                        
-                        <div class="row gutters-10 row-cols-xxl-4 row-cols-xl-3 row-cols-lg-4 row-cols-md-3 row-cols-2">
+                        {{-- Hidden fields for AJAX context --}}
+                        <input type="hidden" id="catType" value="{{ $categoryType }}">
+                        <input type="hidden" id="catId"   value="{{ $category->id }}">
 
-                            @forelse ($catProducts as $catProduct)
-                                <div class="col mb-4">
-                                    <div class="premium-product-card">
-                                        @if($catProduct->discount_percentage)
-                                            <span class="badge-discount">-{{ $catProduct->discount_percentage }}%</span>
-                                        @endif
-                                        <div class="position-relative overflow-hidden">
-                                            <a href="{{ route('ProductView', [$catProduct->id, $catProduct->slug]) }}" class="d-block text-center pt-3">
-                                                <img class="img-fit lazyload mx-auto h-160px h-md-210px"
-                                                    src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                    data-src="{{ $catProduct->firstImage ? asset('Uploads/' . $catProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
-                                                    alt="{{ $catProduct->title }}"
-                                                    onerror="this.onerror=null;this.src='{{ asset('frontEnd') }}/assets/img/placeholder.jpg';">
-                                            </a>
-                                            <div class="absolute-top-right mt-2 mr-2 z-3">
-                                                <a href="javascript:void(0)" onclick="addToWishList({{ $catProduct->id }})" class="action-icon-btn" data-toggle="tooltip" data-title="Add to wishlist">
-                                                    <i class="la la-heart-o fs-18"></i>
-                                                </a>
-                                                <a href="javascript:void(0)" onclick="addToCompare({{ $catProduct->id }})" class="action-icon-btn" data-toggle="tooltip" data-title="Add to compare">
-                                                    <i class="las la-sync fs-18"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                        <div class="p-3 text-left d-flex flex-column flex-grow-1">
-                                            <div class="rating rating-sm mb-1">
-                                                @php
-                                                    $avg = $catProduct->getAverageRating() ?? 0;
-                                                    $fullStars = floor($avg);
-                                                    $fraction = $avg - $fullStars;
-                                                @endphp
-                                                @for ($i = 1; $i <= 5; $i++)
-                                                    @if ($i <= $fullStars)
-                                                        <i class="las la-star text-warning"></i>
-                                                    @elseif ($i == $fullStars + 1 && $fraction >= 0.5)
-                                                        <i class="las la-star-half-alt text-warning"></i>
-                                                    @else
-                                                        <i class="las la-star text-secondary opacity-30"></i>
-                                                    @endif
-                                                @endfor
-                                            </div>
-                                            <h3 class="fw-600 fs-14 text-truncate-2 lh-1-4 mb-2 flex-grow-1">
-                                                <a href="{{ route('ProductView', [$catProduct->id, $catProduct->slug]) }}" class="product-title-link">{{ $catProduct->title }}</a>
-                                            </h3>
-                                            <div class="fs-15 mb-3 d-flex align-items-center">
-                                                <span class="price-new mr-2">৳{{ $catProduct->new_price }}</span>
-                                                @if($catProduct->old_price > $catProduct->new_price)
-                                                    <del class="price-old">৳{{ $catProduct->old_price }}</del>
-                                                @endif
-                                            </div>
-                                            <button type="button" class="btn-gradient-primary w-100 add-to-cart-btn" data-id="{{ $catProduct->id }}" data-type="product">
-                                                <i class="las la-shopping-cart mr-1"></i> Add to Cart
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            @empty
-                                <div class="col-12">
-                                    <div class="premium-card p-5 text-center w-100">
-                                        <i class="las la-frown la-4x text-muted mb-3"></i>
-                                        <h3 class="h5 fw-600 text-dark">No products found</h3>
-                                        <p class="text-muted mb-0">Try checking out our other categories!</p>
-                                    </div>
-                                </div>
-                            @endforelse
-
+                        <div id="catProductGrid" class="row gutters-10 row-cols-xxl-4 row-cols-xl-3 row-cols-lg-4 row-cols-md-3 row-cols-2">
+                            @include('Frontend.category.partials.cat_product_cards', ['catProducts' => $catProducts])
                         </div>
-                        
-                        <div class="aiz-pagination aiz-pagination-center mt-5 mb-4">
-                            <nav>
-                                {{ $catProducts->links('pagination::bootstrap-4') }}
-                            </nav>
+
+                        {{-- AJAX Pagination --}}
+                        <div class="aiz-pagination aiz-pagination-center mt-5 mb-4" id="catPaginationWrap">
+                            <div class="d-flex align-items-center justify-content-center flex-column gap-3">
+                                <p class="text-muted fs-13 mb-2" id="catPaginationInfo">
+                                    Showing <strong>{{ $catProducts->firstItem() ?? 0 }}</strong> &ndash;
+                                    <strong>{{ $catProducts->lastItem() ?? 0 }}</strong> of
+                                    <strong>{{ $catProducts->total() }}</strong> products
+                                </p>
+                                <nav id="catPaginationLinks" class="d-flex align-items-center flex-wrap" style="gap:6px;">
+                                    @if($catProducts->lastPage() > 1)
+                                        @if($catProducts->currentPage() > 1)
+                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->currentPage() - 1 }}" style="border-radius:8px;min-width:38px;">
+                                                <i class="la la-angle-left"></i>
+                                            </button>
+                                        @endif
+                                        @php
+                                            $ps = max(1, $catProducts->currentPage() - 2);
+                                            $pe = min($catProducts->lastPage(), $catProducts->currentPage() + 2);
+                                        @endphp
+                                        @if($ps > 1)
+                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="1" style="border-radius:8px;min-width:38px;">1</button>
+                                            @if($ps > 2)<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>@endif
+                                        @endif
+                                        @for($p = $ps; $p <= $pe; $p++)
+                                            <button class="btn btn-sm cat-page-btn {{ $p == $catProducts->currentPage() ? 'btn-primary' : 'btn-outline-secondary' }}" data-page="{{ $p }}" style="border-radius:8px;min-width:38px;">{{ $p }}</button>
+                                        @endfor
+                                        @if($pe < $catProducts->lastPage())
+                                            @if($pe < $catProducts->lastPage() - 1)<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>@endif
+                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->lastPage() }}" style="border-radius:8px;min-width:38px;">{{ $catProducts->lastPage() }}</button>
+                                        @endif
+                                        @if($catProducts->currentPage() < $catProducts->lastPage())
+                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->currentPage() + 1 }}" style="border-radius:8px;min-width:38px;">
+                                                <i class="la la-angle-right"></i>
+                                            </button>
+                                        @endif
+                                    @endif
+                                </nav>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -453,9 +425,82 @@
 
 @section('script')
     <script>
-        function filter() {
-            $('#search-form').submit();
+        var catFilterPage = 1;
+        var catFilterUrl  = "{{ route('front.category.filter') }}";
+
+        function buildCatPaginationButtons(data) {
+            if (data.last_page <= 1) {
+                $('#catPaginationLinks').html('');
+                $('#catPaginationInfo').text('');
+                return;
+            }
+            var s = Math.max(1, data.current_page - 2);
+            var e = Math.min(data.last_page, data.current_page + 2);
+            var html = '';
+            if (data.current_page > 1) {
+                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + (data.current_page - 1) + '" style="border-radius:8px;min-width:38px;"><i class="la la-angle-left"></i></button>';
+            }
+            if (s > 1) {
+                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="1" style="border-radius:8px;min-width:38px;">1</button>';
+                if (s > 2) html += '<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>';
+            }
+            for (var p = s; p <= e; p++) {
+                var cls = (p === data.current_page) ? 'btn-primary' : 'btn-outline-secondary';
+                html += '<button class="btn btn-sm ' + cls + ' cat-page-btn" data-page="' + p + '" style="border-radius:8px;min-width:38px;">' + p + '</button>';
+            }
+            if (e < data.last_page) {
+                if (e < data.last_page - 1) html += '<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>';
+                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + data.last_page + '" style="border-radius:8px;min-width:38px;">' + data.last_page + '</button>';
+            }
+            if (data.current_page < data.last_page) {
+                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + (data.current_page + 1) + '" style="border-radius:8px;min-width:38px;"><i class="la la-angle-right"></i></button>';
+            }
+            $('#catPaginationLinks').html(html);
+            $('#catPaginationInfo').html(
+                'Showing <strong>' + data.from + '</strong> &ndash; <strong>' + data.to + '</strong> of <strong>' + data.total + '</strong> products'
+            );
         }
+
+        function fetchCatProducts() {
+            var grid = $('#catProductGrid');
+            grid.css('opacity', 0.4);
+
+            $.ajax({
+                url: catFilterUrl,
+                type: 'GET',
+                data: {
+                    type:      $('#catType').val(),
+                    id:        $('#catId').val(),
+                    sort_by:   $('[name="sort_by"]').val(),
+                    min_price: $('[name="min_price"]').val(),
+                    max_price: $('[name="max_price"]').val(),
+                    page:      catFilterPage
+                },
+                success: function(res) {
+                    grid.html(res.html).css('opacity', 1);
+                    buildCatPaginationButtons(res);
+                    // Re-init lazy loading
+                    if (typeof lazyload !== 'undefined') lazyload.update();
+                    $('[data-toggle="tooltip"]').tooltip();
+                    // Scroll to grid
+                    $('html, body').animate({ scrollTop: grid.offset().top - 120 }, 300);
+                },
+                error: function() {
+                    grid.css('opacity', 1);
+                }
+            });
+        }
+
+        function filter() {
+            catFilterPage = 1;
+            fetchCatProducts();
+        }
+
+        // Paginator click (delegated)
+        $(document).on('click', '.cat-page-btn', function() {
+            catFilterPage = parseInt($(this).data('page'));
+            fetchCatProducts();
+        });
     </script>
 @endsection
 

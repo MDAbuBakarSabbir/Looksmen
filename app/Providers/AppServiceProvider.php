@@ -25,7 +25,9 @@ class AppServiceProvider extends ServiceProvider
 
         if (class_exists('App\Models\GeneralWebSettings')) {
             try {
-                $settings = \App\Models\GeneralWebSettings::all()->pluck('value', 'name')->toArray();
+                $settings = \Illuminate\Support\Facades\Cache::rememberForever('boot_general_web_settings_map', function () {
+                    return \App\Models\GeneralWebSettings::all()->pluck('value', 'name')->toArray();
+                });
                 if (isset($settings['mailhost']) && !empty($settings['mailhost'])) {
                     config([
                         'mail.mailers.smtp.host' => $settings['mailhost'],
