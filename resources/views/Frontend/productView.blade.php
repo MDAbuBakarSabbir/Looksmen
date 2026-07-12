@@ -878,14 +878,21 @@
                             <div class="related-card-modern text-left">
                                 <div class="related-title-modern d-flex justify-content-between align-items-center">
                                     <span>Related Products</span>
-                                    <a href="{{ route('catProductView', [$singleProduct->category_id, $singleProduct->category->slug ?? 'category']) }}" 
-                                       class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
-                                        View More <i class="las la-angle-right ml-1 fs-14"></i>
-                                    </a>
+                                    @if(isset($mainCategory) && $mainCategory)
+                                        <a href="{{ route('catProductView', [$mainCategory->id, $mainCategory->slug]) }}" 
+                                           class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
+                                            View More <i class="las la-angle-right ml-1 fs-14"></i>
+                                        </a>
+                                    @else
+                                        <a href="{{ route('catProductView', [$singleProduct->category_id ?? 1, $singleProduct->category->slug ?? 'category']) }}" 
+                                           class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
+                                            View More <i class="las la-angle-right ml-1 fs-14"></i>
+                                        </a>
+                                    @endif
                                 </div>
                                 <div class="p-3">
-                                    <div class="aiz-carousel gutters-5 half-outside-arrow" data-items="4" data-xl-items="3"
-                                        data-lg-items="4" data-md-items="3" data-sm-items="2" data-xs-items="2"
+                                    <div class="aiz-carousel gutters-5 half-outside-arrow" data-items="6" data-xl-items="6"
+                                        data-lg-items="6" data-md-items="4" data-sm-items="2" data-xs-items="2"
                                         data-arrows='true' data-infinite='true' data-autoplay="true" data-speed="500">
                                         @foreach ($relProducts as $relProduct)
                                             <div class="carousel-box">
