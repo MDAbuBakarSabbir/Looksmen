@@ -62,14 +62,15 @@ class FrontCategoryController extends Controller
 
     public function ProductView($id, $slug)
     {
-        $singleProduct = Product::with('productImages', 'reviews')->findOrFail($id);
+        $singleProduct = Product::with('productImages', 'reviews', 'category')->findOrFail($id);
         $relProducts = Product::where('category_id', $singleProduct->category_id)
             ->where('id', '!=', $id)
             ->where('status', '1')
             ->with('firstImage')
             ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
             ->latest()
-            ->paginate(5);
+            ->take(6)
+            ->get();
         $topSellingProducts = Product::where('status', '1')->where('id', '!=', $id)
             ->with('firstImage')
             ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
