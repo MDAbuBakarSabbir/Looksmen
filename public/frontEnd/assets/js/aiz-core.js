@@ -40,7 +40,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             $(elem).find(".selected-files").val(selected);
         },
         removeAttachment: function () {
-            $(document).on("click",'.remove-attachment', function () {
+            $(document).on("click", '.remove-attachment', function () {
                 var value = $(this)
                     .closest(".file-preview-item")
                     .data("id");
@@ -77,11 +77,11 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                         if (e.detail === 1) {
                             var clickedForDeleteObject =
                                 AIZ.uploader.data.allFiles[
-                                    AIZ.uploader.data.allFiles.findIndex(
-                                        (x) =>
-                                            x.id ===
-                                            AIZ.uploader.data.clickedForDelete
-                                    )
+                                AIZ.uploader.data.allFiles.findIndex(
+                                    (x) =>
+                                        x.id ===
+                                        AIZ.uploader.data.clickedForDelete
+                                )
                                 ];
                             $.ajax({
                                 url:
@@ -115,7 +115,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                                     AIZ.uploader.updateUploaderSelected();
                                     AIZ.uploader.getAllUploads(
                                         AIZ.data.appUrl +
-                                            "/aiz-uploader/get_uploaded_files"
+                                        "/aiz-uploader/get_uploaded_files"
                                     );
                                     AIZ.uploader.data.clickedForDelete = null;
                                     $("#aizUploaderDelete").modal("hide");
@@ -133,9 +133,9 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     var value = $(this).data("value");
                     var valueObject =
                         AIZ.uploader.data.allFiles[
-                            AIZ.uploader.data.allFiles.findIndex(
-                                (x) => x.id === value
-                            )
+                        AIZ.uploader.data.allFiles.findIndex(
+                            (x) => x.id === value
+                        )
                         ];
                     // console.log(valueObject);
 
@@ -216,12 +216,12 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             if (sort_key != null && sort_key.length > 0) {
                 params["sort"] = sort_key;
             }
-            else{
+            else {
                 params["sort"] = 'newest';
             }
             $.get(url, params, function (data, status) {
                 //console.log(data);
-                if(typeof data == 'string'){
+                if (typeof data == 'string') {
                     data = JSON.parse(data);
                 }
                 AIZ.uploader.data.allFiles = data.data;
@@ -539,7 +539,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                         } else {
                             elem.find(".file-amount").html(AIZ.local.choose_file);
                         }
-                });
+                    });
             } else {
                 elem.find(".file-amount").html(AIZ.local.choose_file);
             }
@@ -662,7 +662,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
 
             if (multiple) {
                 AIZ.uploader.data.multiple = true;
-            }else{
+            } else {
                 AIZ.uploader.data.multiple = false;
             }
 
@@ -730,7 +730,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             // }, 50);
         },
         initForInput: function () {
-            $(document).on("click",'[data-toggle="aizuploader"]', function (e) {
+            $(document).on("click", '[data-toggle="aizuploader"]', function (e) {
                 if (e.detail === 1) {
                     var elem = $(this);
                     var multiple = elem.data("multiple");
@@ -753,11 +753,11 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 }
             });
         },
-        previewGenerate: function(){
+        previewGenerate: function () {
             $('[data-toggle="aizuploader"]').each(function () {
                 var $this = $(this);
                 var files = $this.find(".selected-files").val();
-                if(files != ""){
+                if (files != "") {
                     $.post(
                         AIZ.data.appUrl + "/aiz-uploader/get_file_by_ids",
                         { _token: AIZ.data.csrf, ids: files },
@@ -822,7 +822,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                             } else {
                                 $this.find(".file-amount").html(AIZ.local.choose_file);
                             }
-                    });
+                        });
                 }
             });
         }
@@ -834,14 +834,14 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
         bootstrapSelect: function (refresh = "") {
             $(".aiz-selectpicker").each(function (el) {
                 var $this = $(this);
-                if(!$this.parent().hasClass('bootstrap-select')){
+                if (!$this.parent().hasClass('bootstrap-select')) {
                     var selected = $this.data('selected');
-                    if( typeof selected !== 'undefined' ){
+                    if (typeof selected !== 'undefined') {
                         $this.val(selected);
                     }
                     $this.selectpicker({
                         size: 5,
-                        noneSelectedText: AIZ.local.nothing_selected,                     
+                        noneSelectedText: AIZ.local.nothing_selected,
                         virtualScroll: false
                     });
                 }
@@ -877,10 +877,10 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     var callback = '';
                 }
                 if (typeof callback == 'function') {
-                    $this.on('removeTag',function(){
+                    $this.on('removeTag', function () {
                         callback();
                     });
-                    $this.on('add',function(){
+                    $this.on('add', function () {
                         callback();
                     });
                 }
@@ -896,14 +896,14 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
 
                 buttons = !buttons
                     ? [
-                          ["font", ["bold", "underline", "italic", "clear"]],
-                          ["para", ["ul", "ol", "paragraph"]],
-                          ["style", ["style"]],
-                          ["color", ["color"]],
-                          ["table", ["table"]],
-                          ["insert", ["link", "picture", "video"]],
-                          ["view", ["fullscreen", "undo", "redo"]],
-                      ]
+                        ["font", ["bold", "underline", "italic", "clear"]],
+                        ["para", ["ul", "ol", "paragraph"]],
+                        ["style", ["style"]],
+                        ["color", ["color"]],
+                        ["table", ["table"]],
+                        ["insert", ["link", "picture", "video"]],
+                        ["view", ["fullscreen", "undo", "redo"]],
+                    ]
                     : buttons;
                 placeholder = !placeholder ? "" : placeholder;
                 minHeight = !minHeight ? 200 : minHeight;
@@ -918,7 +918,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                             data.pop();
                         },
                         onPaste: function (e) {
-                            if(format){
+                            if (format) {
                                 var bufferText = ((e.originalEvent || e).clipboardData || window.clipboardData).getData('Text');
                                 e.preventDefault();
                                 document.execCommand('insertText', false, bufferText);
@@ -929,11 +929,10 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
 
                 var nativeHtmlBuilderFunc = $this.summernote('module', 'videoDialog').createVideoNode;
 
-                $this.summernote('module', 'videoDialog').createVideoNode =  function(url) 
-                {   
+                $this.summernote('module', 'videoDialog').createVideoNode = function (url) {
                     var wrap = $('<div class="embed-responsive embed-responsive-16by9"></div>');
                     var html = nativeHtmlBuilderFunc(url);
-                        html = $(html).addClass('embed-responsive-item');
+                    html = $(html).addClass('embed-responsive-item');
                     return wrap.append(html)[0];
                 };
             });
@@ -1008,8 +1007,8 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     $this.on("apply.daterangepicker", function (ev, picker) {
                         $this.val(
                             picker.startDate.format(format) +
-                                separator +
-                                picker.endDate.format(format)
+                            separator +
+                            picker.endDate.format(format)
                         );
                     });
                 }
@@ -1116,7 +1115,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                         strings: {
                             addMoreFiles: AIZ.local.add_more_files,
                             addingMoreFiles: AIZ.local.adding_more_files,
-                            dropPaste: AIZ.local.drop_files_here_paste_or+' %{browse}',
+                            dropPaste: AIZ.local.drop_files_here_paste_or + ' %{browse}',
                             browse: AIZ.local.browse,
                             uploadComplete: AIZ.local.upload_complete,
                             uploadPaused: AIZ.local.upload_paused,
@@ -1125,16 +1124,16 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                             retryUpload: AIZ.local.retry_upload,
                             cancelUpload: AIZ.local.cancel_upload,
                             xFilesSelected: {
-                                0: '%{smart_count} '+AIZ.local.file_selected,
-                                1: '%{smart_count} '+AIZ.local.files_selected
+                                0: '%{smart_count} ' + AIZ.local.file_selected,
+                                1: '%{smart_count} ' + AIZ.local.files_selected
                             },
                             uploadingXFiles: {
-                                0: AIZ.local.uploading+' %{smart_count} '+AIZ.local.file,
-                                1: AIZ.local.uploading+' %{smart_count} '+AIZ.local.files
+                                0: AIZ.local.uploading + ' %{smart_count} ' + AIZ.local.file,
+                                1: AIZ.local.uploading + ' %{smart_count} ' + AIZ.local.files
                             },
                             processingXFiles: {
-                                0: AIZ.local.processing+' %{smart_count} '+AIZ.local.file,
-                                1: AIZ.local.processing+' %{smart_count} '+AIZ.local.files
+                                0: AIZ.local.processing + ' %{smart_count} ' + AIZ.local.file,
+                                1: AIZ.local.processing + ' %{smart_count} ' + AIZ.local.files
                             },
                             uploading: AIZ.local.uploading,
                             complete: AIZ.local.complete,
@@ -1157,7 +1156,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             }
         },
         tooltip: function () {
-            $('body').tooltip({selector: '[data-toggle="tooltip"]'}).click(function () {
+            $('body').tooltip({ selector: '[data-toggle="tooltip"]' }).click(function () {
                 $('[data-toggle="tooltip"]').tooltip("hide");
             });
         },
@@ -1173,10 +1172,10 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                         var $this = $(this).html(
                             event.strftime(
                                 "" +
-                                    '<div class="countdown-item"><span class="countdown-digit">%-D</span></div><span class="countdown-separator">:</span>' +
-                                    '<div class="countdown-item"><span class="countdown-digit">%H</span></div><span class="countdown-separator">:</span>' +
-                                    '<div class="countdown-item"><span class="countdown-digit">%M</span></div><span class="countdown-separator">:</span>' +
-                                    '<div class="countdown-item"><span class="countdown-digit">%S</span></div>'
+                                '<div class="countdown-item"><span class="countdown-digit">%-D</span></div><span class="countdown-separator">:</span>' +
+                                '<div class="countdown-item"><span class="countdown-digit">%H</span></div><span class="countdown-separator">:</span>' +
+                                '<div class="countdown-item"><span class="countdown-digit">%M</span></div><span class="countdown-separator">:</span>' +
+                                '<div class="countdown-item"><span class="countdown-digit">%S</span></div>'
                             )
                         );
                     });
@@ -1250,74 +1249,78 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 var slidesRtlSm = ($("html").attr("dir") === "rtl" && !verticalSm) ? true : false;
                 var slidesRtlXs = ($("html").attr("dir") === "rtl" && !verticalXs) ? true : false;
 
-                $this.slick({
-                    slidesToShow: slidesPerView,
-                    autoplay: slidesAutoplay,
-                    dots: slidesDots,
-                    arrows: slidesArrows,
-                    infinite: infinite,
-                    vertical: vertical,
-                    rtl: slidesRtl,
-                    rows: slidesRows,
-                    centerPadding: "0px",
-                    centerMode: slidesCenterMode,
-                    fade: slidesFade,
-                    asNavFor: asNavFor,
-                    focusOnSelect: focusOnSelect,
-                    adaptiveHeight: adaptiveHeight,
-                    slidesToScroll: 1,
-                    prevArrow:
-                        '<button type="button" class="slick-prev"><i class="las la-angle-left"></i></button>',
-                    nextArrow:
-                        '<button type="button" class="slick-next"><i class="las la-angle-right"></i></button>',
-                    responsive: [
-                        {
-                            breakpoint: 1500,
-                            settings: {
-                                slidesToShow: slidesPerViewXl,
-                                vertical: verticalXl,
-                                rtl: slidesRtlXL,
+                try {
+                    $this.slick({
+                        slidesToShow: slidesPerView,
+                        autoplay: slidesAutoplay,
+                        dots: slidesDots,
+                        arrows: slidesArrows,
+                        infinite: infinite,
+                        vertical: vertical,
+                        rtl: slidesRtl,
+                        rows: slidesRows,
+                        centerPadding: "0px",
+                        centerMode: slidesCenterMode,
+                        fade: slidesFade,
+                        asNavFor: asNavFor,
+                        focusOnSelect: focusOnSelect,
+                        adaptiveHeight: adaptiveHeight,
+                        slidesToScroll: 1,
+                        prevArrow:
+                            '<button type="button" class="slick-prev"><i class="las la-angle-left"></i></button>',
+                        nextArrow:
+                            '<button type="button" class="slick-next"><i class="las la-angle-right"></i></button>',
+                        responsive: [
+                            {
+                                breakpoint: 1500,
+                                settings: {
+                                    slidesToShow: slidesPerViewXl,
+                                    vertical: verticalXl,
+                                    rtl: slidesRtlXL,
+                                },
                             },
-                        },
-                        {
-                            breakpoint: 1200,
-                            settings: {
-                                slidesToShow: slidesPerViewLg,
-                                vertical: verticalLg,
-                                rtl: slidesRtlLg,
+                            {
+                                breakpoint: 1200,
+                                settings: {
+                                    slidesToShow: slidesPerViewLg,
+                                    vertical: verticalLg,
+                                    rtl: slidesRtlLg,
+                                },
                             },
-                        },
-                        {
-                            breakpoint: 992,
-                            settings: {
-                                slidesToShow: slidesPerViewMd,
-                                vertical: verticalMd,
-                                rtl: slidesRtlMd,
+                            {
+                                breakpoint: 992,
+                                settings: {
+                                    slidesToShow: slidesPerViewMd,
+                                    vertical: verticalMd,
+                                    rtl: slidesRtlMd,
+                                },
                             },
-                        },
-                        {
-                            breakpoint: 768,
-                            settings: {
-                                slidesToShow: slidesPerViewSm,
-                                vertical: verticalSm,
-                                rtl: slidesRtlSm,
+                            {
+                                breakpoint: 768,
+                                settings: {
+                                    slidesToShow: slidesPerViewSm,
+                                    vertical: verticalSm,
+                                    rtl: slidesRtlSm,
+                                },
                             },
-                        },
-                        {
-                            breakpoint: 576,
-                            settings: {
-                                slidesToShow: slidesPerViewXs,
-                                vertical: verticalXs,
-                                rtl: slidesRtlXs,
+                            {
+                                breakpoint: 576,
+                                settings: {
+                                    slidesToShow: slidesPerViewXs,
+                                    vertical: verticalXs,
+                                    rtl: slidesRtlXs,
+                                },
                             },
-                        },
-                    ],
-                });
-                $this.on('afterChange setPosition lazyLoaded', function () {
-                    if ($this.find('.img-zoom')[0]) {
-                        AIZ.plugins.zoom();
-                    }
-                });
+                        ],
+                    });
+                    $this.on('afterChange setPosition lazyLoaded', function () {
+                        if ($this.find('.img-zoom')[0]) {
+                            AIZ.plugins.zoom();
+                        }
+                    });
+                } catch (e) {
+                    console.warn("Slick carousel init warning on element:", $this, e);
+                }
             });
         },
         chart: function (selector, config) {
@@ -1329,13 +1332,13 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 var aizChart = new Chart($this, config);
             });
         },
-        noUiSlider: function(){
+        noUiSlider: function () {
             if ($(".aiz-range-slider")[0]) {
                 $(".aiz-range-slider").each(function () {
                     var c = document.getElementById("input-slider-range"),
-                    d = document.getElementById("input-slider-range-value-low"),
-                    e = document.getElementById("input-slider-range-value-high"),
-                    f = [d, e];
+                        d = document.getElementById("input-slider-range-value-low"),
+                        e = document.getElementById("input-slider-range-value-high"),
+                        f = [d, e];
 
                     noUiSlider.create(c, {
                         start: [
@@ -1348,29 +1351,29 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                             max: parseInt(c.getAttribute("data-range-value-max")),
                         },
                     }),
-                    
-                    c.noUiSlider.on("update", function (a, b) {
-                        f[b].textContent = a[b];
-                    }),
-                    c.noUiSlider.on("change", function (a, b) {
-                        rangefilter(a);
-                    });
+
+                        c.noUiSlider.on("update", function (a, b) {
+                            f[b].textContent = a[b];
+                        }),
+                        c.noUiSlider.on("change", function (a, b) {
+                            rangefilter(a);
+                        });
                 });
             }
         },
-        zoom: function(){
-            if($('.img-zoom')[0]){
+        zoom: function () {
+            if ($('.img-zoom')[0]) {
                 $('.img-zoom').trigger('zoom.destroy');
                 $('.img-zoom').zoom({
-                    magnify:1.5
+                    magnify: 1.5
                 });
-                if((('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))){
+                if ((('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (navigator.msMaxTouchPoints > 0))) {
                     $('.img-zoom').trigger('zoom.destroy');
                 }
             }
         },
-        jsSocials: function(){
-            if($('.aiz-share')[0]){
+        jsSocials: function () {
+            if ($('.aiz-share')[0]) {
                 $('.aiz-share').jsSocials({
                     showLabel: false,
                     showCount: false,
@@ -1401,22 +1404,22 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
         }
     };
     AIZ.extra = {
-        refreshToken: function (){
-            $.get(AIZ.data.appUrl+'/refresh-csrf').done(function(data){
+        refreshToken: function () {
+            $.get(AIZ.data.appUrl + '/refresh-csrf').done(function (data) {
                 AIZ.data.csrf = data;
             });
             // console.log(AIZ.data.csrf);
         },
         mobileNavToggle: function () {
-            if(window.matchMedia('(max-width: 1200px)').matches){
+            if (window.matchMedia('(max-width: 1200px)').matches) {
                 $('body').addClass('side-menu-closed')
             }
             $('[data-toggle="aiz-mobile-nav"]').on("click", function () {
                 if ($("body").hasClass("side-menu-open")) {
                     $("body").addClass("side-menu-closed").removeClass("side-menu-open");
-                } else if($("body").hasClass("side-menu-closed")) {
+                } else if ($("body").hasClass("side-menu-closed")) {
                     $("body").removeClass("side-menu-closed").addClass("side-menu-open");
-                }else{
+                } else {
                     $("body").removeClass("side-menu-open").addClass("side-menu-closed");
                 }
             });
@@ -1490,7 +1493,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 }, 0);
             });
             $(document).on('hidden.bs.modal', function () {
-                if($('.modal.show').length > 0){
+                if ($('.modal.show').length > 0) {
                     $('body').addClass('modal-open');
                 }
             });
@@ -1512,12 +1515,12 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 }
             });
         },
-        stopPropagation: function(){
+        stopPropagation: function () {
             $(document).on('click', '.stop-propagation', function (e) {
                 e.stopPropagation();
             });
         },
-        outsideClickHide: function(){
+        outsideClickHide: function () {
             $(document).on('click', function (e) {
                 $('.document-click-d-none').addClass('d-none');
             });
@@ -1567,7 +1570,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             });
         },
         classToggle: function () {
-            $(document).on('click','[data-toggle="class-toggle"]',function () {
+            $(document).on('click', '[data-toggle="class-toggle"]', function () {
                 var $this = $(this);
                 var target = $this.data("target");
                 var sameTriggers = $this.data("same");
@@ -1581,14 +1584,14 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 } else {
                     $(target).addClass("active");
                     $this.addClass("active");
-                    if(backdrop == 'static'){
+                    if (backdrop == 'static') {
                         $('body').addClass("overflow-hidden");
                     }
                 }
             });
         },
         collapseSidebar: function () {
-            $(document).on('click','[data-toggle="collapse-sidebar"]',function (i, el) {
+            $(document).on('click', '[data-toggle="collapse-sidebar"]', function (i, el) {
                 var $this = $(this);
                 var target = $(this).data("target");
                 var sameTriggers = $(this).data("siblings");
@@ -1680,10 +1683,10 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 }
             );
         },
-        selectHideShow: function() {
-            $('[data-show="selectShow"]').each(function() {
+        selectHideShow: function () {
+            $('[data-show="selectShow"]').each(function () {
                 var target = $(this).data("target");
-                $(this).on("change", function() {
+                $(this).on("change", function () {
                     var value = $(this).val();
                     // console.log(value);
                     $(target)
@@ -1696,20 +1699,20 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 });
             });
         },
-        plusMinus: function(){
-            $('.aiz-plus-minus input').each(function() {
+        plusMinus: function () {
+            $('.aiz-plus-minus input').each(function () {
                 var $this = $(this);
                 var min = parseInt($(this).attr("min"));
                 var max = parseInt($(this).attr("max"));
                 var value = parseInt($(this).val());
-                if(value <= min){
-                    $this.siblings('[data-type="minus"]').attr('disabled',true)
+                if (value <= min) {
+                    $this.siblings('[data-type="minus"]').attr('disabled', true)
                 }
-                if(value >= max){
-                    $this.siblings('[data-type="plus"]').attr('disabled',true)
+                if (value >= max) {
+                    $this.siblings('[data-type="plus"]').attr('disabled', true)
                 }
             });
-            $('.aiz-plus-minus button').on('click', function(e) {
+            $('.aiz-plus-minus button').on('click', function (e) {
                 e.preventDefault();
 
                 var fieldName = $(this).attr("data-field");
@@ -1757,7 +1760,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                 }
             });
         },
-        hovCategoryMenu: function(){
+        hovCategoryMenu: function () {
             $("#category-menu-icon, #category-sidebar")
                 .on("mouseover", function (event) {
                     $("#hover-category-menu").addClass('active').removeClass('d-none');
@@ -1766,19 +1769,19 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     $("#hover-category-menu").addClass('d-none').removeClass('active');
                 });
         },
-        trimAppUrl: function(){
-            if(AIZ.data.appUrl.slice(-1) == '/'){
-                AIZ.data.appUrl = AIZ.data.appUrl.slice(0, AIZ.data.appUrl.length -1);
+        trimAppUrl: function () {
+            if (AIZ.data.appUrl.slice(-1) == '/') {
+                AIZ.data.appUrl = AIZ.data.appUrl.slice(0, AIZ.data.appUrl.length - 1);
                 // console.log(AIZ.data.appUrl);
             }
         },
-        setCookie: function(cname, cvalue, exdays) {
+        setCookie: function (cname, cvalue, exdays) {
             var d = new Date();
             d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
             var expires = "expires=" + d.toUTCString();
             document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
         },
-        getCookie: function(cname) {
+        getCookie: function (cname) {
             var name = cname + "=";
             var decodedCookie = decodeURIComponent(document.cookie);
             var ca = decodedCookie.split(';');
@@ -1793,17 +1796,17 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
             }
             return "";
         },
-        acceptCookie: function(){
+        acceptCookie: function () {
             if (!AIZ.extra.getCookie("acceptCookies")) {
                 $(".aiz-cookie-alert").addClass("show");
             }
-            $(".aiz-cookie-accept").on("click", function() {
+            $(".aiz-cookie-accept").on("click", function () {
                 AIZ.extra.setCookie("acceptCookies", true, 60);
                 $(".aiz-cookie-alert").removeClass("show");
             });
         },
-        setSession: function(){
-            $('.set-session').each(function() {
+        setSession: function () {
+            $('.set-session').each(function () {
                 var $this = $(this);
                 var key = $this.data('key');
                 var value = $this.data('value');
@@ -1814,13 +1817,13 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     expiry: now.getTime() + 3600000,
                 };
 
-                $this.on('click', function(){
+                $this.on('click', function () {
                     localStorage.setItem(key, JSON.stringify(item));
                 });
             });
         },
-        showSessionPopup: function(){
-            $('.removable-session').each(function() {
+        showSessionPopup: function () {
+            $('.removable-session').each(function () {
                 var $this = $(this);
                 var key = $this.data('key');
                 var value = $this.data('value');
@@ -1830,14 +1833,14 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                     item = JSON.parse(item);
                 }
                 const now = new Date()
-                if (typeof item.expiry == 'undefined' || now.getTime() > item.expiry){
+                if (typeof item.expiry == 'undefined' || now.getTime() > item.expiry) {
                     $this.removeClass('d-none');
                 }
             });
         }
     };
 
-    setInterval(function(){
+    setInterval(function () {
         AIZ.extra.refreshToken();
     }, 3600000);
 
@@ -1883,8 +1886,8 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
     AIZ.uploader.removeAttachment();
     AIZ.uploader.previewGenerate();
 
-    // $(document).ajaxComplete(function(){
-    //     AIZ.plugins.bootstrapSelect('refresh');
-    // });
+    $(document).ready(function () {
+        AIZ.plugins.slickCarousel();
+    });
 
 })(jQuery);

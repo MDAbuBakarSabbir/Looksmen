@@ -65,6 +65,15 @@
             font-family: 'Outfit', sans-serif !important;
         }
 
+        /* Exclude Font Awesome icons from Outfit override */
+        .prod-view-page i[class*="fa-"],
+        .prod-view-page i.fas,
+        .prod-view-page i.far,
+        .prod-view-page i.fab,
+        .prod-view-page i.fa {
+            font-family: var(--_fa-family, "Font Awesome 7 Free") !important;
+        }
+
         #map {
             width: 100%;
             height: 250px;
@@ -501,6 +510,44 @@
             50% { transform: scale(1.03); }
             100% { transform: scale(1); }
         }
+
+        /* Related Products Grid — no carousel */
+        .rel-products-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 10px;
+        }
+        .rel-products-grid .rel-product-card {
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #fff;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+        .rel-products-grid .rel-product-card:hover {
+            box-shadow: 0 4px 18px rgba(4,66,68,0.12);
+            transform: translateY(-3px);
+        }
+        .rel-products-grid .rel-product-img-box {
+            overflow: hidden;
+        }
+        .rel-products-grid .rel-product-details {
+            padding: 8px 8px 10px;
+        }
+        @media (max-width: 767px) {
+            .rel-products-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+            .rel-products-grid .rel-product-img-box img {
+                height: 110px !important;
+            }
+        }
+        @media (max-width: 480px) {
+            .rel-products-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 
 
@@ -571,17 +618,17 @@
 
                                             @for ($i = 1; $i <= 5; $i++)
                                                 @if ($i <= $fullStars)
-                                                    <i class="las la-star"></i>
+                                                    <i class="fa-regular fa-star"></i>
                                                 @elseif ($i == $fullStars + 1)
                                                     @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                        <i class="las la-star-half-alt"></i>
+                                                        <i class="fa-regular fa-star-half-alt"></i>
                                                     @elseif ($fraction > 0.7)
-                                                        <i class="las la-star"></i>
+                                                        <i class="fa-regular fa-star"></i>
                                                     @else
-                                                        <i class="las la-star" style="color: #ced4da;"></i>
+                                                        <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                     @endif
                                                 @else
-                                                    <i class="las la-star" style="color: #ced4da;"></i>
+                                                    <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                 @endif
                                             @endfor
                                         </span>
@@ -594,11 +641,13 @@
 
                                 <div class="d-flex align-items-center mb-2">
                                     <div class="sold-by-badge mr-3">
-                                        Sold by: Inhouse Product
+                                        Sold by: LOOKSMEN
                                     </div>
+                                    @auth
                                     <button class="message-seller-btn" onclick="show_chat_modal()">
-                                        <i class="las la-comments mr-1 fs-16"></i> Message Seller
+                                        <i class="fa fa-comments mr-1 fs-16"></i> Message Seller
                                     </button>
+                                    @endauth
                                 </div>
 
                                 <!-- Pricing Card -->
@@ -637,7 +686,7 @@
                                                     <button class="quantity-picker-btn btn col-auto btn-icon btn-sm btn-circle btn-light"
                                                         type="button" data-type="minus" data-field="quantity"
                                                         disabled="">
-                                                        <i class="las la-minus"></i>
+                                                        <i class="fa-solid fa-minus"></i>
                                                     </button>
                                                     <input type="number" name="quantity"
                                                         class="quantity-picker-input col border-0 text-center flex-grow-1 fs-16 input-number"
@@ -645,17 +694,17 @@
                                                         lang="en">
                                                     <button class="quantity-picker-btn btn col-auto btn-icon btn-sm btn-circle btn-light"
                                                         type="button" data-type="plus" data-field="quantity">
-                                                        <i class="las la-plus"></i>
+                                                        <i class="fa fa-plus"></i>
                                                     </button>
                                                 </div>
                                                 <div>
                                                     @if ($singleProduct->stock != 0)
                                                         <span class="stock-pill stock-in">
-                                                            <i class="las la-check-circle mr-1"></i> <span id="available-quantity">{{ $singleProduct->stock }}</span> items available
+                                                            <i class="fa fa-check-circle mr-1"></i> <span id="available-quantity">{{ $singleProduct->stock }}</span> items available
                                                         </span>
                                                     @else
                                                         <span class="stock-pill stock-out">
-                                                            <i class="las la-times-circle mr-1"></i> Out of Stock
+                                                            <i class="fa fa-times-circle mr-1"></i> Out of Stock
                                                         </span>
                                                     @endif
                                                 </div>
@@ -682,23 +731,23 @@
                                             class="btn btn-action-modern btn-add-cart-custom add-to-cart-btn mr-3 mb-2"
                                             data-title="Add to cart" data-id="{{ $singleProduct->id }}"
                                             data-type="product">
-                                            <i class="las la-shopping-bag" style="font-size: 1.2rem;"></i>
+                                            <i class="fa fa-shopping-bag" style="font-size: 1.2rem;"></i>
                                             <span>Add to Cart</span>
                                         </a>
                                         <a href="javascript:void(0)" class="btn btn-action-modern btn-buy-now-custom buy-now-btn mb-2"
                                             data-title="Add to cart" data-id="{{ $singleProduct->id }}"
                                             data-type="product">
-                                            <i class="la la-shopping-cart" style="font-size: 1.2rem;"></i>
+                                            <i class="fa fa-shopping-cart" style="font-size: 1.2rem;"></i>
                                             <span>Buy Now</span>
                                         </a>
                                     @else
                                         <a href="javascript:void(0)" class="btn btn-action-modern btn-add-cart-custom add-to-cart mr-3 mb-2"
                                             onclick="addToWishList({{ $singleProduct->id }})">
-                                            <i class="las la-heart" style="font-size: 1.2rem;"></i>
+                                            <i class="fa fa-heart" style="font-size: 1.2rem;"></i>
                                             <span>Add to Wishlist</span>
                                         </a>
                                         <button class="btn btn-action-modern btn-out-stock-custom mb-2" disabled>
-                                            <i class="la la-cart-arrow-down" style="font-size: 1.2rem;"></i> Out of Stock
+                                            <i class="fa fa-cart-arrow-down" style="font-size: 1.2rem;"></i> Out of Stock
                                         </button>
                                     @endif
                                 </div>
@@ -708,17 +757,17 @@
                                     @if ($singleProduct->stock != 0)
                                         <button type="button" class="btn-link-action"
                                             onclick="addToWishList({{ $singleProduct->id }})">
-                                            <i class="las la-heart" style="font-size: 1.1rem;"></i> Add to wishlist
+                                            <i class="fa fa-heart" style="font-size: 1.1rem;"></i> Add to wishlist
                                         </button>
                                     @endif
                                     
                                     <button type="button" class="btn-link-action"
                                         onclick="addToCompare({{ $singleProduct->id }})">
-                                        <i class="las la-sync" style="font-size: 1.1rem;"></i> Add to compare
+                                        <i class="fa fa-sync" style="font-size: 1.1rem;"></i> Add to compare
                                     </button>
                                     
                                     <span class="text-muted ml-sm-auto mt-2 mt-sm-0 d-flex align-items-center fw-600" style="font-size: 0.95rem; color: #044244 !important;">
-                                        <i class="las la-phone-volume mr-2" style="font-size: 1.3rem; color: #044244;"></i> Hotline Order: +01788246452
+                                        <i class="fa fa-phone-volume mr-2" style="font-size: 1.3rem; color: #044244;"></i> Hotline Order: 
                                     </span>
                                 </div>
 
@@ -776,17 +825,17 @@
                                                         @endphp
                                                         @for ($i = 1; $i <= 5; $i++)
                                                             @if ($i <= $fullStars)
-                                                                <i class="las la-star"></i>
+                                                                <i class="fa-regular fa-star"></i>
                                                             @elseif ($i == $fullStars + 1)
                                                                 @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                                    <i class="las la-star-half-alt"></i>
+                                                                    <i class="fa-regular fa-star-half-alt"></i>
                                                                 @elseif ($fraction > 0.7)
-                                                                    <i class="las la-star"></i>
+                                                                    <i class="fa-regular fa-star"></i>
                                                                 @else
-                                                                    <i class="las la-star" style="color: #ced4da;"></i>
+                                                                    <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                                 @endif
                                                             @else
-                                                                <i class="las la-star" style="color: #ced4da;"></i>
+                                                                <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                             @endif
                                                         @endfor
                                                     </div>
@@ -845,7 +894,7 @@
 
                                                                     <div class="rating-stars-gold" style="font-size: 0.85rem;">
                                                                         @for ($i = 1; $i <= 5; $i++)
-                                                                            <i class="las la-star {{ $i <= $review->review_star ? '' : 'opacity-30' }}" style="{{ $i <= $review->review_star ? '' : 'color: #ced4da;' }}"></i>
+                                                                            <i class="fas fa-star {{ $i <= $review->review_star ? '' : 'opacity-30' }}" style="{{ $i <= $review->review_star ? '' : 'color: #ced4da;' }}"></i>
                                                                         @endfor
                                                                     </div>
                                                                 </div>
@@ -864,7 +913,7 @@
                                             </ul>
                                         @else
                                             <div class="text-center py-5">
-                                                <i class="las la-comment-slash text-muted mb-3" style="font-size: 48px; opacity: 0.4; display: block;"></i>
+                                                <i class="fa fa-comment-slash text-muted mb-3" style="font-size: 48px; opacity: 0.4; display: block;"></i>
                                                 <span class="fs-15 text-muted fw-600">There are no reviews for this product yet.</span>
                                             </div>
                                         @endif
@@ -878,70 +927,59 @@
                             <div class="related-card-modern text-left">
                                 <div class="related-title-modern d-flex justify-content-between align-items-center">
                                     <span>Related Products</span>
-                                    @if(isset($mainCategory) && $mainCategory)
-                                        <a href="{{ route('catProductView', [$mainCategory->id, $mainCategory->slug]) }}" 
-                                           class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
-                                            View More <i class="las la-angle-right ml-1 fs-14"></i>
-                                        </a>
-                                    @else
-                                        <a href="{{ route('catProductView', [$singleProduct->category_id ?? 1, $singleProduct->category->slug ?? 'category']) }}" 
-                                           class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
-                                            View More <i class="las la-angle-right ml-1 fs-14"></i>
-                                        </a>
-                                    @endif
+                                    <a href="{{ route('catProductView', [$singleProduct->category_id, $singleProduct->category->slug ?? 'category']) }}" 
+                                       class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
+                                        View More <i class="fa fa-angle-right ml-1 fs-14"></i>
+                                    </a>
                                 </div>
                                 <div class="p-3">
-                                    <div class="aiz-carousel gutters-5 half-outside-arrow" data-items="6" data-xl-items="6"
-                                        data-lg-items="6" data-md-items="4" data-sm-items="2" data-xs-items="2"
-                                        data-arrows='true' data-infinite='true' data-autoplay="true" data-speed="500">
+                                    <div class="rel-products-grid">
                                         @foreach ($relProducts as $relProduct)
-                                            <div class="carousel-box">
-                                                <div class="rel-product-card">
-                                                    <div class="rel-product-img-box">
-                                                        <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}" class="d-block">
-                                                            <img class="img-fit lazyload mx-auto" style="height: 190px; width: 100%; object-fit: cover;"
-                                                                src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                                data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
-                                                                alt="{{ $relProduct->title }}"
-                                                                onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
-                                                        </a>
+                                            <div class="rel-product-card">
+                                                <div class="rel-product-img-box">
+                                                    <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}" class="d-block">
+                                                        <img class="lazyload" style="height: 160px; width: 100%; object-fit: cover; border-radius: 8px;"
+                                                            src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
+                                                            data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                            alt="{{ $relProduct->title }}"
+                                                            onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
+                                                    </a>
+                                                </div>
+                                                <div class="rel-product-details">
+                                                    <div class="mb-1">
+                                                        @if($relProduct->old_price > $relProduct->new_price)
+                                                            <del class="text-muted mr-1" style="font-size: 0.78rem;">৳{{ $relProduct->old_price }}</del>
+                                                        @endif
+                                                        <span class="fw-700 d-block" style="color: #044244; font-size: 0.95rem;">৳{{ $relProduct->new_price }}</span>
                                                     </div>
-                                                    <div class="rel-product-details">
-                                                        <div class="mb-2">
-                                                            @if($relProduct->old_price > $relProduct->new_price)
-                                                                <del class="text-muted mr-2" style="font-size: 0.85rem;">৳{{ $relProduct->old_price }}</del>
-                                                            @endif
-                                                            <span class="fw-700" style="color: #044244; font-size: 1.05rem;">৳{{ $relProduct->new_price }}</span>
-                                                        </div>
-                                                        
-                                                        <div class="rating-stars-gold mb-2" style="font-size: 0.75rem;">
-                                                            @php
-                                                                $avg = $relProduct->getAverageRating();
-                                                                $fullStars = floor($avg);
-                                                                $fraction = $avg - $fullStars;
-                                                            @endphp
-                                                            @for ($i = 1; $i <= 5; $i++)
-                                                                @if ($i <= $fullStars)
-                                                                    <i class="las la-star"></i>
-                                                                @elseif ($i == $fullStars + 1)
-                                                                    @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                                        <i class="las la-star-half-alt"></i>
-                                                                    @elseif ($fraction > 0.7)
-                                                                        <i class="las la-star"></i>
-                                                                    @else
-                                                                        <i class="las la-star" style="color: #ced4da;"></i>
-                                                                    @endif
+                                                    
+                                                    <div class="rating-stars-gold mb-1" style="font-size: 0.7rem;">
+                                                        @php
+                                                            $avg = $relProduct->getAverageRating();
+                                                            $fullStars = floor($avg);
+                                                            $fraction = $avg - $fullStars;
+                                                        @endphp
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            @if ($i <= $fullStars)
+                                                                <i class="fa-regular fa-star"></i>
+                                                            @elseif ($i == $fullStars + 1)
+                                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                                    <i class="fa-regular fa-star-half-alt"></i>
+                                                                @elseif ($fraction > 0.7)
+                                                                    <i class="fa-regular fa-star"></i>
                                                                 @else
-                                                                    <i class="las la-star" style="color: #ced4da;"></i>
+                                                                    <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                                 @endif
-                                                            @endfor
-                                                        </div>
-                                                        
-                                                        <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0" style="height: 38px;">
-                                                            <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}"
-                                                                class="d-block text-reset" style="color: #0f172a; text-decoration: none;">{{ $relProduct->title }}</a>
-                                                        </h3>
+                                                            @else
+                                                                <i class="fa-regular fa-star" style="color: #ced4da;"></i>
+                                                            @endif
+                                                        @endfor
                                                     </div>
+                                                    
+                                                    <h3 class="fw-600 mb-0" style="font-size: 0.8rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em;">
+                                                        <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}"
+                                                            class="d-block" style="color: #0f172a; text-decoration: none;">{{ $relProduct->title }}</a>
+                                                    </h3>
                                                 </div>
                                             </div>
                                         @endforeach

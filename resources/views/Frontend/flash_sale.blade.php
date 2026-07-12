@@ -153,7 +153,7 @@
                     </div>
                 </div>
             @empty
-                <div class="col-12">
+                <div class="col">
                     <div class="premium-card p-5 text-center w-100" style="background: #fff; border-radius: 16px; border: 1px solid #e2e8f0;">
                         <i class="las la-frown la-4x text-muted mb-3"></i>
                         <h3 class="h5 fw-600 text-dark">No Flash Sale products found</h3>
