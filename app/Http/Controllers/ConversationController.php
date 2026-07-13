@@ -230,23 +230,32 @@ class ConversationController extends Controller
             }
 
             // Step 3: Save to local storage
-            $contentType = $fileResponse->header('Content-Type');
-            $extension = 'jpg';
-            if (str_contains($contentType, 'png')) {
-                $extension = 'png';
-            } elseif (str_contains($contentType, 'gif')) {
-                $extension = 'gif';
-            } elseif (str_contains($contentType, 'webp')) {
-                $extension = 'webp';
-            }
-
-            $fileName = 'wa_'.$mediaId.'_'.time().'.'.$extension;
+            $contentType = strtolower($fileResponse->header('Content-Type') ?: '');
             $dirPath = public_path('Uploads');
-
             if (! file_exists($dirPath)) {
                 mkdir($dirPath, 0755, true);
             }
 
+            if (str_contains($contentType, 'image') || str_contains($contentType, 'png') || str_contains($contentType, 'jpg') || str_contains($contentType, 'jpeg') || str_contains($contentType, 'webp') || str_contains($contentType, 'gif')) {
+                $fileName = 'wa_'.$mediaId.'_'.time().'.webp';
+                try {
+                    $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                    $image = $manager->decode($fileResponse->body());
+                    $image->save($dirPath.'/'.$fileName, quality: 85);
+                    return asset('Uploads/'.$fileName);
+                } catch (\Exception $ex) {
+                    // fallback if decode fails
+                }
+            }
+
+            $extension = 'bin';
+            if (str_contains($contentType, 'png')) $extension = 'png';
+            elseif (str_contains($contentType, 'gif')) $extension = 'gif';
+            elseif (str_contains($contentType, 'webp')) $extension = 'webp';
+            elseif (str_contains($contentType, 'jpg') || str_contains($contentType, 'jpeg')) $extension = 'jpg';
+            elseif (str_contains($contentType, 'pdf')) $extension = 'pdf';
+
+            $fileName = 'wa_'.$mediaId.'_'.time().'.'.$extension;
             file_put_contents($dirPath.'/'.$fileName, $fileResponse->body());
 
             return asset('Uploads/'.$fileName);

@@ -34,9 +34,9 @@ class BannerController extends Controller
             if (! file_exists($dir)) {
                 mkdir($dir, 0755, true);
             }
-            $newname = 'banner_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
+            $newname = 'banner_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
-            $image->save($dir.'/'.$newname);
+            $image->save($dir.'/'.$newname, quality: 85);
         }
 
         $banners = new Banner;
@@ -93,9 +93,9 @@ class BannerController extends Controller
             }
 
             $manager = new ImageManager(new Driver);
-            $newname = 'banner_'.$banner->id.'_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
+            $newname = 'banner_'.$banner->id.'_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
-            $image->save($dir.'/'.$newname);
+            $image->save($dir.'/'.$newname, quality: 85);
             $banner->image = $newname;
         }
 

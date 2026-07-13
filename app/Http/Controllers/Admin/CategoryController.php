@@ -36,9 +36,9 @@ class CategoryController extends Controller
             'icon' => 'required',
         ]);
         if ($request->hasFile('image')) {
-            $imgName = 'category_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
+            $imgName = 'category_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/Uploads/'.$imgName));
+            $image->save(base_path('public/Uploads/'.$imgName), quality: 85);
         }
         Category::create([
             'name' => $request->category_name,
@@ -76,9 +76,9 @@ class CategoryController extends Controller
         $imgName = $category->banner;
         if ($request->hasFile('image')) {
             $manager = new ImageManager(new Driver);
-            $imgName = 'category_'.$category->id.'_'.time().'_'.Str::random(5).'.'.$request->file('image')->getClientOriginalExtension();
+            $imgName = 'category_'.$category->id.'_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
-            $image->save(base_path('public/Uploads/'.$imgName));
+            $image->save(base_path('public/Uploads/'.$imgName), quality: 85);
             if (! empty($category->banner) && file_exists(base_path('public/Uploads/'.$category->banner))) {
                 @unlink(base_path('public/Uploads/'.$category->banner));
             }

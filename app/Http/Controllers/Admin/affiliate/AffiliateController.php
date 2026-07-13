@@ -241,8 +241,16 @@ class AffiliateController extends Controller
                 $item['type'] = 'file';
                 $item['label'] = $element->label;
                 $file = $request['element_'.$i];
-                $fileName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
-                $file->move(public_path('Uploads'), $fileName);
+                $mime = $file->getClientMimeType() ?: '';
+                if (str_starts_with($mime, 'image/') || in_array(strtolower($file->getClientOriginalExtension()), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'])) {
+                    $fileName = 'aff_' . time() . '_' . \Illuminate\Support\Str::random(5) . '.webp';
+                    $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                    $image = $manager->decode($file);
+                    $image->save(public_path('Uploads/' . $fileName), quality: 85);
+                } else {
+                    $fileName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $file->getClientOriginalName());
+                    $file->move(public_path('Uploads'), $fileName);
+                }
                 $item['value'] = 'Uploads/' . $fileName;
             }
             array_push($data, $item);

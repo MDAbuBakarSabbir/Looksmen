@@ -398,9 +398,9 @@ class ProductController extends Controller
             }
 
             foreach ($request->file('images') as $proimage) {
-                $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.'.$proimage->getClientOriginalExtension();
+                $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.webp';
                 $image = $manager->decode($proimage);
-                $image->save($destinationPath.'/'.$imgName);
+                $image->save($destinationPath.'/'.$imgName, quality: 85);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,
@@ -563,9 +563,9 @@ class ProductController extends Controller
             }
 
             foreach ($request->file('images') as $proimage) {
-                $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.'.$proimage->getClientOriginalExtension();
+                $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.webp';
                 $image = $manager->decode($proimage);
-                $image->save($destinationPath.'/'.$imgName);
+                $image->save($destinationPath.'/'.$imgName, quality: 85);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,
@@ -720,12 +720,15 @@ class ProductController extends Controller
         if ($action === 'todayDeals') {
             $status = $request->input('status'); // 1 or 0
             Product::whereIn('id', $ids)->update(['todays_deal' => $status == 1 ? '1' : '0']);
+            \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
             return response()->json(['success' => true, 'message' => 'Todays Deal status updated successfully']);
         }
 
         if ($action === 'flashSale') {
             $status = $request->input('status'); // 1 or 0
             Product::whereIn('id', $ids)->update(['flash_sale' => $status == 1 ? '1' : '0']);
+            \Illuminate\Support\Facades\Cache::forget('has_active_flash_sale_v1');
+            \Illuminate\Support\Facades\Cache::forget('home_flash_sale_products_v1');
             return response()->json(['success' => true, 'message' => 'Flash Sale status updated successfully']);
         }
 
@@ -782,6 +785,7 @@ class ProductController extends Controller
 
         $product->todays_deal = $request->status == 1 ? 1 : 0;
         $product->save();
+        \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
 
         return response()->json([
             'success' => true,
@@ -799,6 +803,8 @@ class ProductController extends Controller
 
         $product->flash_sale = $request->status == 1 ? 1 : 0;
         $product->save();
+        \Illuminate\Support\Facades\Cache::forget('has_active_flash_sale_v1');
+        \Illuminate\Support\Facades\Cache::forget('home_flash_sale_products_v1');
 
         return response()->json([
             'success' => true,
@@ -816,6 +822,10 @@ class ProductController extends Controller
 
         $product->status = $request->status == 1 ? 1 : 0;
         $product->save();
+        \Illuminate\Support\Facades\Cache::forget('has_active_flash_sale_v1');
+        \Illuminate\Support\Facades\Cache::forget('home_flash_sale_products_v1');
+        \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
+        \Illuminate\Support\Facades\Cache::forget('home_new_arrivals_v2');
 
         return response()->json([
             'success' => true,
