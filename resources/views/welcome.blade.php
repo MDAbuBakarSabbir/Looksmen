@@ -417,9 +417,9 @@
                                     <div class="col-sm-6 mb-3">
                                         <a href="{{ route('catProductView', [$cat->id, $cat->slug]) }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
                                             <div class="d-flex align-items-center">
-                                                <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; min-width: 50px;">
+                                                <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3 overflow-hidden" style="width: 50px; height: 50px; min-width: 50px;">
                                                     @if(!empty($cat->banner) && (filter_var($cat->banner, FILTER_VALIDATE_URL) || file_exists(public_path('Uploads/' . $cat->banner))))
-                                                        <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ filter_var($cat->banner, FILTER_VALIDATE_URL) ? $cat->banner : asset('Uploads/'.$cat->banner) }}" alt="{{ $cat->name }}" class="img-fluid lazyload" style="max-height: 25px; max-width: 25px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                                        <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ filter_var($cat->banner, FILTER_VALIDATE_URL) ? $cat->banner : asset('Uploads/'.$cat->banner) }}" alt="{{ $cat->name }}" class="lazyload w-100 h-100" style="object-fit: cover;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                                     @elseif(!empty($cat->icon) && str_starts_with($cat->icon, 'fa'))
                                                         <i class="{{ $cat->icon }} text-primary fs-20"></i>
                                                     @else
