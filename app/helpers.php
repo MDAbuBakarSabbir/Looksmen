@@ -129,3 +129,36 @@ if (!function_exists('send_template_mail')) {
         return false;
     }
 }
+
+if (!function_exists('upload_to_webp')) {
+    function upload_to_webp($file, $destinationFolder, $prefix = 'img', $quality = 85) {
+        if (!$file || !is_object($file) || (method_exists($file, 'isValid') && !$file->isValid())) {
+            return null;
+        }
+
+        $absolutePath = (is_dir($destinationFolder) || str_starts_with($destinationFolder, '/') || str_starts_with($destinationFolder, '\\') || preg_match('/^[a-zA-Z]:/', $destinationFolder))
+            ? $destinationFolder
+            : public_path($destinationFolder);
+
+        if (!file_exists($absolutePath)) {
+            mkdir($absolutePath, 0777, true);
+        }
+
+        $fileName = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.webp';
+        $fullPath = rtrim($absolutePath, '/\\') . '/' . $fileName;
+
+        try {
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image = $manager->decode($file);
+            $image->save($fullPath, quality: $quality);
+            return $fileName;
+        } catch (\Exception $e) {
+            $fallbackExt = method_exists($file, 'getClientOriginalExtension') ? ($file->getClientOriginalExtension() ?: 'webp') : 'webp';
+            $fallbackName = $prefix . '_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.' . $fallbackExt;
+            if (method_exists($file, 'move')) {
+                $file->move($absolutePath, $fallbackName);
+            }
+            return $fallbackName;
+        }
+    }
+}

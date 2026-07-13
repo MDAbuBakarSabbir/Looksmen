@@ -584,6 +584,12 @@
                         Track Order
                     </a>
                 </li>
+                @php
+                    $hasActiveFlashSale = \Illuminate\Support\Facades\Cache::remember('has_active_flash_sale_v1', 300, function () {
+                        return \App\Models\Product::where('status', '1')->where('flash_sale', '1')->exists();
+                    });
+                @endphp
+                @if($hasActiveFlashSale)
                 <li class="list-inline-item mr-0">
                     <a href="{{ route('front.flashSale') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
@@ -591,11 +597,12 @@
                         Flash Sale
                     </a>
                 </li>
+                @endif
                 <li class="list-inline-item mr-0">
                     <a href="{{ route('front.allCategory') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
                         <!--text-reset-->
-                        All Categorie
+                        All Categories
                     </a>
                 </li>
             </ul>

@@ -211,26 +211,31 @@ class AdminSupportController extends Controller
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             $fileName = $file->getClientOriginalName();
-            $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $fileName);
             
             $uploadPath = public_path('Uploads');
             if (!file_exists($uploadPath)) {
                 mkdir($uploadPath, 0755, true);
             }
             
-            $file->move($uploadPath, $safeName);
-            $filePath = 'Uploads/' . $safeName;
-            
-            $mime = $file->getClientMimeType();
-            if (str_starts_with($mime, 'image/')) {
+            $mime = $file->getClientMimeType() ?: '';
+            if (str_starts_with($mime, 'image/') || in_array(strtolower($file->getClientOriginalExtension()), ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'])) {
+                $safeName = 'support_' . time() . '_' . \Illuminate\Support\Str::random(5) . '.webp';
+                $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+                $image = $manager->decode($file);
+                $image->save($uploadPath . '/' . $safeName, quality: 85);
                 $fileType = 'image';
-            } elseif (str_starts_with($mime, 'video/')) {
-                $fileType = 'video';
-            } elseif ($mime === 'application/pdf') {
-                $fileType = 'pdf';
             } else {
-                $fileType = 'document';
+                $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $fileName);
+                $file->move($uploadPath, $safeName);
+                if (str_starts_with($mime, 'video/')) {
+                    $fileType = 'video';
+                } elseif ($mime === 'application/pdf') {
+                    $fileType = 'pdf';
+                } else {
+                    $fileType = 'document';
+                }
             }
+            $filePath = 'Uploads/' . $safeName;
         }
 
         $chatMessage = ChatMessage::create([

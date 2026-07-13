@@ -73,7 +73,7 @@
 
 
 
-            <div class=" col-lg-7 ">
+            <div class="{{ isset($todaysDeals) && $todaysDeals->count() > 0 ? 'col-lg-7' : 'col-lg-9' }}">
                 <div id="carouselExampleControls" class="carousel slide mobile-img-auto-height" data-ride="carousel" data-autoplay="true">
                     <div class="carousel-inner">
                     @foreach ($sliders as $slider)
@@ -137,6 +137,8 @@
                 
             </div>
 
+
+            @if(isset($todaysDeals) && $todaysDeals->count() > 0)
             <div class="col-lg-2 order-3 mt-3 mt-lg-0">
                 <div class="bg-white rounded shadow-sm">
                     <div class="bg-soft-primary rounded-top p-3 d-flex align-items-center justify-content-center">
@@ -179,6 +181,7 @@
 
                 </div>
             </div>
+            @endif
         </div>
 
     </div>
@@ -260,6 +263,82 @@
         </div>
     </section>
 
+    @if(isset($flashSaleProducts) && $flashSaleProducts->count() > 0)
+    <section class="mb-4">
+        <div class="container">
+            <div class="p-4 p-lg-5 rounded shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e1b4b 0%, #311042 50%, #4a044e 100%); border: 1px solid rgba(255, 255, 255, 0.15);">
+                {{-- Decorative background glows --}}
+                <div style="position: absolute; width: 300px; height: 300px; background: radial-gradient(circle, rgba(244, 63, 94, 0.18) 0%, rgba(0,0,0,0) 70%); top: -120px; right: 10%; pointer-events: none;"></div>
+                <div style="position: absolute; width: 250px; height: 250px; background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(0,0,0,0) 70%); bottom: -100px; left: 5%; pointer-events: none;"></div>
+
+                <div class="d-flex flex-column flex-lg-row align-items-center justify-content-between position-relative z-1 text-center text-lg-left">
+                    {{-- Left info --}}
+                    <div class="mb-4 mb-lg-0">
+                        <span class="text-white px-3 py-1 font-weight-bold uppercase mb-2 ml-5 d-inline-flex align-items-center" style="border-radius: 30px; letter-spacing: 1px; font-size: 11px; box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);">
+                            <i class="las la-bolt mr-1 animate-pulse fs-16"></i> Limited Time Offer
+                        </span>
+                        <h2 class="h3 fw-800 text-white mb-2">⚡ SUPER FLASH SALE</h2>
+                        <p class="text-white-50 fs-14 mb-0">Don't miss out on exclusive limited-time discounts before the countdown ends!</p>
+                    </div>
+
+                    {{-- Right countdown & button --}}
+                    <div class="d-flex flex-column flex-sm-row align-items-center gap-3" style="gap: 24px;">
+                        <div class="d-flex flex-column align-items-center align-items-sm-start">
+                            <span class="text-white-50 font-weight-bold uppercase fs-11 mb-2" style="letter-spacing: 1px;">Offer Ends In:</span>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <div class="text-center">
+                                    <div class="px-2 py-1 rounded font-weight-bold text-white fs-18 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); min-width: 48px; min-height: 44px;" id="home_hours">00</div>
+                                    <span class="text-white-50 fs-10 font-weight-bold uppercase mt-1 d-block">Hrs</span>
+                                </div>
+                                <span class="text-white font-weight-bold fs-18 pb-3">:</span>
+                                <div class="text-center">
+                                    <div class="px-2 py-1 rounded font-weight-bold text-white fs-18 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); min-width: 48px; min-height: 44px;" id="home_minutes">00</div>
+                                    <span class="text-white-50 fs-10 font-weight-bold uppercase mt-1 d-block">Min</span>
+                                </div>
+                                <span class="text-white font-weight-bold fs-18 pb-3">:</span>
+                                <div class="text-center">
+                                    <div class="px-2 py-1 rounded font-weight-bold text-white fs-18 d-flex align-items-center justify-content-center" style="background: rgba(255,255,255,0.12); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); min-width: 48px; min-height: 44px;" id="home_seconds">00</div>
+                                    <span class="text-white-50 fs-10 font-weight-bold uppercase mt-1 d-block">Sec</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <a href="{{ route('front.flashSale') }}" class="btn text-white font-weight-bold px-4 py-3 rounded-pill shadow-lg d-inline-flex align-items-center" style="background: linear-gradient(to right, #f43f5e, #e11d48); border: none; font-size: 15px; box-shadow: 0 8px 20px rgba(225, 29, 72, 0.35) !important;">
+                                View Flash Sale <i class="las la-arrow-right ml-2 fs-18"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const updateHomeTimer = () => {
+                const hoursEl = document.getElementById('home_hours');
+                const minutesEl = document.getElementById('home_minutes');
+                const secondsEl = document.getElementById('home_seconds');
+                if (!hoursEl || !minutesEl || !secondsEl) return;
+
+                const now = new Date();
+                const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                const diff = tomorrow - now;
+
+                const hours = Math.floor(diff / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                hoursEl.innerText = String(hours).padStart(2, '0');
+                minutesEl.innerText = String(minutes).padStart(2, '0');
+                secondsEl.innerText = String(seconds).padStart(2, '0');
+            };
+
+            setInterval(updateHomeTimer, 1000);
+            updateHomeTimer();
+        });
+    </script>
+    @endif
 
     <div id="section_home_categories">
         @foreach ($categoryProducts as $key => $categoryProduct)
@@ -477,7 +556,7 @@
                 </div>
 
                 <!-- Top Brands -->
-                @if($hasBrands)
+                {{-- @if($hasBrands)
                 <div class="col-lg-6">
                     <div class="card shadow-sm border-0 h-100 rounded-lg transition-all hover-shadow-lg">
                         <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
@@ -522,7 +601,7 @@
                         </div>
                     </div>
                 </div>
-                @endif
+                @endif --}}
             </div>
         </div>
     </section>

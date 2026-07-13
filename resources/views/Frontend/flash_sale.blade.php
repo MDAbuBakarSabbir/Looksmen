@@ -95,6 +95,7 @@
         <!-- Products Grid -->
         <div class="row gutters-10 row-cols-xxl-4 row-cols-xl-3 row-cols-lg-4 row-cols-md-3 row-cols-2">
             @forelse ($products as $product)
+                @if(is_object($product))
                 <div class="col mb-4">
                     <div class="premium-product-card h-100 d-flex flex-column" style="background: #fff; border-radius: 16px; border: 1px solid #e2e8f0; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; position: relative;">
                         @if($product->discount_percentage)
@@ -152,6 +153,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
             @empty
                 <div class="col">
                     <div class="premium-card p-5 text-center w-100" style="background: #fff; border-radius: 16px; border: 1px solid #e2e8f0;">
