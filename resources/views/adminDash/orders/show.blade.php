@@ -474,6 +474,12 @@
                         <i class="fa-regular fa-calendar"></i> 
                         Placed: {{ $order->created_at->format('d M, Y | h:i A') }}
                     </span>
+                    @if ($order->ip_address)
+                        <span>
+                            <i class="fa-solid fa-network-wired"></i> 
+                            IP: <strong>{{ $order->ip_address }}</strong>
+                        </span>
+                    @endif
                     @if ($order->admin)
                         <span>
                             <i class="fa-regular fa-user"></i> 
@@ -866,7 +872,7 @@
                                 <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
                                 <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
                             @elseif ($order->delivery_status == 'pending')
-                                <button class="status-btn-option btn-option-new update-status" data-id="{{ $order->id }}" data-status="new"><i class="fa-solid fa-clock"></i> Hold/New</button>
+                                <button class="status-btn-option btn-option-new update-status" data-id="{{ $order->id }}" data-status="new"><i class="fa-solid fa-clock"></i>New</button>
                                 <button class="status-btn-option btn-option-approved update-status" data-id="{{ $order->id }}" data-status="approved"><i class="fa-solid fa-circle-check"></i> Approve</button>
                                 <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
                                 <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
