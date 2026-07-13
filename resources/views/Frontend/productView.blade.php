@@ -572,7 +572,7 @@
                                                     <img class="img-fluid lazyload" style="width: 100%; max-height: 480px; object-fit: contain;"
                                                         src="{{ asset('Uploads') }}/{{ $productImage->image }}"
                                                         data-src="{{ asset('Uploads') }}/{{ $productImage->image }}"
-                                                        onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
+                                                        onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                                 </div>
                                             @endforeach
                                         </div>
@@ -587,7 +587,7 @@
                                                 <div class="carousel-box c-pointer">
                                                     <img class="lazyload mw-100 size-50px mx-auto" style="object-fit: cover;"
                                                         src="{{ asset('Uploads') }}/{{ $productImage->image }}"
-                                                        onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
+                                                        onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                                 </div>
                                             @endforeach
                                         </div>
@@ -595,7 +595,7 @@
                                 @else
                                     <div class="col-12">
                                         <div class="gallery-main-box img-zoom">
-                                            <img class="img-fluid" src="{{ asset('frontEnd/assets/img/placeholder.jpg') }}">
+                                            <img class="img-fluid" src="{{ asset('frontend/assets/img/placeholder.jpg') }}">
                                         </div>
                                     </div>
                                 @endif
@@ -806,10 +806,10 @@
                                                     <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                         class="d-block mini-product-img">
                                                         <img class="img-fit lazyload" style="height: 65px; width: 100%; object-fit: cover;"
-                                                            src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                            data-src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                            src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
+                                                            data-src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                             alt="{{ $product->title }}"
-                                                            onerror="this.onerror=null;this.src='{{ asset('frontEnd') }}/assets/img/placeholder.jpg';">
+                                                            onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
                                                     </a>
                                                 </div>
                                                 <div class="col-8 text-left">
@@ -882,9 +882,9 @@
                                                 @foreach ($singleProduct->reviews as $review)
                                                     <li class="list-group-item px-0 py-3 border-0" style="border-bottom: 1px solid #f1f5f9 !important;">
                                                         <div class="d-flex align-items-start">
-                                                            <img src="{{ $review->user && $review->user->image ? asset('Uploads/' . $review->user->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                            <img src="{{ $review->user && $review->user->image ? asset('Uploads/' . $review->user->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                                 class="review-user-avatar mr-3"
-                                                                onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
+                                                                onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
 
                                                             <div class="flex-grow-1">
                                                                 <div class="d-flex justify-content-between align-items-center mb-1">
@@ -939,10 +939,10 @@
                                                 <div class="rel-product-img-box">
                                                     <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}" class="d-block">
                                                         <img class="lazyload" style="height: 160px; width: 100%; object-fit: cover; border-radius: 8px;"
-                                                            src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                                            data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                                            src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
+                                                            data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                             alt="{{ $relProduct->title }}"
-                                                            onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
+                                                            onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                                     </a>
                                                 </div>
                                                 <div class="rel-product-details">
