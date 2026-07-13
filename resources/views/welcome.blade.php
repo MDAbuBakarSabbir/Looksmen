@@ -383,55 +383,95 @@
 
 
 
+    @php
+        $hasBrands = false;
+        $dbBrands = [];
+        try {
+            if (\Illuminate\Support\Facades\Schema::hasTable('brands')) {
+                $dbBrands = \Illuminate\Support\Facades\DB::table('brands')->limit(6)->get();
+                $hasBrands = $dbBrands->isNotEmpty();
+            }
+        } catch (\Exception $e) {
+            $hasBrands = false;
+        }
+    @endphp
+
     <section class="mb-5 mt-4">
         <div class="container">
             <div class="row gutters-10 align-items-stretch">
                 <!-- Top Categories -->
-                <div class="col-lg-6 mb-4 mb-lg-0">
+                <div class="{{ $hasBrands ? 'col-lg-6' : 'col-12' }} mb-4 mb-lg-0">
                     <div class="card shadow-sm border-0 h-100 rounded-lg transition-all hover-shadow-lg">
                         <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
                             <div class="d-flex align-items-center justify-content-between">
                                 <h3 class="h5 fw-700 text-dark mb-0 d-flex align-items-center">
                                     <i class="las la-th-large text-primary mr-2 fs-24"></i> Top Categories
                                 </h3>
-                                <a href="categories.html" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
+                                <a href="{{ route('front.allCategory') }}" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
                             </div>
                         </div>
                         <div class="card-body p-4 pt-2">
                             <div class="row gutters-10">
-                                @php
-                                    $topCats = [
-                                        ['name' => "Women's Fashion", 'img' => 'Wqsoc7xawVjv3oUgSMWlhi8IvrFzRErT2clwzJac.png', 'url' => 'category/womenclothing.html'],
-                                        ['name' => "Men's Fashion", 'img' => '1zeM14zNX9RB2KcUKjhSIpOy9IfXcyknPsWrO5e0.png', 'url' => 'category/menclothing.html'],
-                                        ['name' => "Kids & Toy", 'img' => 'Pm4F1YvDhezPaxJIkeUUOYPoKWLlszqwmPed3qnL.png', 'url' => 'category/kidstoy.html'],
-                                        ['name' => "Electronics", 'img' => 'placeholder.jpg', 'url' => 'javascript:void(0)'],
-                                        ['name' => "Home & Garden", 'img' => 'placeholder.jpg', 'url' => 'javascript:void(0)'],
-                                        ['name' => "Beauty & Health", 'img' => 'placeholder.jpg', 'url' => 'javascript:void(0)'],
-                                    ];
-                                @endphp
-                                @foreach($topCats as $cat)
-                                <div class="col-sm-6 mb-3">
-                                    <a href="{{ $cat['url'] }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
-                                        <div class="d-flex align-items-center">
-                                            <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; min-width: 50px;">
-                                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ $cat['img'] == 'placeholder.jpg' ? asset('frontend/assets/img/placeholder.jpg') : asset('Uploads/'.$cat['img']) }}" alt="{{ $cat['name'] }}" class="img-fluid lazyload" style="max-height: 25px; max-width: 25px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                @if(isset($categories) && $categories->count() > 0)
+                                    @foreach($categories->take(6) as $cat)
+                                    <div class="col-sm-6 mb-3">
+                                        <a href="{{ route('catProductView', [$cat->id, $cat->slug]) }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
+                                            <div class="d-flex align-items-center">
+                                                <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; min-width: 50px;">
+                                                    @if(!empty($cat->banner) && (filter_var($cat->banner, FILTER_VALIDATE_URL) || file_exists(public_path('Uploads/' . $cat->banner))))
+                                                        <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ filter_var($cat->banner, FILTER_VALIDATE_URL) ? $cat->banner : asset('Uploads/'.$cat->banner) }}" alt="{{ $cat->name }}" class="img-fluid lazyload" style="max-height: 25px; max-width: 25px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                                    @elseif(!empty($cat->icon) && str_starts_with($cat->icon, 'fa'))
+                                                        <i class="{{ $cat->icon }} text-primary fs-20"></i>
+                                                    @else
+                                                        <i class="las la-th-large text-primary fs-20"></i>
+                                                    @endif
+                                                </div>
+                                                <div class="category-name flex-grow-1">
+                                                    <h4 class="fs-14 fw-600 mb-0 text-dark">{{ $cat->name }}</h4>
+                                                </div>
+                                                <div class="category-arrow text-primary opacity-0 transition-all">
+                                                    <i class="las la-arrow-right"></i>
+                                                </div>
                                             </div>
-                                            <div class="category-name flex-grow-1">
-                                                <h4 class="fs-14 fw-600 mb-0 text-dark">{{ $cat['name'] }}</h4>
+                                        </a>
+                                    </div>
+                                    @endforeach
+                                @else
+                                    @php
+                                        $topCats = [
+                                            ['name' => "Women's Fashion", 'icon' => 'las la-female', 'url' => 'javascript:void(0)'],
+                                            ['name' => "Men's Fashion", 'icon' => 'las la-tshirt', 'url' => 'javascript:void(0)'],
+                                            ['name' => "Kids & Toy", 'icon' => 'las la-baby-carriage', 'url' => 'javascript:void(0)'],
+                                            ['name' => "Electronics", 'icon' => 'las la-laptop', 'url' => 'javascript:void(0)'],
+                                            ['name' => "Home & Garden", 'icon' => 'las la-couch', 'url' => 'javascript:void(0)'],
+                                            ['name' => "Beauty & Health", 'icon' => 'las la-heartbeat', 'url' => 'javascript:void(0)'],
+                                        ];
+                                    @endphp
+                                    @foreach($topCats as $cat)
+                                    <div class="col-sm-6 mb-3">
+                                        <a href="{{ $cat['url'] }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
+                                            <div class="d-flex align-items-center">
+                                                <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px; min-width: 50px;">
+                                                    <i class="{{ $cat['icon'] }} text-primary fs-20"></i>
+                                                </div>
+                                                <div class="category-name flex-grow-1">
+                                                    <h4 class="fs-14 fw-600 mb-0 text-dark">{{ $cat['name'] }}</h4>
+                                                </div>
+                                                <div class="category-arrow text-primary opacity-0 transition-all">
+                                                    <i class="las la-arrow-right"></i>
+                                                </div>
                                             </div>
-                                            <div class="category-arrow text-primary opacity-0 transition-all">
-                                                <i class="las la-arrow-right"></i>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                @endforeach
+                                        </a>
+                                    </div>
+                                    @endforeach
+                                @endif
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Top Brands -->
+                @if($hasBrands)
                 <div class="col-lg-6">
                     <div class="card shadow-sm border-0 h-100 rounded-lg transition-all hover-shadow-lg">
                         <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
@@ -439,33 +479,31 @@
                                 <h3 class="h5 fw-700 text-dark mb-0 d-flex align-items-center">
                                     <i class="las la-award text-warning mr-2 fs-24"></i> Top Brands
                                 </h3>
-                                <a href="javascript:void(0)" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
+                                @if(Route::has('brand.all'))
+                                    <a href="{{ route('brand.all') }}" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
+                                @else
+                                    <a href="javascript:void(0)" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
+                                @endif
                             </div>
                         </div>
                         <div class="card-body p-4 pt-2">
                             <div class="row gutters-10">
-                                @php
-                                    $staticBrands = [
-                                        'Apple', 'Dove', 'Adidas', 'Gucci', 'Lifebuoy', 'Huawei'
-                                    ];
-                                    $staticImgs = [
-                                        'ubccXxytrayFiJvCo7hHUooPmw2HieetuPgoYk1P.png',
-                                        'wL6ekMxbUXqMu1JoVBKCxO09xJYfvfy8ADzwP0Mm.png',
-                                        'niviyf6aeUwyynNGOtOYR4DuuS6TWqhWkK2NbXHD.png',
-                                        'cC2MKTWOYfcmOKdvj8wsGOB50LBPrP1MZkQOOU6k.png',
-                                        'FxChvGtIih1wX5GZoqE0xtEzBlSo7STHOVuxEgdr.png',
-                                        'wYbxWXUtI9KpKo0GLNuB3BfsdMvQ3D1UbMvRiSRx.png',
-                                    ];
-                                @endphp
-                                @foreach ($staticBrands as $index => $brand)
+                                @foreach ($dbBrands as $brand)
                                 <div class="col-sm-6 mb-3">
-                                    <a href="javascript:void(0)" class="bg-white border border-light d-block text-reset p-3 rounded-lg transition-all brand-card h-100">
+                                    <a href="{{ Route::has('brandProductView') ? route('brandProductView', [$brand->id, $brand->slug]) : 'javascript:void(0)' }}" class="bg-white border border-light d-block text-reset p-3 rounded-lg transition-all brand-card h-100">
                                         <div class="d-flex align-items-center">
                                             <div class="brand-logo text-center mr-3 border-right pr-3" style="width: 70px;">
-                                                <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ asset('Uploads/' . $staticImgs[$index]) }}" alt="{{ $brand }}" class="img-fluid lazyload" style="max-height: 40px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                                @php
+                                                    $brandLogo = $brand->logo ?? $brand->image ?? null;
+                                                @endphp
+                                                @if(!empty($brandLogo) && (filter_var($brandLogo, FILTER_VALIDATE_URL) || file_exists(public_path('Uploads/' . $brandLogo))))
+                                                    <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ filter_var($brandLogo, FILTER_VALIDATE_URL) ? $brandLogo : asset('Uploads/' . $brandLogo) }}" alt="{{ $brand->name }}" class="img-fluid lazyload" style="max-height: 40px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                                @else
+                                                    <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" alt="{{ $brand->name }}" class="img-fluid" style="max-height: 40px; object-fit: contain;">
+                                                @endif
                                             </div>
                                             <div class="brand-name flex-grow-1">
-                                                <h4 class="fs-15 fw-700 text-dark mb-0">{{ $brand }}</h4>
+                                                <h4 class="fs-15 fw-700 text-dark mb-0">{{ $brand->name }}</h4>
                                             </div>
                                         </div>
                                     </a>
@@ -475,6 +513,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
             </div>
         </div>
     </section>
