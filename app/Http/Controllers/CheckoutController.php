@@ -33,10 +33,13 @@ class CheckoutController extends Controller
             $cart = session()->get('cart', []);
             $cartEmpty = empty($cart);
         }
-        $districts = District::where('status', '1')->get();
+        $districts = \Illuminate\Support\Facades\Cache::rememberForever('active_districts_list', function () {
+            return District::where('status', '1')->get();
+        });
         $addresses = auth()->check() ? Address::where('user_id', auth()->id())->get() : collect();
-        $features = FeatureActivation::all();
-        $featuresConfig = $features->pluck('status', 'name')->toArray();
+        $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+            return FeatureActivation::pluck('status', 'name')->toArray();
+        });
         if ($cartEmpty) {
             return redirect()->route('cartView')->with('error', 'Your cart is empty! Please add products first.');
         }
@@ -53,9 +56,11 @@ class CheckoutController extends Controller
 
         // $apiKey   = config('courierCheck.api_key');
         // $endpoint = config('courierCheck.endpoint');
-        $fraudCheck = FraudCheck::first();
-        $apiKey = $fraudCheck->api_key;
-        $endpoint = $fraudCheck->base_url;
+        $fraudCheck = \Illuminate\Support\Facades\Cache::rememberForever('fraud_check_settings_first', function () {
+            return FraudCheck::first();
+        });
+        $apiKey = $fraudCheck ? $fraudCheck->api_key : null;
+        $endpoint = $fraudCheck ? $fraudCheck->base_url : null;
 
         if (!$apiKey || !$endpoint) {
             return response()->json([
@@ -111,9 +116,11 @@ class CheckoutController extends Controller
 
     public function testrun(Request $request)
     {
-        $courierApi = FraudCheck::where('status', '1')->first();
-        $api_key = $courierApi->pluck('api_key', 'name')->toArray();
-        return $api_key['api_key'];
+        $courierApi = \Illuminate\Support\Facades\Cache::rememberForever('fraud_check_settings_first', function () {
+            return FraudCheck::where('status', '1')->first();
+        });
+        $api_key = $courierApi ? [$courierApi->api_key] : ['api_key' => null];
+        return $courierApi ? $courierApi->api_key : null;
     }
 
     public function applyCoupon(Request $request)

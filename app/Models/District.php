@@ -20,6 +20,13 @@ class District extends Model
         return $this->belongsTo(Address::class, 'district_id');
     }
 
-
-
+    protected static function booted()
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('active_districts_list');
+        });
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::forget('active_districts_list');
+        });
+    }
 }

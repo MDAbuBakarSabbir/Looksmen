@@ -772,12 +772,65 @@
                                 </div>
 
                                 <!-- Social Share -->
+                                @php
+                                    $currentUrl = url()->current();
+                                    $shareUrl = urlencode($currentUrl);
+                                    $shareTitle = urlencode($singleProduct->title);
+                                @endphp
                                 <div class="row no-gutters mt-4 align-items-center">
                                     <div class="col-auto">
-                                        <div class="text-muted font-weight-bold mr-3" style="font-size: 0.9rem;">Share:</div>
+                                        <div class="text-muted font-weight-bold mr-3" style="font-size: 0.95rem;">Share:</div>
                                     </div>
                                     <div class="col">
-                                        <div class="aiz-share"></div>
+                                        <div class="d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ $shareUrl }}" 
+                                               target="_blank" rel="noopener noreferrer" 
+                                               class="btn btn-icon btn-sm rounded-circle text-white shadow-sm d-inline-flex align-items-center justify-content-center" 
+                                               style="width: 36px; height: 36px; background-color: #1877F2; text-decoration: none; transition: transform 0.2s;"
+                                               title="Share on Facebook" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                                <i class="fab fa-facebook-f" style="font-size: 1rem;"></i>
+                                            </a>
+                                            
+                                            <a href="https://api.whatsapp.com/send?text={{ $shareTitle }}%20-%20{{ $shareUrl }}" 
+                                               target="_blank" rel="noopener noreferrer" 
+                                               class="btn btn-icon btn-sm rounded-circle text-white shadow-sm d-inline-flex align-items-center justify-content-center" 
+                                               style="width: 36px; height: 36px; background-color: #25D366; text-decoration: none; transition: transform 0.2s;"
+                                               title="Share on WhatsApp" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                                <i class="fab fa-whatsapp" style="font-size: 1.15rem;"></i>
+                                            </a>
+                                            
+                                            <a href="https://twitter.com/intent/tweet?text={{ $shareTitle }}&url={{ $shareUrl }}" 
+                                               target="_blank" rel="noopener noreferrer" 
+                                               class="btn btn-icon btn-sm rounded-circle text-white shadow-sm d-inline-flex align-items-center justify-content-center" 
+                                               style="width: 36px; height: 36px; background-color: #1DA1F2; text-decoration: none; transition: transform 0.2s;"
+                                               title="Share on Twitter" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                                <i class="fab fa-twitter" style="font-size: 1rem;"></i>
+                                            </a>
+                                            
+                                            <a href="https://t.me/share/url?url={{ $shareUrl }}&text={{ $shareTitle }}" 
+                                               target="_blank" rel="noopener noreferrer" 
+                                               class="btn btn-icon btn-sm rounded-circle text-white shadow-sm d-inline-flex align-items-center justify-content-center" 
+                                               style="width: 36px; height: 36px; background-color: #0088cc; text-decoration: none; transition: transform 0.2s;"
+                                               title="Share on Telegram" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                                <i class="fab fa-telegram-plane" style="font-size: 1rem;"></i>
+                                            </a>
+                                            
+                                            <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ $shareUrl }}&title={{ $shareTitle }}" 
+                                               target="_blank" rel="noopener noreferrer" 
+                                               class="btn btn-icon btn-sm rounded-circle text-white shadow-sm d-inline-flex align-items-center justify-content-center" 
+                                               style="width: 36px; height: 36px; background-color: #0A66C2; text-decoration: none; transition: transform 0.2s;"
+                                               title="Share on LinkedIn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                                <i class="fab fa-linkedin-in" style="font-size: 1rem;"></i>
+                                            </a>
+                                            
+                                            <button type="button" 
+                                                    onclick="copyProductUrl('{{ $currentUrl }}')" 
+                                                    class="btn btn-icon btn-sm rounded-circle text-white shadow-sm d-inline-flex align-items-center justify-content-center border-0" 
+                                                    style="width: 36px; height: 36px; background-color: #64748b; transition: transform 0.2s;"
+                                                    title="Copy Link" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                                                <i class="fa fa-copy" style="font-size: 0.95rem;"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -996,6 +1049,30 @@
 
 @section('script')
     <script>
+        function copyProductUrl(url) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(function() {
+                    if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                        AIZ.plugins.notify('success', 'Product link copied to clipboard!');
+                    } else {
+                        alert('Product link copied to clipboard!');
+                    }
+                });
+            } else {
+                var tempInput = document.createElement("input");
+                tempInput.value = url;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand("copy");
+                document.body.removeChild(tempInput);
+                if (typeof AIZ !== 'undefined' && AIZ.plugins && AIZ.plugins.notify) {
+                    AIZ.plugins.notify('success', 'Product link copied to clipboard!');
+                } else {
+                    alert('Product link copied to clipboard!');
+                }
+            }
+        }
+
         $(document).ready(function() {
             $('.product-gallery').on('afterChange setPosition lazyLoaded', function() {
                 if ($('.img-zoom')[0]) {

@@ -14,7 +14,9 @@ class AddressController extends Controller
     public function getThanasByDistrict($district_id)
     {
         // আপনার মডেল অনুযায়ী Thana বা City টেবিল থেকে ডাটা আনুন
-        $thanas = Thana::where('district_id', $district_id)->get(['id', 'name']);
+        $thanas = \Illuminate\Support\Facades\Cache::rememberForever('thanas_by_district_' . $district_id, function () use ($district_id) {
+            return Thana::where('district_id', $district_id)->get(['id', 'name']);
+        });
         return response()->json($thanas);
     }
     public function store(Request $request)

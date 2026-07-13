@@ -11,10 +11,10 @@ class Pages extends Model
     protected static function booted()
     {
         static::saved(function () {
-            \Illuminate\Support\Facades\Cache::forget('global_pages_list');
+            \Illuminate\Support\Facades\Cache::flush();
         });
         static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::forget('global_pages_list');
+            \Illuminate\Support\Facades\Cache::flush();
         });
     }
 }

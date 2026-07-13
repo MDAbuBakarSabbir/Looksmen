@@ -63,14 +63,10 @@ class Product extends Model
     protected static function booted()
     {
         static::saved(function () {
-            \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
-            \Illuminate\Support\Facades\Cache::forget('home_new_arrivals_v2');
-            \Illuminate\Support\Facades\Cache::forget('home_category_products_v2');
+            \Illuminate\Support\Facades\Cache::flush();
         });
         static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::forget('home_todays_deals_v2');
-            \Illuminate\Support\Facades\Cache::forget('home_new_arrivals_v2');
-            \Illuminate\Support\Facades\Cache::forget('home_category_products_v2');
+            \Illuminate\Support\Facades\Cache::flush();
         });
     }
 }

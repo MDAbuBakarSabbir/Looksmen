@@ -11,10 +11,10 @@ class Banner extends Model
     protected static function booted()
     {
         static::saved(function () {
-            \Illuminate\Support\Facades\Cache::forget('home_banners_v2');
+            \Illuminate\Support\Facades\Cache::flush();
         });
         static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::forget('home_banners_v2');
+            \Illuminate\Support\Facades\Cache::flush();
         });
     }
 }

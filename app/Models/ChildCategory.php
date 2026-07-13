@@ -16,4 +16,13 @@ class ChildCategory extends Model
     return $this->belongsTo(SubCategory::class , 'subcategory_id');
 }
 
+    protected static function booted()
+    {
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
+        static::deleted(function () {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
+    }
 }
