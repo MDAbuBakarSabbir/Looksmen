@@ -320,7 +320,7 @@
                     <h3 class="chk-card-title">Shipping Details</h3>
                     
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-lg-6">
                             <div class="chk-form-group">
                                 <label class="chk-label" for="name">Your Name
                                     @auth <span class="text-muted fw-normal">(Optional)</span> @else <span class="text-danger">*</span> @endauth
@@ -329,7 +329,7 @@
                                 <div class="invalid-feedback">Please enter your name.</div>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-lg-6">
                             <div class="chk-form-group">
                                 <label class="chk-label" for="phone">Your Phone Number <span class="text-danger">*</span></label>
                                 <input type="text" class="chk-input" name="phone" id="phone" placeholder="Ex:01XXXXXXXXX" title="আপনার মোবাইল নাম্বার" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
