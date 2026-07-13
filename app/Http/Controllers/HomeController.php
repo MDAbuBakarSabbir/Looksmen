@@ -122,13 +122,16 @@ class HomeController extends Controller
         return view('Frontend.track_order', compact('order', 'searched'));
     }
 
-    public function flashSale()
+    public function flashSale(Request $request)
     {
-        $products = Product::where('status', '1')
-            ->where('flash_sale', '1')
-            ->with('firstImage')
-            ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
-            ->paginate(12);
+        $page = (int) $request->input('page', 1);
+        $products = \Illuminate\Support\Facades\Cache::remember('flash_sale_products_page_' . $page, 600, function () {
+            return Product::where('status', '1')
+                ->where('flash_sale', '1')
+                ->with('firstImage')
+                ->withAvg(['reviews' => function ($q) { $q->where('status', '1'); }], 'review_star')
+                ->paginate(12);
+        });
 
         return view('Frontend.flash_sale', compact('products'));
     }

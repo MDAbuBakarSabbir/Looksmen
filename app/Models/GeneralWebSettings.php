@@ -11,14 +11,10 @@ class GeneralWebSettings extends Model
     protected static function booted()
     {
         static::saved(function () {
-            \Illuminate\Support\Facades\Cache::forget('boot_general_web_settings_map');
-            \Illuminate\Support\Facades\Cache::forget('global_webinfo_first');
-            \Illuminate\Support\Facades\Cache::forget('global_webconfig_pluck');
+            \Illuminate\Support\Facades\Cache::flush();
         });
         static::deleted(function () {
-            \Illuminate\Support\Facades\Cache::forget('boot_general_web_settings_map');
-            \Illuminate\Support\Facades\Cache::forget('global_webinfo_first');
-            \Illuminate\Support\Facades\Cache::forget('global_webconfig_pluck');
+            \Illuminate\Support\Facades\Cache::flush();
         });
     }
 }

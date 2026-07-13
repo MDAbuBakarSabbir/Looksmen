@@ -53,6 +53,7 @@ class GeneralWebSettingsController extends Controller
             GeneralWebSettings::where('name', 'web_logo')->update([
                 'value' => $newname,
             ]);
+            \Illuminate\Support\Facades\Cache::flush();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -93,6 +94,7 @@ class GeneralWebSettingsController extends Controller
             GeneralWebSettings::where('name', 'footer_logo')->update([
                 'value' => $newname,
             ]);
+            \Illuminate\Support\Facades\Cache::flush();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -133,6 +135,7 @@ class GeneralWebSettingsController extends Controller
             GeneralWebSettings::where('name', 'web_favicon')->update([
                 'value' => $newname,
             ]);
+            \Illuminate\Support\Facades\Cache::flush();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -198,6 +201,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
+        \Illuminate\Support\Facades\Cache::flush();
 
         return back()->with('success', 'Website Details Updated Successfull !');
     }
@@ -220,6 +224,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
+        \Illuminate\Support\Facades\Cache::flush();
 
         return back()->with('success', 'Website Details Updated Successfull !');
     }
@@ -241,6 +246,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
+        \Illuminate\Support\Facades\Cache::flush();
 
         return back()->with('success', 'Website Contact Details Updated Successfull !');
     }
@@ -262,6 +268,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
+        \Illuminate\Support\Facades\Cache::flush();
 
         return back()->with('success', 'Website Meta Details Updated Successfull !');
     }
