@@ -1,4 +1,4 @@
-﻿@extends('layouts.Backend.master')
+@extends('layouts.Backend.master')
 @section('title') COURIER API @endsection
 @section('content')
 
@@ -406,25 +406,25 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">ðŸ“– API Key à¦•à¦¿à¦­à¦¾à¦¬à§‡ à¦ªà¦¾à¦¬à§‡à¦¨?</div>
+                <div class="info-card-header">📖 API Key কিভাবে পাবেন?</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#10b981;">
-                        <div class="step-num" style="background:#10b981;">à§§</div>
-                        <div><strong>Steadfast à¦ªà§‹à¦°à§à¦Ÿà¦¾à¦²à§‡ à¦¯à¦¾à¦¨</strong><p>steadfast-courier.com à¦ à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦–à§à¦²à§à¦¨ à¦“ à¦²à¦—à¦‡à¦¨ à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#10b981;">১</div>
+                        <div><strong>Steadfast পোর্টালে যান</strong><p>steadfast-courier.com এ একাউন্ট খুলুন ও লগইন করুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
-                        <div><strong>API Settings</strong><p>Dashboard â†’ Settings â†’ API Integration à¦ à¦¯à¦¾à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#3b82f6;">২</div>
+                        <div><strong>API Settings</strong><p>Dashboard → Settings → API Integration এ যান।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#f59e0b;">
-                        <div class="step-num" style="background:#f59e0b;">à§©</div>
-                        <div><strong>Keys à¦•à¦ªà¦¿ à¦•à¦°à§à¦¨</strong><p>API Key à¦“ Secret Key à¦•à¦ªà¦¿ à¦•à¦°à§‡ à¦‰à¦ªà¦°à§‡à¦° à¦«à¦°à§à¦®à§‡ à¦¦à¦¿à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#f59e0b;">৩</div>
+                        <div><strong>Keys কপি করুন</strong><p>API Key ও Secret Key কপি করে উপরের ফর্মে দিন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#f43f5e;">
-                        <div class="step-num" style="background:#f43f5e;">à§ª</div>
-                        <div><strong>à¦¶à§à¦§à§ à¦à¦•à¦Ÿà¦¿ Active</strong><p>à¦à¦•à¦¸à¦¾à¦¥à§‡ à¦à¦•à¦Ÿà¦¿à¦‡ courier API active à¦°à¦¾à¦–à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#f43f5e;">৪</div>
+                        <div><strong>শুধু একটি Active</strong><p>একসাথে একটিই courier API active রাখুন।</p></div>
                     </div>
-                    <div class="info-tip"><span>ðŸ’¡</span><span>Keys à¦•à¦–à¦¨à§‹ publicly à¦¶à§‡à¦¯à¦¼à¦¾à¦° à¦•à¦°à¦¬à§‡à¦¨ à¦¨à¦¾à¥¤</span></div>
+                    <div class="info-tip"><span>💡</span><span>Keys কখনো publicly শেয়ার করবেন না।</span></div>
                     <a href="https://steadfast-courier.com" target="_blank" class="info-visit-btn" style="color:#4f46e5;border-color:#e0e7ff;background:#eff6ff;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Steadfast Portal
                     </a>
