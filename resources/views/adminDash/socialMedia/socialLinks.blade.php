@@ -331,9 +331,15 @@
                 </span>
             </div>
             <div class="d-flex gap-2">
-                <a href="{{ route('social.edit') }}" class="card-action-btn edit-btn" title="Edit">
+                <button class="card-action-btn edit-btn dataEditBtn"
+                    data-id="{{ $socialLink->id }}"
+                    data-icon="{{ $socialLink->social_icon }}"
+                    data-link="{{ $socialLink->social_link }}"
+                    data-followers="{{ $socialLink->followers_count }}"
+                    data-secondary="{{ $socialLink->secondary_count }}"
+                    title="Edit">
                     <i class="fa-regular fa-pen-to-square"></i>
-                </a>
+                </button>
                 <button class="card-action-btn delete-btn dataDeleteBtn"
                     data-id="{{ $socialLink->id }}" title="Delete">
                     <i class="fa-regular fa-trash-can"></i>
@@ -369,6 +375,7 @@
         <div class="sm-modal-body">
             <form id="social-form" action="{{ route('social.store') }}" method="POST">
                 @csrf
+                <input type="hidden" name="id" id="social-id">
 
                 {{-- Icon Picker --}}
                 <div class="sm-input-group">
@@ -485,10 +492,65 @@ renderIcons(allIcons);
 
 // ===== Modal open/close =====
 const modal = document.getElementById('addSocialModal');
-document.getElementById('openAddModal').addEventListener('click',  () => { modal.classList.add('show'); });
+document.getElementById('openAddModal').addEventListener('click',  () => { 
+    document.getElementById('social-form').reset();
+    document.getElementById('social-id').value = '';
+    document.getElementById('social-form').action = "{{ route('social.store') }}";
+    document.querySelector('.sm-modal-header h4').textContent = 'Add Social Platform';
+    document.getElementById('saveBtn').innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Save Platform';
+    
+    document.getElementById('iconPreviewBox').style.display = 'none';
+    document.querySelectorAll('.icon-item-new').forEach(i => i.classList.remove('selected'));
+    
+    modal.classList.add('show'); 
+});
 document.getElementById('closeAddModal').addEventListener('click', () => { modal.classList.remove('show'); });
 document.getElementById('cancelAddModal').addEventListener('click',() => { modal.classList.remove('show'); });
 modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('show'); });
+
+// ===== Edit handler =====
+function bindEditBtn(btn) {
+    btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        const id = this.dataset.id;
+        const icon = this.dataset.icon;
+        const link = this.dataset.link;
+        const followers = this.dataset.followers;
+        const secondary = this.dataset.secondary;
+
+        // Form setup
+        const form = document.getElementById('social-form');
+        form.reset();
+        form.action = "{{ route('social.update') }}";
+        
+        document.getElementById('social-id').value = id;
+        form.querySelector('input[name="social_link"]').value = link;
+        form.querySelector('input[name="followers_count"]').value = followers;
+        form.querySelector('input[name="secondary_count"]').value = secondary;
+        
+        // Icon selection
+        document.getElementById('selected-icon').value = icon;
+        document.querySelectorAll('.icon-item-new').forEach(i => {
+            if (i.innerHTML.includes(icon)) {
+                i.classList.add('selected');
+                const preview = document.getElementById('iconPreviewBox');
+                const previewEl = document.getElementById('iconPreviewEl');
+                const previewTxt = document.getElementById('iconPreviewText');
+                preview.style.display = 'flex';
+                previewEl.className = `fa-brands ${icon}`;
+                previewTxt.textContent = icon.replace('fa-','').replace(/-/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+            } else {
+                i.classList.remove('selected');
+            }
+        });
+        
+        document.querySelector('.sm-modal-header h4').textContent = 'Edit Social Platform';
+        document.getElementById('saveBtn').innerHTML = '<i class="fa-solid fa-floppy-disk me-1"></i> Update Platform';
+
+        modal.classList.add('show');
+    });
+}
 
 // ===== Add Social Form Submit =====
 document.getElementById('social-form').addEventListener('submit', function(e) {
@@ -497,7 +559,7 @@ document.getElementById('social-form').addEventListener('submit', function(e) {
     btn.disabled = true;
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Saving...';
 
-    fetch("{{ route('social.store') }}", {
+    fetch(this.action, {
         method: 'POST',
         body: new FormData(this),
         headers: { 'X-Requested-With': 'XMLHttpRequest' }
@@ -539,12 +601,18 @@ document.getElementById('social-form').addEventListener('submit', function(e) {
                             <input class="socialstatus-switch" type="checkbox" data-id="${sl.id}" checked>
                             <span class="slider round"></span>
                         </label>
-                        <span style="font-size:11px;font-weight:600;color:#9ca3af;">Active</span>
+                        <span style="font-size:11px;font-weight:600;color:#9ca3af;">${sl.status == '1' ? 'Active' : 'Inactive'}</span>
                     </div>
                     <div class="d-flex gap-2">
-                        <a href="{{ route('social.edit') }}" class="card-action-btn edit-btn" title="Edit">
+                        <button class="card-action-btn edit-btn dataEditBtn"
+                            data-id="${sl.id}"
+                            data-icon="${sl.social_icon}"
+                            data-link="${sl.social_link}"
+                            data-followers="${sl.followers_count || ''}"
+                            data-secondary="${sl.secondary_count || ''}"
+                            title="Edit">
                             <i class="fa-regular fa-pen-to-square"></i>
-                        </a>
+                        </button>
                         <button class="card-action-btn delete-btn dataDeleteBtn" data-id="${sl.id}" title="Delete">
                             <i class="fa-regular fa-trash-can"></i>
                         </button>
@@ -555,13 +623,20 @@ document.getElementById('social-form').addEventListener('submit', function(e) {
             const grid = document.getElementById('socialCardsGrid');
             const empty = document.getElementById('emptyState');
             if (empty) empty.style.display = 'none';
-            grid.style.display = 'grid';
-            grid.insertAdjacentHTML('afterbegin', cardHtml);
+            const isEdit = document.getElementById('social-id').value !== '';
+            
+            if (isEdit) {
+                const oldCard = document.getElementById(`social-card-${sl.id}`);
+                if (oldCard) oldCard.outerHTML = cardHtml;
+            } else {
+                grid.insertAdjacentHTML('afterbegin', cardHtml);
+            }
 
-            // Bind new delete btn
-            const newCard = grid.querySelector(`#social-card-${sl.id}`);
+            // Bind new buttons
+            const newCard = document.getElementById(`social-card-${sl.id}`);
             bindDeleteBtn(newCard.querySelector('.dataDeleteBtn'));
             bindStatusSwitch(newCard.querySelector('.socialstatus-switch'));
+            bindEditBtn(newCard.querySelector('.dataEditBtn'));
 
             this.reset();
             document.getElementById('iconPreviewBox').style.display = 'none';
@@ -646,6 +721,7 @@ function bindStatusSwitch(sw) {
 // Bind to existing elements
 document.querySelectorAll('.dataDeleteBtn').forEach(bindDeleteBtn);
 document.querySelectorAll('.socialstatus-switch').forEach(bindStatusSwitch);
+document.querySelectorAll('.dataEditBtn').forEach(bindEditBtn);
 </script>
 
 @endsection
