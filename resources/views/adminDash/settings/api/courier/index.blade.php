@@ -249,8 +249,8 @@
 <div class="courier-hero">
     <div>
         <h1>Courier API Configuration</h1>
-        <p>Manage delivery partner integrations â€” Steadfast, Pathao, RedX, Paperfly, CityFast & eCourier</p>
-        <span class="hero-badge">âš¡ Only one courier can be active at a time</span>
+        <p>Manage delivery partner integrations Steadfast, Pathao, RedX, Paperfly, CityFast & eCourier</p>
+        <span class="hero-badge">Only one courier can be active at a time</span>
     </div>
     <div class="active-courier-badge">
         <div class="active-pulse"></div>
@@ -363,7 +363,7 @@
                             <span class="slider round"></span>
                         </label>
                         <span class="courier-toggle-label" id="label-steadfast">
-                            {{ isset($courierStatusConfig['steadfast']) && $courierStatusConfig['steadfast']['status']=='1' ? '<span class="toggle-on">Active</span>' : '<span class="toggle-off">Inactive</span>' }}
+                            {{ isset($courierStatusConfig['steadfast']) && $courierStatusConfig['steadfast']['status']=='1' ? '' : '' }}
                         </span>
                     </div>
                 </div>

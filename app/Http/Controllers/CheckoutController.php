@@ -8,19 +8,19 @@ use App\Models\Coupons;
 use App\Models\District;
 use App\Models\FeatureActivation;
 use App\Models\FraudCheck;
+use App\Models\GeneralWebSettings;
 use App\Models\IncompleteOrders;
-use App\Models\Logs;
 use App\Models\OrderDetails;
 use App\Models\Orders;
 use App\Models\Payment;
+use App\Models\WalletTransaction;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-
-
-
-
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 
 class CheckoutController extends Controller
 {
@@ -33,23 +33,24 @@ class CheckoutController extends Controller
             $cart = session()->get('cart', []);
             $cartEmpty = empty($cart);
         }
-        $districts = \Illuminate\Support\Facades\Cache::rememberForever('active_districts_list', function () {
+        $districts = Cache::rememberForever('active_districts_list', function () {
             return District::where('status', '1')->get();
         });
         // Guard: if cache is corrupted (not a collection of objects), refresh from DB
-        if (!($districts instanceof \Illuminate\Database\Eloquent\Collection) || ($districts->isNotEmpty() && !is_object($districts->first()))) {
-            \Illuminate\Support\Facades\Cache::forget('active_districts_list');
+        if (! ($districts instanceof Collection) || ($districts->isNotEmpty() && ! is_object($districts->first()))) {
+            Cache::forget('active_districts_list');
             $districts = District::where('status', '1')->get();
-            \Illuminate\Support\Facades\Cache::forever('active_districts_list', $districts);
+            Cache::forever('active_districts_list', $districts);
         }
         $addresses = auth()->check() ? Address::where('user_id', auth()->id())->get() : collect();
-        $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+        $featuresConfig = Cache::rememberForever('feature_activations_map', function () {
             return FeatureActivation::pluck('status', 'name')->toArray();
         });
         if ($cartEmpty) {
             return redirect()->route('cartView')->with('error', 'Your cart is empty! Please add products first.');
         }
-        return view('Frontend.checkout', compact('districts', 'cart','addresses','featuresConfig'));
+
+        return view('Frontend.checkout', compact('districts', 'cart', 'addresses', 'featuresConfig'));
     }
 
     public function checkFraud(Request $request)
@@ -58,26 +59,24 @@ class CheckoutController extends Controller
             'phone' => 'required|digits:11',
         ]);
 
-
-
         // $apiKey   = config('courierCheck.api_key');
         // $endpoint = config('courierCheck.endpoint');
-        $fraudCheck = \Illuminate\Support\Facades\Cache::rememberForever('fraud_check_settings_first', function () {
+        $fraudCheck = Cache::rememberForever('fraud_check_settings_first', function () {
             return FraudCheck::first();
         });
         $apiKey = $fraudCheck ? $fraudCheck->api_key : null;
         $endpoint = $fraudCheck ? $fraudCheck->base_url : null;
 
-        if (!$apiKey || !$endpoint) {
+        if (! $apiKey || ! $endpoint) {
             return response()->json([
                 'success' => false,
-                'message' => 'Courier API configuration missing.'
+                'message' => 'Courier API configuration missing.',
             ], 500);
         }
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $apiKey,
+                'Authorization' => 'Bearer '.$apiKey,
             ])->timeout(10)->post($endpoint, [
                 'phone' => $request->phone,
             ]);
@@ -92,10 +91,10 @@ class CheckoutController extends Controller
             $data = $response->json();
             $summary = $data['courierData']['summary'] ?? null;
 
-            if (!$summary) {
+            if (! $summary) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No courier history found.'
+                    'message' => 'No courier history found.',
                 ]);
             }
 
@@ -104,12 +103,12 @@ class CheckoutController extends Controller
             return response()->json([
                 'success' => true,
                 'data' => [
-                    'total'        => (int) $summary['total_parcel'],
-                    'delivered'    => (int) $summary['success_parcel'],
-                    'cancelled'    => (int) $summary['cancelled_parcel'],
+                    'total' => (int) $summary['total_parcel'],
+                    'delivered' => (int) $summary['success_parcel'],
+                    'cancelled' => (int) $summary['cancelled_parcel'],
                     'success_rate' => (int) $summary['success_ratio'],
                 ],
-                'min_rate' => $minRate
+                'min_rate' => $minRate,
             ]);
         } catch (\Throwable $e) {
             return response()->json([
@@ -119,13 +118,13 @@ class CheckoutController extends Controller
         }
     }
 
-
     public function testrun(Request $request)
     {
-        $courierApi = \Illuminate\Support\Facades\Cache::rememberForever('fraud_check_settings_first', function () {
+        $courierApi = Cache::rememberForever('fraud_check_settings_first', function () {
             return FraudCheck::where('status', '1')->first();
         });
         $api_key = $courierApi ? [$courierApi->api_key] : ['api_key' => null];
+
         return $courierApi ? $courierApi->api_key : null;
     }
 
@@ -136,7 +135,7 @@ class CheckoutController extends Controller
         // ১. প্রথমে চেক করুন কোডটি ডাটাবেসে আছে কি না
         $coupon = Coupons::where('code', $request->code)->where('status', 1)->first();
 
-        if (!$coupon) {
+        if (! $coupon) {
             return response()->json(['status' => 'error', 'message' => 'This coupon code does not exist!']);
         }
 
@@ -161,27 +160,26 @@ class CheckoutController extends Controller
             }
         }
         if ($request->subtotal < $coupon->min_cart_amount) {
-            return response()->json(['status' => 'error', 'message' => 'Min. order amount ৳' . $coupon->min_cart_amount . ' required']);
+            return response()->json(['status' => 'error', 'message' => 'Min. order amount ৳'.$coupon->min_cart_amount.' required']);
         }
         $discount = 0;
         if ($coupon->discount_type == 'percent') {
-            $discount = ($request->subtotal * (float)$coupon->discount) / 100;
+            $discount = ($request->subtotal * (float) $coupon->discount) / 100;
         } else {
-            $discount = (float)$coupon->discount;
+            $discount = (float) $coupon->discount;
         }
         session()->put('coupon', [
             'code' => $coupon->code,
-            'discount' => $discount
+            'discount' => $discount,
         ]);
         // ... আপনার আগের লজিক এখানে থাকবে ...
 
         return response()->json([
             'status' => 'success',
             'message' => 'Congrats! Coupon applied successfully.',
-            'discount' => $discount
+            'discount' => $discount,
         ]);
     }
-
 
     public function storeIncompleteOrder(Request $request)
     {
@@ -200,19 +198,18 @@ class CheckoutController extends Controller
         IncompleteOrders::updateOrCreate(
             ['phone' => $request->phone], // যদি এই ফোন অলরেডি থাকে তবে আপডেট হবে
             [
-                'name'         => $request->name ?? 'Customer',
-                'address'      => $request->address ?? 'N/A',
-                'district'     => $request->district,
-                'product_id'   => json_encode($productCodes), // Array হিসেবে সেভ
-                'subtotal'     => $request->subtotal,
-                'grand_total'  => $request->grand_total,
-                'status'       => 'incomplete'
+                'name' => $request->name ?? 'Customer',
+                'address' => $request->address ?? 'N/A',
+                'district' => $request->district,
+                'product_id' => json_encode($productCodes), // Array হিসেবে সেভ
+                'subtotal' => $request->subtotal,
+                'grand_total' => $request->grand_total,
+                'status' => 'incomplete',
             ]
         );
 
         return response()->json(['status' => 'success']);
     }
-
 
     public function storeOrder(Request $request)
     {
@@ -233,11 +230,11 @@ class CheckoutController extends Controller
             $cart = [];
             foreach ($dbCart as $item) {
                 $cart[] = [
-                    'id'        => $item->product_id,
-                    'price'     => $item->product->new_price,
-                    'quantity'  => $item->quantity,
+                    'id' => $item->product_id,
+                    'price' => $item->product->new_price,
+                    'quantity' => $item->quantity,
                     'attribute' => $item->attributes ?? 'N/A',
-                    'color'     => $item->color ?? 'N/A',
+                    'color' => $item->color ?? 'N/A',
                 ];
             }
         } else {
@@ -251,7 +248,7 @@ class CheckoutController extends Controller
             DB::beginTransaction();
 
             // ২. Orders টেবিলে ডাটা ইনসার্ট
-            $order = new Orders();
+            $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
             $order->ip_address = $request->ip();
             $order->name = $request->name;
@@ -271,7 +268,7 @@ class CheckoutController extends Controller
 
             // Wallet Payment Process
             if ($request->payment === 'wallet') {
-                if (!auth()->check()) {
+                if (! auth()->check()) {
                     throw new \Exception('Please login to pay using your wallet.');
                 }
                 $user = auth()->user();
@@ -285,13 +282,13 @@ class CheckoutController extends Controller
                 $user->save();
 
                 // Create Wallet Transaction
-                \App\Models\WalletTransaction::create([
+                WalletTransaction::create([
                     'user_id' => $user->id,
                     'amount' => $grandTotal,
                     'payment_method' => 'wallet',
                     'type' => 'debit',
                     'status' => 'approved',
-                    'payment_details' => json_encode(['order_id' => $order->id])
+                    'payment_details' => json_encode(['order_id' => $order->id]),
                 ]);
 
                 // Update order payment status
@@ -301,14 +298,14 @@ class CheckoutController extends Controller
 
             // ৩. OrderDetails টেবিলে লুপ চালিয়ে প্রোডাক্ট সেভ
             foreach ($cart as $item) {
-                $orderDetail = new OrderDetails();
+                $orderDetail = new OrderDetails;
                 $orderDetail->order_id = $order->id;
                 $orderDetail->product_id = $item['id'];
                 $orderDetail->product_attribute = $item['attribute'] ?? 'N/A';
                 $orderDetail->product_colour = $item['color'] ?? 'N/A';
-                $orderDetail->unit_price = (float)$item['price'];
+                $orderDetail->unit_price = (float) $item['price'];
                 $orderDetail->product_qty = $item['quantity'];
-                $orderDetail->total_price = (float)$item['price'] * (int)$item['quantity'];
+                $orderDetail->total_price = (float) $item['price'] * (int) $item['quantity'];
                 if (request()->hasCookie('referral_code')) {
                     $orderDetail->product_referral_code = request()->cookie('referral_code');
                 }
@@ -336,7 +333,7 @@ class CheckoutController extends Controller
                     ]);
                 }
             } catch (\Exception $e) {
-                \Log::error('Order Confirmation Mail Trigger Error: ' . $e->getMessage());
+                \Log::error('Order Confirmation Mail Trigger Error: '.$e->getMessage());
             }
 
             // ৫. কার্ট ক্লিয়ার করা
@@ -348,10 +345,10 @@ class CheckoutController extends Controller
             return redirect()->route('order.invoice', $order->id)->with('success', 'Order placed successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage());
+
+            return redirect()->back()->with('error', 'Something went wrong: '.$e->getMessage());
         }
     }
-
 
     // ---------------Bkash Payment -------------
 
@@ -362,8 +359,8 @@ class CheckoutController extends Controller
                 'username' => env('BKASH_USERNAME'),
                 'password' => env('BKASH_PASSWORD'),
             ])
-            ->post(env('BKASH_BASE_URL') . "/tokenized/checkout/token/grant", [
-                'app_key'    => env('BKASH_APP_KEY'),
+            ->post(env('BKASH_BASE_URL').'/tokenized/checkout/token/grant', [
+                'app_key' => env('BKASH_APP_KEY'),
                 'app_secret' => env('BKASH_APP_SECRET'),
             ]);
 
@@ -379,6 +376,7 @@ class CheckoutController extends Controller
 
         throw new \Exception("bKash Error ($code): $message");
     }
+
     public function bkashPayment(Request $request)
     {
         // কাস্টমারের ইনফরমেশন সেশনে সেভ করে রাখা (অর্ডার প্লেস করার জন্য)
@@ -390,16 +388,17 @@ class CheckoutController extends Controller
         $response = Http::withHeaders([
             'Authorization' => $token,
             'X-APP-Key' => env('BKASH_APP_KEY'),
-        ])->post(env('BKASH_BASE_URL') . "/tokenized/checkout/create", [
+        ])->post(env('BKASH_BASE_URL').'/tokenized/checkout/create', [
             'amount' => $payableAmount,
             'currency' => 'BDT',
             'intent' => 'sale',
-            'merchantInvoiceNumber' => 'INV-' . time(),
+            'merchantInvoiceNumber' => 'INV-'.time(),
             'callbackURL' => route('bkash.callback'),
         ]);
 
         return redirect($response->json()['bkashURL']);
     }
+
     public function bkashCallback(Request $request)
     {
         if ($request->status === 'success') {
@@ -407,7 +406,7 @@ class CheckoutController extends Controller
             $response = Http::withHeaders([
                 'Authorization' => $token,
                 'X-APP-Key' => env('BKASH_APP_KEY'),
-            ])->post(env('BKASH_BASE_URL') . "/tokenized/checkout/execute", [
+            ])->post(env('BKASH_BASE_URL').'/tokenized/checkout/execute', [
                 'paymentID' => $request->paymentID,
             ]);
 
@@ -418,6 +417,7 @@ class CheckoutController extends Controller
                 return $this->finalizeOrder($result);
             }
         }
+
         return redirect()->route('checkout')->with('error', 'Payment failed or cancelled.');
     }
 
@@ -427,7 +427,7 @@ class CheckoutController extends Controller
             DB::beginTransaction();
 
             // ক. Payments টেবিলে ডাটা স্টোর
-            $payment = new Payment();
+            $payment = new Payment;
             $payment->user_id = auth()->id() ?? 0;
             $payment->amount = $paymentData['amount'];
             $payment->currency = $paymentData['currency'];
@@ -442,7 +442,7 @@ class CheckoutController extends Controller
             $cart = session()->get('cart', []);
 
             // গ. Orders টেবিলে ডাটা ইনসার্ট
-            $order = new Orders();
+            $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
             $order->ip_address = $request->ip();
             $order->name = $orderData['name'];
@@ -477,16 +477,12 @@ class CheckoutController extends Controller
             return redirect()->route('order.invoice', $order->id)->with('order_placed', 'success');
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->route('checkout')->with('error', 'Critical Error: ' . $e->getMessage());
+
+            return redirect()->route('checkout')->with('error', 'Critical Error: '.$e->getMessage());
         }
     }
 
-
-
-
-
     // ------------- SSL Commerz ----------
-
 
     public function othersPayment(Request $request)
     {
@@ -500,8 +496,8 @@ class CheckoutController extends Controller
             'store_id' => env('SSLC_STORE_ID'),
             'store_passwd' => env('SSLC_STORE_PASSWORD'),
             'total_amount' => $payableAmount,
-            'currency' => "BDT",
-            'tran_id' => "SSLC_" . uniqid(),
+            'currency' => 'BDT',
+            'tran_id' => 'SSLC_'.uniqid(),
             'success_url' => route('ssl.success'),
             'fail_url' => route('ssl.fail'),
             'cancel_url' => route('ssl.cancel'),
@@ -510,14 +506,14 @@ class CheckoutController extends Controller
             'cus_phone' => $request->phone,
             'cus_add1' => $request->address,
             'cus_city' => $district->name,
-            'cus_country' => "Bangladesh",
-            'shipping_method' => "NO",
-            'product_name' => "Delivery Charge",
-            'product_category' => "Ecommerce",
-            'product_profile' => "general",
+            'cus_country' => 'Bangladesh',
+            'shipping_method' => 'NO',
+            'product_name' => 'Delivery Charge',
+            'product_category' => 'Ecommerce',
+            'product_profile' => 'general',
         ];
 
-        $url = env('SSLC_BASE_URL') . "/gwprocess/v4/api.php";
+        $url = env('SSLC_BASE_URL').'/gwprocess/v4/api.php';
 
         $response = Http::asForm()->withoutVerifying()->post($url, $post_data);
         $result = $response->json();
@@ -526,7 +522,7 @@ class CheckoutController extends Controller
             return redirect($result['GatewayPageURL']);
         }
 
-        return redirect()->back()->with('error', 'SSLCommerz Error: ' . $result['failedreason']);
+        return redirect()->back()->with('error', 'SSLCommerz Error: '.$result['failedreason']);
     }
 
     public function success(Request $request)
@@ -536,12 +532,11 @@ class CheckoutController extends Controller
         $amount = $request->input('amount');
         $orderData = session()->get('pending_order_data');
 
-
         try {
             DB::beginTransaction();
 
             // ১. Payment টেবিলে ডাটা রাখা
-            $payment = new Payment();
+            $payment = new Payment;
             $payment->user_id = auth()->id() ?? 0;
             $payment->amount = $amount;
             $payment->paymentID = $tran_id;
@@ -551,13 +546,14 @@ class CheckoutController extends Controller
 
             // ২. Order সেভ করা (সেশন থেকে ডাটা নিয়ে)
             $cart = session()->get('cart', []);
-            if (!$orderData) {
+            if (! $orderData) {
                 // যদি সেশন না পাওয়া যায়, তবে ডাটাবেসে পেমেন্ট লগ করে রাখুন (ডিব্যাগিং এর জন্য)
                 \Log::error('SSL Success: Session Data Lost', ['request' => $request->all()]);
+
                 return redirect()->route('checkout')->with('error', 'সেশন টাইমআউট হয়ে গেছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
             }
 
-            $order = new Orders();
+            $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
             $order->ip_address = $request->ip();
             $order->name = $orderData['name'];
@@ -594,26 +590,19 @@ class CheckoutController extends Controller
             IncompleteOrders::where('phone', $orderData['phone'])->delete();
             DB::commit();
             session()->forget(['cart', 'pending_order_data']);
+
             return redirect()->route('order.invoice', $order->id)->with('success', 'Order Placed Successfully!');
         } catch (\Exception $e) {
             DB::rollBack();
+
             return redirect()->route('checkout')->with('error', $e->getMessage());
         }
     }
 
-
-
-
-
-
-
-
-
-
-
     public function showInvoice($id)
     {
         $order = Orders::where('id', $id)->first();
+
         return view('Frontend.order.success', compact('order'));
     }
 
@@ -621,14 +610,12 @@ class CheckoutController extends Controller
     {
         $order = Orders::where('id', $id)->firstOrFail();
         $webConfig = [];
-        if (\Illuminate\Support\Facades\Schema::hasTable('general_web_settings')) {
-            $webConfig = \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        if (Schema::hasTable('general_web_settings')) {
+            $webConfig = GeneralWebSettings::pluck('value', 'name')->toArray();
         }
+
         return view('Frontend.order.invoice', compact('order', 'webConfig'));
     }
-
-
-
 
     public function storeOrderTest(Request $request)
     {
