@@ -36,6 +36,12 @@ class CheckoutController extends Controller
         $districts = \Illuminate\Support\Facades\Cache::rememberForever('active_districts_list', function () {
             return District::where('status', '1')->get();
         });
+        // Guard: if cache is corrupted (not a collection of objects), refresh from DB
+        if (!($districts instanceof \Illuminate\Database\Eloquent\Collection) || ($districts->isNotEmpty() && !is_object($districts->first()))) {
+            \Illuminate\Support\Facades\Cache::forget('active_districts_list');
+            $districts = District::where('status', '1')->get();
+            \Illuminate\Support\Facades\Cache::forever('active_districts_list', $districts);
+        }
         $addresses = auth()->check() ? Address::where('user_id', auth()->id())->get() : collect();
         $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
             return FeatureActivation::pluck('status', 'name')->toArray();
