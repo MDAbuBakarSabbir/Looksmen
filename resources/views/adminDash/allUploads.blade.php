@@ -149,7 +149,7 @@
             <div class="uploads-grid">
                 @foreach($images as $image)
                     @php
-                        $url = asset('uploads/' . $image);
+                        $url = asset('Uploads/' . $image);
                     @endphp
                     <div class="upload-card">
                         <div class="upload-img-wrap">

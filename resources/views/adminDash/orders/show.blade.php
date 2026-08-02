@@ -8,6 +8,10 @@
     @php
         $featuresConfig = \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
         $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
+        $blockedIpRecord = $order->ip_address
+            ? \Illuminate\Support\Facades\DB::table('blocked_ips')->where('ip_address', $order->ip_address)->first()
+            : null;
+        $isIpBlocked = (bool) $blockedIpRecord;
     @endphp
 
     <!-- Premium Custom Styles -->
@@ -475,9 +479,27 @@
                         Placed: {{ $order->created_at->format('d M, Y | h:i A') }}
                     </span>
                     @if ($order->ip_address)
-                        <span>
-                            <i class="fa-solid fa-network-wired"></i> 
+                        <span class="d-inline-flex align-items-center" style="gap: 6px;">
+                            <i class="fa-solid fa-network-wired"></i>
                             IP: <strong>{{ $order->ip_address }}</strong>
+                            @if ($isIpBlocked)
+                                <span class="badge badge-danger ml-1" style="font-size: 0.7rem; border-radius: 4px;">Blocked</span>
+                                <form action="{{ route('ip_block.destroy', $blockedIpRecord->id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Unblock IP: {{ $order->ip_address }}?');">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="btn btn-xs btn-success" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;" title="Unblock this IP">
+                                        <i class="fa-solid fa-lock-open"></i> Unblock
+                                    </button>
+                                </form>
+                            @else
+                                <form action="{{ route('ip_block.store') }}" method="POST" style="display:inline;" onsubmit="return confirm('Block IP {{ $order->ip_address }}? This will prevent all future orders from this IP.');"> 
+                                    @csrf
+                                    <input type="hidden" name="ip_address" value="{{ $order->ip_address }}">
+                                    <input type="hidden" name="reason" value="Blocked from Order #LM-{{ $order->id }}">
+                                    <button type="submit" class="btn btn-xs btn-danger" style="font-size: 0.7rem; padding: 2px 8px; border-radius: 4px;" title="Block this IP">
+                                        <i class="fa-solid fa-ban"></i> Block
+                                    </button>
+                                </form>
+                            @endif
                         </span>
                     @endif
                     @if ($order->admin)
@@ -701,6 +723,38 @@
                             <span class="text-muted font-weight-medium" style="font-size: 0.9rem;">
                                 <i class="fa-solid fa-phone mr-1"></i> {{ $order->phone }}
                             </span>
+                            @if ($order->ip_address)
+                                <div class="mt-2">
+                                    <div class="d-flex align-items-center justify-content-center flex-wrap" style="gap: 6px;">
+                                        <span class="d-inline-flex align-items-center px-3 py-1 rounded font-weight-bold {{ $isIpBlocked ? 'text-danger' : 'text-dark' }}" style="font-size: 0.8rem; background: {{ $isIpBlocked ? 'rgba(239,68,68,0.08)' : '#f1f5f9' }}; border: 1px solid {{ $isIpBlocked ? 'rgba(239,68,68,0.3)' : '#e2e8f0' }};">
+                                            <i class="fa-solid fa-network-wired mr-2 {{ $isIpBlocked ? 'text-danger' : 'text-primary' }}"></i>
+                                            {{ $order->ip_address }}
+                                            @if ($isIpBlocked)
+                                                <span class="badge badge-danger ml-2" style="font-size: 0.65rem;">BLOCKED</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                    <div class="mt-2 d-flex justify-content-center">
+                                        @if ($isIpBlocked)
+                                            <form action="{{ route('ip_block.destroy', $blockedIpRecord->id) }}" method="POST" onsubmit="return confirm('Unblock IP address {{ $order->ip_address }}?');">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="btn btn-sm btn-success font-weight-bold px-3" style="border-radius: 8px; font-size: 0.8rem;">
+                                                    <i class="fa-solid fa-lock-open mr-1"></i> Unblock IP
+                                                </button>
+                                            </form>
+                                        @else
+                                            <form action="{{ route('ip_block.store') }}" method="POST" onsubmit="return confirm('Block IP {{ $order->ip_address }}?\n\nThis will prevent all website access from this IP address.');">
+                                                @csrf
+                                                <input type="hidden" name="ip_address" value="{{ $order->ip_address }}">
+                                                <input type="hidden" name="reason" value="Blocked from Order #LM-{{ $order->id }}">
+                                                <button type="submit" class="btn btn-sm btn-danger font-weight-bold px-3" style="border-radius: 8px; font-size: 0.8rem;">
+                                                    <i class="fa-solid fa-ban mr-1"></i> Block IP
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endif
                             <input type="hidden" id="phoneNumber" value="{{ $order->phone }}">
                         </div>
 

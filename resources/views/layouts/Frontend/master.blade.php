@@ -278,38 +278,39 @@
             max-width: 100%;
         }
 
-        /* Make customer dashboard layouts responsive on mobile (Slide-out Off-canvas Drawer) */
+        /* Make customer dashboard sidebar an off-canvas drawer on mobile */
         @media (max-width: 991.98px) {
-            .container .d-flex.align-items-start {
-                flex-direction: column !important;
-                align-items: stretch !important;
+
+            /* Hide the column wrapper on mobile — sidenav becomes a fixed drawer */
+            .col-lg-3:has(.user-sidenav),
+            .col-md-4:has(.user-sidenav) {
+                display: none !important;
             }
-            .container .d-flex.align-items-start > .user-sidenav {
+
+            /* The sidenav itself: fixed off-canvas, pushed off to the left */
+            .user-sidenav {
                 position: fixed !important;
                 top: 0 !important;
-                left: -280px !important;
+                left: -300px !important;
                 width: 280px !important;
                 height: 100vh !important;
-                z-index: 1045 !important;
+                z-index: 1055 !important;
                 background: #ffffff !important;
-                box-shadow: 5px 0 25px rgba(0,0,0,0.15) !important;
-                transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-                margin-bottom: 0 !important;
+                box-shadow: 5px 0 30px rgba(0,0,0,0.18) !important;
+                transition: left 0.32s cubic-bezier(0.4, 0, 0.2, 1) !important;
                 border-radius: 0 !important;
                 border: none !important;
                 display: block !important;
-            }
-            .container .d-flex.align-items-start > .user-sidenav.show,
-            #mobileCategoriesDrawer.show {
-                left: 0 !important;
-            }
-            .container .d-flex.align-items-start > .aiz-user-panel {
-                width: 100% !important;
-                margin-left: 0 !important;
-                margin-top: 0 !important;
+                overflow-y: auto !important;
+                margin: 0 !important;
             }
 
-            /* Off-canvas Backdrop */
+            /* When opened, slide in */
+            .user-sidenav.show {
+                left: 0 !important;
+            }
+
+            /* Backdrop */
             .user-sidenav-backdrop {
                 position: fixed;
                 top: 0;
@@ -317,7 +318,7 @@
                 width: 100vw;
                 height: 100vh;
                 background: rgba(0, 0, 0, 0.5);
-                z-index: 1040;
+                z-index: 1050;
                 display: none;
                 opacity: 0;
                 transition: opacity 0.3s ease;
@@ -326,8 +327,20 @@
                 display: block;
                 opacity: 1;
             }
-            body.overflow-hidden {
+            body.sidenav-open {
                 overflow: hidden !important;
+            }
+
+            /* Mobile menu open button — only visible on dashboard pages */
+            .mobile-dashboard-toggle {
+                display: inline-block !important;
+            }
+        }
+
+        /* On desktop always hide the mobile toggle */
+        @media (min-width: 992px) {
+            .mobile-dashboard-toggle {
+                display: none !important;
             }
         }
     </style>
