@@ -215,12 +215,21 @@ class FrontCategoryController extends Controller
 
     public function pages($slug)
     {
-        $page = Cache::remember('page_content_slug_'.$slug, 3600, function () use ($slug) {
-            return Pages::where('slug', $slug)->where('status', 1)->first();
+        // Cache only the page ID to avoid Eloquent model unserialize issues
+        $pageId = Cache::remember('page_id_slug_' . $slug, 3600, function () use ($slug) {
+            $p = Pages::where('slug', $slug)->where('status', 1)->first();
+            return $p ? $p->id : null;
         });
+
+        $page = $pageId ? Pages::find($pageId) : null;
+
+        if (!$page) {
+            abort(404);
+        }
 
         return view('Frontend.pages.pages', compact('page'));
     }
+
 
     public function ProductCompare()
     {
