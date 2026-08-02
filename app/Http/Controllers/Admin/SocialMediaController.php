@@ -46,8 +46,36 @@ class SocialMediaController extends Controller
         }
     }
 
+    public function update(Request $request)
+    {
+        $request->validate([
+            'id' => 'required|exists:social_media,id',
+            'social_icon' => 'required|string|max:50',
+            'social_link' => 'required|url|max:255',
+            'followers_count' => 'nullable|string|max:50',
+            'secondary_count' => 'nullable|string|max:50',
+        ]);
+        try {
+            $social = SocialMedia::find($request->id);
+            $social->social_icon = $request->social_icon;
+            $social->social_link = $request->social_link;
+            $social->followers_count = $request->followers_count ?? '0';
+            $social->secondary_count = $request->secondary_count ?? '0';
+            $social->save();
+            return response()->json([
+                'success' => true,
+                'status' => 'success',
+                'message' => 'Social media link updated successfully!',
+                'data' => $social
+            ], 200);
 
-
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Failed to save data. ' . $e->getMessage()
+            ], 500);
+        }
+    }
 
 
     public function status(Request $request)

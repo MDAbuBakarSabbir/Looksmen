@@ -337,7 +337,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/socialmedia', 'index')->name('social.index')->middleware('admin.permission:setup_social_links');
         Route::post('/socialmedia/status', 'status')->name('social.status')->middleware('admin.permission:setup_social_links');
         Route::post('/socialmedia/store', 'store')->name('social.store')->middleware('admin.permission:setup_social_links');
-        Route::post('/socialmedia/edit', 'edit')->name('social.edit')->middleware('admin.permission:setup_social_links');
+        Route::post('/socialmedia/update', 'update')->name('social.update')->middleware('admin.permission:setup_social_links');
         Route::post('/socialmedia/destroy/{id}', 'destroy')->name('social.destroy')->middleware('admin.permission:setup_social_links');
     });
 
