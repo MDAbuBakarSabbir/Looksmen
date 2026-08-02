@@ -514,21 +514,21 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">ðŸ“– Pathao API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
+                <div class="info-card-header">📖 Pathao API সেটআপ</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#e11d48;">
-                        <div class="step-num" style="background:#e11d48;">à§§</div>
-                        <div><strong>Pathao Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>courier.pathao.com à¦ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦–à§à¦²à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#e11d48;">১</div>
+                        <div><strong>Pathao Merchant একাউন্ট</strong><p>courier.pathao.com এ merchant একাউন্ট খুলুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
-                        <div><strong>Developer API Access</strong><p>Support à¦ à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦— à¦•à¦°à§à¦¨ à¦…à¦¥à¦¬à¦¾ Developer Dashboard à¦¥à§‡à¦•à§‡ credentials à¦¨à¦¿à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#3b82f6;">২</div>
+                        <div><strong>Developer API Access</strong><p>Support এ যোগাযোগ করুন অথবা Developer Dashboard থেকে credentials নিন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#f59e0b;">
-                        <div class="step-num" style="background:#f59e0b;">à§©</div>
-                        <div><strong>Client ID & Secret</strong><p>à¦ªà¦¾à¦“à¦¯à¦¼à¦¾ Client ID, Secret, Username, Password à¦¦à¦¿à¦¯à¦¼à§‡ à¦«à¦°à§à¦® à¦ªà§‚à¦°à¦£ à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#f59e0b;">৩</div>
+                        <div><strong>Client ID & Secret</strong><p>পাওয়া Client ID, Secret, Username, Password দিয়ে ফর্ম পূরণ করুন।</p></div>
                     </div>
-                    <div class="info-tip"><span>ðŸ’¡</span><span>Pathao Sandbox à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§à¦¨ test à¦à¦° à¦œà¦¨à§à¦¯à¥¤</span></div>
+                    <div class="info-tip"><span>💡</span><span>Pathao Sandbox ব্যবহার করুন test এর জন্য।</span></div>
                     <a href="https://pathao.com" target="_blank" class="info-visit-btn" style="color:#e11d48;border-color:#fecdd3;background:#fff1f2;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Pathao Portal
                     </a>
@@ -596,21 +596,21 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">ðŸ“– RedX API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
+                <div class="info-card-header">📖 RedX API সেটআপ</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#ef4444;">
-                        <div class="step-num" style="background:#ef4444;">à§§</div>
-                        <div><strong>RedX Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>redx.com.bd à¦¤à§‡ merchant account à¦–à§à¦²à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#ef4444;">১</div>
+                        <div><strong>RedX Merchant একাউন্ট</strong><p>redx.com.bd তে merchant account খুলুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
-                        <div><strong>API Token à¦ªà¦¾à¦¨</strong><p>Dashboard â†’ Settings â†’ API Access Token Generate à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#3b82f6;">২</div>
+                        <div><strong>API Token পান</strong><p>Dashboard → Settings → API Access Token Generate করুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#10b981;">
-                        <div class="step-num" style="background:#10b981;">à§©</div>
-                        <div><strong>Token à¦¦à¦¿à¦¯à¦¼à§‡ Connect à¦•à¦°à§à¦¨</strong><p>API Token à¦‰à¦ªà¦°à§‡à¦° à¦«à¦°à§à¦®à§‡ à¦¦à¦¿à¦¯à¦¼à§‡ Save à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#10b981;">৩</div>
+                        <div><strong>Token দিয়ে Connect করুন</strong><p>API Token উপরের ফর্মে দিয়ে Save করুন।</p></div>
                     </div>
-                    <div class="info-tip"><span>ðŸ’¡</span><span>RedX Production à¦“ Sandbox à¦†à¦²à¦¾à¦¦à¦¾ token à¦¬à§à¦¯à¦¬à¦¹à¦¾à¦° à¦•à¦°à§‡à¥¤</span></div>
+                    <div class="info-tip"><span>💡</span><span>RedX Production ও Sandbox আলাদা token ব্যবহার করে।</span></div>
                     <a href="https://redx.com.bd" target="_blank" class="info-visit-btn" style="color:#ef4444;border-color:#fecaca;background:#fff5f5;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> RedX Portal
                     </a>
@@ -675,17 +675,17 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">ðŸ“– Paperfly API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
+                <div class="info-card-header">📖 Paperfly API সেটআপ</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#f59e0b;">
-                        <div class="step-num" style="background:#f59e0b;">à§§</div>
-                        <div><strong>Paperfly Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>paperfly.com.bd à¦¤à§‡ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#f59e0b;">১</div>
+                        <div><strong>Paperfly Merchant একাউন্ট</strong><p>paperfly.com.bd তে merchant একাউন্ট করুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
-                        <div><strong>API Credentials</strong><p>Support à¦¬à¦¾ dashboard à¦¥à§‡à¦•à§‡ Client ID à¦“ Secret à¦ªà¦¾à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#3b82f6;">২</div>
+                        <div><strong>API Credentials</strong><p>Support বা dashboard থেকে Client ID ও Secret পান।</p></div>
                     </div>
-                    <div class="info-tip"><span>ðŸ’¡</span><span>Paperfly API à¦¸à¦®à§à¦ªà¦°à§à¦•à§‡ à¦†à¦°à¦“ à¦œà¦¾à¦¨à¦¤à§‡ à¦¤à¦¾à¦¦à§‡à¦° support à¦ à¦¯à§‹à¦—à¦¾à¦¯à§‹à¦— à¦•à¦°à§à¦¨à¥¤</span></div>
+                    <div class="info-tip"><span>💡</span><span>Paperfly API সম্পর্কে আরো জানতে তাদের support এ যোগাযোগ করুন।</span></div>
                     <a href="https://paperfly.com.bd" target="_blank" class="info-visit-btn" style="color:#f59e0b;border-color:#fde68a;background:#fffbeb;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> Paperfly Portal
                     </a>
@@ -750,17 +750,17 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">ðŸ“– CityFast API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
+                <div class="info-card-header">📖 CityFast API সেটআপ</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#8b5cf6;">
-                        <div class="step-num" style="background:#8b5cf6;">à§§</div>
-                        <div><strong>CityFast Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>cityfast.com.bd à¦¤à§‡ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#8b5cf6;">১</div>
+                        <div><strong>CityFast Merchant একাউন্ট</strong><p>cityfast.com.bd তে merchant একাউন্ট করুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
-                        <div><strong>API Credentials à¦ªà¦¾à¦¨</strong><p>Dashboard â†’ API Integration à¦¥à§‡à¦•à§‡ credentials à¦¨à¦¿à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#3b82f6;">২</div>
+                        <div><strong>API Credentials পান</strong><p>Dashboard → API Integration থেকে credentials নিন।</p></div>
                     </div>
-                    <div class="info-tip"><span>ðŸ’¡</span><span>CityFast primarily à¦¢à¦¾à¦•à¦¾à¦° à¦­à§‡à¦¤à¦°à§‡ same-day delivery à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸ à¦¦à§‡à¦¯à¦¼à¥¤</span></div>
+                    <div class="info-tip"><span>💡</span><span>CityFast primarily ঢাকার ভেতরে same-day delivery সার্ভিস দেয়।</span></div>
                     <a href="https://cityfast.com.bd" target="_blank" class="info-visit-btn" style="color:#8b5cf6;border-color:#ddd6fe;background:#f5f3ff;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> CityFast Portal
                     </a>
@@ -828,21 +828,21 @@
         </div>
         <div class="col-lg-5">
             <div class="info-card">
-                <div class="info-card-header">ðŸ“– eCourier API à¦¸à§‡à¦Ÿà¦†à¦ª</div>
+                <div class="info-card-header">📖 eCourier API সেটআপ</div>
                 <div class="info-card-body">
                     <div class="info-step" style="border-color:#0ea5e9;">
-                        <div class="step-num" style="background:#0ea5e9;">à§§</div>
-                        <div><strong>eCourier Merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ</strong><p>ecourier.com.bd à¦¤à§‡ merchant à¦à¦•à¦¾à¦‰à¦¨à§à¦Ÿ à¦–à§à¦²à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#0ea5e9;">১</div>
+                        <div><strong>eCourier Merchant একাউন্ট</strong><p>ecourier.com.bd তে merchant একাউন্ট খুলুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#3b82f6;">
-                        <div class="step-num" style="background:#3b82f6;">à§¨</div>
-                        <div><strong>API Keys à¦ªà¦¾à¦¨</strong><p>Dashboard â†’ Developer â†’ API Key Generate à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#3b82f6;">২</div>
+                        <div><strong>API Keys পান</strong><p>Dashboard → Developer → API Key Generate করুন।</p></div>
                     </div>
                     <div class="info-step" style="border-color:#10b981;">
-                        <div class="step-num" style="background:#10b981;">à§©</div>
-                        <div><strong>Save à¦•à¦°à§à¦¨</strong><p>API Key à¦“ Secret à¦¦à¦¿à¦¯à¦¼à§‡ à¦«à¦°à§à¦® à¦ªà§‚à¦°à¦£ à¦•à¦°à§‡ Save à¦•à¦°à§à¦¨à¥¤</p></div>
+                        <div class="step-num" style="background:#10b981;">৩</div>
+                        <div><strong>Save করুন</strong><p>API Key ও Secret দিয়ে ফর্ম পূরণ করে Save করুন।</p></div>
                     </div>
-                    <div class="info-tip"><span>ðŸ’¡</span><span>eCourier à¦¸à¦¾à¦°à¦¾à¦¦à§‡à¦¶à§‡ delivery à¦¸à¦¾à¦°à§à¦­à¦¿à¦¸ à¦ªà§à¦°à¦¦à¦¾à¦¨ à¦•à¦°à§‡à¥¤</span></div>
+                    <div class="info-tip"><span>💡</span><span>eCourier সারাদেশে delivery সার্ভিস প্রদান করে।</span></div>
                     <a href="https://ecourier.com.bd" target="_blank" class="info-visit-btn" style="color:#0ea5e9;border-color:#bae6fd;background:#f0f9ff;">
                         <i class="fa-solid fa-arrow-up-right-from-square"></i> eCourier Portal
                     </a>
