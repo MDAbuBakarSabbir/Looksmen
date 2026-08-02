@@ -311,9 +311,12 @@
                                 <div class="col-6">
                                     <label class="form-label">Customer District</label>
                                     <select id="SelectDistrict" class="form-select dropdown-groups" name="district_id">
-                                        <option value="" disabled selected>Select District</option>
+                                        <option value="" disabled {{ !$selectedDistrict ? 'selected' : '' }}>Select District</option>
                                         @foreach ($districts as $district)
-                                            <option value="{{ $district->id }}" @if($selectedDistrict && $selectedDistrict->id == $district->id) selected @endif>{{ $district->name }}</option>
+                                            <option value="{{ $district->id }}"
+                                                {{ ($selectedDistrict && $selectedDistrict->id == $district->id) ? 'selected' : '' }}>
+                                                {{ $district->name }}
+                                            </option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -323,12 +326,23 @@
                                         <option value="" disabled selected>Select Upazila</option>
                                         @if($selectedDistrict)
                                             @foreach($thanas->where('district_id', $selectedDistrict->id) as $thana)
-                                                <option value="{{ $thana->id }}" @if($selectedThana && $selectedThana->id == $thana->id) selected @endif>{{ $thana->name }}</option>
+                                                <option value="{{ $thana->id }}"
+                                                    {{ ($selectedThana && $selectedThana->id == $thana->id) ? 'selected' : '' }}>
+                                                    {{ $thana->name }}
+                                                </option>
                                             @endforeach
                                         @endif
                                     </select>
                                 </div>
                             </div>
+
+                            {{-- Hidden: all thanas as JSON for dynamic JS reload --}}
+                            @once
+                            <script id="thanas-data" type="application/json">
+                                @json($thanas->map(fn($t) => ['id' => $t->id, 'name' => $t->name, 'district_id' => $t->district_id]))
+                            </script>
+                            @endonce
+
 
                             <div class="mb-3">
                                 <label class="form-label">Customer Address</label>
@@ -686,7 +700,28 @@
         });
     </script>
 
-    <!-- Product Autocomplete and catalog loader -->
+    <!-- District → Upazila dynamic loader -->
+    <script>
+        $(document).ready(function () {
+            const allThanas = JSON.parse(document.getElementById('thanas-data').textContent);
+
+            $('#SelectDistrict').on('change', function () {
+                const districtId = parseInt($(this).val());
+                const $upazilaSelect = $('#SelectUpazila');
+
+                $upazilaSelect.empty().append('<option value="" disabled selected>Select Upazila</option>');
+
+                const filtered = allThanas.filter(t => t.district_id == districtId);
+                filtered.forEach(function (thana) {
+                    $upazilaSelect.append(
+                        $('<option>', { value: thana.id, text: thana.name })
+                    );
+                });
+            });
+        });
+    </script>
+
+
     <script>
         $(document).ready(function() {
             let searchTimer;

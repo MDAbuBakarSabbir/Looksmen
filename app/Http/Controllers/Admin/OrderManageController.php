@@ -860,7 +860,15 @@ class OrderManageController extends Controller
 
         $this->checkOrderAccess($order);
 
-        return view('adminDash.orders.edit', compact('order', 'districts', 'thanas'));
+        // Resolve selected district & thana objects from the stored string names
+        $selectedDistrict = $order->district
+            ? $districts->firstWhere('name', $order->district)
+            : null;
+        $selectedThana = $order->thana
+            ? $thanas->firstWhere('name', $order->thana)
+            : null;
+
+        return view('adminDash.orders.edit', compact('order', 'districts', 'thanas', 'selectedDistrict', 'selectedThana'));
     }
 
 
