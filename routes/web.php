@@ -34,6 +34,8 @@ Route::middleware(['maintainance'])->group(function () {
 
         Route::get('/purchase-history', [ProfileController::class, 'purchaseHistory'])->name('purchaseHistory');
         Route::get('/wishlist', [ProfileController::class, 'wishlist'])->name('wishlist');
+        Route::post('/wishlist/add', [ProfileController::class, 'addWishlist'])->name('wishlist.add');
+        Route::post('/wishlist/remove', [ProfileController::class, 'removeWishlist'])->name('wishlist.remove');
         Route::get('/compare', [ProfileController::class, 'compare'])->name('compare');
         Route::get('/conversation', [ChatController::class, 'index'])->name('conversation');
         Route::get('/conversation/messages', [ChatController::class, 'getMessages'])->name('conversation.messages');
