@@ -236,21 +236,21 @@
                                     </div>
                                     <div class="p-4">
                                         <div class="aiz-range-slider">
-                                            <div id="input-slider-range" data-range-value-min="120.00"
-                                                data-range-value-max="15050.00"></div>
+                                            <div id="input-slider-range" data-range-value-min="0"
+                                                data-range-value-max="100000"></div>
 
                                             <div class="row mt-3">
                                                 <div class="col-6">
                                                     <span class="badge badge-soft-primary px-3 py-2 fs-13 fw-600 rounded-pill"
-                                                        data-range-value-low="450.00"
+                                                        data-range-value-low="0"
                                                         id="input-slider-range-value-low"></span>
-                                                    <input type="hidden" name="min_price" value="450">
+                                                    <input type="hidden" name="min_price" value="0">
                                                 </div>
                                                 <div class="col-6 text-right">
                                                     <span class="badge badge-soft-primary px-3 py-2 fs-13 fw-600 rounded-pill"
-                                                        data-range-value-high="15050.00"
+                                                        data-range-value-high="100000"
                                                         id="input-slider-range-value-high"></span>
-                                                    <input type="hidden" name="max_price" value="15050">
+                                                    <input type="hidden" name="max_price" value="100000">
                                                 </div>
                                             </div>
                                         </div>
@@ -515,7 +515,7 @@
             if(slider && typeof noUiSlider !== 'undefined') {
                 if(!slider.noUiSlider) {
                     var min = parseFloat(slider.getAttribute('data-range-value-min')) || 0;
-                    var max = parseFloat(slider.getAttribute('data-range-value-max')) || 15000;
+                    var max = parseFloat(slider.getAttribute('data-range-value-max')) || 100000;
                     var startLow = parseFloat(document.getElementById('input-slider-range-value-low').getAttribute('data-range-value-low')) || min;
                     var startHigh = parseFloat(document.getElementById('input-slider-range-value-high').getAttribute('data-range-value-high')) || max;
 

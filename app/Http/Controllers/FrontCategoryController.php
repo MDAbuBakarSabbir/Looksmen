@@ -273,17 +273,17 @@ class FrontCategoryController extends Controller
         // Sort
         match ($request->input('sort_by', 'newest')) {
             'oldest' => $query->oldest(),
-            'price-asc' => $query->orderBy('new_price', 'asc'),
-            'price-desc' => $query->orderBy('new_price', 'desc'),
+            'price-asc' => $query->orderByRaw('CAST(new_price AS DECIMAL(10,2)) asc'),
+            'price-desc' => $query->orderByRaw('CAST(new_price AS DECIMAL(10,2)) desc'),
             default => $query->latest(),
         };
 
         // Price range
         if ($request->filled('min_price')) {
-            $query->where('new_price', '>=', (float) $request->input('min_price'));
+            $query->whereRaw('CAST(new_price AS DECIMAL(10,2)) >= ?', [(float) $request->input('min_price')]);
         }
         if ($request->filled('max_price')) {
-            $query->where('new_price', '<=', (float) $request->input('max_price'));
+            $query->whereRaw('CAST(new_price AS DECIMAL(10,2)) <= ?', [(float) $request->input('max_price')]);
         }
 
         $catProducts = $query->paginate(12, ['*'], 'page', $page);
