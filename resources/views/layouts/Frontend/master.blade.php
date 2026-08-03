@@ -406,24 +406,15 @@
             <div class="d-flex align-items-center">
 
                 <div class="col-auto col-xl-3 pl-0 pr-3 d-flex align-items-center">
-                    <button type="button" class="btn p-0 mr-3 d-xl-none mobile-dashboard-toggle" style="font-size: 24px; color: #000; background: none; border: none; outline: none; cursor: pointer;">
+                    @auth
+                    <button type="button" class="btn p-0 mr-3 d-xl-none mobile-dashboard-toggle" style="font-size: 24px; color: #000; background: none; border: none; outline: none; cursor: pointer;" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
                         <i class="las la-bars"></i>
                     </button>
+                    @endauth
                     <a class="d-block py-20px mr-3 ml-0" href="{{ url('/') }}">
                         <img src="{{ asset('adminDash/assets/img/layouts') }}/{{ $webConfig['web_logo'] ?? 'Logo.png' }}"
                             alt="LOOKSMEN" class="mw-100 h-40px h-md-60px" height="40">
                     </a>
-
-                    @if (Route::currentRouteName() != 'home')
-                        <div class="d-none d-xl-block align-self-stretch category-menu-icon-box ml-auto mr-0">
-                            <div class="h-100 d-flex align-items-center" id="category-menu-icon">
-                                <div
-                                    class="dropdown-toggle navbar-light bg-light h-40px w-50px pl-2 rounded border c-pointer">
-                                    <span class="navbar-toggler-icon"></span>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
 
                     <div class="hover-category-menu position-absolute w-100 top-100 left-0 right-0 z-3 d-none"
                         id="hover-category-menu">
@@ -649,10 +640,8 @@
                                 with us.
                             </div>
                             <div class="d-inline-block d-md-block mb-4">
-                                <form class="form-inline" method="POST"
-                                    action="https://www.store.looksmen.com/subscribers">
-                                    <input type="hidden" name="_token"
-                                        value="kbxvDqGfGdVazCkZ4DhRVh8xW2Ztv6FGgoKTFXGQ">
+                                <form class="form-inline" method="POST" action="{{ url('/subscribers') }}">
+                                    @csrf
                                     <div class="form-group mb-0">
                                         <input type="email" class="form-control" placeholder="Your Email Address"
                                             name="email" required>
@@ -848,7 +837,7 @@
                     </a>
                 </div>
                 <div class="col">
-                    <a href="users/login.html" class="text-reset d-block text-center pb-2 pt-3">
+                    <a href="javascript:void(0)" class="text-reset d-block text-center pb-2 pt-3">
                         <span class="d-inline-block position-relative px-2">
                             <i class="las la-bell fs-20 opacity-60 "></i>
                         </span>
@@ -858,7 +847,7 @@
                 <div class="col">
                     @auth
                         <a href="javascript:void(0)"
-                            class="text-reset d-block text-center pb-2 pt-3 mobile-dashboard-toggle">
+                            class="text-reset d-block text-center pb-2 pt-3" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
                             <span class="d-block mx-auto">
                                 <img src="{{ asset('frontend/assets/img/avatar-place.png') }}"
                                     class="rounded-circle size-20px">
@@ -903,6 +892,28 @@
         .modal-backdrop {
             display: none !important;
             /* ডাবল কালো ছায়া বন্ধ করতে */
+        }
+
+        /* Mobile Categories Drawer */
+        .mobile-categories-drawer.show {
+            left: 0 !important;
+        }
+
+        .mobile-categories-drawer .subcategory-list,
+        .mobile-categories-drawer .childcategory-list {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .mobile-categories-drawer .toggle-subcategories-btn i,
+        .mobile-categories-drawer .toggle-childcategories-btn i {
+            transition: transform 0.3s ease;
+        }
+        
+        .mobile-categories-drawer .toggle-subcategories-btn.active i,
+        .mobile-categories-drawer .toggle-childcategories-btn.active i {
+            transform: rotate(180deg);
         }
     </style>
 
@@ -978,9 +989,9 @@
                     <div class="aiz-user-sidenav rounded overflow-auto c-scrollbar-light pb-5 pb-xl-0">
                         <div class="p-4 text-xl-center mb-4 border-bottom bg-primary text-white position-relative">
                             <span class="avatar avatar-md mb-3">
-                                <img src="https://www.store.looksmen.com/public/assets/img/avatar-place.png"
+                                <img src="{{ asset('frontend/assets/img/avatar-place.png') }}"
                                     class="image rounded-circle"
-                                    onerror="this.onerror=null;this.src='https://www.store.looksmen.com/public/assets/img/avatar-place.png';">
+                                    onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/avatar-place.png') }}';">
                             </span>
                             <h4 class="h5 fs-16 mb-1 fw-600">{{ Auth::user()->name }}</h4>
                             <div class="text-truncate opacity-60">{{ Auth::user()->email }}</div>
@@ -1046,7 +1057,7 @@
                                 </li>
 
                                 <li class="aiz-side-nav-item">
-                                    <a href="https://www.store.looksmen.com/profile" class="aiz-side-nav-link ">
+                                    <a href="{{ route('profile.edit') }}" class="aiz-side-nav-link ">
                                         <i class="las la-user aiz-side-nav-icon"></i>
                                         <span class="aiz-side-nav-text">Manage Profile</span>
                                     </a>
@@ -1412,7 +1423,24 @@
         }
 
         function addToWishList(id) {
+            @auth
+            $.post('{{ route('wishlist.add') }}', {
+                _token: '{{ csrf_token() }}',
+                product_id: id
+            }, function(response) {
+                if (response.status === 'success') {
+                    AIZ.plugins.notify('success', response.message);
+                } else if (response.status === 'warning') {
+                    AIZ.plugins.notify('warning', response.message);
+                } else {
+                    AIZ.plugins.notify('error', response.message);
+                }
+            }).fail(function(xhr) {
+                AIZ.plugins.notify('error', 'Something went wrong');
+            });
+            @else
             AIZ.plugins.notify('warning', "Please login first");
+            @endauth
         }
     </script>
 

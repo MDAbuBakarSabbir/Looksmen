@@ -231,66 +231,76 @@
                 <!-- Metric Cards -->
                 <div class="row mb-4">
                     <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="dash-metric-card">
-                            <div class="metric-icon metric-bg-1">
-                                <i class="las la-shopping-cart"></i>
+                        <a href="{{ route('cartView') }}" class="d-block text-decoration-none text-reset">
+                            <div class="dash-metric-card">
+                                <div class="metric-icon metric-bg-1">
+                                    <i class="las la-shopping-cart"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>{{ \App\Models\Cart::where('user_id', auth()->id())->count() }}</h3>
+                                    <p>Products in Cart</p>
+                                </div>
                             </div>
-                            <div class="metric-info">
-                                <h3>{{ \App\Models\Cart::where('user_id', auth()->id())->count() }}</h3>
-                                <p>Products in Cart</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     
                     <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="dash-metric-card">
-                            <div class="metric-icon metric-bg-2">
-                                <i class="la la-heart"></i>
+                        <a href="{{ route('wishlist') }}" class="d-block text-decoration-none text-reset">
+                            <div class="dash-metric-card">
+                                <div class="metric-icon metric-bg-2">
+                                    <i class="la la-heart"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>{{ \App\Models\Wishlist::where('user_id', auth()->id())->count() }}</h3>
+                                    <p>In Wishlist</p>
+                                </div>
                             </div>
-                            <div class="metric-info">
-                                <h3>1</h3>
-                                <p>In Wishlist</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     
                     <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="dash-metric-card">
-                            <div class="metric-icon metric-bg-3">
-                                <i class="las la-box"></i>
+                        <a href="{{ route('purchaseHistory') }}" class="d-block text-decoration-none text-reset">
+                            <div class="dash-metric-card">
+                                <div class="metric-icon metric-bg-3">
+                                    <i class="las la-box"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>{{ \App\Models\Orders::where('user_id', auth()->id())->count() }}</h3>
+                                    <p>Total Orders</p>
+                                </div>
                             </div>
-                            <div class="metric-info">
-                                <h3>{{ \App\Models\Orders::where('user_id', auth()->id())->count() }}</h3>
-                                <p>Total Orders</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
 
                     @if (\App\Models\FeatureActivation::where('name', 'wallet_system')->first()?->status == '1')
                     <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="dash-metric-card">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
-                                <i class="las la-wallet"></i>
+                        <a href="{{ route('myWallet') }}" class="d-block text-decoration-none text-reset">
+                            <div class="dash-metric-card">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white;">
+                                    <i class="las la-wallet"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>৳{{ number_format(Auth::user()->wallet_balance, 2) }}</h3>
+                                    <p>Wallet Balance</p>
+                                </div>
                             </div>
-                            <div class="metric-info">
-                                <h3>৳{{ number_format(Auth::user()->wallet_balance, 2) }}</h3>
-                                <p>Wallet Balance</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     @endif
 
                     @if (\App\Models\FeatureActivation::where('name', 'point_system')->first()?->status == '1')
                     <div class="col-xl-4 col-md-6 mb-4">
-                        <div class="dash-metric-card">
-                            <div class="metric-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
-                                <i class="las la-coins"></i>
+                        <a href="{{ route('myWallet') }}" class="d-block text-decoration-none text-reset">
+                            <div class="dash-metric-card">
+                                <div class="metric-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white;">
+                                    <i class="las la-coins"></i>
+                                </div>
+                                <div class="metric-info">
+                                    <h3>{{ number_format(Auth::user()->points) }} Pts</h3>
+                                    <p>Club Points</p>
+                                </div>
                             </div>
-                            <div class="metric-info">
-                                <h3>{{ number_format(Auth::user()->points) }} Pts</h3>
-                                <p>Club Points</p>
-                            </div>
-                        </div>
+                        </a>
                     </div>
                     @endif
                 </div>
