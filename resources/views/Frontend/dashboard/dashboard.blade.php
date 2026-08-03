@@ -186,6 +186,34 @@
         color: var(--dash-text);
         margin-bottom: 8px;
     }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 767.98px) {
+        .dash-section {
+            padding: 20px 0;
+        }
+        .dash-metric-card {
+            padding: 16px;
+        }
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            font-size: 24px;
+            margin-right: 15px;
+        }
+        .metric-info h3 {
+            font-size: 1.25rem;
+        }
+        .address-section-header {
+            padding: 16px;
+        }
+        .address-card-modern {
+            padding: 16px;
+        }
+        .add-new-address {
+            min-height: 120px;
+        }
+    }
 </style>
 
 <section class="dash-section">
@@ -197,7 +225,7 @@
             </div>
 
             <!-- Main Content -->
-            <div class="col-lg-9 col-md-8">
+            <div class="col-lg-9 col-md-8 mt-4 mt-md-0">
                 <h3 class="fw-700 mb-4" style="color: #1e293b; font-family: 'Outfit', sans-serif;">My Dashboard</h3>
                 
                 <!-- Metric Cards -->
@@ -277,9 +305,9 @@
                             @foreach ($addresses as $address)
                                 <div class="col-xl-6 col-lg-12 mb-4" id="address-card-{{ $address->id }}">
                                     <div class="address-card-modern {{ $address->set_default == 1 ? 'is-default' : '' }}">
-                                        <div class="d-flex align-items-center mb-3">
-                                            <input type="radio" name="address_id" value="{{ $address->id }}" class="address-radio mr-3" style="accent-color: var(--dash-primary); width: 18px; height: 18px; cursor: pointer;" onchange="set_default({{ $address->id }})" {{ $address->set_default == 1 ? 'checked' : '' }}>
-                                            <h6 class="mb-0 fw-600" style="font-size: 1.1rem; color: #1e293b;">{{ $address->name }}</h6>
+                                        <div class="d-flex align-items-center mb-3 pr-4">
+                                            <input type="radio" name="address_id" value="{{ $address->id }}" class="address-radio mr-3" style="accent-color: var(--dash-primary); width: 18px; height: 18px; flex-shrink: 0; cursor: pointer;" onchange="set_default({{ $address->id }})" {{ $address->set_default == 1 ? 'checked' : '' }}>
+                                            <h6 class="mb-0 fw-600 text-truncate" style="font-size: 1.1rem; color: #1e293b;">{{ $address->name }}</h6>
                                         </div>
                                         
                                         <div class="pl-4 ml-2">
