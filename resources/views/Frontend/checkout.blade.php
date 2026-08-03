@@ -332,10 +332,11 @@
                         <div class="col-lg-6">
                             <div class="chk-form-group">
                                 <label class="chk-label" for="phone">Your Phone Number <span class="text-danger">*</span></label>
-                                <input type="text" class="chk-input" name="phone" id="phone" placeholder="Ex:01XXXXXXXXX" title="আপনার মোবাইল নাম্বার" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                                <input type="text" class="chk-input" name="phone" id="phone" placeholder="Ex:01XXXXXXXXX" title="আপনার মোবাইল নাম্বার" oninput="this.value = this.value.replace(/[^0-9+]/g, '');" required>
+                                <div id="phone-error-msg" class="text-danger fs-13 mt-1 fw-500 d-none"></div>
                                 <div class="invalid-feedback">Please enter a valid phone number.</div>
                                 
-                                <div id="scanLoading" class="mt-2 text-info d-none fs-13">
+                                {{-- <div id="scanLoading" class="mt-2 text-info d-none fs-13">
                                     <span class="spinner-border spinner-border-sm me-1"></span> Checking courier records...
                                 </div>
                                 <div id="courierInfo" class="mt-2 d-none fs-13 p-2 bg-light rounded border">
@@ -344,7 +345,7 @@
                                         <span class="text-danger fw-600">Cancelled: <span id="cancelledParcel"></span></span>
                                     </div>
                                     <div id="successRateText" class="fw-bold">Success Rate: <span id="successRate"></span>%</div>
-                                </div>
+                                </div> --}}
                             </div>
                         </div>
                     </div>
@@ -1127,6 +1128,67 @@
         });
     </script>
     <script>
+        function validatePhoneNumber(phone) {
+            phone = (phone || '').trim();
+            if (!phone) {
+                return { isValid: false, message: 'অনুগ্রহ করে মোবাইল নাম্বারটি দিন।' };
+            }
+
+            // Check if phone starts with +880 or 880
+            let hasCountryCode = phone.startsWith('+880') || phone.startsWith('880');
+            
+            if (hasCountryCode) {
+                let clean = phone.startsWith('+880') ? phone.substring(4) : phone.substring(3);
+                if (clean.startsWith('0')) {
+                    clean = clean.substring(1);
+                }
+                if (/^1[3-9]\d{8}$/.test(clean)) {
+                    return { isValid: true, message: '' };
+                } else {
+                    return { isValid: false, message: 'মোবাইল নাম্বারটি সঠিক নয়।' };
+                }
+            }
+
+            let digitsOnly = phone.replace(/[^0-9]/g, '');
+
+            if (digitsOnly.length < 11) {
+                return { isValid: false, message: 'মোবাইল নাম্বারটি সঠিক নয়, অন্তত ১১ ডিজিট হতে হবে।' };
+            }
+
+            if (digitsOnly.length > 11) {
+                return { isValid: false, message: 'মোবাইল নাম্বারটি সঠিক নয়।' };
+            }
+
+            if (/^01[3-9]\d{8}$/.test(digitsOnly)) {
+                return { isValid: true, message: '' };
+            } else {
+                return { isValid: false, message: 'মোবাইল নাম্বারটি সঠিক নয়।' };
+            }
+        }
+
+        function checkPhoneValidation() {
+            let phoneVal = $('#phone').val();
+            let res = validatePhoneNumber(phoneVal);
+            if (!res.isValid) {
+                $('#phone-error-msg').text(res.message).removeClass('d-none');
+                $('#phone').css('border-color', '#dc3545');
+                return false;
+            } else {
+                $('#phone-error-msg').text('').addClass('d-none');
+                $('#phone').css('border-color', '#198754');
+                return true;
+            }
+        }
+
+        $(document).on('input keyup blur change', '#phone', function() {
+            if ($(this).val().trim().length > 0) {
+                checkPhoneValidation();
+            } else {
+                $('#phone-error-msg').text('').addClass('d-none');
+                $('#phone').css('border-color', '');
+            }
+        });
+
         $(document).ready(function() {
             // ১. যখন 'Proceed to Payment' বাটনে ক্লিক হবে
             $('#proceed_payment_btn').on('click', function(e) {
@@ -1140,6 +1202,11 @@
 
                 if (!name || !phone || !address || district == "null") {
                     alert("অনুগ্রহ করে আপনার নাম, জেলা, ঠিকানা এবং মোবাইল নাম্বারটি দিন।");
+                    return false;
+                }
+
+                if (!checkPhoneValidation()) {
+                    $('#phone').focus();
                     return false;
                 }
 
@@ -1176,6 +1243,12 @@
     <script>
         $('#checkoutForm').on('submit', function(e) {
             let district = $('#district_select').val();
+
+            if (!checkPhoneValidation()) {
+                e.preventDefault();
+                $('#phone').focus();
+                return false;
+            }
 
             if (!district || district === "null") {
                 e.preventDefault(); // ফর্ম সাবমিট বন্ধ করবে

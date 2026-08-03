@@ -729,7 +729,7 @@
                 <div class="row align-items-center">
                     <div class="col-lg-4">
                         <div class="text-center text-md-left" current-verison="5.5.4">
-                            <p>All Rights Reserved By LOOKSMEN<br></p>
+                            <p>All Rights Reserved By <a href="https://looksmen.com">LOOKSMEN</a><br></p>
                             <p>
                             </p>
                         </div>
@@ -758,7 +758,7 @@
                         <div class="text-center text-md-right">
                             <ul class="list-inline mb-0">
                                 <li class="list-inline-item">
-                                    <span style="color: white;">&nbsp;Website Designed By: <a href=""
+                                    <a href="https://www.facebook.com/sabalontech"></a> <span style="color: white;">&nbsp;Website Designed By: <a href=""
                                             target="_blank"><span style="color: white;">SABALON TECH</span></a></span>
                                 </li>
 
