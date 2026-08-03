@@ -46,11 +46,13 @@ class CheckoutController extends Controller
         $featuresConfig = Cache::rememberForever('feature_activations_map', function () {
             return FeatureActivation::pluck('status', 'name')->toArray();
         });
+        
+        $activePaymentMethods = \Illuminate\Support\Facades\DB::table('payment_apis')->where('status', '1')->pluck('paymentapi_name')->toArray();
         if ($cartEmpty) {
             return redirect()->route('cartView')->with('error', 'Your cart is empty! Please add products first.');
         }
 
-        return view('Frontend.checkout', compact('districts', 'cart', 'addresses', 'featuresConfig'));
+        return view('Frontend.checkout', compact('districts', 'cart', 'addresses', 'featuresConfig', 'activePaymentMethods'));
     }
 
     public function checkFraud(Request $request)

@@ -1456,24 +1456,24 @@
                             <li><a href="{{ Route::has('social.index') ? route('social.index') : '#' }}">Social Links</a></li>
                             @endif
                             @if($user?->hasPermission('setup_smtp'))
-                                @if (isset($featuresConfig['email_verification']) && $featuresConfig['email_verification'] == '1')
+                                
                                 <li><a href="{{ Route::has('smtp.index') ? route('smtp.index') : '#' }}">SMTP Settings</a></li>
-                                @endif
+                                
                             @endif
                             @if($user?->hasPermission('setup_fraud_check'))
-                                @if (isset($featuresConfig['fraud_check_api']) && $featuresConfig['fraud_check_api'] == '1')
+                                
                                 <li><a href="{{ Route::has('fraudCheck.index') ? route('fraudCheck.index') : '#' }}">Fraud Check API</a></li>
-                                @endif
+                                
                             @endif
                             @if($user?->hasPermission('setup_courier_api'))
-                                @if (isset($featuresConfig['courier_api']) && $featuresConfig['courier_api'] == '1')
+                                
                                 <li><a href="{{ Route::has('courier.index') ? route('courier.index') : '#' }}">Courier API</a></li>
-                                @endif
+                                
                             @endif
                             @if($user?->hasPermission('setup_payment_api'))
-                                @if (isset($featuresConfig['payment_api']) && $featuresConfig['payment_api'] == '1')
+                                
                                 <li><a href="{{ Route::has('payment.index') ? route('payment.index') : '#' }}">Payment API</a></li>
-                                @endif
+                                
                             @endif
                         </ul>
                     </li>

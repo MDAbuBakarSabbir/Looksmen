@@ -205,28 +205,29 @@
                     </div>
                     <div class="payment-toggle-wrap">
                         <label class="switch">
-                            <input class="status-switch" type="checkbox" data-id="">
+                            <input class="status-switch" type="checkbox" data-id="{{ $paymentApis['bkash']->id ?? '' }}" {{ ($paymentApis['bkash']->status ?? '0') == '1' ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                 </div>
                 <div class="config-card-body">
-                    <form action="" method="post">
+                    <form class="payment-form" action="{{ route('payment.update') }}" method="post">
                         @csrf
+                        <input type="hidden" name="paymentapi_name" value="bkash">
                         <div class="field-group">
                             <label class="field-label">API Key <span style="color:#f43f5e">*</span></label>
-                            <input type="text" class="field-input secret-field" value="" name="" placeholder="Enter bKash API Key">
+                            <input type="text" class="field-input secret-field" value="{{ $paymentApis['bkash']->api_key ?? '' }}" name="api_key" placeholder="Enter bKash API Key">
                         </div>
                         <div class="field-group">
                             <label class="field-label">Secret Key <span style="color:#f43f5e">*</span></label>
                             <div class="input-icon-wrap">
-                                <input type="password" class="field-input secret-field" value="" name="" placeholder="Enter bKash Secret Key">
+                                <input type="password" class="field-input secret-field" value="{{ $paymentApis['bkash']->api_secret ?? '' }}" name="api_secret" placeholder="Enter bKash Secret Key">
                                 <i class="las la-eye input-eye" onclick="toggleField(this)"></i>
                             </div>
                         </div>
                         <div class="field-group">
                             <label class="field-label">Base URL <span style="color:#9ca3af;font-weight:500;text-transform:none;font-size:11px;">(Optional)</span></label>
-                            <input type="url" class="field-input" value="" name="" placeholder="https://checkout.bkash.com/api">
+                            <input type="url" class="field-input" value="{{ $paymentApis['bkash']->base_url ?? '' }}" name="base_url" placeholder="https://checkout.bkash.com/api">
                         </div>
                         <div class="field-divider"></div>
                         <button type="submit" class="btn btn-payment-save">
@@ -256,28 +257,29 @@
                     </div>
                     <div class="payment-toggle-wrap">
                         <label class="switch">
-                            <input class="status-switch" type="checkbox" data-id="">
+                            <input class="status-switch" type="checkbox" data-id="{{ $paymentApis['nagad']->id ?? '' }}" {{ ($paymentApis['nagad']->status ?? '0') == '1' ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                 </div>
                 <div class="config-card-body">
-                    <form action="" method="post">
+                    <form class="payment-form" action="{{ route('payment.update') }}" method="post">
                         @csrf
+                        <input type="hidden" name="paymentapi_name" value="nagad">
                         <div class="field-group">
                             <label class="field-label">API Key <span style="color:#f43f5e">*</span></label>
-                            <input type="text" class="field-input secret-field" value="" name="" placeholder="Enter Nagad API Key">
+                            <input type="text" class="field-input secret-field" value="{{ $paymentApis['nagad']->api_key ?? '' }}" name="api_key" placeholder="Enter Nagad API Key">
                         </div>
                         <div class="field-group">
                             <label class="field-label">Secret Key <span style="color:#f43f5e">*</span></label>
                             <div class="input-icon-wrap">
-                                <input type="password" class="field-input secret-field" value="" name="" placeholder="Enter Nagad Secret Key">
+                                <input type="password" class="field-input secret-field" value="{{ $paymentApis['nagad']->api_secret ?? '' }}" name="api_secret" placeholder="Enter Nagad Secret Key">
                                 <i class="las la-eye input-eye" onclick="toggleField(this)"></i>
                             </div>
                         </div>
                         <div class="field-group">
                             <label class="field-label">Base URL <span style="color:#9ca3af;font-weight:500;text-transform:none;font-size:11px;">(Optional)</span></label>
-                            <input type="url" class="field-input" value="" name="" placeholder="https://api.nagad.com.bd">
+                            <input type="url" class="field-input" value="{{ $paymentApis['nagad']->base_url ?? '' }}" name="base_url" placeholder="https://api.nagad.com.bd">
                         </div>
                         <div class="field-divider"></div>
                         <button type="submit" class="btn btn-payment-save">
@@ -307,28 +309,29 @@
                     </div>
                     <div class="payment-toggle-wrap">
                         <label class="switch">
-                            <input class="status-switch" type="checkbox" data-id="">
+                            <input class="status-switch" type="checkbox" data-id="{{ $paymentApis['rocket']->id ?? '' }}" {{ ($paymentApis['rocket']->status ?? '0') == '1' ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                 </div>
                 <div class="config-card-body">
-                    <form action="" method="post">
+                    <form class="payment-form" action="{{ route('payment.update') }}" method="post">
                         @csrf
+                        <input type="hidden" name="paymentapi_name" value="rocket">
                         <div class="field-group">
                             <label class="field-label">API Key <span style="color:#f43f5e">*</span></label>
-                            <input type="text" class="field-input secret-field" value="" name="" placeholder="Enter Rocket API Key">
+                            <input type="text" class="field-input secret-field" value="{{ $paymentApis['rocket']->api_key ?? '' }}" name="api_key" placeholder="Enter Rocket API Key">
                         </div>
                         <div class="field-group">
                             <label class="field-label">Secret Key <span style="color:#f43f5e">*</span></label>
                             <div class="input-icon-wrap">
-                                <input type="password" class="field-input secret-field" value="" name="" placeholder="Enter Rocket Secret Key">
+                                <input type="password" class="field-input secret-field" value="{{ $paymentApis['rocket']->api_secret ?? '' }}" name="api_secret" placeholder="Enter Rocket Secret Key">
                                 <i class="las la-eye input-eye" onclick="toggleField(this)"></i>
                             </div>
                         </div>
                         <div class="field-group">
                             <label class="field-label">Base URL <span style="color:#9ca3af;font-weight:500;text-transform:none;font-size:11px;">(Optional)</span></label>
-                            <input type="url" class="field-input" value="" name="" placeholder="https://api.rocket.com.bd">
+                            <input type="url" class="field-input" value="{{ $paymentApis['rocket']->base_url ?? '' }}" name="base_url" placeholder="https://api.rocket.com.bd">
                         </div>
                         <div class="field-divider"></div>
                         <button type="submit" class="btn btn-payment-save">
@@ -358,28 +361,29 @@
                     </div>
                     <div class="payment-toggle-wrap">
                         <label class="switch">
-                            <input class="status-switch" type="checkbox" data-id="">
+                            <input class="status-switch" type="checkbox" data-id="{{ $paymentApis['sslcommerz']->id ?? '' }}" {{ ($paymentApis['sslcommerz']->status ?? '0') == '1' ? 'checked' : '' }}>
                             <span class="slider round"></span>
                         </label>
                     </div>
                 </div>
                 <div class="config-card-body">
-                    <form action="" method="post">
+                    <form class="payment-form" action="{{ route('payment.update') }}" method="post">
                         @csrf
+                        <input type="hidden" name="paymentapi_name" value="sslcommerz">
                         <div class="field-group">
                             <label class="field-label">Store ID <span style="color:#f43f5e">*</span></label>
-                            <input type="text" class="field-input secret-field" value="" name="" placeholder="Enter Store ID">
+                            <input type="text" class="field-input secret-field" value="{{ $paymentApis['sslcommerz']->username ?? '' }}" name="username" placeholder="Enter Store ID">
                         </div>
                         <div class="field-group">
                             <label class="field-label">Store Password <span style="color:#f43f5e">*</span></label>
                             <div class="input-icon-wrap">
-                                <input type="password" class="field-input secret-field" value="" name="" placeholder="Enter Store Password">
+                                <input type="password" class="field-input secret-field" value="{{ $paymentApis['sslcommerz']->password ?? '' }}" name="password" placeholder="Enter Store Password">
                                 <i class="las la-eye input-eye" onclick="toggleField(this)"></i>
                             </div>
                         </div>
                         <div class="field-group">
                             <label class="field-label">Base URL <span style="color:#9ca3af;font-weight:500;text-transform:none;font-size:11px;">(Optional)</span></label>
-                            <input type="url" class="field-input" value="" name="" placeholder="https://securepay.sslcommerz.com">
+                            <input type="url" class="field-input" value="{{ $paymentApis['sslcommerz']->base_url ?? '' }}" name="base_url" placeholder="https://securepay.sslcommerz.com">
                         </div>
                         <div class="field-divider"></div>
                         <button type="submit" class="btn btn-payment-save">
@@ -412,5 +416,60 @@ function toggleField(icon) {
         icon.classList.replace('la-eye-slash', 'la-eye');
     }
 }
+
+$(document).ready(function() {
+    // Form submission
+    $('.payment-form').on('submit', function(e) {
+        e.preventDefault();
+        let form = $(this);
+        let btn = form.find('.btn-payment-save');
+        let originalHtml = btn.html();
+        
+        btn.html('<i class="las la-spinner la-spin fs-16"></i> Saving...').prop('disabled', true);
+
+        $.ajax({
+            url: form.attr('action'),
+            type: form.attr('method'),
+            data: form.serialize(),
+            success: function(response) {
+                btn.html(originalHtml).prop('disabled', false);
+                if(response.status === 'success') {
+                    Toast.fire({ icon: 'success', title: response.message });
+                } else {
+                    Toast.fire({ icon: 'error', title: response.message });
+                }
+            },
+            error: function(xhr) {
+                btn.html(originalHtml).prop('disabled', false);
+                Toast.fire({ icon: 'error', title: 'Something went wrong!' });
+            }
+        });
+    });
+
+    // Status toggle
+    $('.status-switch').on('change', function() {
+        let id = $(this).data('id');
+        let isChecked = $(this).is(':checked');
+
+        $.ajax({
+            url: "{{ route('payment.status') }}",
+            type: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                id: id
+            },
+            success: function(response) {
+                if(response.status === 'success') {
+                    Toast.fire({ icon: 'success', title: response.message });
+                } else {
+                    Toast.fire({ icon: 'error', title: response.message });
+                }
+            },
+            error: function(xhr) {
+                Toast.fire({ icon: 'error', title: 'Failed to update status!' });
+            }
+        });
+    });
+});
 </script>
 @endsection

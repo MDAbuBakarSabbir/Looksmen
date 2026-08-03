@@ -643,18 +643,27 @@
                 <div class="modal-body p-4">
                     <p class="text-center text-muted mb-4 fs-14">অর্ডারটি কনফার্ম করতে অগ্রিম ডেলিভারি চার্জ পরিশোধ করুন।</p>
                     <div class="row g-3">
+                        @if(isset($activePaymentMethods) && in_array('bkash', $activePaymentMethods))
                         <div class="col-6 mb-3">
                             <div class="payment-card text-center p-3 border rounded cursor-pointer h-100 d-flex flex-column align-items-center justify-content-center" onclick="submitWithGateway('bkash')" style="transition: all 0.2s;">
                                 <img src="https://www.logo.wine/a/logo/BKash/BKash-Logo.wine.svg" class="img-fluid" style="max-height: 80px;" alt="bKash">
                                 <span class="d-block mt-2 small fw-600 text-dark">bKash</span>
                             </div>
                         </div>
+                        @endif
+                        @if(isset($activePaymentMethods) && (in_array('sslcommerz', $activePaymentMethods) || in_array('ssl', $activePaymentMethods)))
                         <div class="col-6 mb-3">
                             <div class="payment-card text-center p-3 border rounded cursor-pointer h-100 d-flex flex-column align-items-center justify-content-center" onclick="submitWithGateway('ssl')" style="transition: all 0.2s;">
                                 <img src="{{ asset('frontEnd/assets/img/OthersPayments.png') }}" class="img-fluid" style="max-height: 80px;" alt="SSLCommerz">
                                 <span class="d-block mt-2 small fw-600 text-dark">Cards/Others</span>
                             </div>
                         </div>
+                        @endif
+                        @if(isset($activePaymentMethods) && count($activePaymentMethods) == 0)
+                        <div class="col-12 text-center text-danger">
+                            <p>বর্তমানে কোনো অনলাইন পেমেন্ট মেথড চালু নেই।</p>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -1141,7 +1150,7 @@
 
         // ২. গেটওয়ে অনুযায়ী ফর্ম সাবমিট করার ফাংশন
         function submitWithGateway(gateway) {
-            let form = $('#confirm_order_btn').closest('form'); // আপনার মেইন ফর্ম আইডি
+            let form = $('#checkoutForm'); // আপনার মেইন ফর্ম আইডি
 
             if (gateway === 'bkash') {
                 form.attr('action', '{{ route('bkash.payment') }}');
@@ -1150,16 +1159,18 @@
             }
 
             // পেমেন্ট গেটওয়েতে যাওয়ার আগে একটি লোডিং দেখানো ভালো
-            Swal.fire({
-                title: 'অপেক্ষা করুন...',
-                text: 'আপনাকে পেমেন্ট গেটওয়েতে নিয়ে যাওয়া হচ্ছে।',
-                allowOutsideClick: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                }
-            });
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'অপেক্ষা করুন...',
+                    text: 'আপনাকে পেমেন্ট গেটওয়েতে নিয়ে যাওয়া হচ্ছে।',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+            }
 
-            form.submit();
+            form[0].submit();
         }
     </script>
     <script>

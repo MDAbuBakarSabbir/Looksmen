@@ -30,7 +30,6 @@ use App\Http\Controllers\ConversationController;
 use App\Http\Controllers\IncompleteOrdersController;
 use App\Http\Controllers\UserController;
 use App\Models\Orders;
-use App\Models\PaymentAPIS;
 use App\Models\Product;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
@@ -349,11 +348,11 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/courier/balance', 'getBalance')->name('courier.balance')->middleware('admin.permission:setup_courier_api');
     });
 
-    Route::controller(PaymentAPIS::class)->group(function () {
+    Route::controller(PaymentController::class)->group(function () {
         Route::get('/payment-api', 'index')->name('payment.index')->middleware('admin.permission:setup_payment_api');
+        Route::post('/payment-api/update', 'update')->name('payment.update')->middleware('admin.permission:setup_payment_api');
+        Route::post('/payment-api/status', 'status')->name('payment.status')->middleware('admin.permission:setup_payment_api');
     });
-
-    Route::controller(PaymentController::class)->group(function () {});
 
     Route::controller(FeatureActivationController::class)->group(function () {
         Route::get('/feature', 'index')->name('feature.index')->middleware('admin.permission:setup_feature_activation');
