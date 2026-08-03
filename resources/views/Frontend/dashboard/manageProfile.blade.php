@@ -159,7 +159,7 @@
         <div class="row">
             <!-- Sidebar -->
             <div class="col-lg-3 col-md-4 mb-4">
-                @include('frontEnd.dashboard.partials.usersideNav')
+                @include('Frontend.dashboard.partials.usersideNav')
             </div>
 
             <!-- Main Content -->
