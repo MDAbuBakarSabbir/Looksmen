@@ -372,8 +372,8 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="modal_title">Add New Address</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="background: none; border: none; font-size: 1.5rem;">
-                    <span aria-hidden="true">&times;</span>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="background: none; border: none;">
+                    <i class="las la-times fs-24"></i>
                 </button>
             </div>
             <div class="modal-body p-4">
@@ -383,7 +383,7 @@
                     
                     <div class="form-group mb-3">
                         <label>Receiver Name</label>
-                        <input id="address_value" class="form-control" name="receiver_name" placeholder="John Doe">
+                        <input id="name_value" class="form-control" name="name" placeholder="John Doe" required>
                     </div>
                     
                     <div class="form-group mb-3">
@@ -447,6 +447,68 @@
                     });
                 }
             });
+
+            // Address form AJAX submit
+            $('#address_form').on('submit', function(e) {
+                e.preventDefault();
+                let form = $(this);
+                let url = form.attr('action');
+                let formData = new FormData(this);
+
+                let submitBtn = form.find('button[type="submit"]');
+                let originalText = submitBtn.text();
+                submitBtn.text('Saving...').prop('disabled', true);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $('#addressModal').modal('hide');
+                        submitBtn.text(originalText).prop('disabled', false);
+
+                        if (typeof AIZ !== 'undefined') {
+                            AIZ.plugins.notify('success', response.message || 'Address saved successfully');
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message || 'Address saved successfully',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }
+
+                        // Reload the address container to show the new/updated address without full page reload
+                        $('.address-section-card .card-body').load(location.href + ' .address-section-card .card-body > *');
+                    },
+                    error: function(xhr) {
+                        submitBtn.text(originalText).prop('disabled', false);
+                        let errMsg = 'Something went wrong!';
+                        if(xhr.responseJSON && xhr.responseJSON.message) {
+                            errMsg = xhr.responseJSON.message;
+                        }
+                        if(xhr.responseJSON && xhr.responseJSON.errors) {
+                            let errors = xhr.responseJSON.errors;
+                            errMsg = Object.values(errors)[0][0];
+                        }
+                        
+                        if (typeof AIZ !== 'undefined') {
+                            AIZ.plugins.notify('danger', errMsg);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: errMsg,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }
+                    }
+                });
+            });
         });
     </script>
     <script>
@@ -455,9 +517,11 @@
             $('#address_form').attr('action', "{{ route('addresses.store') }}"); 
             $('#method_field').html(''); 
 
+            $('#name_value').val('');
             $('#address_value').val('');
             $('#phone_value').val('');
-            $('#state_id').val('').selectpicker('refresh');
+            $('#district_id').val('').trigger('change');
+            $('#thana_id').val('').trigger('change');
 
             $('#addressModal').modal('show');
         }
@@ -466,12 +530,19 @@
             $('#modal_title').text('Edit Address');
             let url = "{{ url('addresses/update') }}/" + id;
             $('#address_form').attr('action', url);
-            $('#method_field').html('<input type="hidden" name="_method" value="POST">');
+            $('#method_field').html('');
 
             $.get("{{ url('addresses/edit') }}/" + id, function(data) {
+                $('#name_value').val(data.name);
                 $('#address_value').val(data.address);
                 $('#phone_value').val(data.phone);
-                $('#state_id').val(data.state_id).selectpicker('refresh');
+                
+                $('#district_id').val(data.district_id).trigger('change');
+                
+                setTimeout(function() {
+                    $('#thana_id').val(data.thana_id).trigger('change');
+                }, 500);
+
                 $('#addressModal').modal('show');
             });
         }

@@ -28,12 +28,15 @@ class CouponsController extends Controller
             'end_date' => 'required'
         ]);
         $coupons = new Coupons();
+        $coupons->user_type = $request->user_type;
+        $coupons->use_type = $request->use_type;
         $coupons->coupon_type = $request->coupon_type;
         $coupons->code = $request->code;
         $coupons->details = $request->details;
         $coupons->discount = $request->discount;
         $coupons->discount_type = $request->discount_type;
         $coupons->min_cart_amount = $request->min_cart_amount;
+        $coupons->maximum_discount = $request->maximum_discount;
         $coupons->quantity = $request->quantity;
         $coupons->start_date = $request->start_date;
         $coupons->end_date = $request->end_date;
@@ -72,12 +75,15 @@ class CouponsController extends Controller
     {
 
         $coupons = Coupons::find($id);
+        if ($request->has('user_type')) $coupons->user_type = $request->user_type;
+        if ($request->has('use_type')) $coupons->use_type = $request->use_type;
         $coupons->coupon_type = $request->coupon_type;
         $coupons->code = $request->code;
         $coupons->details = $request->details;
         $coupons->discount = $request->discount;
         $coupons->discount_type = $request->discount_type;
         $coupons->min_cart_amount = $request->min_cart_amount;
+        $coupons->maximum_discount = $request->maximum_discount;
         $coupons->quantity = $request->quantity;
         $coupons->start_date = $request->start_date;
         $coupons->end_date = $request->end_date;

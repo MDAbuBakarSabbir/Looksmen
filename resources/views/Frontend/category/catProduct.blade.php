@@ -244,11 +244,13 @@
                                                     <span class="badge badge-soft-primary px-3 py-2 fs-13 fw-600 rounded-pill"
                                                         data-range-value-low="450.00"
                                                         id="input-slider-range-value-low"></span>
+                                                    <input type="hidden" name="min_price" value="450">
                                                 </div>
                                                 <div class="col-6 text-right">
                                                     <span class="badge badge-soft-primary px-3 py-2 fs-13 fw-600 rounded-pill"
                                                         data-range-value-high="15050.00"
                                                         id="input-slider-range-value-high"></span>
+                                                    <input type="hidden" name="max_price" value="15050">
                                                 </div>
                                             </div>
                                         </div>
@@ -307,20 +309,24 @@
                                 </div>
                                 <div class="col-6 col-lg-auto mt-3 mt-lg-0 w-lg-200px">
                                     <label class="mb-1 fw-600 text-muted fs-12 text-uppercase">Brands</label>
-                                    <select class="form-control form-control-sm aiz-selectpicker rounded-pill" data-live-search="true"
+                                    @php
+                                        $brands = \App\Models\Product::whereNotNull('brand_id')->where('brand_id', '!=', '')->select('brand_id')->distinct()->get();
+                                    @endphp
+                                    <select class="form-control form-control-sm custom-select rounded-pill"
                                         name="brand" onchange="filter()">
                                         <option value="">All Brands</option>
-                                        <option value="Apple-Rpu7X">Apple</option>
-                                        <option value="Dove-5KnP4">Dove</option>
-                                        <option value="Addidas-A4poF">Addidas</option>
-                                        <option value="Gucci-FCyXE">Gucci</option>
-                                        <option value="Lifeboy-f28SD">Lifeboy</option>
-                                        <option value="Huwaei-rvanQ">Huwaei</option>
+                                        @foreach($brands as $b)
+                                            @php
+                                                $brandParts = explode('-', $b->brand_id);
+                                                $brandName = count($brandParts) > 1 ? implode('-', array_slice($brandParts, 0, -1)) : $b->brand_id;
+                                            @endphp
+                                            <option value="{{ $b->brand_id }}">{{ $brandName }}</option>
+                                        @endforeach
                                     </select>
                                 </div>
                                 <div class="col-6 col-lg-auto mt-3 mt-lg-0 w-lg-200px">
                                     <label class="mb-1 fw-600 text-muted fs-12 text-uppercase">Sort by</label>
-                                    <select class="form-control form-control-sm aiz-selectpicker rounded-pill" name="sort_by"
+                                    <select class="form-control form-control-sm custom-select rounded-pill" name="sort_by"
                                         onchange="filter()">
                                         <option value="newest">Newest Arrivals</option>
                                         <option value="oldest">Oldest Arrivals</option>
@@ -352,7 +358,7 @@
                                 <nav id="catPaginationLinks" class="d-flex align-items-center flex-wrap" style="gap:6px;">
                                     @if($catProducts->lastPage() > 1)
                                         @if($catProducts->currentPage() > 1)
-                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->currentPage() - 1 }}" style="border-radius:8px;min-width:38px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->currentPage() - 1 }}" style="border-radius:8px;min-width:38px;">
                                                 <i class="la la-angle-left"></i>
                                             </button>
                                         @endif
@@ -361,18 +367,18 @@
                                             $pe = min($catProducts->lastPage(), $catProducts->currentPage() + 2);
                                         @endphp
                                         @if($ps > 1)
-                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="1" style="border-radius:8px;min-width:38px;">1</button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="1" style="border-radius:8px;min-width:38px;">1</button>
                                             @if($ps > 2)<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>@endif
                                         @endif
                                         @for($p = $ps; $p <= $pe; $p++)
-                                            <button class="btn btn-sm cat-page-btn {{ $p == $catProducts->currentPage() ? 'btn-primary' : 'btn-outline-secondary' }}" data-page="{{ $p }}" style="border-radius:8px;min-width:38px;">{{ $p }}</button>
+                                            <button type="button" class="btn btn-sm cat-page-btn {{ $p == $catProducts->currentPage() ? 'btn-primary' : 'btn-outline-secondary' }}" data-page="{{ $p }}" style="border-radius:8px;min-width:38px;">{{ $p }}</button>
                                         @endfor
                                         @if($pe < $catProducts->lastPage())
                                             @if($pe < $catProducts->lastPage() - 1)<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>@endif
-                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->lastPage() }}" style="border-radius:8px;min-width:38px;">{{ $catProducts->lastPage() }}</button>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->lastPage() }}" style="border-radius:8px;min-width:38px;">{{ $catProducts->lastPage() }}</button>
                                         @endif
                                         @if($catProducts->currentPage() < $catProducts->lastPage())
-                                            <button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->currentPage() + 1 }}" style="border-radius:8px;min-width:38px;">
+                                            <button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="{{ $catProducts->currentPage() + 1 }}" style="border-radius:8px;min-width:38px;">
                                                 <i class="la la-angle-right"></i>
                                             </button>
                                         @endif
@@ -438,22 +444,22 @@
             var e = Math.min(data.last_page, data.current_page + 2);
             var html = '';
             if (data.current_page > 1) {
-                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + (data.current_page - 1) + '" style="border-radius:8px;min-width:38px;"><i class="la la-angle-left"></i></button>';
+                html += '<button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + (data.current_page - 1) + '" style="border-radius:8px;min-width:38px;"><i class="la la-angle-left"></i></button>';
             }
             if (s > 1) {
-                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="1" style="border-radius:8px;min-width:38px;">1</button>';
+                html += '<button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="1" style="border-radius:8px;min-width:38px;">1</button>';
                 if (s > 2) html += '<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>';
             }
             for (var p = s; p <= e; p++) {
                 var cls = (p === data.current_page) ? 'btn-primary' : 'btn-outline-secondary';
-                html += '<button class="btn btn-sm ' + cls + ' cat-page-btn" data-page="' + p + '" style="border-radius:8px;min-width:38px;">' + p + '</button>';
+                html += '<button type="button" class="btn btn-sm ' + cls + ' cat-page-btn" data-page="' + p + '" style="border-radius:8px;min-width:38px;">' + p + '</button>';
             }
             if (e < data.last_page) {
                 if (e < data.last_page - 1) html += '<span class="btn btn-sm disabled" style="min-width:38px;">&hellip;</span>';
-                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + data.last_page + '" style="border-radius:8px;min-width:38px;">' + data.last_page + '</button>';
+                html += '<button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + data.last_page + '" style="border-radius:8px;min-width:38px;">' + data.last_page + '</button>';
             }
             if (data.current_page < data.last_page) {
-                html += '<button class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + (data.current_page + 1) + '" style="border-radius:8px;min-width:38px;"><i class="la la-angle-right"></i></button>';
+                html += '<button type="button" class="btn btn-outline-secondary btn-sm cat-page-btn" data-page="' + (data.current_page + 1) + '" style="border-radius:8px;min-width:38px;"><i class="la la-angle-right"></i></button>';
             }
             $('#catPaginationLinks').html(html);
             $('#catPaginationInfo').html(
@@ -472,6 +478,7 @@
                     type:      $('#catType').val(),
                     id:        $('#catId').val(),
                     sort_by:   $('[name="sort_by"]').val(),
+                    brand:     $('[name="brand"]').val(),
                     min_price: $('[name="min_price"]').val(),
                     max_price: $('[name="max_price"]').val(),
                     page:      catFilterPage
@@ -497,9 +504,48 @@
         }
 
         // Paginator click (delegated)
-        $(document).on('click', '.cat-page-btn', function() {
+        $(document).on('click', '.cat-page-btn', function(e) {
+            e.preventDefault();
             catFilterPage = parseInt($(this).data('page'));
             fetchCatProducts();
+        });
+
+        $(document).ready(function() {
+            var slider = document.getElementById('input-slider-range');
+            if(slider && typeof noUiSlider !== 'undefined') {
+                if(!slider.noUiSlider) {
+                    var min = parseFloat(slider.getAttribute('data-range-value-min')) || 0;
+                    var max = parseFloat(slider.getAttribute('data-range-value-max')) || 15000;
+                    var startLow = parseFloat(document.getElementById('input-slider-range-value-low').getAttribute('data-range-value-low')) || min;
+                    var startHigh = parseFloat(document.getElementById('input-slider-range-value-high').getAttribute('data-range-value-high')) || max;
+
+                    noUiSlider.create(slider, {
+                        start: [startLow, startHigh],
+                        connect: true,
+                        range: {
+                            'min': min,
+                            'max': max
+                        }
+                    });
+
+                    slider.noUiSlider.on('update', function (values, handle) {
+                        if (handle == 0) {
+                            $('#input-slider-range-value-low').text(values[0]);
+                            $('[name="min_price"]').val(values[0]);
+                        } else {
+                            $('#input-slider-range-value-high').text(values[1]);
+                            $('[name="max_price"]').val(values[1]);
+                        }
+                    });
+                }
+                
+                // Bind change event to trigger ajax
+                slider.noUiSlider.on('change', function (values, handle) {
+                    $('[name="min_price"]').val(values[0]);
+                    $('[name="max_price"]').val(values[1]);
+                    filter();
+                });
+            }
         });
     </script>
 @endsection

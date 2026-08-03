@@ -1274,6 +1274,10 @@
                             @if($user?->hasPermission('manage_reviews'))
                             <li><a href="{{ Route::has('reviews.index') ? route('reviews.index') : '#' }}">Reviews</a></li>
                             @endif
+                            @php
+                                $lowStockCount = \App\Models\Product::whereBetween('stock', [1, 9])->count();
+                            @endphp
+                            <li><a href="{{ Route::has('product.index') ? route('product.index', ['stock_status' => 'low_stock']) : '#' }}">Low Stock [{{ $lowStockCount }}]</a></li>
                         </ul>
                     </li>
                     @endif

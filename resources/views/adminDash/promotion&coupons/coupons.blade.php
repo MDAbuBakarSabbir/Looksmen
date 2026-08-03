@@ -9,10 +9,10 @@
             <div class="card shadow-sm border-0 rounded-lg mb-4">
                 <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-700 text-dark">
-                        <i class="las la-ticket-alt mr-2 text-primary fs-24 align-middle"></i> Coupons Management
+                        <i class="la la-ticket-alt mr-2 text-primary fs-24 align-middle"></i> Coupons Management
                     </h5>
                     <button id="addCoupon" class="btn btn-primary btn-sm rounded-pill px-3 fw-600 shadow-sm d-flex align-items-center">
-                        <i class="las la-plus fs-16 mr-1"></i> Add New Coupon
+                        <i class="la la-plus fs-16 mr-1"></i> Add New Coupon
                     </button>
                 </div>
                 <div class="card-body p-0">
@@ -23,9 +23,11 @@
                                     <th class="py-3 px-4 text-left">Type</th>
                                     <th class="py-3">Code</th>
                                     <th class="py-3">Discount</th>
-                                    <th class="py-3">Start Date</th>
-                                    <th class="py-3">End Date</th>
-                                    <th class="py-3">Status</th>
+                                    <th class="py-3">Date</th>
+                                    <th class="py-3">Quantity</th>
+                                    <th class="py-3">Used</th>
+                                    <th class="py-3">Active Status</th>
+                                    <th class="py-3">Expired Status</th>
                                     <th class="py-3 text-right px-4">Action</th>
                                 </tr>
                             </thead>
@@ -41,20 +43,31 @@
                                         </td>
                                         <td><span class="fw-700 text-dark fs-14 bg-light px-2 py-1 rounded border">{{ $coupon->code }}</span></td>
                                         <td class="fw-600 text-primary">{{ $coupon->discount }}{{ $coupon->discount_type == 'percent' ? '%' : ' ৳' }}</td>
-                                        <td class="text-muted fs-13">{{ date('d M Y', strtotime($coupon->start_date)) }}</td>
-                                        <td class="text-muted fs-13">{{ date('d M Y', strtotime($coupon->end_date)) }}</td>
+                                        <td class="text-muted fs-13">{{ date('d M Y', strtotime($coupon->start_date)) }}-{{ date('d M Y', strtotime($coupon->end_date)) }}</td>
+                                        <td class="text-muted fs-13">{{ $coupon->quantity }}</td>
+                                        <td class="text-muted fs-13">{{ $coupon->used ?? 0 }}</td>
                                         <td>
                                             <label class="switch mb-0">
                                                 <input class="status-switch" type="checkbox" data-id="{{ $coupon->id }}" {{ $coupon->status == '1' ? 'checked' : '' }}>
                                                 <span class="slider round shadow-sm" title="Click to change status"></span>
                                             </label>
                                         </td>
+                                        <td>
+                                            @if(strtotime($coupon->end_date) < strtotime(date('Y-m-d')))
+                                                <span class="badge badge-soft-danger px-2 py-1 rounded-pill fw-600">Expired</span>
+                                            @else
+                                                <span class="badge badge-soft-success px-2 py-1 rounded-pill fw-600">Valid</span>
+                                            @endif
+                                        </td>
                                         <td class="text-right px-4">
-                                            <button title="Edit" class="btn btn-icon btn-sm btn-soft-primary rounded-circle mr-2 editCoupon shadow-sm" data-id="{{ $coupon->id }}">
-                                                <i class="las la-pen fs-16"></i>
+                                            <button title="View Coupon" class="btn btn-icon btn-sm btn-soft-primary rounded-circle mr-2 shadow-sm" data-id="{{ $coupon->id }}">
+                                                <i class="fa-solid fa-eye"></i>
                                             </button>
-                                            <button class="btn btn-icon btn-sm btn-soft-danger rounded-circle couponDeleteBtn shadow-sm" data-id="{{ $coupon->id }}" title="Delete">
-                                                <i class="las la-trash fs-16"></i>
+                                            <button title="Edit Coupon" class="btn btn-icon btn-sm btn-soft-primary rounded-circle mr-2 editCoupon shadow-sm" data-id="{{ $coupon->id }}">
+                                                <i class="fa-solid fa-pen-to-square"></i>
+                                            </button>
+                                            <button title="Delete Coupon" class="btn btn-icon btn-sm btn-soft-danger rounded-circle couponDeleteBtn shadow-sm" data-id="{{ $coupon->id }}" title="Delete">
+                                                <i class="fa-solid fa-trash"></i>
                                             </button>
                                         </td>
                                     </tr>
@@ -77,7 +90,7 @@
             <div id="couponModal" class="custom-modal-overlay">
                 <div class="custom-modal-box shadow-lg rounded-lg bg-white">
                     <div class="modal-header border-bottom py-3 px-4 bg-light rounded-top">
-                        <h5 class="fw-700 text-dark mb-0"><i class="las la-plus-circle text-primary mr-2"></i>Add New Coupon</h5>
+                        <h5 class="fw-700 text-dark mb-0"><i class="fa-solid fa-plus-circle text-primary mr-2"></i>Add New Coupon</h5>
                         <button type="button" class="close cancel-btn bg-transparent border-0 fs-24 text-muted" id="cancelBtn">&times;</button>
                     </div>
                     <form id="addCouponForm" class="p-4">
@@ -138,12 +151,17 @@
                                 <label class="fw-600 text-dark fs-13">Discount Value</label>
                                 <input type="number" class="form-control form-control-sm modern-input" name="discount" placeholder="Value" required>
                             </div>
-                            <div class="col-md-4 mb-3">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label class="fw-600 text-dark fs-13">Quantity</label>
                                 <input type="number" class="form-control form-control-sm modern-input" name="quantity" placeholder="Limit" required>
                             </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-600 text-dark fs-13">Maximum Discount (৳)</label>
+                                <input type="number" class="form-control form-control-sm modern-input" name="maximum_discount" placeholder="100">
+                            </div>
                         </div>
-
                         <div class="row">
                             <div class="col-md-6 mb-4">
                                 <label class="fw-600 text-dark fs-13">Start Date</label>
@@ -230,9 +248,15 @@
                                 <label class="fw-600 text-dark fs-13">Discount Value</label>
                                 <input type="number" class="form-control form-control-sm modern-input" name="discount" id="edit_discount" placeholder="Value" required>
                             </div>
-                            <div class="col-md-4 mb-3">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
                                 <label class="fw-600 text-dark fs-13">Quantity</label>
                                 <input type="number" class="form-control form-control-sm modern-input" name="quantity" id="edit_quantity" placeholder="Limit" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="fw-600 text-dark fs-13">Maximum Discount (৳)</label>
+                                <input type="number" class="form-control form-control-sm modern-input" name="maximum_discount" id="edit_maximum_discount" placeholder="100">
                             </div>
                         </div>
 
@@ -409,19 +433,25 @@
                             : '<span class="badge badge-soft-warning px-2 py-1 rounded-pill fw-600">Product</span>';
                         let discountVal = coupon.discount + (coupon.discount_type == 'percent' ? '%' : ' ৳');
 
+                        let today = new Date().toISOString().split('T')[0];
+                        let isExpired = coupon.end_date < today;
+                        let expiredBadge = isExpired ? '<span class="badge badge-soft-danger px-2 py-1 rounded-pill fw-600">Expired</span>' : '<span class="badge badge-soft-success px-2 py-1 rounded-pill fw-600">Valid</span>';
+
                         let newRow = `
                         <tr class="border-bottom">
                             <td class="text-left px-4">${typeBadge}</td>
                             <td><span class="fw-700 text-dark fs-14 bg-light px-2 py-1 rounded border">${coupon.code}</span></td>
                             <td class="fw-600 text-primary">${discountVal}</td>
-                            <td class="text-muted fs-13">${coupon.start_date}</td>
-                            <td class="text-muted fs-13">${coupon.end_date}</td>
+                            <td class="text-muted fs-13">${coupon.start_date} - ${coupon.end_date}</td>
+                            <td class="text-muted fs-13">${coupon.quantity}</td>
+                            <td class="text-muted fs-13">${coupon.used || 0}</td>
                             <td>
                                 <label class="switch mb-0">
                                     <input class="status-switch" type="checkbox" data-id="${coupon.id}" checked>
                                     <span class="slider round shadow-sm" title="Click to change status"></span>
                                 </label>
                             </td>
+                            <td>${expiredBadge}</td>
                             <td class="text-right px-4">
                                 <button title="Edit" class="btn btn-icon btn-sm btn-soft-primary rounded-circle mr-2 editCoupon shadow-sm" data-id="${coupon.id}">
                                     <i class="las la-pen fs-16"></i>
@@ -486,6 +516,7 @@
                     document.getElementById('edit_discount').value = data.discount;
                     document.getElementById('edit_discount_type').value = data.discount_type;
                     if(document.getElementById('edit_quantity')) document.getElementById('edit_quantity').value = data.quantity || 1;
+                    if(document.getElementById('edit_maximum_discount')) document.getElementById('edit_maximum_discount').value = data.maximum_discount || '';
                     document.getElementById('edit_start_date').value = data.start_date;
                     document.getElementById('edit_end_date').value = data.end_date;
 

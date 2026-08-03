@@ -370,11 +370,17 @@
                         
                         <!-- Address Book Snippet -->
                         <div class="bg-light p-3 rounded mb-4 border">
+                            <h5>Saved Address</h5>
                             <div class="row gutters-5">
                                 @foreach ($addresses as $address)
                                     <div class="col-md-6 col-12 mb-3">
-                                        <label class="aiz-megabox d-block bg-white mb-0 border rounded p-3 h-100 position-relative cursor-pointer" style="border-color: #cbd5e1 !important;">
-                                            <input type="radio" name="address_id" value="{{ $address->id }}" required="">
+                                        <label class="aiz-megabox address-box d-block bg-white mb-0 border rounded p-3 h-100 position-relative cursor-pointer" style="border-width: 2px !important; transition: all 0.3s;">
+                                            <input type="radio" name="address_id" value="{{ $address->id }}" required=""
+                                                data-name="{{ $address->name }}"
+                                                data-phone="{{ $address->phone }}"
+                                                data-address="{{ $address->address }}"
+                                                data-district="{{ $address->district_id }}"
+                                                {{ $address->set_default == 1 ? 'checked' : '' }}>
                                             <span class="d-flex align-items-start mt-2">
                                                 <span class="flex-grow-1 text-left fs-13">
                                                     <div class="mb-1"><span class="text-muted">Name:</span> <span class="fw-600">{{ $address->name }}</span></div>
@@ -508,7 +514,7 @@
                                         </div>
                                     </div>
                                     <div class="cart-price-col">
-                                        <div class="text-muted fs-12 mb-1">৳{{ $price }} /ea</div>
+                                        <div class="text-muted fs-12 mb-1">৳{{ $price }} /pcs</div>
                                         <div class="cart-price-val">৳<span class="line-total-{{ $id }}">{{ $line_total }}</span></div>
                                     </div>
                                 </div>
@@ -568,6 +574,62 @@
 </div>
 
 <!-- Modals -->
+<div class="modal fade" id="addressModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 16px; overflow:hidden;">
+            <div class="modal-header bg-light border-0 py-3">
+                <h6 class="modal-title fw-700" id="modal_title">Add New Address</h6>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <form id="address_form" method="POST" action="">
+                    @csrf
+                    <div id="method_field"></div>
+                    
+                    <div class="form-group mb-3">
+                        <label>Receiver Name</label>
+                        <input id="name_value" class="form-control" name="name" placeholder="John Doe" required>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label>Phone</label>
+                        <input type="text" id="phone_value" class="form-control" name="phone" placeholder="+880 1..." required>
+                    </div>
+                    
+                    <div class="form-group mb-3">
+                        <label>Address</label>
+                        <textarea id="address_value" class="form-control" name="address" rows="3" placeholder="House 123, Road 4..." required></textarea>
+                    </div>
+
+                    <div class="form-group mb-3">
+                        <label>District</label>
+                        <select class="form-control select2" name="district_id" id="district_id" required>
+                            <option value="">Select District</option>
+                            @foreach ($districts as $district)
+                                <option value="{{ $district->id }}">{{ $district->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label>Thana</label>
+                        <select class="form-control select2" name="thana_id" id="thana_id" required>
+                            <option value="">Select District First</option>
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="button" class="btn btn-light mr-3" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="background: #6366f1; border: none;">Save Address</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 @if ($featuresConfig['payment_api'] == '1')
     <div class="modal fade" id="paymentOptionModal" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-sm" role="document" style="max-width: 450px;">
@@ -801,10 +863,147 @@
                 calculateGrandTotal(currentSubtotal);
             }
             updateOrderButtons();
+
+            // Address Book Logic
+            function applySelectedAddress() {
+                let selected = $('input[name="address_id"]:checked');
+                
+                // Remove glow from all address boxes
+                $('.address-box').css('cssText', 'border-color: #cbd5e1 !important; border-width: 2px !important; box-shadow: none !important; transition: all 0.3s;');
+                
+                if (selected.length) {
+                    // Add glow to selected address box
+                    selected.closest('.address-box').css('cssText', 'border-color: #6366f1 !important; border-width: 2px !important; box-shadow: 0 0 15px rgba(99, 102, 241, 0.2) !important; transition: all 0.3s;');
+
+                    $('#name').val(selected.data('name'));
+                    $('#phone').val(selected.data('phone'));
+                    $('#address').val(selected.data('address'));
+                    
+                    let districtId = selected.data('district');
+                    if (districtId) {
+                        $('#district_select').val(districtId).trigger('change');
+                    }
+                }
+            }
+
+            $(document).on('change', 'input[name="address_id"]', applySelectedAddress);
+            applySelectedAddress();
         });
     </script>
 
     <script>
+        function add_new_address() {
+            $('#modal_title').text('Add New Address');
+            $('#address_form').attr('action', "{{ route('addresses.store') }}"); 
+            $('#method_field').html(''); 
+
+            $('#name_value').val('');
+            $('#address_value').val('');
+            $('#phone_value').val('');
+            $('#district_id').val('').trigger('change');
+            $('#thana_id').val('').trigger('change');
+
+            $('#addressModal').modal('show');
+        }
+
+        function edit_address(id) {
+            $('#modal_title').text('Edit Address');
+            let url = "{{ url('addresses/update') }}/" + id;
+            $('#address_form').attr('action', url);
+            $('#method_field').html('');
+
+            $.get("{{ url('addresses/edit') }}/" + id, function(data) {
+                $('#name_value').val(data.name);
+                $('#address_value').val(data.address);
+                $('#phone_value').val(data.phone);
+                
+                $('#district_id').val(data.district_id).trigger('change');
+                
+                setTimeout(function() {
+                    $('#thana_id').val(data.thana_id).trigger('change');
+                }, 500);
+
+                $('#addressModal').modal('show');
+            });
+        }
+
+        $(document).ready(function() {
+            $(document).on('change', '#district_id', function() {
+                let district_id = $(this).val();
+                let thanaSelect = $('#thana_id');
+
+                if (district_id) {
+                    $.ajax({
+                        url: "{{ url('/get-thanas') }}/" + district_id,
+                        type: "GET",
+                        success: function(data) {
+                            thanaSelect.empty().append('<option value="">Select Thana</option>');
+                            $.each(data, function(key, value) {
+                                thanaSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
+                            });
+                            thanaSelect.trigger('change');
+                        }
+                    });
+                }
+            });
+
+            $('#address_form').on('submit', function(e) {
+                e.preventDefault();
+                let form = $(this);
+                let url = form.attr('action');
+                let formData = new FormData(this);
+
+                let submitBtn = form.find('button[type="submit"]');
+                let originalText = submitBtn.text();
+                submitBtn.text('Saving...').prop('disabled', true);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $('#addressModal').modal('hide');
+                        submitBtn.text(originalText).prop('disabled', false);
+
+                        if (typeof AIZ !== 'undefined') {
+                            AIZ.plugins.notify('success', response.message || 'Address saved successfully');
+                        } else {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Success',
+                                text: response.message || 'Address saved successfully',
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }
+
+                        // Reload address book snippet to show the new/updated address
+                        $('.bg-light.p-3.rounded.mb-4.border').load(location.href + ' .bg-light.p-3.rounded.mb-4.border > *', function() {
+                            $('input[name="address_id"]:checked').trigger('change');
+                        });
+                    },
+                    error: function(xhr) {
+                        submitBtn.text(originalText).prop('disabled', false);
+                        let errMsg = 'Something went wrong!';
+                        if(xhr.responseJSON && xhr.responseJSON.message) {
+                            errMsg = xhr.responseJSON.message;
+                        }
+                        if (typeof AIZ !== 'undefined') {
+                            AIZ.plugins.notify('danger', errMsg);
+                        } else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: errMsg,
+                                timer: 1500,
+                                showConfirmButton: false
+                            });
+                        }
+                    }
+                });
+            });
         function applyCoupon() {
             // ১. সিলেক্টরগুলো ঠিক করা
             let codeInput = $('#coupon_code'); // ইনপুট এলিমেন্ট
