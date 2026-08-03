@@ -11,7 +11,7 @@ class AdminPermission
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next, string $permission)
     {
@@ -29,11 +29,11 @@ class AdminPermission
             }
         }
 
-        if (!$user || !$hasPermission) {
+        if (! $user || ! $hasPermission) {
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'You do not have permission to perform this action.'
+                    'message' => 'You do not have permission to perform this action.',
                 ], 403);
             }
             abort(403, 'You do not have permission to access this operation.');

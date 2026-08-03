@@ -3,13 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\Product;
+use App\Models\Wishlist;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
-use App\Models\Wishlist;
-use App\Models\Product;
+
 class ProfileController extends Controller
 {
     /**
@@ -17,7 +18,7 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('frontEnd.dashboard.manageProfile', [
+        return view('Frontend.dashboard.manageProfile', [
             'user' => $request->user(),
         ]);
     }
@@ -58,12 +59,16 @@ class ProfileController extends Controller
 
         return Redirect::to('/');
     }
-    public function purchaseHistory(){
+
+    public function purchaseHistory()
+    {
         return view('Frontend.dashboard.purchaseHistory');
     }
 
-    public function wishlist(){
+    public function wishlist()
+    {
         $wishlists = Wishlist::where('user_id', Auth::id())->with('product')->get();
+
         return view('Frontend.dashboard.wishlist', compact('wishlists'));
     }
 
@@ -76,10 +81,12 @@ class ProfileController extends Controller
             }
             Wishlist::create([
                 'user_id' => Auth::id(),
-                'product_id' => $request->product_id
+                'product_id' => $request->product_id,
             ]);
+
             return response()->json(['status' => 'success', 'message' => 'Product added to wishlist successfully']);
         }
+
         return response()->json(['status' => 'error', 'message' => 'Please login first'], 401);
     }
 
@@ -87,27 +94,34 @@ class ProfileController extends Controller
     {
         if (Auth::check()) {
             Wishlist::where('user_id', Auth::id())->where('product_id', $request->product_id)->delete();
+
             return response()->json(['status' => 'success', 'message' => 'Product removed from wishlist']);
         }
+
         return response()->json(['status' => 'error', 'message' => 'Please login first'], 401);
     }
 
-    public function compare(){
+    public function compare()
+    {
         $compareSession = session()->get('compare', []);
         $productIds = array_keys($compareSession);
         $products = Product::whereIn('id', $productIds)->with('firstImage')->get();
+
         return view('Frontend.dashboard.compare', compact('products'));
     }
 
-    public function conversation(){
+    public function conversation()
+    {
         return view('Frontend.dashboard.conversation');
     }
 
-    public function myWallet(){
+    public function myWallet()
+    {
         return view('Frontend.dashboard.myWallet');
     }
 
-    public function supportTicket(){
+    public function supportTicket()
+    {
         return view('Frontend.dashboard.supportTicket');
     }
 }

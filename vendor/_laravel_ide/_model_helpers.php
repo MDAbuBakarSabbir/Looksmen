@@ -6785,6 +6785,7 @@ namespace App\Models {
      * @property string $end_date
      * @property string $start_date
      * @property int $used
+     * @property float|null $maximum_discount
      * @property int $quantity
      * @property string|null $min_cart_amount
      * @property string $discount
@@ -6805,6 +6806,7 @@ namespace App\Models {
      * @method static \Illuminate\Database\Eloquent\Builder<Coupons>|Coupons whereDiscount($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Coupons>|Coupons whereMinCartAmount($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Coupons>|Coupons whereQuantity($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<Coupons>|Coupons whereMaximumDiscount($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Coupons>|Coupons whereUsed($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Coupons>|Coupons whereStartDate($value)
      * @method static \Illuminate\Database\Eloquent\Builder<Coupons>|Coupons whereEndDate($value)
@@ -11950,6 +11952,28 @@ namespace App\Models {
     /**
      * App\Models\PaymentAPIS
      *
+     * @property \Illuminate\Support\Carbon|null $updated_at
+     * @property \Illuminate\Support\Carbon|null $created_at
+     * @property string $status
+     * @property string|null $refresh_token
+     * @property string|null $api_key
+     * @property string|null $api_secret
+     * @property string|null $base_url
+     * @property string|null $password
+     * @property string|null $username
+     * @property string $paymentapi_name
+     * @property int $id
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereId($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS wherePaymentapiName($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereUsername($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS wherePassword($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereBaseUrl($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereApiSecret($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereApiKey($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereRefreshToken($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereStatus($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereCreatedAt($value)
+     * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS whereUpdatedAt($value)
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS newModelQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS newQuery()
      * @method static \Illuminate\Database\Eloquent\Builder<PaymentAPIS>|PaymentAPIS query()
