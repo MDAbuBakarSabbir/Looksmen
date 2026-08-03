@@ -278,67 +278,31 @@
             max-width: 100%;
         }
 
-        /* Make customer dashboard sidebar an off-canvas drawer on mobile */
-        @media (max-width: 991.98px) {
-
-            /* Hide the column wrapper on mobile — sidenav becomes a fixed drawer */
-            .col-lg-3:has(.user-sidenav),
-            .col-md-4:has(.user-sidenav) {
+        /* Hide in-page user-sidenav on mobile, but display inside aiz-mobile-side-nav drawer */
+        @media (max-width: 1199.98px) {
+            .user-sidenav {
                 display: none !important;
             }
-
-            /* The sidenav itself: fixed off-canvas, pushed off to the left */
-            .user-sidenav {
-                position: fixed !important;
-                top: 0 !important;
-                left: -300px !important;
-                width: 280px !important;
+            .aiz-mobile-side-nav .collapse-sidebar {
                 height: 100vh !important;
-                z-index: 1055 !important;
+                max-height: 100vh !important;
+                overflow-y: auto !important;
                 background: #ffffff !important;
-                box-shadow: 5px 0 30px rgba(0,0,0,0.18) !important;
-                transition: left 0.32s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+            .aiz-mobile-side-nav .user-sidenav {
+                display: block !important;
+                margin-bottom: 0 !important;
                 border-radius: 0 !important;
                 border: none !important;
-                display: block !important;
-                overflow-y: auto !important;
-                margin: 0 !important;
+                box-shadow: none !important;
             }
-
-            /* When opened, slide in */
-            .user-sidenav.show {
-                left: 0 !important;
-            }
-
-            /* Backdrop */
-            .user-sidenav-backdrop {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                background: rgba(0, 0, 0, 0.5);
-                z-index: 1050;
-                display: none;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-            .user-sidenav-backdrop.show {
-                display: block;
-                opacity: 1;
-            }
-            body.sidenav-open {
-                overflow: hidden !important;
-            }
-
-            /* Mobile menu open button — only visible on dashboard pages */
             .mobile-dashboard-toggle {
                 display: inline-block !important;
             }
         }
 
         /* On desktop always hide the mobile toggle */
-        @media (min-width: 992px) {
+        @media (min-width: 1200px) {
             .mobile-dashboard-toggle {
                 display: none !important;
             }
@@ -370,28 +334,28 @@
 
                     <div class="col-5 text-right d-none d-lg-block">
                         <ul class="list-inline mb-0 h-100 d-flex justify-content-end align-items-center">
-                    @auth
-                        <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
-                                <a href="{{ route('login') }}"
-                                    class="text-reset d-inline-block opacity-60 py-2">Account</a>
-                            </li>
-                        <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
-                            <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                                        class="text-reset d-inline-block opacity-60 py-2">Logout</a>
-                        </li>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                    @else
+                            @auth
+                                <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
+                                        <a href="{{ route('login') }}"
+                                            class="text-reset d-inline-block opacity-60 py-2">Account</a>
+                                    </li>
+                                <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
+                                    <a href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
+                                                class="text-reset d-inline-block opacity-60 py-2">Logout</a>
+                                </li>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
+                                    @csrf
+                                </form>
+                            @else
 
-                            <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
-                                <a href="{{ route('login') }}"
-                                    class="text-reset d-inline-block opacity-60 py-2">Login</a>
-                            </li>
-                            <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
-                                <a href="{{ route('register') }}" class="text-reset d-inline-block opacity-60 py-2">Sign Up</a>
+                                    <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
+                                        <a href="{{ route('login') }}"
+                                            class="text-reset d-inline-block opacity-60 py-2">Login</a>
+                                    </li>
+                                    <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
+                                        <a href="{{ route('register') }}" class="text-reset d-inline-block opacity-60 py-2">Sign Up</a>
 
-                            </li> @endauth
+                                    </li> @endauth
 
                         </ul>
                     </div>
@@ -980,111 +944,6 @@
         </div>
     </div>
 
-    @auth
-        <div class="aiz-mobile-side-nav collapse-sidebar-wrap sidebar-xl d-xl-none z-1035">
-            <div class="overlay dark c-pointer overlay-fixed" data-toggle="class-toggle" data-backdrop="static"
-                data-target=".aiz-mobile-side-nav" data-same=".mobile-side-nav-thumb"></div>
-            <div class="collapse-sidebar bg-white">
-                <div class="aiz-user-sidenav-wrap position-relative z-1 shadow-sm">
-                    <div class="aiz-user-sidenav rounded overflow-auto c-scrollbar-light pb-5 pb-xl-0">
-                        <div class="p-4 text-xl-center mb-4 border-bottom bg-primary text-white position-relative">
-                            <span class="avatar avatar-md mb-3">
-                                <img src="{{ asset('frontend/assets/img/avatar-place.png') }}"
-                                    class="image rounded-circle"
-                                    onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/avatar-place.png') }}';">
-                            </span>
-                            <h4 class="h5 fs-16 mb-1 fw-600">{{ Auth::user()->name }}</h4>
-                            <div class="text-truncate opacity-60">{{ Auth::user()->email }}</div>
-                        </div>
-
-                        <div class="sidemnenu mb-3">
-                            <ul class="aiz-side-nav-list px-2" data-toggle="aiz-side-menu">
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('dashboard') }}" class="aiz-side-nav-link active">
-                                        <i class="las la-home aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Dashboard</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('purchaseHistory') }}" class="aiz-side-nav-link ">
-                                        <i class="las la-file-alt aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Purchase History</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('wishlist') }}" class="aiz-side-nav-link ">
-                                        <i class="la la-heart-o aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Wishlist</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('compare') }}" class="aiz-side-nav-link ">
-                                        <i class="la la-refresh aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Compare</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="" class="aiz-side-nav-link ">
-                                        <i class="lab la-sketch aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Classified Products</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('conversation') }}" class="aiz-side-nav-link ">
-                                        <i class="las la-comment aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Conversations</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('myWallet') }}" class="aiz-side-nav-link ">
-                                        <i class="las la-dollar-sign aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">My Wallet</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('supportTicket') }}" class="aiz-side-nav-link ">
-                                        <i class="las la-atom aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Support Ticket</span>
-                                    </a>
-                                </li>
-
-                                <li class="aiz-side-nav-item">
-                                    <a href="{{ route('profile.edit') }}" class="aiz-side-nav-link ">
-                                        <i class="las la-user aiz-side-nav-icon"></i>
-                                        <span class="aiz-side-nav-text">Manage Profile</span>
-                                    </a>
-                                </li>
-
-                            </ul>
-                        </div>
-
-                    </div>
-
-                    <div class="fixed-bottom d-xl-none bg-white border-top d-flex justify-content-between px-2"
-                        style="box-shadow: 0 -5px 10px rgb(0 0 0 / 10%);">
-                        <a class="btn btn-sm p-2 d-flex align-items-center" href="{{ route('logout') }}">
-                            <i class="las la-sign-out-alt fs-18 mr-2"></i>
-                            <span>Logout</span>
-                        </a>
-                        <button class="btn btn-sm p-2 " data-toggle="class-toggle" data-backdrop="static"
-                            data-target=".aiz-mobile-side-nav" data-same=".mobile-side-nav-thumb">
-                            <i class="las la-times la-2x"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    @endauth
-
-
     <script>
         function confirm_modal(delete_url) {
             jQuery('#confirm-delete').modal('show', {
@@ -1097,6 +956,16 @@
 
 
 
+
+    @auth
+        <div class="aiz-mobile-side-nav collapse-sidebar-wrap sidebar-xl d-xl-none z-1035">
+            <div class="overlay dark c-pointer overlay-fixed" data-toggle="class-toggle" data-backdrop="static"
+                data-target=".aiz-mobile-side-nav" data-same=".mobile-side-nav-thumb"></div>
+            <div class="collapse-sidebar bg-white border-0 p-0 shadow-lg" style="height: 100vh; overflow-y: auto;">
+                @include('Frontend.dashboard.partials.usersideNav')
+            </div>
+        </div>
+    @endauth
 
     <!-- Dashboard mobile sidebar backdrop -->
     <div class="user-sidenav-backdrop" id="userSidenavBackdrop"></div>
@@ -1313,7 +1182,7 @@
             // Add close button to user-sidenav header if on mobile
             if ($('.user-sidenav').length > 0 && $('#mobile-sidenav-close-btn').length === 0) {
                 $('.user-sidenav-header').addClass('position-relative').prepend(
-                    '<button type="button" id="mobile-sidenav-close-btn" class="btn p-0 d-lg-none" style="position: absolute; top: 15px; right: 15px; color: white; font-size: 24px; z-index: 10; border: none; background: none; outline: none;"><i class="las la-times"></i></button>'
+                    '<button type="button" id="mobile-sidenav-close-btn" class="btn p-0 d-lg-none" style="position: absolute; top: 15px; right: 15px; color: white; font-size: 24px; z-index: 10; border: none; background: none; outline: none;"></button>'
                 );
             }
 

@@ -24,6 +24,26 @@ if (!function_exists('addon_is_activated')) {
                 } catch (\Exception $e) {}
             }
             return true;
+        } elseif ($addon === 'wallet_system') {
+            if (class_exists('App\Models\FeatureActivation')) {
+                try {
+                    $features = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+                        return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+                    });
+                    return ($features['wallet_system'] ?? '0') == '1';
+                } catch (\Exception $e) {}
+            }
+            return false;
+        } elseif ($addon === 'conversations') {
+            if (class_exists('App\Models\FeatureActivation')) {
+                try {
+                    $features = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+                        return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+                    });
+                    return ($features['conversations'] ?? '0') == '1';
+                } catch (\Exception $e) {}
+            }
+            return false;
         }
         return false;
     }

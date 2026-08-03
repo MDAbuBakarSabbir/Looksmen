@@ -56,8 +56,16 @@
 </style>
 
 <div class="user-sidenav mb-4">
-    <div class="user-sidenav-header">
-        <img src="{{ asset('frontend/assets/img/avatar-place.png') }}" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCA4MCI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiNlMmU4ZjAiLz48Y2lyY2xlIGN4PSI0MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iIzk0YTNiOCIvPjxwYXRoIGQ9Ik0xMCA3MWMwLTE2LjU3IDEzLjQzLTMwIDMwLTMwczMwIDEzLjQzIDMwIDMwIiBmaWxsPSIjOTRhM2I4Ii8+PC9zdmc+';">
+    <div class="user-sidenav-header position-relative">
+        <button type="button" class="btn p-0 text-white position-absolute d-xl-none" style="top: 12px; right: 15px; font-size: 28px; line-height: 1; opacity: 0.9; background: none; border: none; outline: none; cursor: pointer; z-index: 10;" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav" title="Close Menu">
+            <span aria-hidden="true">×</span>
+        </button>
+        @php
+            $navUserAvatar = Auth::user()->profile_pic && file_exists(public_path('Uploads/' . Auth::user()->profile_pic))
+                ? asset('Uploads/' . Auth::user()->profile_pic)
+                : asset('frontend/assets/img/avatar-place.png');
+        @endphp
+        <img src="{{ $navUserAvatar }}" onerror="this.onerror=null;this.src='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA4MCA4MCI+PGNpcmNsZSBjeD0iNDAiIGN5PSI0MCIgcj0iNDAiIGZpbGw9IiNlMmU4ZjAiLz48Y2lyY2xlIGN4PSI0MCIgY3k9IjMwIiByPSIxNSIgZmlsbD0iIzk0YTNiOCIvPjxwYXRoIGQ9Ik0xMCA3MWMwLTE2LjU3IDEzLjQzLTMwIDMwLTMwczMwIDEzLjQzIDMwIDMwIiBmaWxsPSIjOTRhM2I4Ii8+PC9zdmc+';">
         <h4 class="h5 mb-1 fw-600 text-white">{{ Auth::user()->name }}</h4>
         <div class="opacity-70 fs-14">{{ Auth::user()->email }}</div>
     </div>
@@ -82,26 +90,27 @@
                 <i class="la la-refresh"></i> Compare
             </a>
         </li>
-        <li>
-            <a href="#" class="user-nav-link">
-                <i class="lab la-sketch"></i> Classified Products
-            </a>
-        </li>
+        @if(addon_is_activated('conversations'))
         <li>
             <a href="{{ route('conversation') }}" class="user-nav-link {{ Route::currentRouteName() == 'conversation' ? 'active' : '' }}">
                 <i class="las la-comment"></i> Conversations
             </a>
         </li>
+        @endif
+        @if(addon_is_activated('wallet_system'))
         <li>
             <a href="{{ route('myWallet') }}" class="user-nav-link {{ Route::currentRouteName() == 'myWallet' ? 'active' : '' }}">
                 <i class="las la-dollar-sign"></i> My Wallet
             </a>
         </li>
+        @endif
+        @if(addon_is_activated('conversations'))
         <li>
             <a href="{{ route('supportTicket') }}" class="user-nav-link {{ Route::currentRouteName() == 'supportTicket' ? 'active' : '' }}">
                 <i class="las la-atom"></i> Support Ticket
             </a>
         </li>
+        @endif
         <li>
             <a href="{{ route('profile.edit') }}" class="user-nav-link {{ Route::currentRouteName() == 'profile.edit' ? 'active' : '' }}">
                 <i class="las la-user"></i> Manage Profile

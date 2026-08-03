@@ -130,4 +130,8 @@ Route::middleware(['maintainance'])->group(function () {
 
 Route::get('/under-maintainance', [GeneralWebSettingsController::class, 'maintainance'])->name('maintainance.mode');
 
+Route::fallback(function () {
+    return response()->view('errors.404', [], 404);
+});
+
 require __DIR__.'/auth.php';

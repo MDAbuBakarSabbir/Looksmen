@@ -23,15 +23,11 @@ class FeatureActivationController extends Controller
         $featureName = $request->name;
         $newStatus = $request->status;
 
-        // 2. Find and Update the Feature (ফিচার খুঁজে আপডেট)
-        $setting = FeatureActivation::where('name', $featureName)->first();
-
-        if (!$setting) {
-            return response()->json(['message' => "Feature '{$featureName}' not found in database."], 404);
-        }
-
-        $setting->status = $newStatus;
-        $setting->save();
+        // 2. Find and Update the Feature (or create if not found)
+        $setting = FeatureActivation::updateOrCreate(
+            ['name' => $featureName],
+            ['status' => $newStatus]
+        );
 
         // 3. Success Response (সফল উত্তর)
         $action = $newStatus == 1 ? 'Activated' : 'Deactivated';

@@ -298,6 +298,27 @@
                 </div>
             </div>
         </div>
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-center">
+                    <h2>Conversation and Support Ticket System</h2>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-center">
+                        <label class="switch">
+                            <input class="status-switch" type="checkbox" data-name="conversations"
+                                data-url="{{ route('feature.status') }}"
+                                {{ isset($featuresConfig['conversations']) && $featuresConfig['conversations'] == '1' ? 'checked' : '' }}>
+                            <span class="slider round" title="Click for Deactive">
+                            </span>
+                        </label>
+                    </div>
+                    <div class="alert flex-column justify-content-center text-center" style="color: #004085;background-color: #cce5ff;border-color: #b8daff;margin-bottom:0;margin-top:10px;">
+                        <p class="mb-0">Enable this feature to allow customers to create support tickets and communicate with the admin.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
