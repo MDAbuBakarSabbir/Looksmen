@@ -38,6 +38,10 @@ class AddressController extends Controller
             'created_at' => now(),
         ]);
 
+        if ($request->ajax()) {
+            return response()->json(['status' => 'success', 'message' => 'Address added successfully!']);
+        }
+
         return back()->with('success', 'Address added successfully!');
     }
 
@@ -53,13 +57,26 @@ class AddressController extends Controller
     // ৩. অ্যাড্রেস আপডেট করা
     public function update(Request $request, $id)
     {
+        $request->validate([
+            'address'  => 'required',
+            'phone'    => 'required |min_digits:11',
+            'district_id' => 'required',
+            'thana_id' => 'required',
+        ]);
+
         $address = Address::where('user_id', Auth::id())->findOrFail($id);
 
         $address->update([
+            'name'     => $request->name,
             'address'  => $request->address,
             'phone'    => $request->phone,
-            'state_id' => $request->state_id,
+            'district_id' => $request->district_id,
+            'thana_id' => $request->thana_id,
         ]);
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'success', 'message' => 'Address updated successfully!']);
+        }
 
         return back()->with('success', 'Address updated successfully!');
     }

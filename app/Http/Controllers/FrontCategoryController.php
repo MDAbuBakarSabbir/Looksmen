@@ -265,6 +265,11 @@ class FrontCategoryController extends Controller
             $query->where('childcategory_id', $id);
         }
 
+        // Brand filter
+        if ($request->filled('brand')) {
+            $query->where('brand_id', $request->input('brand'));
+        }
+
         // Sort
         match ($request->input('sort_by', 'newest')) {
             'oldest' => $query->oldest(),

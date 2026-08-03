@@ -96,7 +96,8 @@ Route::middleware(['maintainance'])->group(function () {
 
     Route::controller(AddressController::class)->group(function () {
         Route::post('addresses/store', 'store')->name('addresses.store');
-        Route::post('addresses/update', 'update')->name('address.update');
+        Route::get('addresses/edit/{id}', 'edit')->name('address.edit');
+        Route::post('addresses/update/{id}', 'update')->name('address.update');
         Route::get('/get-thanas/{district_id}', 'getThanasByDistrict')->name('get.thanas');
         Route::post('/addresses/set-default', 'set_default')->name('addresses.default');
         Route::delete('/addresses/destroy/{id}', 'destroy')->name('addresses.destroy');
