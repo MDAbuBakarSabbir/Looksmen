@@ -9,7 +9,7 @@
 
                 @include('Frontend.dashboard.partials.usersideNav')
 
-                <div class="aiz-user-panel" style="flex: 1; margin-left: 20px;">
+                <div class="aiz-user-panel w-100">
                     <div class="aiz-titlebar mt-2 mb-4">
                         <div class="row align-items-center">
                             <div class="col-md-6">

@@ -152,6 +152,47 @@
         font-size: 0.9rem;
         margin-top: 6px;
     }
+    .profile-avatar-wrapper {
+        position: relative;
+        display: inline-block;
+    }
+
+    .profile-avatar-img {
+        width: 130px;
+        height: 130px;
+        object-fit: cover;
+        border-radius: 50%;
+        border: 4px solid #ffffff;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+    }
+
+    .profile-avatar-edit-btn {
+        position: absolute;
+        bottom: 4px;
+        right: 4px;
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+        color: #ffffff !important;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        cursor: pointer;
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);
+        border: 3px solid #ffffff;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 5;
+    }
+
+    .profile-avatar-edit-btn:hover {
+        transform: scale(1.12);
+        background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+        box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+        color: #ffffff !important;
+    }
 </style>
 
 <section class="dash-section">
@@ -175,7 +216,7 @@
                         </div>
                         <div>
                             <h5>Profile Information</h5>
-                            <p>Update your name and email address</p>
+                            <p>Update your profile photo, name and email address</p>
                         </div>
                     </div>
                     <div class="card-body p-4 p-md-5">
@@ -184,9 +225,34 @@
                             @csrf
                         </form>
 
-                        <form method="post" action="{{ route('profile.update') }}">
+                        <form method="post" action="{{ route('profile.update') }}" enctype="multipart/form-data">
                             @csrf
                             @method('patch')
+
+                            <!-- Circular Avatar Upload Preview -->
+                            <div class="text-center mb-4">
+                                <div class="profile-avatar-wrapper">
+                                    @php
+                                        $userAvatar = $user->profile_pic && file_exists(public_path('Uploads/' . $user->profile_pic))
+                                            ? asset('Uploads/' . $user->profile_pic)
+                                            : asset('frontend/assets/img/avatar-place.png');
+                                    @endphp
+                                    <img src="{{ $userAvatar }}" 
+                                         id="profile_avatar_preview" 
+                                         alt="{{ $user->name }}" 
+                                         class="profile-avatar-img">
+                                    
+                                    <label for="profile_pic_input" class="profile-avatar-edit-btn" title="Update Profile Picture">
+                                        <i class="fa-solid fa-camera"></i>
+                                    </label>
+                                    
+                                    <input type="file" name="profile_pic" id="profile_pic_input" accept="image/*" style="display: none;">
+                                </div>
+                                <div class="mt-2 text-muted small">Click camera icon to select a new profile picture</div>
+                                @error('profile_pic')
+                                    <div class="alert-danger-soft d-inline-block mt-2"><i class="fa-solid fa-circle-exclamation mr-2"></i>{{ $message }}</div>
+                                @enderror
+                            </div>
 
                             <div class="row">
                                 <div class="col-md-6 mb-4">
@@ -349,4 +415,24 @@
         </div>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const profilePicInput = document.getElementById('profile_pic_input');
+        const profileAvatarPreview = document.getElementById('profile_avatar_preview');
+
+        if (profilePicInput && profileAvatarPreview) {
+            profilePicInput.addEventListener('change', function (e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (event) {
+                        profileAvatarPreview.src = event.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
 @endsection

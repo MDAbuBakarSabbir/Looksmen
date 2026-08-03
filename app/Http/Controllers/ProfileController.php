@@ -26,15 +26,45 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(Request $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'profile_pic' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,webp', 'max:5120'],
+        ]);
+
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('users', 'profile_pic')) {
+            \Illuminate\Support\Facades\Schema::table('users', function (\Illuminate\Database\Schema\Blueprint $table) {
+                $table->string('profile_pic')->nullable()->after('email');
+            });
         }
 
-        $request->user()->save();
+        $user->name = $request->name;
+        $user->email = $request->email;
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        if ($request->hasFile('profile_pic')) {
+            if ($user->profile_pic && file_exists(public_path('Uploads/' . $user->profile_pic))) {
+                @unlink(public_path('Uploads/' . $user->profile_pic));
+            }
+
+            if (function_exists('upload_to_webp')) {
+                $user->profile_pic = upload_to_webp($request->file('profile_pic'), 'Uploads', 'user');
+            } else {
+                $file = $request->file('profile_pic');
+                $filename = 'user_' . time() . '_' . \Illuminate\Support\Str::random(6) . '.' . $file->getClientOriginalExtension();
+                $file->move(public_path('Uploads'), $filename);
+                $user->profile_pic = $filename;
+            }
+        }
+
+        $user->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -62,7 +92,8 @@ class ProfileController extends Controller
 
     public function purchaseHistory()
     {
-        return view('Frontend.dashboard.purchaseHistory');
+        $orders = \App\Models\Orders::where('user_id', Auth::id())->orderBy('id', 'desc')->paginate(10);
+        return view('Frontend.dashboard.purchaseHistory', compact('orders'));
     }
 
     public function wishlist()
