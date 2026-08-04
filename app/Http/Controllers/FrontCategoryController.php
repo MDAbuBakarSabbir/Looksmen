@@ -247,8 +247,8 @@ class FrontCategoryController extends Controller
 
     public function filterProducts(Request $request)
     {
-        $type = $request->input('type');   // category | subcategory | childcategory
-        $id = (int) $request->input('id');
+        $type = $request->input('type');   // category | subcategory | childcategory | search
+        $id = $request->input('id');
         $page = (int) $request->input('page', 1);
 
         $query = Product::with('firstImage')
@@ -263,6 +263,12 @@ class FrontCategoryController extends Controller
             $query->where('subcategory_id', $id);
         } elseif ($type === 'childcategory') {
             $query->where('childcategory_id', $id);
+        } elseif ($type === 'search') {
+            // For search, $id actually holds the keyword
+            $keyword = $request->input('id');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', "%{$keyword}%");
+            });
         }
 
         // Brand filter

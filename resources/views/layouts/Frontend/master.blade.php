@@ -43,8 +43,8 @@
 <head>
 
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="app-url" content="//www.store.looksmen.com/">
-    <meta name="file-base-url" content="//www.store.looksmen.com/public/">
+    <meta name="app-url" content="//www.looksmen.com/">
+    <meta name="file-base-url" content="//www.looksmen.com/public/">
 
     <title>{{ $webConfig['web_name'] }} | @yield('title')</title>
 
@@ -75,7 +75,7 @@
     <!-- Open Graph data -->
     <meta property="og:title" content="looksmen.com" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="index.html" />
+    <meta property="og:url" content="{{ url("/") }}" />
     <meta property="og:image" content="{{ asset('frontend') }}/uploads/CcWodTkHslpIjY8rstUMkVdmzLDJdT3ULIstJtHy.png" />
     <meta property="og:description"
         content="{{ $webConfig['web_description'] }}" />
@@ -446,7 +446,7 @@
 
                 <div class="flex-grow-1 front-header-search d-flex align-items-center bg-white">
                     <div class="position-relative flex-grow-1">
-                        <form action="https://www.store.looksmen.com/search" method="GET" class="stop-propagation">
+                        <form action="{{ route('front.search') }}" method="GET" class="stop-propagation">
                             <div class="d-flex position-relative align-items-center">
                                 <div class="d-lg-none" data-toggle="class-toggle" data-target=".front-header-search">
                                     <button class="btn px-2" type="button"><i
@@ -1241,12 +1241,19 @@
             }
         });
 
-        $('#search').on('keyup', function() {
-            search();
+        var searchTimeout = null;
+        $('#search').on('keyup focus', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                search();
+            }, 250);
         });
 
-        $('#search').on('focus', function() {
-            search();
+        $(document).on('click', function(e) {
+            if (!$(e.target).closest('.front-header-search').length) {
+                $('.typed-search-box').addClass('d-none');
+                $('body').removeClass("typed-search-box-shown");
+            }
         });
 
         function search() {
@@ -1256,8 +1263,8 @@
 
                 $('.typed-search-box').removeClass('d-none');
                 $('.search-preloader').removeClass('d-none');
-                $.post('ajax-search.html', {
-                    _token: AIZ.data.csrf,
+                $.post('{{ route("front.ajaxSearch") }}', {
+                    _token: '{{ csrf_token() }}',
                     search: searchKey
                 }, function(data) {
                     if (data == '0') {
