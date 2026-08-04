@@ -270,25 +270,28 @@
                         </nav>
                         
                         <div class="premium-card p-3 mb-4">
-                            <div class="row gutters-5 flex-wrap align-items-center">
-                                <div class="col-12 text-center text-lg-left mt-2">
-                                    <h1 class="h3 fw-700 mb-0">
-                                        Search Results for "{{ $keyword }}"
+                            <div class="row align-items-center gutters-10">
+                                <div class="col-10 col-lg mb-2 mb-lg-0">
+                                    <h1 class="h5 fw-700 text-dark mb-0 d-flex align-items-center flex-wrap" style="gap: 8px;">
+                                        <span class="text-secondary">Search Results for</span>
+                                        <span class="badge badge-soft-primary px-3 py-2 rounded-pill fs-14 fw-600">
+                                            "{{ $keyword }}"
+                                        </span>
                                     </h1>
                                     <input type="hidden" name="keyword" id="searchKeyword" value="{{ $keyword }}">
                                 </div>
-                                <div class="col-2 col-lg-auto d-xl-none text-right">
+                                <div class="col-2 col-lg-auto d-xl-none text-right mb-2 mb-lg-0">
                                     <button type="button" class="btn btn-soft-primary btn-icon p-2 rounded-circle" data-toggle="class-toggle"
-                                        data-target=".aiz-filter-sidebar">
+                                        data-target=".aiz-filter-sidebar" title="Filter Products">
                                         <i class="la la-filter fs-20"></i>
                                     </button>
                                 </div>
-                                <div class="col-6 col-lg-auto mt-3 mt-lg-0 w-lg-200px">
-                                    <label class="mb-1 fw-600 text-muted fs-12 text-uppercase">Brands</label>
+                                <div class="col-6 col-lg-auto w-lg-200px">
+                                    <label class="mb-1 fw-600 text-muted fs-11 text-uppercase">Brands</label>
                                     @php
                                         $brands = \App\Models\Product::whereNotNull('brand_id')->where('brand_id', '!=', '')->select('brand_id')->distinct()->get();
                                     @endphp
-                                    <select class="form-control form-control-sm custom-select rounded-pill"
+                                    <select class="form-control form-control-sm custom-select rounded-pill shadow-none"
                                         name="brand" onchange="filter()">
                                         <option value="">All Brands</option>
                                         @foreach($brands as $b)
@@ -300,9 +303,9 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                <div class="col-6 col-lg-auto mt-3 mt-lg-0 w-lg-200px">
-                                    <label class="mb-1 fw-600 text-muted fs-12 text-uppercase">Sort by</label>
-                                    <select class="form-control form-control-sm custom-select rounded-pill" name="sort_by"
+                                <div class="col-6 col-lg-auto w-lg-200px">
+                                    <label class="mb-1 fw-600 text-muted fs-11 text-uppercase">Sort by</label>
+                                    <select class="form-control form-control-sm custom-select rounded-pill shadow-none" name="sort_by"
                                         onchange="filter()">
                                         <option value="newest">Newest Arrivals</option>
                                         <option value="oldest">Oldest Arrivals</option>
