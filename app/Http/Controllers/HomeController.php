@@ -155,4 +155,54 @@ class HomeController extends Controller
 
         return view('Frontend.flash_sale', compact('products'));
     }
+
+    public function search(Request $request)
+    {
+        $keyword = $request->input('keyword');
+        $catProducts = Product::where('status', '1')
+            ->where(function ($query) use ($keyword) {
+                $query->where('title', 'like', "%{$keyword}%");
+            })
+            ->with('firstImage')
+            ->withAvg(['reviews' => function ($q) {
+                $q->where('status', '1');
+            }], 'review_star')
+            ->latest()
+            ->paginate(12);
+
+        $categoryType = 'search';
+        
+        return view('Frontend.search', compact('catProducts', 'keyword', 'categoryType'));
+    }
+
+    public function ajaxSearch(Request $request)
+    {
+        $keyword = trim($request->input('search', ''));
+        if (empty($keyword)) {
+            return response()->json(0);
+        }
+
+        $products = Product::where('status', '1')
+            ->where(function ($query) use ($keyword) {
+                $query->where('title', 'like', "%{$keyword}%");
+            })
+            ->with('firstImage')
+            ->latest()
+            ->take(6)
+            ->get();
+
+        if ($products->isEmpty()) {
+            return response()->json(0);
+        }
+
+        $totalCount = Product::where('status', '1')
+            ->where(function ($query) use ($keyword) {
+                $query->where('title', 'like', "%{$keyword}%");
+            })
+            ->count();
+
+        $categories = Category::where('name', 'like', "%{$keyword}%")->take(3)->get();
+
+        return view('Frontend.partials.search_content', compact('products', 'keyword', 'totalCount', 'categories'))->render();
+    }
 }

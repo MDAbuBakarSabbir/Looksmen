@@ -26,6 +26,8 @@ Route::middleware(['maintainance'])->group(function () {
     Route::get('/', [HomeController::class, 'home'])->name('home');
     Route::match(['get', 'post'], '/track-order', [HomeController::class, 'trackOrder'])->name('front.trackOrder');
     Route::get('/flash-sale', [HomeController::class, 'flashSale'])->name('front.flashSale');
+    Route::get('/search', [HomeController::class, 'search'])->name('front.search');
+    Route::post('/ajax-search', [HomeController::class, 'ajaxSearch'])->name('front.ajaxSearch');
 
     Route::middleware('auth')->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
