@@ -99,13 +99,11 @@
 
                 <div id="carouselExampleControls2" class="carousel slide" data-ride="carousel">
                     <div class="carousel-inner">
-                        {{-- ক্যাটেগরিগুলোকে ৬টি করে গ্রুপে (chunk) ভাগ করা হচ্ছে --}}
-                        @foreach ($categories->chunk(6) as $chunkIndex => $categoryChunk)
+                        @foreach ($categories->chunk(3) as $chunkIndex => $categoryChunk)
                             <div class="carousel-item {{ $chunkIndex == 0 ? 'active' : '' }}">
                                 <div class="row gutters-5">
                                     @foreach ($categoryChunk as $category)
-                                        {{-- col-md-2 দিলে ডেক্সটপে ৬টি কলাম শো করবে (১২ / ২ = ৬) --}}
-                                        <div class="col-4 col-md-2 mt-3 minw-0">
+                                        <div class="col-4 mt-3 minw-0">
                                             <a href="{{ route('catProductView', [$category->id, $category->slug]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm text-center">
                                                 <img
                                                     src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
