@@ -655,7 +655,7 @@
                         @if(isset($activePaymentMethods) && (in_array('sslcommerz', $activePaymentMethods) || in_array('ssl', $activePaymentMethods)))
                         <div class="col-6 mb-3">
                             <div class="payment-card text-center p-3 border rounded cursor-pointer h-100 d-flex flex-column align-items-center justify-content-center" onclick="submitWithGateway('ssl')" style="transition: all 0.2s;">
-                                <img src="{{ asset('frontEnd/assets/img/OthersPayments.png') }}" class="img-fluid" style="max-height: 80px;" alt="SSLCommerz">
+                                <img src="{{ asset('frontend/assets/img/OthersPayments.png') }}" class="img-fluid" style="max-height: 80px;" alt="SSLCommerz">
                                 <span class="d-block mt-2 small fw-600 text-dark">Cards/Others</span>
                             </div>
                         </div>
