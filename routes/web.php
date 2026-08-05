@@ -142,6 +142,13 @@ Route::middleware(['maintainance'])->group(function () {
 
 Route::get('/under-maintainance', [GeneralWebSettingsController::class, 'maintainance'])->name('maintainance.mode');
 
+// Route to clear and optimize cache on live server without terminal access
+Route::get('/clear-cache', function() {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    \Illuminate\Support\Facades\Artisan::call('view:cache');
+    return "Cache is cleared and optimized! You can go back to the homepage.";
+});
+
 Route::fallback(function () {
     return response()->view('errors.404', [], 404);
 });
