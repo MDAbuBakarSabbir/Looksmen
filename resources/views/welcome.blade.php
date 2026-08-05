@@ -367,7 +367,6 @@
                                                     <img class="img-fit mx-auto h-140px h-md-210px ls-is-cached lazyload" loading="lazy"
                                                         src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
                                                         data-src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
-                                                        alt="Exclusive Fu l  l Sleeve Check Formal and Casual Shirt for Men"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';"
                                                         alt="{{ $product->title }}">
                                                 </a>
