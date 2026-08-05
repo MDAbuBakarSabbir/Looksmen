@@ -39,7 +39,7 @@ class CategoryController extends Controller
             $imgName = 'category_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
             $image->scaleDown(width: 800);
-            $image->save(base_path('public/Uploads/'.$imgName), quality: 80);
+            $image->save(base_path('public/Uploads/'.$imgName), quality: 60);
         }
         Category::create([
             'name' => $request->category_name,
@@ -80,7 +80,7 @@ class CategoryController extends Controller
             $imgName = 'category_'.$category->id.'_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
             $image->scaleDown(width: 800);
-            $image->save(base_path('public/Uploads/'.$imgName), quality: 80);
+            $image->save(base_path('public/Uploads/'.$imgName), quality: 60);
             if (! empty($category->banner) && file_exists(base_path('public/Uploads/'.$category->banner))) {
                 @unlink(base_path('public/Uploads/'.$category->banner));
             }
