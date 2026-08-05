@@ -297,7 +297,7 @@
                                     <div class="d-flex align-items-center flex-grow-1 mb-3 mb-md-0">
                                         <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="product-img mr-4" alt="{{ $name }}">
                                         <div>
-                                            <h4 class="product-title">{{ $name }}</h4>
+                                            <h4 class="product-title text-truncate" style="max-width: 220px;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 28) }}</h4>
                                             <div class="product-code mt-1"><i class="las la-barcode mr-1"></i> Code: {{ $code }}</div>
                                         </div>
                                     </div>
