@@ -77,7 +77,7 @@
                     @php
                         $product = $detail->orderProduct;
                         $firstImg = $product?->firstImage;
-                        $imgPath = $firstImg ? asset('adminDash/images/product/' . $firstImg->image) : asset('favicon.png');
+                        $imgPath = $firstImg ? asset('Uploads/' . $firstImg->image) : asset('favicon.png');
                     @endphp
                     <div class="d-flex align-items-center" style="gap: 8px;">
                         <img style="height: 50px; width: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc;" 
