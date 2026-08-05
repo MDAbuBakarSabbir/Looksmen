@@ -50,7 +50,8 @@ class GeneralWebSettingsController extends Controller
 
             $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $image = $manager->decode($file);
-            $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 85);
+            $image->scaleDown(width: 300);
+            $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 60);
 
             GeneralWebSettings::where('name', 'web_logo')->update([
                 'value' => $newname,
@@ -93,7 +94,8 @@ class GeneralWebSettingsController extends Controller
 
             $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $image = $manager->decode($file);
-            $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 85);
+            $image->scaleDown(width: 300);
+            $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 60);
 
             GeneralWebSettings::where('name', 'footer_logo')->update([
                 'value' => $newname,
@@ -136,7 +138,8 @@ class GeneralWebSettingsController extends Controller
 
             $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $image = $manager->decode($file);
-            $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 85);
+            $image->scaleDown(width: 150);
+            $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 60);
 
             GeneralWebSettings::where('name', 'web_favicon')->update([
                 'value' => $newname,

@@ -219,7 +219,8 @@ if (!function_exists('upload_to_webp')) {
         try {
             $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $image = $manager->decode($file);
-            $image->save($fullPath, quality: $quality);
+            $image->scaleDown(width: 800);
+            $image->save($fullPath, quality: 60);
             return $fileName;
         } catch (\Exception $e) {
             $fallbackExt = method_exists($file, 'getClientOriginalExtension') ? ($file->getClientOriginalExtension() ?: 'webp') : 'webp';

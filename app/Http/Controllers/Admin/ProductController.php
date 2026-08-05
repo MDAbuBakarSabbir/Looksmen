@@ -401,7 +401,7 @@ class ProductController extends Controller
                 $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.webp';
                 $image = $manager->decode($proimage);
                 $image->scaleDown(width: 800);
-                $image->save($destinationPath.'/'.$imgName, quality: 80);
+                $image->save($destinationPath.'/'.$imgName, quality: 60);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,
@@ -567,7 +567,7 @@ class ProductController extends Controller
                 $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.webp';
                 $image = $manager->decode($proimage);
                 $image->scaleDown(width: 800);
-                $image->save($destinationPath.'/'.$imgName, quality: 80);
+                $image->save($destinationPath.'/'.$imgName, quality: 60);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,

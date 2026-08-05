@@ -39,7 +39,7 @@ class SliderController extends Controller
             $newname = 'slider_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
             $image->scaleDown(width: 1200);
-            $image->save($dir.'/'.$newname, quality: 80);
+            $image->save($dir.'/'.$newname, quality: 60);
         }
 
         $sliders = new Slider;
@@ -103,7 +103,7 @@ class SliderController extends Controller
             $newname = 'slider_'.$slider->id.'_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
             $image->scaleDown(width: 1200);
-            $image->save($dir.'/'.$newname, quality: 80);
+            $image->save($dir.'/'.$newname, quality: 60);
             $slider->image = $newname;
         }
 

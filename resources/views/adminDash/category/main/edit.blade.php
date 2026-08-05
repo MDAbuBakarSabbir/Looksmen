@@ -58,7 +58,7 @@
                                 <div class="image-upload-placeholder {{ $category->banner ? 'd-none' : '' }}" id="edit-image-placeholder">
                                     <i class="fa-regular fa-image text-muted mb-2" style="font-size: 32px; display: block; margin: 0 auto;"></i>
                                     <p class="mb-1 text-sm font-weight-bold" style="color: #475569;">Click or Drag & Drop Banner Image here</p>
-                                    <span class="text-xs text-muted">Supports JPG, PNG, WEBP (Max 2MB)</span>
+                                    <span class="text-xs text-muted">Supports JPG, PNG, WEBP</span>
                                 </div>
                                 <div class="image-upload-preview {{ $category->banner ? '' : 'd-none' }}" id="edit-image-preview-container" style="position: relative; z-index: 3; width: 100%;">
                                     <img id="edit-image-preview" src="{{ $category->banner ? asset('Uploads/' . $category->banner) : '' }}" alt="Preview" style="max-height: 120px; max-width: 100%; border-radius: 8px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);">

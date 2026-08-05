@@ -148,7 +148,8 @@ class AdminsController extends Controller
             $imgName = 'admin-' . $admin->id . '-' . time() . '.webp';
             $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
             $image = $manager->decode($file);
-            $image->save(public_path('Uploads/' . $imgName), quality: 85);
+            $image->scaleDown(width: 800);
+            $image->save(public_path('Uploads/' . $imgName), quality: 60);
             $admin->profile_pic = $imgName;
         }
 

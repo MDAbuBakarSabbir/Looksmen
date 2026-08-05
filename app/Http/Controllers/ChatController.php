@@ -116,7 +116,8 @@ class ChatController extends Controller
                 $safeName = 'chat_' . time() . '_' . \Illuminate\Support\Str::random(5) . '.webp';
                 $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
                 $image = $manager->decode($file);
-                $image->save($uploadPath . '/' . $safeName, quality: 85);
+                $image->scaleDown(width: 800);
+                $image->save($uploadPath . '/' . $safeName, quality: 60);
                 $fileType = 'image';
             } else {
                 $safeName = time() . '_' . preg_replace('/[^A-Za-z0-9\._-]/', '', $fileName);
