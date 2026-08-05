@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('instagram_contacts', function (Blueprint $table) {
-            $table->id();
-            $table->string('sender_id')->unique(); // Instagram IGSID
-            $table->string('username')->nullable();
-            $table->integer('unread_count')->default(0);
-            $table->timestamp('last_message_at')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('instagram_contacts')) {
+            Schema::create('instagram_contacts', function (Blueprint $table) {
+                $table->id();
+                $table->string('sender_id')->unique(); // Instagram IGSID
+                $table->string('username')->nullable();
+                $table->integer('unread_count')->default(0);
+                $table->timestamp('last_message_at')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**

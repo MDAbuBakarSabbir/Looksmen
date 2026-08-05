@@ -55,63 +55,6 @@
                             <th scope="col" class="text-right">Action</th>
                         </tr>
                     </thead>
-                    {{-- <tbody>
-                        @foreach ($cart as $key => $item)
-                            @php
-                                $cleanPrice = str_replace(',', '', $item['price']);
-                                $line_total = (float) $cleanPrice * (int) $item['quantity'];
-                                $subtotal += $line_total;
-                            @endphp
-                            <tr class="border-bottom">
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <img src="{{ asset($item['image']) }}" class="size-60px mr-2 rounded">
-                                        <div>
-                                            <span class="fs-14 fw-600 d-block">{{ $item['name'] }}</span>
-                                            <small class="text-info font-weight-bold">code:
-                                                {{ $item['code'] ?? 'N/A' }}{{ $item['attribute'] || $item['color']  ? '|' : '' }}
-                                            </small>
-                                            <small class="text-info font-weight-bold">
-                                                {{ $item['attribute'] ?? '' }}
-                                                {{ $item['attribute'] && $item['color'] ? '|' : '' }}
-                                                {{ $item['color'] ?? '' }}
-                                            </small>
-                                            <small class="text-info font-weight-bold">| Price: ৳ {{ $item['price'] }}</small>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center justify-content-center">
-                                        <div class="input-group aiz-plus-minus" style="width: 100px;">
-                                            <div class="input-group-prepend">
-                                                <button class="btn btn-outline-secondary btn-sm" type="button"
-                                                    onclick="changeQuantity('{{ $key }}', -1)">
-                                                    <i class="las la-minus"></i>
-                                                </button>
-                                            </div>
-                                            <input type="text" style="height: 20px"
-                                                class="form-control form-control-sm text-center cart-qty-{{ $key }}" data-max="{{ $item['stock'] }}"
-                                                value="{{ $item['quantity'] }}" readonly>
-                                            <div class="input-group-append">
-                                                <button class="btn btn-outline-secondary btn-sm" type="button"
-                                                    onclick="changeQuantity('{{ $key }}', 1)">
-                                                    <i class="las la-plus"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="fw-600 text-primary">৳<span class="line-total-{{ $key }}">
-                                        {{ $line_total }}</span></td>
-                                <td class="text-right">
-                                    <button onclick="removeguest('{{ $key }}')"
-                                        class="btn btn-soft-danger btn-circle btn-sm">
-                                        <i class="las la-trash"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody> --}}
                     <tbody>
                         @foreach ($cart as $key => $rawItem)
                             @php

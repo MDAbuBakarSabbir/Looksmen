@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('whatsapp_messages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('whatsapp_contact_id')->constrained('whatsapp_contacts')->onDelete('cascade');
-            $table->string('message_id')->unique()->nullable();
-            $table->text('body')->nullable();
-            $table->string('type')->default('text'); // text, image, document, etc.
-            $table->string('direction')->default('inbound'); // inbound, outbound
-            $table->string('status')->default('received'); // received, sent, delivered, read
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('whatsapp_messages')) {
+            Schema::create('whatsapp_messages', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('whatsapp_contact_id')->constrained('whatsapp_contacts')->onDelete('cascade');
+                $table->string('message_id')->unique()->nullable();
+                $table->text('body')->nullable();
+                $table->string('type')->default('text'); // text, image, document, etc.
+                $table->string('direction')->default('inbound'); // inbound, outbound
+                $table->string('status')->default('received'); // received, sent, delivered, read
+                $table->timestamps();
+            });
+        }
     }
 
     /**

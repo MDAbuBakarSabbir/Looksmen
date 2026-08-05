@@ -11,16 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('facebook_messages', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('facebook_contact_id')->constrained('facebook_contacts')->onDelete('cascade');
-            $table->string('message_id')->unique()->nullable();
-            $table->text('body')->nullable();
-            $table->string('type')->default('text'); // text, image, etc.
-            $table->string('direction')->default('inbound'); // inbound, outbound
-            $table->string('status')->default('received'); // received, sent, read
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('facebook_messages')) {
+            Schema::create('facebook_messages', function (Blueprint $table) {
+                $table->id();
+                $table->foreignId('facebook_contact_id')->constrained('facebook_contacts')->onDelete('cascade');
+                $table->string('message_id')->unique()->nullable();
+                $table->text('body')->nullable();
+                $table->string('type')->default('text'); // text, image, etc.
+                $table->string('direction')->default('inbound'); // inbound, outbound
+                $table->string('status')->default('received'); // received, sent, read
+                $table->timestamps();
+            });
+        }
     }
 
     /**

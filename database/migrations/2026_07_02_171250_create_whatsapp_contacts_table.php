@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('whatsapp_contacts', function (Blueprint $table) {
-            $table->id();
-            $table->string('phone_number')->unique();
-            $table->string('name')->nullable();
-            $table->integer('unread_count')->default(0);
-            $table->timestamp('last_message_at')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('whatsapp_contacts')) {
+            Schema::create('whatsapp_contacts', function (Blueprint $table) {
+                $table->id();
+                $table->string('phone_number')->unique();
+                $table->string('name')->nullable();
+                $table->integer('unread_count')->default(0);
+                $table->timestamp('last_message_at')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
