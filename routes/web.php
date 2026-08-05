@@ -22,6 +22,10 @@ Route::prefix('admin')->middleware('guest:admin')->group(function () {
 
 Route::middleware(['maintainance'])->group(function () {
 
+    Route::match(['get', 'post'], '/verifyEmail', [HomeController::class, 'verifyEmail'])->name('front.verifyEmail');
+    Route::match(['get', 'post'], '/otpEmail', [HomeController::class, 'otpEmail'])->name('front.otpEmail');
+    Route::match(['get', 'post'], '/welcomeEmail', [HomeController::class, 'welcomeEmail'])->name('front.welcomeEmail');
+
     Route::get('/user-dashboard', [HomeController::class, 'userDash'])->middleware(['auth', 'verified'])->name('dashboard');
     Route::get('/', [HomeController::class, 'home'])->name('home');
     Route::match(['get', 'post'], '/track-order', [HomeController::class, 'trackOrder'])->name('front.trackOrder');
@@ -29,7 +33,12 @@ Route::middleware(['maintainance'])->group(function () {
     Route::get('/search', [HomeController::class, 'search'])->name('front.search');
     Route::post('/ajax-search', [HomeController::class, 'ajaxSearch'])->name('front.ajaxSearch');
 
-    Route::middleware('auth')->group(function () {
+    // AI Customer Support Routes
+    Route::get('/ai-support/history', [\App\Http\Controllers\Frontend\AiSupportController::class, 'getHistory'])->name('aiSupport.history');
+    Route::post('/ai-support/send', [\App\Http\Controllers\Frontend\AiSupportController::class, 'sendMessage'])->name('aiSupport.send');
+    Route::post('/ai-support/transfer', [\App\Http\Controllers\Frontend\AiSupportController::class, 'transferToAgent'])->name('aiSupport.transfer');
+
+    Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

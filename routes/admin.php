@@ -362,6 +362,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::controller(APIController::class)->group(function () {
         Route::get('/froud-check/api', 'froudCheck')->name('fraudCheck.index')->middleware('admin.permission:setup_fraud_check');
         Route::post('/froud-check/api/update', 'updateFraudCheck')->name('admin.fraudCheck.update')->middleware('admin.permission:setup_fraud_check');
+        Route::post('/froud-check/api/toggle-status', 'toggleStatus')->name('admin.fraudCheck.toggleStatus')->middleware('admin.permission:setup_fraud_check');
+        Route::post('/froud-check/api/toggle-feature', 'toggleFeature')->name('admin.fraudCheck.toggleFeature')->middleware('admin.permission:setup_fraud_check');
     });
 
     Route::controller(GeneralWebSettingsController::class)->group(function () {
@@ -419,6 +421,12 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/chat/users', 'getChatUsers')->name('admin.chat.users')->middleware('admin.permission:manage_support_tickets');
         Route::get('/chat/messages/{user_id}', 'getUserMessages')->name('admin.chat.messages')->middleware('admin.permission:manage_support_tickets');
         Route::post('/chat/send', 'sendChatMessage')->name('admin.chat.send')->middleware('admin.permission:manage_support_tickets');
+
+        Route::get('/customMail', 'customMail')->name('admin.customMail')->middleware('admin.permission:manage_support_tickets');
+        Route::post('/customMail/send', 'sendCustomMail')->name('admin.customMail.send')->middleware('admin.permission:manage_support_tickets');
+
+        Route::get('/customSMS', 'customSMS')->name('admin.customSMS')->middleware('admin.permission:manage_support_tickets');
+        Route::post('/customSMS/send', 'sendCustomSMS')->name('admin.customSMS.send')->middleware('admin.permission:manage_support_tickets');
     });
 
     // Admin Wallet & Point System Routes
@@ -454,6 +462,17 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('/conversation/instagram/send', 'sendInstagramMessage')->name('conversation.instagram.send');
 
         Route::get('/conversation/facebook-business-suit', 'metaBusinessSuit')->name('conversation.facebookBusinessSuit');
+    });
+
+    // Admin AI & Live Chat Support Routes
+    Route::controller(\App\Http\Controllers\Admin\AdminAiSupportController::class)->group(function () {
+        Route::get('/ai-support', 'index')->name('admin.aiSupport.index');
+        Route::get('/ai-support/settings', 'settingsIndex')->name('admin.aiSupport.settings');
+        Route::post('/ai-support/settings/update', 'updateSettings')->name('admin.aiSupport.updateSettings');
+        Route::get('/ai-support/messages/{session_id}', 'getMessages')->name('admin.aiSupport.messages');
+        Route::post('/ai-support/reply', 'replyMessage')->name('admin.aiSupport.reply');
+        Route::post('/ai-support/toggle-transfer', 'toggleTransfer')->name('admin.aiSupport.toggleTransfer');
+        Route::post('/ai-support/close', 'closeChat')->name('admin.aiSupport.close');
     });
 });
 Route::match(['get', 'post'], '/webhook/whatsapp', [ConversationController::class, 'handleWhatsApp']);

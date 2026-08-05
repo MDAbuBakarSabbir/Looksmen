@@ -1,7 +1,17 @@
 @php
+    use App\Models\FraudCheck;
     use App\Models\GeneralWebSettings;
+    use App\Models\FeatureActivation;
+
+    $providersList = FraudCheck::all()->keyBy('name');
+    $bdcourier = $providersList->get('bdcourier');
+    $zachaikori = $providersList->get('zachaikori');
+    $fraudshield = $providersList->get('fraudshield');
+
     $settings  = GeneralWebSettings::all()->keyBy('name');
     $webConfig = $settings->map(fn($i) => $i->value)->toArray();
+
+    $featuresConfig = FeatureActivation::pluck('status', 'name')->toArray();
 @endphp
 @extends('layouts.Backend.master')
 @section('title') FRAUD CHECK API @endsection
@@ -27,7 +37,7 @@
         background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #a855f7 100%);
         border-radius: var(--radius);
         padding: 28px 32px;
-        margin-bottom: 28px;
+        margin-bottom: 24px;
         position: relative;
         overflow: hidden;
     }
@@ -48,14 +58,6 @@
     }
     .fca-hero h1 { color: #fff; font-size: 22px; font-weight: 800; margin: 0 0 6px; }
     .fca-hero p  { color: rgba(255,255,255,0.75); font-size: 13px; margin: 0; }
-    .fca-hero-badges { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
-    .fca-hero-badge {
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.25);
-        color: #fff; font-size: 10px; font-weight: 700;
-        padding: 4px 12px; border-radius: 20px;
-        letter-spacing: 0.5px; backdrop-filter: blur(4px);
-    }
 
     /* ===== Provider Tabs ===== */
     .provider-tabs {
@@ -106,8 +108,9 @@
         transform: translateY(-2px);
     }
     .api-config-card .card-top {
-        padding: 20px 24px 0;
+        padding: 20px 24px 18px;
         display: flex; align-items: center; gap: 14px;
+        border-bottom: 1px solid var(--border);
     }
     .provider-logo {
         width: 48px; height: 48px;
@@ -120,6 +123,45 @@
     .api-config-card .provider-name  { font-size: 16px; font-weight: 800; color: #111827; margin: 0; }
     .api-config-card .provider-label { font-size: 11px; color: #9ca3af; margin: 0; }
     .api-config-card .card-body-inner { padding: 20px 24px 24px; }
+
+    /* ===== Toggle Switch Styling ===== */
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 44px;
+        height: 24px;
+    }
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0; left: 0; right: 0; bottom: 0;
+        background-color: #cbd5e1;
+        transition: .3s;
+        border-radius: 24px;
+    }
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .3s;
+        border-radius: 50%;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider {
+        background: linear-gradient(135deg, #10b981, #059669);
+    }
+    input:checked + .slider:before {
+        transform: translateX(20px);
+    }
 
     /* ===== Form Inputs ===== */
     .fca-label {
@@ -250,11 +292,6 @@
     }
     .inst-visit-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-    /* Divider in card */
-    .fca-divider {
-        height: 1px; background: var(--border); margin: 18px 0;
-    }
-
     /* Key masked display */
     .key-masked {
         font-family: monospace; letter-spacing: 2px; color: #6b7280; font-size: 12px;
@@ -266,11 +303,66 @@
     <div class="fca-hero-icon">🛡️</div>
     <h1>Fraud Check API Configuration</h1>
     <p>Configure third-party fraud detection APIs to verify customer phone numbers during checkout and reduce fraudulent orders.</p>
-    <div class="fca-hero-badges">
-        <span class="fca-hero-badge">BD Courier</span>
-        <span class="fca-hero-badge">Zachaikori</span>
-        <span class="fca-hero-badge">FraudShield BD</span>
-        <span class="fca-hero-badge">🔒 Secure Configuration</span>
+</div>
+
+{{-- ===== Feature Option Status Switches ===== --}}
+<div class="row mb-4">
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="card border-0 shadow-sm" style="border-radius: 14px; background: #ffffff; border: 1px solid var(--border) !important;">
+            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="font-weight-bold text-dark" style="font-size: 13.5px;">Frontend Check</div>
+                    <small class="text-muted" style="font-size: 11px;">Verify phone on checkout page</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge {{ ($featuresConfig['fraud_check_frontend'] ?? '1') == '1' ? 'badge-success' : 'badge-secondary' }} px-2 py-1" id="opt-badge-fraud_check_frontend" style="font-size: 10px;">
+                        {{ ($featuresConfig['fraud_check_frontend'] ?? '1') == '1' ? 'ON' : 'OFF' }}
+                    </span>
+                    <label class="switch mb-0" title="Toggle Frontend Check">
+                        <input type="checkbox" class="feature-option-toggle" data-feature="fraud_check_frontend" {{ ($featuresConfig['fraud_check_frontend'] ?? '1') == '1' ? 'checked' : '' }}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3 mb-md-0">
+        <div class="card border-0 shadow-sm" style="border-radius: 14px; background: #ffffff; border: 1px solid var(--border) !important;">
+            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="font-weight-bold text-dark" style="font-size: 13.5px;">Order Check</div>
+                    <small class="text-muted" style="font-size: 11px;">Verify on admin order details</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge {{ ($featuresConfig['fraud_check_order'] ?? '1') == '1' ? 'badge-success' : 'badge-secondary' }} px-2 py-1" id="opt-badge-fraud_check_order" style="font-size: 10px;">
+                        {{ ($featuresConfig['fraud_check_order'] ?? '1') == '1' ? 'ON' : 'OFF' }}
+                    </span>
+                    <label class="switch mb-0" title="Toggle Order Check">
+                        <input type="checkbox" class="feature-option-toggle" data-feature="fraud_check_order" {{ ($featuresConfig['fraud_check_order'] ?? '1') == '1' ? 'checked' : '' }}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm" style="border-radius: 14px; background: #ffffff; border: 1px solid var(--border) !important;">
+            <div class="card-body p-3 d-flex align-items-center justify-content-between">
+                <div>
+                    <div class="font-weight-bold text-dark" style="font-size: 13.5px;">Incomplete Order Check</div>
+                    <small class="text-muted" style="font-size: 11px;">Verify draft / abandon orders</small>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <span class="badge {{ ($featuresConfig['fraud_check_incomplete_order'] ?? '1') == '1' ? 'badge-success' : 'badge-secondary' }} px-2 py-1" id="opt-badge-fraud_check_incomplete_order" style="font-size: 10px;">
+                        {{ ($featuresConfig['fraud_check_incomplete_order'] ?? '1') == '1' ? 'ON' : 'OFF' }}
+                    </span>
+                    <label class="switch mb-0" title="Toggle Incomplete Order Check">
+                        <input type="checkbox" class="feature-option-toggle" data-feature="fraud_check_incomplete_order" {{ ($featuresConfig['fraud_check_incomplete_order'] ?? '1') == '1' ? 'checked' : '' }}>
+                        <span class="slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -279,14 +371,23 @@
     <div class="provider-tab active" onclick="switchProvider('bdcourier')" id="tab-bdcourier">
         <span style="font-size:15px;">🚚</span>
         <span>BD Courier</span>
+        <span class="badge {{ ($bdcourier->status ?? '0') == '1' ? 'badge-success' : 'badge-secondary' }} ml-1 px-2 py-1" id="tab-badge-bdcourier" style="font-size: 10px;">
+            {{ ($bdcourier->status ?? '0') == '1' ? 'ON' : 'OFF' }}
+        </span>
     </div>
     <div class="provider-tab" onclick="switchProvider('zachaikori')" id="tab-zachaikori">
         <span style="font-size:15px;">🔍</span>
         <span>Zachaikori</span>
+        <span class="badge {{ ($zachaikori->status ?? '0') == '1' ? 'badge-success' : 'badge-secondary' }} ml-1 px-2 py-1" id="tab-badge-zachaikori" style="font-size: 10px;">
+            {{ ($zachaikori->status ?? '0') == '1' ? 'ON' : 'OFF' }}
+        </span>
     </div>
     <div class="provider-tab" onclick="switchProvider('fraudshield')" id="tab-fraudshield">
         <span style="font-size:15px;">🛡️</span>
         <span>FraudShield BD</span>
+        <span class="badge {{ ($fraudshield->status ?? '0') == '1' ? 'badge-success' : 'badge-secondary' }} ml-1 px-2 py-1" id="tab-badge-fraudshield" style="font-size: 10px;">
+            {{ ($fraudshield->status ?? '0') == '1' ? 'ON' : 'OFF' }}
+        </span>
     </div>
 </div>
 
@@ -296,47 +397,56 @@
         {{-- Config Form --}}
         <div class="col-lg-6">
             <div class="api-config-card">
-                <div class="card-top">
-                    <div class="provider-logo" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">🚚</div>
-                    <div>
-                        <p class="provider-name">BD Courier</p>
-                        <p class="provider-label">BDCourier.com — Fraud Check & Courier History</p>
+                <div class="card-top d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="provider-logo" style="background: linear-gradient(135deg, #4f46e5, #7c3aed);">🚚</div>
+                        <div>
+                            <p class="provider-name">BD Courier</p>
+                            <p class="provider-label">BDCourier.com — Fraud Check & Courier History</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="switch mb-0" title="Toggle BD Courier Status">
+                            <input type="checkbox" class="fraud-status-toggle" data-provider="bdcourier" {{ ($bdcourier->status ?? '0') == '1' ? 'checked' : '' }}>
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 </div>
                 <div class="card-body-inner">
-                    @if(!empty($webConfig['fraud_check_api_key'] ?? ''))
+                    @if(!empty($bdcourier->api_key ?? $webConfig['fraud_check_api_key'] ?? ''))
                     <div class="api-status-row">
                         <div class="api-status-dot"></div>
-                        <span>API Key configured — Active</span>
-                        <span class="key-masked ms-auto">••••{{ substr($webConfig['fraud_check_api_key'] ?? '', -6) }}</span>
+                        <span>API Key configured — {{ ($bdcourier->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
+                        <span class="key-masked ms-auto">••••{{ substr($bdcourier->api_key ?? $webConfig['fraud_check_api_key'] ?? '', -6) }}</span>
                     </div>
                     @endif
 
-                    <form action="{{ route('admin.fraudCheck.update') }}" method="POST" class="settingsUpdateForm">
+                    <form action="{{ route('admin.fraudCheck.update') }}" method="POST" class="fraudCheckForm">
                         @csrf
+                        <input type="hidden" name="provider_name" value="bdcourier">
                         <div class="mb-3">
                             <label class="fca-label">API Key <span style="color:var(--rose)">*</span></label>
                             <div class="fca-input-icon-wrap">
                                 <input type="password" id="bdcourier-apikey" class="form-control fca-input"
-                                    value="{{ $webConfig['fraud_check_api_key'] ?? '' }}"
+                                    value="{{ $bdcourier->api_key ?? $webConfig['fraud_check_api_key'] ?? '' }}"
                                     name="api_key"
                                     placeholder="Enter BD Courier API Key"
-                                    autocomplete="off">
+                                    required autocomplete="off">
                                 <i class="fa-regular fa-eye fca-input-icon" onclick="toggleKey('bdcourier-apikey', this)"></i>
                             </div>
                         </div>
                         <div class="mb-4">
                             <label class="fca-label">Base URL <span style="color:#9ca3af; font-weight:500; text-transform:none; font-size:11px;">(Optional)</span></label>
                             <input type="text" class="form-control fca-input"
-                                value="{{ $webConfig['fraud_check_api_url'] ?? '' }}"
+                                value="{{ $bdcourier->base_url ?? $webConfig['fraud_check_api_url'] ?? 'https://bdcourier.com/api/courier-check' }}"
                                 name="base_url"
                                 placeholder="https://bdcourier.com/api/courier-check">
-                            <div style="font-size:11px; color:#9ca3af; margin-top:5px;">Leave blank to use the default BDCourier API endpoint.</div>
+                            <div style="font-size:11px; color:#9ca3af; margin-top:5px;">Leave blank to use default BDCourier API endpoint.</div>
                         </div>
-                        <div class="fca-divider"></div>
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="fca-divider mb-3"></div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <button type="submit" class="btn fca-save-btn">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Configuration
                             </button>
                             <a href="https://bdcourier.com" target="_blank"
                                style="font-size:12px; color:var(--indigo); font-weight:600; text-decoration:none;">
@@ -403,38 +513,55 @@
     <div class="row g-4">
         <div class="col-lg-6">
             <div class="api-config-card">
-                <div class="card-top">
-                    <div class="provider-logo" style="background: linear-gradient(135deg, #059669, #10b981);">🔍</div>
-                    <div>
-                        <p class="provider-name">Zachaikori</p>
-                        <p class="provider-label">Zachaikori.com — Phone Verification Service</p>
+                <div class="card-top d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="provider-logo" style="background: linear-gradient(135deg, #059669, #10b981);">🔍</div>
+                        <div>
+                            <p class="provider-name">Zachaikori</p>
+                            <p class="provider-label">Zachaikori.com — Phone Verification Service</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="switch mb-0" title="Toggle Zachaikori Status">
+                            <input type="checkbox" class="fraud-status-toggle" data-provider="zachaikori" {{ ($zachaikori->status ?? '0') == '1' ? 'checked' : '' }}>
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 </div>
                 <div class="card-body-inner">
-                    <form action="{{ route('admin.fraudCheck.update') }}" method="POST" class="settingsUpdateForm">
+                    @if(!empty($zachaikori->api_key ?? ''))
+                    <div class="api-status-row" style="background: #ecfdf5; border-color: #a7f3d0; color: #065f46;">
+                        <div class="api-status-dot"></div>
+                        <span>API Key configured — {{ ($zachaikori->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
+                        <span class="key-masked ms-auto">••••{{ substr($zachaikori->api_key ?? '', -6) }}</span>
+                    </div>
+                    @endif
+
+                    <form action="{{ route('admin.fraudCheck.update') }}" method="POST" class="fraudCheckForm">
                         @csrf
+                        <input type="hidden" name="provider_name" value="zachaikori">
                         <div class="mb-3">
                             <label class="fca-label">API Key <span style="color:var(--rose)">*</span></label>
                             <div class="fca-input-icon-wrap">
                                 <input type="password" id="zachaikori-apikey" class="form-control fca-input"
-                                    value="{{ $webConfig['fraud_check_api_key'] ?? '' }}"
+                                    value="{{ $zachaikori->api_key ?? '' }}"
                                     name="api_key"
                                     placeholder="Enter Zachaikori API Key"
-                                    autocomplete="off">
+                                    required autocomplete="off">
                                 <i class="fa-regular fa-eye fca-input-icon" onclick="toggleKey('zachaikori-apikey', this)"></i>
                             </div>
                         </div>
                         <div class="mb-4">
                             <label class="fca-label">Base URL <span style="color:#9ca3af; font-weight:500; text-transform:none; font-size:11px;">(Optional)</span></label>
                             <input type="text" class="form-control fca-input"
-                                value="{{ $webConfig['fraud_check_api_url'] ?? '' }}"
+                                value="{{ $zachaikori->base_url ?? 'https://api.zachaikori.com/v1/check' }}"
                                 name="base_url"
                                 placeholder="https://api.zachaikori.com/v1/check">
                         </div>
-                        <div class="fca-divider"></div>
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="fca-divider mb-3"></div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <button type="submit" class="btn fca-save-btn" style="background: linear-gradient(135deg,#059669,#10b981) !important; box-shadow: 0 4px 14px rgba(16,185,129,0.3) !important;">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Configuration
                             </button>
                             <a href="https://zachaikori.com" target="_blank"
                                style="font-size:12px; color:#059669; font-weight:600; text-decoration:none;">
@@ -500,38 +627,55 @@
     <div class="row g-4">
         <div class="col-lg-6">
             <div class="api-config-card">
-                <div class="card-top">
-                    <div class="provider-logo" style="background: linear-gradient(135deg, #dc2626, #f43f5e);">🛡️</div>
-                    <div>
-                        <p class="provider-name">FraudShield BD</p>
-                        <p class="provider-label">FraudShieldBD.com — Advanced Fraud Detection</p>
+                <div class="card-top d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="provider-logo" style="background: linear-gradient(135deg, #dc2626, #f43f5e);">🛡️</div>
+                        <div>
+                            <p class="provider-name">FraudShield BD</p>
+                            <p class="provider-label">FraudShieldBD.com — Advanced Fraud Detection</p>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <label class="switch mb-0" title="Toggle FraudShield BD Status">
+                            <input type="checkbox" class="fraud-status-toggle" data-provider="fraudshield" {{ ($fraudshield->status ?? '0') == '1' ? 'checked' : '' }}>
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 </div>
                 <div class="card-body-inner">
-                    <form action="{{ route('admin.fraudCheck.update') }}" method="POST" class="settingsUpdateForm">
+                    @if(!empty($fraudshield->api_key ?? ''))
+                    <div class="api-status-row" style="background: #fff1f2; border-color: #fecdd3; color: #9f1239;">
+                        <div class="api-status-dot" style="background: #f43f5e;"></div>
+                        <span>API Key configured — {{ ($fraudshield->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
+                        <span class="key-masked ms-auto">••••{{ substr($fraudshield->api_key ?? '', -6) }}</span>
+                    </div>
+                    @endif
+
+                    <form action="{{ route('admin.fraudCheck.update') }}" method="POST" class="fraudCheckForm">
                         @csrf
+                        <input type="hidden" name="provider_name" value="fraudshield">
                         <div class="mb-3">
                             <label class="fca-label">API Key <span style="color:var(--rose)">*</span></label>
                             <div class="fca-input-icon-wrap">
                                 <input type="password" id="fraudshield-apikey" class="form-control fca-input"
-                                    value="{{ $webConfig['fraud_check_api_key'] ?? '' }}"
+                                    value="{{ $fraudshield->api_key ?? '' }}"
                                     name="api_key"
                                     placeholder="Enter FraudShield BD API Key"
-                                    autocomplete="off">
+                                    required autocomplete="off">
                                 <i class="fa-regular fa-eye fca-input-icon" onclick="toggleKey('fraudshield-apikey', this)"></i>
                             </div>
                         </div>
                         <div class="mb-4">
                             <label class="fca-label">Base URL <span style="color:#9ca3af; font-weight:500; text-transform:none; font-size:11px;">(Optional)</span></label>
                             <input type="text" class="form-control fca-input"
-                                value="{{ $webConfig['fraud_check_api_url'] ?? '' }}"
+                                value="{{ $fraudshield->base_url ?? 'https://api.fraudshieldbd.com/v1/check' }}"
                                 name="base_url"
                                 placeholder="https://api.fraudshieldbd.com/v1/check">
                         </div>
-                        <div class="fca-divider"></div>
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="fca-divider mb-3"></div>
+                        <div class="d-flex align-items-center justify-content-between">
                             <button type="submit" class="btn fca-save-btn" style="background: linear-gradient(135deg,#dc2626,#f43f5e) !important; box-shadow: 0 4px 14px rgba(244,63,94,0.3) !important;">
-                                <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Configuration
                             </button>
                             <a href="https://fraudshieldbd.com" target="_blank"
                                style="font-size:12px; color:#dc2626; font-weight:600; text-decoration:none;">
@@ -592,14 +736,13 @@
     </div>
 </div>
 
+@section('script')
 <script>
     // ===== Provider Tab Switcher =====
     function switchProvider(name) {
-        // Hide all panels & deactivate tabs
         document.querySelectorAll('.provider-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.provider-tab').forEach(t => t.classList.remove('active'));
 
-        // Show selected panel & activate tab
         document.getElementById('panel-' + name).classList.add('active');
         document.getElementById('tab-'   + name).classList.add('active');
     }
@@ -615,6 +758,154 @@
             iconEl.classList.replace('fa-eye-slash', 'fa-eye');
         }
     }
+
+    $(document).ready(function() {
+        // ===== Feature Option Status Toggle =====
+        $('.feature-option-toggle').on('change', function() {
+            const checkbox = $(this);
+            const featureName = checkbox.data('feature');
+            const isChecked = checkbox.is(':checked') ? 1 : 0;
+            const badge = $('#opt-badge-' + featureName);
+
+            // Rule: To activate any option, minimum 1 provider must be active
+            let activeProvidersCount = 0;
+            $('.fraud-status-toggle:checked').each(function() {
+                activeProvidersCount++;
+            });
+
+            if (isChecked && activeProvidersCount === 0) {
+                checkbox.prop('checked', false);
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Provider Required!',
+                    text: 'To activate any Fraud Check option, at least 1 Fraud Check API provider (BD Courier, Zachaikori, or FraudShield BD) must be active!',
+                    confirmButtonColor: '#4f46e5'
+                });
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('admin.fraudCheck.toggleFeature') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    feature_name: featureName,
+                    status: isChecked
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Updated!',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        if (badge.length) {
+                            badge.text(isChecked ? 'ON' : 'OFF')
+                                 .toggleClass('badge-success', isChecked)
+                                 .toggleClass('badge-secondary', !isChecked);
+                        }
+                    } else {
+                        checkbox.prop('checked', !isChecked);
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Notice',
+                            text: response.message,
+                            confirmButtonColor: '#4f46e5'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    checkbox.prop('checked', !isChecked);
+                    Swal.fire('Error!', 'Failed to update feature option status.', 'error');
+                }
+            });
+        });
+
+        // ===== Provider Status Switch Toggle AJAX =====
+        $('.fraud-status-toggle').on('change', function() {
+            const checkbox = $(this);
+            const provider = checkbox.data('provider');
+            const isChecked = checkbox.is(':checked') ? 1 : 0;
+            const tabBadge = $('#tab-badge-' + provider);
+
+            Swal.fire({
+                title: 'Change Provider Status?',
+                text: `Are you sure you want to ${isChecked ? 'Activate' : 'Deactivate'} ${provider.toUpperCase()} Fraud Checker?`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: isChecked ? '#10b981' : '#dc3545',
+                confirmButtonText: isChecked ? 'Yes, Activate' : 'Yes, Deactivate'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: "{{ route('admin.fraudCheck.toggleStatus') }}",
+                        type: "POST",
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            provider_name: provider,
+                            status: isChecked
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Updated!',
+                                    text: response.message,
+                                    timer: 1500,
+                                    showConfirmButton: false
+                                });
+                                if (tabBadge.length) {
+                                    tabBadge.text(isChecked ? 'ON' : 'OFF')
+                                            .toggleClass('badge-success', isChecked)
+                                            .toggleClass('badge-secondary', !isChecked);
+                                }
+                            }
+                        },
+                        error: function(xhr) {
+                            checkbox.prop('checked', !isChecked);
+                            Swal.fire('Error!', 'Failed to update provider status.', 'error');
+                        }
+                    });
+                } else {
+                    checkbox.prop('checked', !isChecked);
+                }
+            });
+        });
+
+        // ===== Save Form Settings via AJAX =====
+        $('.fraudCheckForm').on('submit', function(e) {
+            e.preventDefault();
+            const form = $(this);
+            const submitBtn = form.find('button[type="submit"]');
+
+            submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...');
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    submitBtn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk mr-1"></i> Save Configuration');
+                    if (response.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Saved!',
+                            text: response.message,
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    submitBtn.prop('disabled', false).html('<i class="fa-solid fa-floppy-disk mr-1"></i> Save Configuration');
+                    Swal.fire('Error!', 'Failed to save configuration details.', 'error');
+                }
+            });
+        });
+    });
 </script>
+@endsection
 
 @endsection

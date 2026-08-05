@@ -319,6 +319,30 @@
                 </div>
             </div>
         </div>
+
+        {{-- === AI Support Feature Card === --}}
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-center">
+                    <h2>AI Support Assistant</h2>
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex justify-content-center">
+                        <label class="switch">
+                            <input class="status-switch" type="checkbox" data-name="ai_support"
+                                data-url="{{ route('feature.status') }}"
+                                {{ isset($featuresConfig['ai_support']) && $featuresConfig['ai_support'] == '1' ? 'checked' : '' }}>
+                            <span class="slider round" title="Click to Change Status">
+                            </span>
+                        </label>
+                    </div>
+                    <div class="alert flex-column justify-content-center text-center" style="color: #004085;background-color: #e0e7ff;border-color: #c7d2fe;margin-bottom:0;margin-top:10px;">
+                        <p class="mb-1 font-weight-bold" style="color: #3730a3;">AI Chat & Agent Transfer</p>
+                        <p class="mb-0 small" style="color: #4338ca;">Enable floating AI help widget on frontend with automated response and admin live transfer.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>

@@ -16,14 +16,14 @@
     <ul class="list-group list-group-flush mb-0">
         @foreach($products as $product)
             @php
-                $imgUrl = $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg');
+                $imgUrl = $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg');
             @endphp
             <li class="list-group-item px-0 py-2 border-0">
                 <a href="{{ route('ProductView', [$product->id, $product->slug]) }}" class="d-flex align-items-center text-reset text-decoration-none">
                     <img src="{{ $imgUrl }}" 
                          alt="{{ $product->title }}" 
                          class="size-40px rounded object-fit-cover mr-3 border"
-                         onerror="this.onerror=null;this.src='{{ asset('frontEnd/assets/img/placeholder.jpg') }}';">
+                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                     <div class="flex-grow-1 minw-0">
                         <div class="text-truncate fs-13 fw-600 text-dark">{{ $product->title }}</div>
                         <div class="fs-12 text-primary fw-700">

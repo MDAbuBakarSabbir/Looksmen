@@ -13,12 +13,30 @@ class EmailVerificationNotificationController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        if ($request->user()->hasVerifiedEmail()) {
+        $user = $request->user();
+
+        if ($user->hasVerifiedEmail()) {
             return redirect()->intended(route('dashboard', absolute: true));
         }
 
-        $request->user()->sendEmailVerificationNotification();
+        // Generate New 6-Digit OTP Code
+        $otp = sprintf("%06d", mt_rand(1, 999999));
+        $user->verification_code = $otp;
+        $user->verification_code_expires_at = now()->addMinutes(15);
+        $user->save();
 
-        return back()->with('status', 'verification-link-sent');
+        try {
+            $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                'verification.verify',
+                now()->addMinutes(60),
+                ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
+            );
+
+            send_verification_email($user, $otp, $verifyUrl);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Resend Verification Mail Error: ' . $e->getMessage());
+        }
+
+        return back()->with('status', 'verification-code-sent');
     }
 }

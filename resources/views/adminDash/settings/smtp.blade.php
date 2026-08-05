@@ -515,9 +515,71 @@
 
 @section('script')
     <script>
+        function notifyToast(type, message) {
+            if (typeof AIZ !== 'undefined' && AIZ.plugins && typeof AIZ.plugins.notify === 'function') {
+                AIZ.plugins.notify(type === 'error' ? 'danger' : 'success', message);
+            } else if (typeof Toast !== 'undefined' && typeof Toast.fire === 'function') {
+                Toast.fire({
+                    icon: type,
+                    title: message
+                });
+            } else if (typeof Swal !== 'undefined' && typeof Swal.fire === 'function') {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: type,
+                    title: message,
+                    showConfirmButton: false,
+                    timer: 3500,
+                    timerProgressBar: true
+                });
+            } else {
+                alert(message);
+            }
+        }
+
+        function performSaveTemplate(template_name, active, body, callback) {
+            $.post('{{ route('smtp.template.save') }}', {
+                _token: '{{ csrf_token() }}',
+                name: template_name,
+                active: active,
+                body: body
+            }, function(res) {
+                if (callback) callback(res);
+            }).fail(function() {
+                if (callback) callback({ success: false, message: 'Server error occurred.' });
+            });
+        }
+
         $(document).ready(function() {
+            // Instant Switch Toggle Event
+            $(document).on('change', '.switch-custom input[type="checkbox"]', function() {
+                let checkbox = $(this);
+                let card = checkbox.closest('.template-item');
+                let textarea = card.find('textarea');
+                
+                let template_name = checkbox.attr('name');
+                let active = checkbox.is(':checked') ? '1' : '0';
+                let body = textarea.val();
+
+                let readableName = template_name.replace(/([A-Z])/g, ' $1');
+                readableName = readableName.charAt(0).toUpperCase() + readableName.slice(1);
+
+                performSaveTemplate(template_name, active, body, function(res) {
+                    if (res.success) {
+                        let statusText = active === '1' ? 'Enabled' : 'Disabled';
+                        notifyToast('success', readableName + ' status ' + statusText);
+                    } else {
+                        checkbox.prop('checked', active !== '1');
+                        notifyToast('error', 'Failed to update ' + readableName + ' status.');
+                    }
+                });
+            });
+
+            // Save Template Button Click Event
             $(document).on('click', '.btn-save-template', function() {
-                let card = $(this).closest('.template-item');
+                let btn = $(this);
+                let card = btn.closest('.template-item');
                 let checkbox = card.find('input[type="checkbox"]');
                 let textarea = card.find('textarea');
                 
@@ -525,31 +587,19 @@
                 let active = checkbox.is(':checked') ? '1' : '0';
                 let body = textarea.val();
 
-                $.post('{{ route('smtp.template.save') }}', {
-                    _token: '{{ csrf_token() }}',
-                    name: template_name,
-                    active: active,
-                    body: body
-                }, function(res) {
+                let readableName = template_name.replace(/([A-Z])/g, ' $1');
+                readableName = readableName.charAt(0).toUpperCase() + readableName.slice(1);
+
+                let originalHtml = btn.html();
+                btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...');
+
+                performSaveTemplate(template_name, active, body, function(res) {
+                    btn.prop('disabled', false).html(originalHtml);
                     if (res.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success',
-                            text: res.message
-                        });
+                        notifyToast('success', readableName + ' template saved successfully!');
                     } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'Failed to save template.'
-                        });
+                        notifyToast('error', 'Failed to save ' + readableName + ' template.');
                     }
-                }).fail(function(xhr) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Something went wrong.'
-                    });
                 });
             });
         });

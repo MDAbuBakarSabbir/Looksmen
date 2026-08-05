@@ -29,6 +29,22 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerate();
 
+        $user = Auth::user();
+        $settings = \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+            return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+        });
+
+        $emailVerificationFeature = ($featuresConfig['email_verification'] ?? '0') === '1';
+        $verificationTemplateActive = ($settings['verification_mail_active'] ?? '0') === '1';
+        $otpTemplateActive = ($settings['otp_mail_active'] ?? '0') === '1';
+
+        $emailVerificationRequired = $emailVerificationFeature && ($verificationTemplateActive || $otpTemplateActive);
+
+        if ($emailVerificationRequired && $user && !$user->hasVerifiedEmail()) {
+            return redirect()->route('verification.notice');
+        }
+
         return redirect()->route('dashboard');
     }
 

@@ -69,6 +69,35 @@
         <h4 class="h5 mb-1 fw-600 text-white">{{ Auth::user()->name }}</h4>
         <div class="opacity-70 fs-14">{{ Auth::user()->email }}</div>
     </div>
+    @php
+        $settings = \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+            return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+        });
+        $emailVerificationFeature = ($featuresConfig['email_verification'] ?? '0') === '1';
+        $verificationTemplateActive = ($settings['verification_mail_active'] ?? '0') === '1';
+        $otpTemplateActive = ($settings['otp_mail_active'] ?? '0') === '1';
+
+        $isUnverifiedNav = $emailVerificationFeature && ($verificationTemplateActive || $otpTemplateActive) && Auth::check() && !Auth::user()->hasVerifiedEmail();
+    @endphp
+
+    @if($isUnverifiedNav)
+        <div class="p-4 text-center">
+            <div class="p-3 rounded-lg text-left mb-3" style="background: #fffbeb; border: 1px solid #fef3c7; color: #92400e; font-size: 0.88rem; line-height: 1.5;">
+                <i class="las la-exclamation-triangle font-weight-bold mr-1 text-warning"></i>
+                <strong>Email Not Verified:</strong> Please complete email verification to access your dashboard and account features.
+            </div>
+            <a href="{{ route('verification.notice') }}" class="btn btn-primary btn-block rounded-pill font-weight-bold py-2" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); border: none;">
+                <i class="las la-shield-alt mr-1"></i> Verify Email Now
+            </a>
+            <form method="POST" action="{{ route('logout') }}" id="logout-form-nav" class="mt-3">
+                @csrf
+                <button type="submit" class="btn btn-link text-danger btn-sm p-0">
+                    <i class="las la-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
+    @else
     <ul class="user-nav-list">
         <li>
             <a href="{{ route('dashboard') }}" class="user-nav-link {{ Route::currentRouteName() == 'dashboard' ? 'active' : '' }}">
@@ -143,4 +172,5 @@
             </form>
         </li>
     </ul>
+    @endif
 </div>

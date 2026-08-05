@@ -786,9 +786,9 @@
                     </a>
                 </div>
                 <div class="col-auto">
-                    <a href="{{ route('cartView') }}" class="text-reset d-block text-center pb-2 pt-3">
-                        <span
-                            class="align-items-center bg-primary border border-white border-width-4 d-flex justify-content-center position-relative rounded-circle size-50px"
+                    <a href="javascript:void(0)" onclick="showCartModal()" class="text-reset d-block text-center pb-2 pt-3">
+                        <span id="mobileCartCircle"
+                            class="align-items-center bg-primary border border-white border-width-4 d-flex justify-content-center position-relative rounded-circle size-50px {{ ($cartCount ?? 0) > 0 ? 'cart-circle-glow' : '' }}"
                             style="margin-top: -33px;box-shadow: 0px -5px 10px rgb(0 0 0 / 15%);border-color: #fff !important;">
                             <i class="las la-shopping-bag la-2x text-white"></i>
                         </span>
@@ -878,6 +878,28 @@
         .mobile-categories-drawer .toggle-subcategories-btn.active i,
         .mobile-categories-drawer .toggle-childcategories-btn.active i {
             transform: rotate(180deg);
+        }
+
+        /* Glowing Pulse Animation for Mobile Cart Circle when products exist */
+        @keyframes cartGlowPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.8), 0px -5px 10px rgba(0, 0, 0, 0.15);
+                transform: scale(1);
+            }
+            50% {
+                box-shadow: 0 0 0 12px rgba(99, 102, 241, 0), 0 0 20px rgba(99, 102, 241, 0.9);
+                transform: scale(1.08);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0), 0px -5px 10px rgba(0, 0, 0, 0.15);
+                transform: scale(1);
+            }
+        }
+
+        .cart-circle-glow {
+            animation: cartGlowPulse 1.8s infinite cubic-bezier(0.66, 0, 0, 1) !important;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+            border-color: #ffffff !important;
         }
     </style>
 
@@ -1409,10 +1431,8 @@
                     // নেভবার আপডেট
                     updateNavCart();
 
-                    // শুধুমাত্র বড় স্ক্রিনে মডাল দেখাবে
-                    if ($(window).width() > 768) {
-                        showCartModal();
-                    }
+                    // মোবাইল এবং ডেক্সটপ সব ভিউতেই পপআপ মডাল দেখাবে
+                    showCartModal();
                 }
             }).fail(function(xhr) {
                 console.error("Error adding to cart:", xhr.responseText);
@@ -1497,17 +1517,21 @@
             $.get('{{ route('cart.count') }}', function(data) {
                 if (data.count !== undefined) {
                     $('.cart-count').text(data.count);
+                    const countNum = parseInt(data.count) || 0;
+                    const mobileCircle = $('#mobileCartCircle');
+                    if (mobileCircle.length > 0) {
+                        if (countNum > 0) {
+                            mobileCircle.addClass('cart-circle-glow');
+                        } else {
+                            mobileCircle.removeClass('cart-circle-glow');
+                        }
+                    }
                 }
             });
         }
 
-        // ৪. কার্ট মডেল দেখানো
+        // ৪. কার্ট মডাল দেখানো (ডেক্সটপ ও মোবাইল উভয় ভিউতেই)
         function showCartModal() {
-            if ($(window).width() <= 768) {
-                window.location.href = "{{ route('cartView') }}";
-                return false;
-            }
-
             $.get('{{ route('cart.showModal') }}', function(data) {
                 $('#cart-modal-content').html(data);
                 $('#cart-modal').modal('show');
@@ -1810,5 +1834,474 @@
             $('.compare-count').text(count);
         }
     </script>
-    </body>
+
+    {{-- ==================== AI SUPPORT FLOATING HELP WIDGET ==================== --}}
+    @php
+        $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+            return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+        });
+        $aiSupportActive = ($featuresConfig['ai_support'] ?? '0') === '1';
+    @endphp
+
+    @if($aiSupportActive)
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
+        .ai-support-widget-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.45);
+            cursor: pointer;
+            z-index: 99999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+        }
+        .ai-support-widget-btn:hover {
+            transform: scale(1.08) translateY(-3px);
+            box-shadow: 0 14px 30px rgba(99, 102, 241, 0.55);
+            color: #ffffff;
+        }
+
+        .ai-chat-box-modal {
+            position: fixed;
+            bottom: 95px;
+            right: 25px;
+            width: 380px;
+            max-width: calc(100vw - 30px);
+            height: 540px;
+            max-height: calc(100vh - 120px);
+            background: #ffffff;
+            border-radius: 24px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.18), 0 10px 25px rgba(0, 0, 0, 0.08);
+            z-index: 99999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            font-family: 'Plus Jakarta Sans', sans-serif !important;
+        }
+
+        .ai-chat-header {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            padding: 1.1rem 1.25rem;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .ai-chat-header-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-chat-header-sub {
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.8);
+            margin: 0;
+        }
+
+        .btn-talk-agent-header {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-talk-agent-header:hover {
+            background: #ffffff;
+            color: #4f46e5;
+        }
+
+        .ai-chat-body {
+            flex: 1;
+            padding: 1.1rem;
+            background: #f8fafc;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+        }
+
+        .ai-chat-msg-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 85%;
+        }
+        .ai-chat-msg-row.msg-user {
+            align-self: flex-end;
+        }
+        .ai-chat-msg-row.msg-ai, .ai-chat-msg-row.msg-admin {
+            align-self: flex-start;
+        }
+
+        .ai-chat-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+            word-wrap: break-word;
+        }
+        .msg-user .ai-chat-bubble {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+        }
+        .msg-ai .ai-chat-bubble {
+            background: #ffffff;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+            border-bottom-left-radius: 4px;
+        }
+        .msg-admin .ai-chat-bubble {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-bottom-left-radius: 4px;
+        }
+
+        .ai-chat-sender-label {
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 3px;
+            color: #64748b;
+        }
+
+        .quick-chips-row {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding: 0.5rem 1.1rem;
+            background: #ffffff;
+            border-top: 1px solid #f1f5f9;
+        }
+        .quick-chip-btn {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #475569;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 10px;
+            border-radius: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .quick-chip-btn:hover {
+            background: #e0e7ff;
+            color: #4f46e5;
+            border-color: #c7d2fe;
+        }
+
+        .ai-chat-footer {
+            padding: 0.85rem 1.1rem;
+            background: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+        .ai-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .ai-input-field {
+            flex: 1;
+            border: 1px solid #cbd5e1;
+            border-radius: 12px;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.9rem;
+            background: #f8fafc;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        .ai-input-field:focus {
+            border-color: #6366f1;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
+        }
+        .btn-ai-send {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: #6366f1;
+            color: #ffffff;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-ai-send:hover {
+            background: #4f46e5;
+        }
+
+        /* Mobile Phone View Optimization */
+        @media (max-width: 576px) {
+            .ai-support-widget-btn {
+                bottom: 140px !important;
+                right: 15px !important;
+                width: 52px !important;
+                height: 52px !important;
+                font-size: 20px !important;
+                box-shadow: 0 10px 25px rgba(99, 102, 241, 0.5) !important;
+            }
+            .ai-chat-box-modal {
+                position: fixed !important;
+                bottom: 200px !important;
+                right: 10px !important;
+                left: 10px !important;
+                width: calc(100vw - 20px) !important;
+                max-width: none !important;
+                height: calc(100vh - 220px) !important;
+                max-height: 480px !important;
+                border-radius: 20px !important;
+            }
+            .ai-chat-header {
+                padding: 0.85rem 1rem !important;
+            }
+            .ai-chat-header-title {
+                font-size: 0.95rem !important;
+            }
+            .btn-talk-agent-header {
+                padding: 4px 9px !important;
+                font-size: 0.7rem !important;
+            }
+            .ai-chat-body {
+                padding: 0.85rem !important;
+            }
+            .ai-chat-msg-row {
+                max-width: 90% !important;
+            }
+            .quick-chips-row {
+                padding: 0.4rem 0.85rem !important;
+            }
+            .ai-chat-footer {
+                padding: 0.65rem 0.85rem !important;
+            }
+        }
+    </style>
+
+    <!-- Floating Trigger Icon -->
+    <div class="ai-support-widget-btn" onclick="toggleAiChatModal()" id="aiWidgetTrigger" title="Need Help? Chat with Us!">
+        <i class="fa-solid fa-headset" id="triggerIcon"></i>
+    </div>
+
+    <!-- Chat Modal Window -->
+    <div class="ai-chat-box-modal" id="aiChatModal">
+        <div class="ai-chat-header">
+            <div>
+                <h4 class="ai-chat-header-title">
+                    <i class="fa-solid fa-robot"></i> AI Support
+                </h4>
+                <div class="ai-chat-header-sub" id="aiHeaderSubStatus">● Online • LOOK-AI</div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+                <button type="button" class="btn-talk-agent-header" onclick="requestHumanAgentTransfer()">
+                    <i class="fa-solid fa-user-headset mr-1"></i> Talk to Agent
+                </button>
+                <button type="button" class="btn p-0 text-white opacity-80" onclick="toggleAiChatModal()" style="font-size: 22px; line-height: 1; border: none; background: none;">
+                    &times;
+                </button>
+            </div>
+        </div>
+
+        <div class="ai-chat-body" id="aiChatBody">
+            <!-- Messages populated dynamically -->
+        </div>
+
+        <!-- Quick Suggestion Chips -->
+        <div class="quick-chips-row">
+            <button class="quick-chip-btn" onclick="sendQuickChip('Track my order')">📦 Track Order</button>
+            <button class="quick-chip-btn" onclick="sendQuickChip('Shipping details')">🚚 Shipping Info</button>
+            <button class="quick-chip-btn" onclick="sendQuickChip('Payment options')">💳 Payment Methods</button>
+            <button class="quick-chip-btn" onclick="requestHumanAgentTransfer()">🎧 Talk to Agent</button>
+        </div>
+
+        <div class="ai-chat-footer">
+            <form id="aiChatForm" onsubmit="handleAiFormSubmit(event)">
+                <div class="ai-input-group">
+                    <input type="text" id="aiInputMsg" class="ai-input-field" placeholder="Ask LOOK-AI AI or 'Talk to agent'..." autocomplete="off" required>
+                    <button type="submit" id="aiSendBtn" class="btn-ai-send">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let isChatModalOpen = false;
+        let aiPollingInterval = null;
+
+        function toggleAiChatModal() {
+            isChatModalOpen = !isChatModalOpen;
+            const modal = document.getElementById('aiChatModal');
+            const icon = document.getElementById('triggerIcon');
+
+            if (!modal) return;
+
+            if (isChatModalOpen) {
+                modal.style.display = 'flex';
+                if (icon) icon.className = 'fa-solid fa-xmark';
+                loadAiChatHistory();
+                if (!aiPollingInterval) {
+                    aiPollingInterval = setInterval(loadAiChatHistory, 4000);
+                }
+            } else {
+                modal.style.display = 'none';
+                if (icon) icon.className = 'fa-solid fa-headset';
+                if (aiPollingInterval) {
+                    clearInterval(aiPollingInterval);
+                    aiPollingInterval = null;
+                }
+            }
+        }
+
+        function loadAiChatHistory() {
+            $.get("{{ route('aiSupport.history') }}", function(res) {
+                if (res.active) {
+                    const subStatus = document.getElementById('aiHeaderSubStatus');
+                    if (subStatus) {
+                        if (res.is_transferred) {
+                            subStatus.innerText = '● Transferred to Live Admin';
+                        } else {
+                            subStatus.innerText = '● Online • LOOK-AI';
+                        }
+                    }
+
+                    let html = '';
+                    if (!res.messages || res.messages.length === 0) {
+                        html = `
+                            <div class="ai-chat-msg-row msg-ai">
+                                <div class="ai-chat-sender-label">LOOK-AI</div>
+                                <div class="ai-chat-bubble">
+                                    Hello! 👋 Welcome to our store. I am your LOOK AI Assistant. How can I help you today? Ask me about order tracking, shipping, or type 'Talk to agent' to connect with a live representative.
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        res.messages.forEach(function(msg) {
+                            let msgType = 'msg-user';
+                            let label = 'You';
+                            if (msg.sender === 'ai') {
+                                msgType = 'msg-ai';
+                                label = 'LOOK-AI';
+                            } else if (msg.sender === 'admin') {
+                                msgType = 'msg-admin';
+                                label = 'Live Support Admin';
+                            }
+
+                            html += `
+                                <div class="ai-chat-msg-row ${msgType}">
+                                    <div class="ai-chat-sender-label">${label}</div>
+                                    <div class="ai-chat-bubble">${escapeAiHtml(msg.message).replace(/\n/g, '<br>')}</div>
+                                </div>
+                            `;
+                        });
+                    }
+
+                    const body = document.getElementById('aiChatBody');
+                    if (body) {
+                        body.innerHTML = html;
+                        scrollAiBodyToBottom();
+                    }
+                }
+            });
+        }
+
+        function handleAiFormSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('aiInputMsg');
+            const msg = input ? input.value.trim() : '';
+            if (!msg) return;
+
+            if (input) input.value = '';
+            appendUserBubble(msg);
+
+            $.post("{{ route('aiSupport.send') }}", {
+                _token: '{{ csrf_token() }}',
+                message: msg
+            }, function(res) {
+                if (res.success) {
+                    loadAiChatHistory();
+                }
+            });
+        }
+
+        function sendQuickChip(text) {
+            const input = document.getElementById('aiInputMsg');
+            if (input) {
+                input.value = text;
+                document.getElementById('aiChatForm').dispatchEvent(new Event('submit'));
+            }
+        }
+
+        function requestHumanAgentTransfer() {
+            appendUserBubble('Talk to agent');
+            $.post("{{ route('aiSupport.transfer') }}", {
+                _token: '{{ csrf_token() }}'
+            }, function(res) {
+                if (res.success) {
+                    loadAiChatHistory();
+                }
+            });
+        }
+
+        function appendUserBubble(msg) {
+            const body = document.getElementById('aiChatBody');
+            if (!body) return;
+
+            const existingTyping = document.getElementById('typingIndicator');
+            if (existingTyping) existingTyping.remove();
+
+            const userHtml = `
+                <div class="ai-chat-msg-row msg-user">
+                    <div class="ai-chat-sender-label">You</div>
+                    <div class="ai-chat-bubble">${escapeAiHtml(msg).replace(/\n/g, '<br>')}</div>
+                </div>
+                <div class="ai-chat-msg-row msg-ai" id="typingIndicator">
+                    <div class="ai-chat-sender-label">AI Support (LOOK-AI)</div>
+                    <div class="ai-chat-bubble" style="color: #6366f1; font-style: italic;">
+                        <i class="fa-solid fa-sparkles fa-spin mr-1"></i> LOOK-AI thinking...
+                    </div>
+                </div>
+            `;
+            body.innerHTML += userHtml;
+            scrollAiBodyToBottom();
+        }
+
+        function escapeAiHtml(text) {
+            return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+        }
+
+        function scrollAiBodyToBottom() {
+            const body = document.getElementById('aiChatBody');
+            if (body) {
+                body.scrollTop = body.scrollHeight;
+            }
+        }
+    </script>
+    @endif
+
+    @yield('script')
+</body>
 </html>
