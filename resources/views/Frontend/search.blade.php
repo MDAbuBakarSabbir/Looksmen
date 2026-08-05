@@ -273,7 +273,7 @@
                             <div class="row align-items-center gutters-10">
                                 <div class="col-10 col-lg mb-2 mb-lg-0">
                                     <h1 class="h5 fw-700 text-dark mb-0 d-flex align-items-center flex-wrap" style="gap: 8px;">
-                                        <span class="text-secondary">Search Results for</span>
+                                        <span class="text-secondary">Search Results for &nbsp;</span>
                                         <span class="badge badge-soft-primary px-3 py-2 rounded-pill fs-14 fw-600">
                                             "{{ $keyword }}"
                                         </span>

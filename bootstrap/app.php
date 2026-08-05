@@ -4,6 +4,7 @@ use App\Http\Middleware\AdminPermission;
 use App\Http\Middleware\AffiliateTrackingMiddleware;
 use App\Http\Middleware\BlockIpMiddleware;
 use App\Http\Middleware\BlockUserMiddleware;
+use App\Http\Middleware\EnsureCustomerEmailIsVerified;
 use App\Http\Middleware\MaintainanceMiddlewere;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -43,6 +44,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin.permission' => AdminPermission::class,
             'maintainance' => MaintainanceMiddlewere::class,
+            'verified' => EnsureCustomerEmailIsVerified::class,
         ]);
 
         $middleware->validateCsrfTokens(except: [

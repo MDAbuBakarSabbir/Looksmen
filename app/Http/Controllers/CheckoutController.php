@@ -61,13 +61,35 @@ class CheckoutController extends Controller
             'phone' => 'required|digits:11',
         ]);
 
-        // $apiKey   = config('courierCheck.api_key');
-        // $endpoint = config('courierCheck.endpoint');
-        $fraudCheck = Cache::rememberForever('fraud_check_settings_first', function () {
-            return FraudCheck::first();
+        $features = Cache::rememberForever('feature_activations_map', function () {
+            return FeatureActivation::pluck('status', 'name')->toArray();
         });
-        $apiKey = $fraudCheck ? $fraudCheck->api_key : null;
-        $endpoint = $fraudCheck ? $fraudCheck->base_url : null;
+
+        // 1. Check if Frontend Fraud Check is enabled
+        $frontendEnabled = ($features['fraud_check_frontend'] ?? '1') === '1';
+        if (! $frontendEnabled) {
+            return response()->json([
+                'success' => false,
+                'disabled' => true,
+                'message' => 'Frontend Fraud Check is disabled.',
+            ]);
+        }
+
+        // 2. Fetch active provider (must have status == 1)
+        $fraudCheck = Cache::rememberForever('fraud_check_settings_first', function () {
+            return FraudCheck::where('status', '1')->first() ?? FraudCheck::first();
+        });
+
+        if (! $fraudCheck || ($fraudCheck->status ?? '0') != '1') {
+            return response()->json([
+                'success' => false,
+                'disabled' => true,
+                'message' => 'No active Fraud Check API provider enabled.',
+            ]);
+        }
+
+        $apiKey = $fraudCheck->api_key;
+        $endpoint = $fraudCheck->base_url;
 
         if (! $apiKey || ! $endpoint) {
             return response()->json([

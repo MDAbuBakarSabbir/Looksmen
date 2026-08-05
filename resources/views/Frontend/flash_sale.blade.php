@@ -106,10 +106,10 @@
                         <div class="position-relative overflow-hidden text-center pt-3">
                             <a href="{{ route('ProductView', [$product->id, $product->slug]) }}" class="d-block">
                                 <img class="img-fit lazyload mx-auto h-160px h-md-210px"
-                                    src="{{ asset('frontEnd') }}/assets/img/placeholder.jpg"
-                                    data-src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontEnd/assets/img/placeholder.jpg') }}"
+                                    src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
+                                    data-src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                     alt="{{ $product->title }}"
-                                    onerror="this.onerror=null;this.src='{{ asset('frontEnd') }}/assets/img/placeholder.jpg';"
+                                    onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';"
                                     style="max-width: 90%; object-fit: contain;">
                             </a>
                             <div class="absolute-top-right mt-2 mr-2 z-3" style="position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 6px;">

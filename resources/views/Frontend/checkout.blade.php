@@ -336,7 +336,8 @@
                                 <div id="phone-error-msg" class="text-danger fs-13 mt-1 fw-500 d-none"></div>
                                 <div class="invalid-feedback">Please enter a valid phone number.</div>
                                 
-                                {{-- <div id="scanLoading" class="mt-2 text-info d-none fs-13">
+                                @if(($featuresConfig['fraud_check_frontend'] ?? '1') == '1')
+                                <div id="scanLoading" class="mt-2 text-info d-none fs-13">
                                     <span class="spinner-border spinner-border-sm me-1"></span> Checking courier records...
                                 </div>
                                 <div id="courierInfo" class="mt-2 d-none fs-13 p-2 bg-light rounded border">
@@ -345,7 +346,8 @@
                                         <span class="text-danger fw-600">Cancelled: <span id="cancelledParcel"></span></span>
                                     </div>
                                     <div id="successRateText" class="fw-bold">Success Rate: <span id="successRate"></span>%</div>
-                                </div> --}}
+                                </div>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -551,16 +553,17 @@
                         <div class="mt-4 pt-3 border-top">
                             @php
                                 $cartCount = auth()->check() ? \App\Models\Cart::where('user_id', auth()->id())->count() : count(session('cart', []));
+                                $isFrontendFraudCheckActive = ($featuresConfig['fraud_check_frontend'] ?? '1') == '1';
                             @endphp
                             
                             @if ($cartCount == 0)
                                 <a href="{{ url('/') }}" class="btn btn-chk-primary text-center d-block">Continue Shopping</a>
                             @else
-                                <button type="submit" id="confirm_order_btn" class="btn btn-chk-primary" disabled="disabled">
+                                <button type="submit" id="confirm_order_btn" class="btn btn-chk-primary" {{ $isFrontendFraudCheckActive ? 'disabled="disabled"' : '' }}>
                                     <i class="las la-check-circle me-1"></i> Confirm Order
                                 </button>
                                 @if ($featuresConfig['payment_api'] == '1')
-                                <button type="submit" id="proceed_payment_btn" class="btn btn-chk-primary" style="display: none;">
+                                <button type="submit" id="proceed_payment_btn" class="btn btn-chk-primary" style="display: none;" {{ $isFrontendFraudCheckActive ? 'disabled="disabled"' : '' }}>
                                     <i class="las la-credit-card me-1"></i> Proceed to Payment
                                 </button>
                                 @endif
@@ -729,102 +732,108 @@
             updateOrderButtons();
         });
         let scanTimer = null;
+        const isFrontendFraudCheckActive = ($featuresConfig['fraud_check_frontend'] ?? '1') == '1';
 
-        $('#phone').on('keyup', function() {
-            let phone = $('#phone').val();
-            let phoneRegex = /^(01)[3-9][0-9]{8}$/;
-            let isPhoneValid = phoneRegex.test(phone);
-            // let phone = $(this).val();
+        if (isFrontendFraudCheckActive) {
+            $('#phone').on('keyup', function() {
+                let phone = $('#phone').val();
+                let phoneRegex = /^(01)[3-9][0-9]{8}$/;
+                let isPhoneValid = phoneRegex.test(phone);
 
-            if (phone.length !== 11 && !isPhoneValid) return;
+                if (phone.length !== 11 || !isPhoneValid) return;
 
-            clearTimeout(scanTimer);
+                clearTimeout(scanTimer);
 
-            scanTimer = setTimeout(() => {
+                scanTimer = setTimeout(() => {
 
-                $('#scanLoading').removeClass('d-none');
-                $('#courierInfo').addClass('d-none');
+                    $('#scanLoading').removeClass('d-none');
+                    $('#courierInfo').addClass('d-none');
 
-                $('input[name=payment]').prop('disabled', true);
-                $('#confirm_order_btn, #proceed_payment_btn').addClass('disabled').attr('disabled', true);
+                    $('input[name=payment]').prop('disabled', true);
+                    $('#confirm_order_btn, #proceed_payment_btn').addClass('disabled').attr('disabled', true);
 
-                $.post("{{ route('check.fraud') }}", {
-                    phone: phone,
-                    _token: "{{ csrf_token() }}"
-                }, function(res) {
+                    $.post("{{ route('check.fraud') }}", {
+                        phone: phone,
+                        _token: "{{ csrf_token() }}"
+                    }, function(res) {
 
-                    $('#scanLoading').addClass('d-none');
+                        $('#scanLoading').addClass('d-none');
 
-                    if (!res.success) {
-                        Toast.fire({
-                            icon: 'error',
-                            title: res.message
-                        });
-                        return;
-                    }
+                        if (!res.success) {
+                            if (!res.disabled) {
+                                Toast.fire({
+                                    icon: 'error',
+                                    title: res.message
+                                });
+                            }
+                            $('input[name=payment]').prop('disabled', false);
+                            $('#confirm_order_btn, #proceed_payment_btn').removeClass('disabled').removeAttr('disabled');
+                            updateOrderButtons();
+                            return;
+                        }
 
-                    $('#courierInfo').removeClass('d-none');
+                        $('#courierInfo').removeClass('d-none');
 
-                    $('#totalParcel').text(res.data.total);
-                    $('#deliveredParcel').text(res.data.delivered);
-                    $('#cancelledParcel').text(res.data.cancelled);
-                    $('#successRate').text(res.data.success_rate);
+                        $('#totalParcel').text(res.data.total);
+                        $('#deliveredParcel').text(res.data.delivered);
+                        $('#cancelledParcel').text(res.data.cancelled);
+                        $('#successRate').text(res.data.success_rate);
 
-                    // Success rate color logic
-                    if (res.data.total === 0) {
-                        $('#successRateText').css('color', 'green');
-                    } else if (res.data.success_rate < res.min_rate) {
-                        $('#successRateText').css('color', 'red');
-                    } else {
-                        $('#successRateText').css('color', 'green');
-                    }
-
-                    if ($featuresConfig['payment_api'] == '1') {
+                        // Success rate color logic
                         if (res.data.total === 0) {
-                            $('#cod').prop('disabled', false).prop('checked', true);
-                            $('#prepaid').prop('disabled', false);
-                            $('#confirm_order_btn,#proceed_payment_btn').removeClass('disabled')
-                                .removeAttr('disabled');
-                            updateOrderButtons();
+                            $('#successRateText').css('color', 'green');
                         } else if (res.data.success_rate < res.min_rate) {
-                            $('#cod').prop('disabled', true);
-                            $('#prepaid').prop('disabled', false).prop('checked', true);
-                            $('#proceed_payment_btn').removeClass('disabled').removeAttr('disabled');
-                            updateOrderButtons();
-
-                            Swal.fire({
-                                icon: 'warning',
-                                title: 'Low Success Rate',
-                                text: 'Cash on Delivery is disabled. Please use Prepayment.'
-                            });
+                            $('#successRateText').css('color', 'red');
                         } else {
+                            $('#successRateText').css('color', 'green');
+                        }
+
+                        if ($featuresConfig['payment_api'] == '1') {
+                            if (res.data.total === 0) {
+                                $('#cod').prop('disabled', false).prop('checked', true);
+                                $('#prepaid').prop('disabled', false);
+                                $('#confirm_order_btn,#proceed_payment_btn').removeClass('disabled')
+                                    .removeAttr('disabled');
+                                updateOrderButtons();
+                            } else if (res.data.success_rate < res.min_rate) {
+                                $('#cod').prop('disabled', true);
+                                $('#prepaid').prop('disabled', false).prop('checked', true);
+                                $('#proceed_payment_btn').removeClass('disabled').removeAttr('disabled');
+                                updateOrderButtons();
+
+                                Swal.fire({
+                                    icon: 'warning',
+                                    title: 'Low Success Rate',
+                                    text: 'Cash on Delivery is disabled. Please use Prepayment.'
+                                });
+                            } else {
+                                $('#cod').prop('disabled', false).prop('checked', true);
+                                $('#prepaid').prop('disabled', false);
+                                $('#confirm_order_btn,#proceed_payment_btn').removeClass('disabled')
+                                    .removeAttr('disabled');
+                                updateOrderButtons();
+                            }
+                        } else {
+                            $('#confirm_order_btn').removeClass('disabled').removeAttr('disabled');
                             $('#cod').prop('disabled', false).prop('checked', true);
-                            $('#prepaid').prop('disabled', false);
-                            $('#confirm_order_btn,#proceed_payment_btn').removeClass('disabled')
-                                .removeAttr('disabled');
                             updateOrderButtons();
                         }
-                    } else {
-                        $('#confirm_order_btn').removeClass('disabled').removeAttr('disabled');
-                        $('#cod').prop('disabled', false).prop('checked', true);
-                        updateOrderButtons();
-                    }
 
-                }).fail(function() {
-                    $('#scanLoading').addClass('d-none');
-                    $('#cod').prop('disabled', false);
-                    $('#prepaid').prop('disabled', false);
-                    $('#confirm_order_btn, #proceed_payment_btn').removeClass('disabled')
-                        .removeAttr('disabled');
-                    Toast.fire({
-                        icon: 'error',
-                        title: 'Courier check failed.'
+                    }).fail(function() {
+                        $('#scanLoading').addClass('d-none');
+                        $('#cod').prop('disabled', false);
+                        $('#prepaid').prop('disabled', false);
+                        $('#confirm_order_btn, #proceed_payment_btn').removeClass('disabled')
+                            .removeAttr('disabled');
+                        Toast.fire({
+                            icon: 'error',
+                            title: 'Courier check failed.'
+                        });
                     });
-                });
 
-            }, 400); // debounce for fast typing
-
-        });
+                }, 400); // debounce for fast typing
+            });
+        }
 
         // SweetAlert Toast
         const Toast = Swal.mixin({
@@ -873,6 +882,10 @@
                 calculateGrandTotal(currentSubtotal);
             }
             updateOrderButtons();
+
+            if (!isFrontendFraudCheckActive) {
+                $('#confirm_order_btn, #proceed_payment_btn').removeClass('disabled').removeAttr('disabled').prop('disabled', false);
+            }
 
             // Address Book Logic
             function applySelectedAddress() {

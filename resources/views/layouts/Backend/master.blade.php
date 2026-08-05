@@ -1365,6 +1365,9 @@
                         <ul aria-expanded="false">
                             <li><a href="{{ route('admin.chat') }}">Customer Chat</a></li>
                             <li><a href="{{ route('admin.tickets') }}">Ticket</a></li>
+                            <li><a href="{{ route('admin.aiSupport.index') }}">AI Live Support</a></li>
+                            <li><a href="{{ route('admin.customMail') }}">Custom Mail</a></li>
+                            <li><a href="{{ route('admin.customSMS') }}">Custom SMS</a></li>
                         </ul>
                     </li>
                     @endif

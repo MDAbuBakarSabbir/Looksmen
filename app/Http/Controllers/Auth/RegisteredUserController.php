@@ -52,14 +52,54 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        // Send Welcome Mail
+        // Check if Email Verification Feature & Verification/OTP Mail Templates are Active
+        $settings = \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
+            return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();
+        });
+
+        $emailVerificationFeature = ($featuresConfig['email_verification'] ?? '0') === '1';
+        $verificationTemplateActive = ($settings['verification_mail_active'] ?? '0') === '1';
+        $otpTemplateActive = ($settings['otp_mail_active'] ?? '0') === '1';
+
+        $emailVerificationRequired = $emailVerificationFeature && ($verificationTemplateActive || $otpTemplateActive);
+
+        if ($emailVerificationRequired) {
+            // Generate 6-Digit Verification Code
+            $otp = sprintf("%06d", mt_rand(1, 999999));
+            $user->verification_code = $otp;
+            $user->verification_code_expires_at = now()->addMinutes(15);
+            $user->save();
+
+            // Send Verification Mail
+            try {
+                $verifyUrl = \Illuminate\Support\Facades\URL::temporarySignedRoute(
+                    'verification.verify',
+                    now()->addMinutes(60),
+                    ['id' => $user->id, 'hash' => sha1($user->getEmailForVerification())]
+                );
+
+                send_verification_email($user, $otp, $verifyUrl);
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Verification Mail Error: ' . $e->getMessage());
+            }
+
+            Auth::login($user);
+
+            return redirect()->route('verification.notice')->with('status', 'verification-code-sent');
+        }
+
+        // Default: If Email Verification is disabled, mark verified & send Welcome Mail
+        $user->email_verified_at = now();
+        $user->save();
+
         try {
             send_template_mail($user->email, 'welcome_mail', [
                 'customer_name' => $user->name,
                 'customer_email' => $user->email,
             ]);
         } catch (\Exception $e) {
-            \Log::error('Welcome Mail Trigger Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Welcome Mail Trigger Error: ' . $e->getMessage());
         }
 
         Auth::login($user);

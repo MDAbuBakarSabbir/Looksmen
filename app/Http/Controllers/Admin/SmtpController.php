@@ -40,6 +40,8 @@ class SmtpController extends Controller
             ['value' => $body ?? '', 'status' => 1]
         );
 
+        \Illuminate\Support\Facades\Cache::forget('boot_general_web_settings_map');
+
         return response()->json([
             'success' => true,
             'message' => 'Template Saved Successfully!'
@@ -63,6 +65,8 @@ class SmtpController extends Controller
                 ['value' => $value ?? '', 'status' => 1]
             );
         }
+
+        \Illuminate\Support\Facades\Cache::forget('boot_general_web_settings_map');
 
         return back()->with('success', 'SMTP Settings Updated Successfully!');
     }
