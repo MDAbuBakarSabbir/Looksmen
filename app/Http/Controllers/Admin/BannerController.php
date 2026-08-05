@@ -36,7 +36,8 @@ class BannerController extends Controller
             }
             $newname = 'banner_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
-            $image->save($dir.'/'.$newname, quality: 85);
+            $image->scaleDown(width: 1200);
+            $image->save($dir.'/'.$newname, quality: 80);
         }
 
         $banners = new Banner;
@@ -95,7 +96,8 @@ class BannerController extends Controller
             $manager = new ImageManager(new Driver);
             $newname = 'banner_'.$banner->id.'_'.time().'_'.Str::random(5).'.webp';
             $image = $manager->decode($request->file('image'));
-            $image->save($dir.'/'.$newname, quality: 85);
+            $image->scaleDown(width: 1200);
+            $image->save($dir.'/'.$newname, quality: 80);
             $banner->image = $newname;
         }
 

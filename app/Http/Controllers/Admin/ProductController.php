@@ -400,7 +400,8 @@ class ProductController extends Controller
             foreach ($request->file('images') as $proimage) {
                 $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.webp';
                 $image = $manager->decode($proimage);
-                $image->save($destinationPath.'/'.$imgName, quality: 85);
+                $image->scaleDown(width: 800);
+                $image->save($destinationPath.'/'.$imgName, quality: 80);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,
@@ -565,7 +566,8 @@ class ProductController extends Controller
             foreach ($request->file('images') as $proimage) {
                 $imgName = 'product_'.$product->id.'_'.uniqid().Str::random(5).'.webp';
                 $image = $manager->decode($proimage);
-                $image->save($destinationPath.'/'.$imgName, quality: 85);
+                $image->scaleDown(width: 800);
+                $image->save($destinationPath.'/'.$imgName, quality: 80);
                 ProductImage::create([
                     'product_id' => $product->id,
                     'image' => $imgName,
