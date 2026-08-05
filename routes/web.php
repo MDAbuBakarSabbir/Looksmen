@@ -29,6 +29,7 @@ Route::middleware(['maintainance'])->group(function () {
     Route::get('/user-dashboard', [HomeController::class, 'userDash'])->middleware(['auth', 'verified'])->name('dashboard');
     Route::get('/', [HomeController::class, 'home'])->name('home');
     Route::match(['get', 'post'], '/track-order', [HomeController::class, 'trackOrder'])->name('front.trackOrder');
+    Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
     Route::get('/flash-sale', [HomeController::class, 'flashSale'])->name('front.flashSale');
     Route::get('/search', [HomeController::class, 'search'])->name('front.search');
     Route::post('/ajax-search', [HomeController::class, 'ajaxSearch'])->name('front.ajaxSearch');
