@@ -589,30 +589,24 @@
                         <div class="col-xl-5 col-lg-6 mb-4">
                             <div class="product-gallery-container sticky-top z-3 row gutters-10">
                                 @if ($singleProduct->productImages->count() > 0)
-                                    <div class="col order-1 order-md-2">
-                                        <div class="gallery-main-box aiz-carousel product-gallery" data-nav-for='.product-gallery-thumb'
-                                            data-fade='true' data-auto-height='true'>
-
-                                            @foreach ($singleProduct->productImages as $key => $productImage)
-                                                <div class="carousel-box img-zoom">
-                                                    <img class="img-fluid lazyload" loading="lazy" style="width: 100%; max-height: 480px; object-fit: contain;"
-                                                        src="{{ asset('Uploads') }}/{{ $productImage->image }}"
-                                                        data-src="{{ asset('Uploads') }}/{{ $productImage->image }}"
-                                                        onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
-                                                </div>
-                                            @endforeach
+                                    <!-- Main Big Image Preview -->
+                                    <div class="col-12 col-md order-1 order-md-2 mb-3 mb-md-0">
+                                        <div class="gallery-main-box border rounded p-2 text-center bg-white shadow-sm img-zoom" style="min-height: 380px; display: flex; align-items: center; justify-content: center;">
+                                            <img id="main-product-image" class="img-fluid" style="max-height: 480px; width: 100%; object-fit: contain; transition: opacity 0.2s ease-in-out;"
+                                                src="{{ asset('Uploads/' . $singleProduct->productImages->first()->image) }}"
+                                                onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                         </div>
                                     </div>
 
-                                    <div class="col-12 col-md-auto w-md-80px order-2 order-md-1 mt-3 mt-md-0">
-                                        <div class="aiz-carousel product-gallery-thumb" data-items='5'
-                                            data-nav-for='.product-gallery' data-vertical='true' data-vertical-sm='false'
-                                            data-focus-select='true' data-arrows='true'>
-
+                                    <!-- Thumbnails Column -->
+                                    <div class="col-12 col-md-auto order-2 order-md-1">
+                                        <div class="product-thumbnails d-flex flex-row flex-md-column gap-2" style="max-height: 480px; overflow-y: auto;">
                                             @foreach ($singleProduct->productImages as $key => $productImage)
-                                                <div class="carousel-box c-pointer">
-                                                    <img class="lazyload mw-100 size-50px mx-auto" loading="lazy" style="object-fit: cover;"
-                                                        src="{{ asset('Uploads') }}/{{ $productImage->image }}"
+                                                <div class="product-thumb-item c-pointer p-1 rounded mb-2 {{ $key == 0 ? 'border-primary active-thumb' : '' }}"
+                                                    data-image="{{ asset('Uploads/' . $productImage->image) }}"
+                                                    style="width: 65px; height: 65px; cursor: pointer; border: 2px solid {{ $key == 0 ? '#044244' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    <img class="w-100 h-100" style="object-fit: cover; border-radius: 4px;"
+                                                        src="{{ asset('Uploads/' . $productImage->image) }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                                 </div>
                                             @endforeach
@@ -665,12 +659,17 @@
                                     </span>
                                 </div>
 
-                                <div class="d-flex align-items-center mb-2">
-                                    <div class="sold-by-badge mr-3">
+                                <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
+                                    <div class="sold-by-badge mr-2 mb-1">
                                         Sold by: LOOKSMEN
                                     </div>
+                                    @if (!empty($singleProduct->code))
+                                        <div class="sold-by-badge mr-2 mb-1" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+                                            Product Code: <strong class="text-dark">{{ $singleProduct->code }}</strong>
+                                        </div>
+                                    @endif
                                     @auth
-                                    <button class="message-seller-btn" onclick="show_chat_modal()">
+                                    <button class="message-seller-btn mb-1" onclick="show_chat_modal()">
                                         <i class="fa fa-comments mr-1 fs-16"></i> Message Seller
                                     </button>
                                     @endauth
@@ -1100,19 +1099,33 @@
         }
 
         $(document).ready(function() {
-            $('.product-gallery').on('afterChange setPosition lazyLoaded', function() {
-                if ($('.img-zoom')[0]) {
+            function initZoom() {
+                if ($('.img-zoom')[0] && typeof $.fn.zoom === 'function') {
                     $('.img-zoom').trigger('zoom.destroy');
                     $('.img-zoom').zoom({
                         magnify: 1.5
                     });
-                    setTimeout(function() {
-                        $('.img-zoom').trigger('zoom.destroy');
-                        $('.img-zoom').zoom({
-                            magnify: 1.5
-                        });
-                    }, 300);
                 }
+            }
+
+            initZoom();
+
+            $('.product-thumb-item').on('click', function(e) {
+                e.preventDefault();
+                var targetImage = $(this).attr('data-image');
+                
+                var $mainImg = $('#main-product-image');
+                $mainImg.css('opacity', '0.3');
+                
+                $mainImg.attr('src', targetImage);
+                $mainImg.off('load').on('load', function() {
+                    $(this).css('opacity', '1');
+                    initZoom();
+                });
+                
+                // Active thumbnail styling
+                $('.product-thumb-item').css('border-color', '#e2e8f0').removeClass('active-thumb');
+                $(this).css('border-color', '#044244').addClass('active-thumb');
             });
         });
     </script>

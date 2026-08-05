@@ -188,7 +188,8 @@ class HomeController extends Controller
         $keyword = $request->input('keyword');
         $catProducts = Product::where('status', '1')
             ->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', "%{$keyword}%");
+                $query->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('code', 'like', "%{$keyword}%");
             })
             ->with('firstImage')
             ->withAvg(['reviews' => function ($q) {
@@ -211,7 +212,8 @@ class HomeController extends Controller
 
         $products = Product::where('status', '1')
             ->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', "%{$keyword}%");
+                $query->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('code', 'like', "%{$keyword}%");
             })
             ->with('firstImage')
             ->latest()
@@ -224,7 +226,8 @@ class HomeController extends Controller
 
         $totalCount = Product::where('status', '1')
             ->where(function ($query) use ($keyword) {
-                $query->where('title', 'like', "%{$keyword}%");
+                $query->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('code', 'like', "%{$keyword}%");
             })
             ->count();
 

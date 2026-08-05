@@ -1,1 +1,1 @@
-$('.product-gallery').slick(); // অথবা আপনার থিমের carousel init function
+// custom js code can go here

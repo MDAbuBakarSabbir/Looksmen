@@ -1265,6 +1265,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
                         asNavFor: asNavFor,
                         focusOnSelect: focusOnSelect,
                         adaptiveHeight: adaptiveHeight,
+                        accessibility: false,
                         slidesToScroll: 1,
                         prevArrow:
                             '<button type="button" class="slick-prev"><i class="las la-angle-left"></i></button>',
