@@ -905,8 +905,8 @@
 
     <div class="modal fade" id="cart-modal" tabindex="-1" role="dialog" aria-hidden="true"
         style="z-index: 1060;">
-        <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-            <div class="modal-content" id="cart-modal-content" style="border-radius: 15px; overflow: hidden;">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md" role="document" style="max-height: 90vh;">
+            <div class="modal-content" id="cart-modal-content" style="border-radius: 15px; overflow: hidden; max-height: 90vh; display: flex; flex-direction: column;">
             </div>
         </div>
     </div>

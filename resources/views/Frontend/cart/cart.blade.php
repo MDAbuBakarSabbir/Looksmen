@@ -43,7 +43,7 @@
         $subtotal = 0;
     @endphp
 
-    <div class="modal-body">
+    <div class="modal-body" style="max-height: calc(75vh - 100px); overflow-y: auto;">
         @if (!empty($cart) && count($cart) > 0)
             <div class="table-responsive">
                 <table class="table table-borderless">
@@ -84,7 +84,7 @@
                                     <div class="d-flex align-items-center">
                                         <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="size-60px mr-2 rounded">
                                         <div>
-                                            <span class="fs-14 fw-600 d-block">{{ $name }}</span>
+                                            <span class="fs-14 fw-600 d-block text-truncate" style="max-width: 150px;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 25) }}</span>
                                             <small class="text-info font-weight-bold">Code: {{ $code }}</small>
                                         </div>
                                     </div>
@@ -133,13 +133,26 @@
     </div>
 
     @if (!empty($cart) && count($cart) > 0)
-        <div class="modal-footer justify-content-between">
-            <div class="h5 mb-0">
+        <style>
+            @media (max-width: 575.98px) {
+                .cart-footer-buttons {
+                    width: 100% !important;
+                    flex-direction: column !important;
+                    gap: 8px;
+                }
+                .cart-footer-buttons .btn {
+                    width: 100% !important;
+                    margin-right: 0 !important;
+                }
+            }
+        </style>
+        <div class="modal-footer justify-content-between flex-column flex-sm-row align-items-center" style="position: sticky; bottom: 0; background: #ffffff; z-index: 10; border-top: 1px solid #e2e8f0; box-shadow: 0 -4px 12px rgba(0,0,0,0.05);">
+            <div class="h5 mb-2 mb-sm-0 text-center text-sm-left">
                 <strong>Subtotal:</strong>
                 ৳<span class="text-primary all-subtotal" id="cart-subtotal"> {{ $subtotal }}</span>
             </div>
-            <div>
-                <a href="{{ url('/') }}" class="btn btn-light">Continue Shopping</a>
+            <div class="cart-footer-buttons d-flex align-items-center">
+                <a href="{{ url('/') }}" class="btn btn-light mr-2">Continue Shopping</a>
                 <a href="{{ route('checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
             </div>
         </div>

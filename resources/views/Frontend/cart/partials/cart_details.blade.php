@@ -7,7 +7,7 @@
     <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
 </div>
 
-<div class="modal-body">
+<div class="modal-body" style="max-height: calc(75vh - 120px); overflow-y: auto;">
     @if (!empty($cart) && count($cart) > 0)
         <div class="table-responsive">
             <table class="table table-borderless">
@@ -47,7 +47,7 @@
                                 <div class="d-flex align-items-center">
                                     <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="size-60px mr-2 rounded">
                                     <div>
-                                        <span class="fs-14 fw-600 d-block">{{ $name }}</span>
+                                        <span class="fs-14 fw-600 d-block text-truncate" style="max-width: 150px;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 25) }}</span>
                                         <small class="text-info font-weight-bold">Code: {{ $code }}</small>
                                     </div>
                                 </div>
@@ -109,7 +109,7 @@
             }
         }
     </style>
-    <div class="modal-footer justify-content-between flex-column flex-sm-row align-items-center">
+    <div class="modal-footer justify-content-between flex-column flex-sm-row align-items-center" style="position: sticky; bottom: 0; background: #ffffff; z-index: 10; border-top: 1px solid #e2e8f0; box-shadow: 0 -4px 12px rgba(0,0,0,0.05);">
         <div class="mb-2 mb-sm-0 text-center text-sm-left">
             <h5 class="mb-1"><strong>Subtotal:</strong>
                 ৳<span class="all-subtotal"> {{ $subtotal }}</span></h5>
