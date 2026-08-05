@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('coupons', function (Blueprint $table) {
-            $table->decimal('maximum_discount', 10, 2)->nullable()->after('quantity');
+            if (!Schema::hasColumn('coupons', 'maximum_discount')) {
+                $table->decimal('maximum_discount', 10, 2)->nullable()->after('quantity');
+            }
         });
     }
 

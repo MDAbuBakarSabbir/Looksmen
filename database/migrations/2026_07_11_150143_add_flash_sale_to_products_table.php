@@ -12,7 +12,9 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->tinyInteger('flash_sale')->default(0)->after('todays_deal');
+            if (!Schema::hasColumn('products', 'flash_sale')) {
+                $table->tinyInteger('flash_sale')->default(0)->after('todays_deal');
+            }
         });
     }
 

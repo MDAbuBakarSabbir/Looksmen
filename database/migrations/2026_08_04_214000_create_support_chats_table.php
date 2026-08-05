@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('support_chats', function (Blueprint $table) {
-            $table->id();
-            $table->string('session_id')->index();
-            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
-            $table->enum('sender', ['user', 'ai', 'admin'])->default('user');
-            $table->text('message');
-            $table->boolean('is_transferred')->default(false);
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('support_chats')) {
+            Schema::create('support_chats', function (Blueprint $table) {
+                $table->id();
+                $table->string('session_id')->index();
+                $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('cascade');
+                $table->enum('sender', ['user', 'ai', 'admin'])->default('user');
+                $table->text('message');
+                $table->boolean('is_transferred')->default(false);
+                $table->timestamps();
+            });
+        }
     }
 
     /**

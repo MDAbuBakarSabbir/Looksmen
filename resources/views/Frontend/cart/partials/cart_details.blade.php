@@ -96,14 +96,27 @@
 </div>
 
 @if (!empty($cart) && count($cart) > 0)
-    <div class="modal-footer justify-content-between">
-        <div class="mb-0">
-            <h5><strong>Subtotal:</strong>
-                ৳<span class="all-subtotal"> {{ $subtotal }}</span><br></h5>
-            <p>Shipping charge And Discount Calculated AT Checkout</p>
+    <style>
+        @media (max-width: 575.98px) {
+            .cart-footer-buttons {
+                width: 100% !important;
+                flex-direction: column !important;
+                gap: 8px;
+            }
+            .cart-footer-buttons .btn {
+                width: 100% !important;
+                margin-right: 0 !important;
+            }
+        }
+    </style>
+    <div class="modal-footer justify-content-between flex-column flex-sm-row align-items-center">
+        <div class="mb-2 mb-sm-0 text-center text-sm-left">
+            <h5 class="mb-1"><strong>Subtotal:</strong>
+                ৳<span class="all-subtotal"> {{ $subtotal }}</span></h5>
+            <p class="mb-0 fs-12 text-muted">Shipping charge And Discount Calculated AT Checkout</p>
         </div>
-        <div>
-            <button type="button" class="btn btn-light" data-dismiss="modal">Continue Shopping</button>
+        <div class="cart-footer-buttons d-flex align-items-center">
+            <button type="button" class="btn btn-light mr-2" data-dismiss="modal">Continue Shopping</button>
             <a href="{{ route('checkout') }}" class="btn btn-primary">Proceed to Checkout</a>
         </div>
     </div>

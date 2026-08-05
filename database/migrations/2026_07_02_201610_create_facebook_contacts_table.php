@@ -11,14 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('facebook_contacts', function (Blueprint $table) {
-            $table->id();
-            $table->string('sender_id')->unique(); // Facebook PSID
-            $table->string('name')->nullable();
-            $table->integer('unread_count')->default(0);
-            $table->timestamp('last_message_at')->nullable();
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('facebook_contacts')) {
+            Schema::create('facebook_contacts', function (Blueprint $table) {
+                $table->id();
+                $table->string('sender_id')->unique(); // Facebook PSID
+                $table->string('name')->nullable();
+                $table->integer('unread_count')->default(0);
+                $table->timestamp('last_message_at')->nullable();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
