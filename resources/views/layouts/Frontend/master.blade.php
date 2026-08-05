@@ -1052,8 +1052,8 @@
     <div class="user-sidenav-backdrop" id="mobileCategoriesBackdrop" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); z-index: 1040; display: none; opacity: 0; transition: opacity 0.3s ease;"></div>
 
     <!-- SCRIPTS -->
-    <script src="{{ asset('frontend') }}/assets/js/aiz-core.js"></script>
-    <script src="{{ asset('frontend') }}/assets/js/custom.js"></script>
+    <script src="{{ asset('frontend') }}/assets/js/aiz-core.js?v={{ time() }}"></script>
+    <script src="{{ asset('frontend') }}/assets/js/custom.js?v={{ time() }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 

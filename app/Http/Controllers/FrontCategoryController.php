@@ -267,7 +267,8 @@ class FrontCategoryController extends Controller
             // For search, $id actually holds the keyword
             $keyword = $request->input('id');
             $query->where(function ($q) use ($keyword) {
-                $q->where('title', 'like', "%{$keyword}%");
+                $q->where('title', 'like', "%{$keyword}%")
+                  ->orWhere('code', 'like', "%{$keyword}%");
             });
         }
 
