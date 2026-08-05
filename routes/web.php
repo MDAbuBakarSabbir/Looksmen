@@ -10,9 +10,12 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CompareController;
 use App\Http\Controllers\Customer\WalletPointController;
 use App\Http\Controllers\FrontCategoryController;
+use App\Http\Controllers\Frontend\AiSupportController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\SupportTicketController;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('admin')->middleware('guest:admin')->group(function () {
@@ -29,15 +32,15 @@ Route::middleware(['maintainance'])->group(function () {
     Route::get('/user-dashboard', [HomeController::class, 'userDash'])->middleware(['auth', 'verified'])->name('dashboard');
     Route::get('/', [HomeController::class, 'home'])->name('home');
     Route::match(['get', 'post'], '/track-order', [HomeController::class, 'trackOrder'])->name('front.trackOrder');
-    Route::get('/sitemap.xml', [App\Http\Controllers\SitemapController::class, 'index'])->name('sitemap');
+    Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
     Route::get('/flash-sale', [HomeController::class, 'flashSale'])->name('front.flashSale');
     Route::get('/search', [HomeController::class, 'search'])->name('front.search');
     Route::post('/ajax-search', [HomeController::class, 'ajaxSearch'])->name('front.ajaxSearch');
 
     // AI Customer Support Routes
-    Route::get('/ai-support/history', [\App\Http\Controllers\Frontend\AiSupportController::class, 'getHistory'])->name('aiSupport.history');
-    Route::post('/ai-support/send', [\App\Http\Controllers\Frontend\AiSupportController::class, 'sendMessage'])->name('aiSupport.send');
-    Route::post('/ai-support/transfer', [\App\Http\Controllers\Frontend\AiSupportController::class, 'transferToAgent'])->name('aiSupport.transfer');
+    Route::get('/ai-support/history', [AiSupportController::class, 'getHistory'])->name('aiSupport.history');
+    Route::post('/ai-support/send', [AiSupportController::class, 'sendMessage'])->name('aiSupport.send');
+    Route::post('/ai-support/transfer', [AiSupportController::class, 'transferToAgent'])->name('aiSupport.transfer');
 
     Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -143,10 +146,10 @@ Route::middleware(['maintainance'])->group(function () {
 Route::get('/under-maintainance', [GeneralWebSettingsController::class, 'maintainance'])->name('maintainance.mode');
 
 // Route to clear and optimize cache on live server without terminal access
-Route::get('/clear-cache', function() {
-    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-    \Illuminate\Support\Facades\Artisan::call('view:cache');
-    return "Cache is cleared and optimized! You can go back to the homepage.";
+Route::get('/clear-cache', function () {
+    Artisan::call('optimize:clear');
+
+    return 'Cache is cleared! You can go back to the homepage.';
 });
 
 Route::fallback(function () {
