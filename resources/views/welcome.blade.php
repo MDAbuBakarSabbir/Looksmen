@@ -156,7 +156,7 @@
                                         <div class="row gutters-5 align-items-center">
                                             <div class="col-xxl">
                                                 <div class="img">
-                                                    <img class="lazyload img-fit h-140px h-lg-80px"
+                                                    <img class="lazyload img-fit h-140px h-lg-80px" loading="lazy"
                                                         src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                                         data-src="{{ $todaysDeal->firstImage ? asset('Uploads/' . $todaysDeal->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                         alt="{{ $todaysDeal->title }}"
@@ -201,7 +201,7 @@
                                 <span class="badge-custom">OFF<span class="box ml-1 mr-0">&nbsp;{!! $newArival->discount_percentage !!}%</span></span>
                                 <div class="position-relative">
                                     <a href="{{ route('ProductView', [$newArival->id, $newArival->slug]) }}" class="d-block">
-                                        <img class="img-fit mx-auto h-140px h-md-210px lazyload"
+                                        <img class="img-fit mx-auto h-140px h-md-210px lazyload" loading="lazy"
                                             src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                             data-src="{{ $newArival->firstImage ? asset('Uploads/' . $newArival->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                             alt="{{ $newArival->name }}"
@@ -364,7 +364,7 @@
                                             <div class="position-relative">
                                                 <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                     class="d-block">
-                                                    <img class="img-fit mx-auto h-140px h-md-210px ls-is-cached lazyload"
+                                                    <img class="img-fit mx-auto h-140px h-md-210px ls-is-cached lazyload" loading="lazy"
                                                         src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
                                                         data-src="{{ $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                         alt="Exclusive Fu l  l Sleeve Check Formal and Casual Shirt for Men"

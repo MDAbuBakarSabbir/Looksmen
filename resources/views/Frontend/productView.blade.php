@@ -11,7 +11,33 @@
     {{ strtoupper($singleProduct->title) }}
 @endsection
 
+@section('meta_title', $singleProduct->title)
+@section('meta_description', \Illuminate\Support\Str::limit(strip_tags($singleProduct->description), 160))
+@section('meta_image', $singleProduct->productImages->count() > 0 ? asset('Uploads/'.$singleProduct->productImages->first()->image) : '')
+@section('canonical', url()->current())
+@section('og_type', 'product')
+
 @section('content')
+    <!-- Product Schema Markup -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "{{ $singleProduct->title }}",
+      "image": "{{ $singleProduct->productImages->count() > 0 ? asset('Uploads/'.$singleProduct->productImages->first()->image) : '' }}",
+      "description": "{{ \Illuminate\Support\Str::limit(strip_tags($singleProduct->description), 160) }}",
+      "sku": "{{ $singleProduct->sku ?? $singleProduct->id }}",
+      "offers": {
+        "@type": "Offer",
+        "url": "{{ url()->current() }}",
+        "priceCurrency": "BDT",
+        "price": "{{ $singleProduct->new_price }}",
+        "availability": "{{ $singleProduct->quantity > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock' }}",
+        "itemCondition": "https://schema.org/NewCondition"
+      }
+    }
+    </script>
+
     <script>
         var AIZ = AIZ || {};
         AIZ.local = {
@@ -569,7 +595,7 @@
 
                                             @foreach ($singleProduct->productImages as $key => $productImage)
                                                 <div class="carousel-box img-zoom">
-                                                    <img class="img-fluid lazyload" style="width: 100%; max-height: 480px; object-fit: contain;"
+                                                    <img class="img-fluid lazyload" loading="lazy" style="width: 100%; max-height: 480px; object-fit: contain;"
                                                         src="{{ asset('Uploads') }}/{{ $productImage->image }}"
                                                         data-src="{{ asset('Uploads') }}/{{ $productImage->image }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
@@ -585,7 +611,7 @@
 
                                             @foreach ($singleProduct->productImages as $key => $productImage)
                                                 <div class="carousel-box c-pointer">
-                                                    <img class="lazyload mw-100 size-50px mx-auto" style="object-fit: cover;"
+                                                    <img class="lazyload mw-100 size-50px mx-auto" loading="lazy" style="object-fit: cover;"
                                                         src="{{ asset('Uploads') }}/{{ $productImage->image }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                                 </div>

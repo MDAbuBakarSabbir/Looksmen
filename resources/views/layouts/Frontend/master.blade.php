@@ -46,40 +46,39 @@
     <meta name="app-url" content="//www.looksmen.com/">
     <meta name="file-base-url" content="//www.looksmen.com/public/">
 
-    <title>{{ $webConfig['web_name'] }} | @yield('title')</title>
+    <title>@hasSection('meta_title') @yield('meta_title') | {{ $webConfig['web_name'] }} @else {{ $webConfig['web_name'] }} | @yield('title') @endif</title>
 
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="index, follow">
-    <meta name="description"
-        content="{{ $webConfig['web_description'] }}" />
-    <meta name="keywords" content="Looksmen.com, Looksmen-Online Shopping, Looksmen, looksmen.com,looks">
+    <meta name="description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])" />
+    <meta name="keywords" content="@yield('meta_keyword', $webConfig['meta_keyword'] ?? 'looksmen, online shopping')">
+    <link rel="canonical" href="@yield('canonical', url()->current())" />
 
+    <!-- Preconnect & DNS Prefetch -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
     <!-- Schema.org markup for Google+ -->
-    <meta itemprop="name" content="looksmen.com">
-    <meta itemprop="description"
-        content="{{ $webConfig['web_description'] }}">
-    <meta itemprop="image" content="{{ asset('frontend') }}/uploads/CcWodTkHslpIjY8rstUMkVdmzLDJdT3ULIstJtHy.png">
+    <meta itemprop="name" content="@yield('meta_title', $webConfig['web_name'])">
+    <meta itemprop="description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])">
+    <meta itemprop="image" content="@yield('meta_image', asset('adminDash/assets/img/layouts/'.($webConfig['web_favicon'] ?? 'favicon.png')))">
 
     <!-- Twitter Card data -->
-    <meta name="twitter:card" content="product">
-    <meta name="twitter:site" content="@publisher_handle">
-    <meta name="twitter:title" content="looksmen.com">
-    <meta name="twitter:description"
-        content="{{ $webConfig['web_description'] }}">
-    <meta name="twitter:creator"
-        content="@author_handle">
-    <meta name="twitter:image" content="{{ asset('frontend') }}/uploads/CcWodTkHslpIjY8rstUMkVdmzLDJdT3ULIstJtHy.png">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@yield('twitter_site', '@looksmen')">
+    <meta name="twitter:title" content="@yield('meta_title', $webConfig['web_name'])">
+    <meta name="twitter:description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])">
+    <meta name="twitter:image" content="@yield('meta_image', asset('adminDash/assets/img/layouts/'.($webConfig['web_favicon'] ?? 'favicon.png')))">
 
     <!-- Open Graph data -->
-    <meta property="og:title" content="looksmen.com" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="{{ url("/") }}" />
-    <meta property="og:image" content="{{ asset('frontend') }}/uploads/CcWodTkHslpIjY8rstUMkVdmzLDJdT3ULIstJtHy.png" />
-    <meta property="og:description"
-        content="{{ $webConfig['web_description'] }}" />
-    <meta property="og:site_name" content="LOOKSMEN" />
+    <meta property="og:title" content="@yield('meta_title', $webConfig['web_name'])" />
+    <meta property="og:type" content="@yield('og_type', 'website')" />
+    <meta property="og:url" content="@yield('canonical', url()->current())" />
+    <meta property="og:image" content="@yield('meta_image', asset('adminDash/assets/img/layouts/'.($webConfig['web_favicon'] ?? 'favicon.png')))" />
+    <meta property="og:description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])" />
+    <meta property="og:site_name" content="{{ $webConfig['web_name'] }}" />
     <meta property="fb:app_id" content="1125412091428219">
     
     <!-- Facebook Domain Verification -->
@@ -596,12 +595,8 @@
                                     data-src="{{ asset('adminDash/assets/img/layouts') }}/{{ $webConfig['footer_logo'] }}"
                                     alt="LOOKSMEN" height="44">
                             </a>
-                            <div class="my-3">
-                                <span style="font-weight: bolder;">looksmen.com&nbsp;</span>is a trusted virtual
-                                e-commerce marketplace. It is an online retailer that sells various products online from
-                                anywhere in Bangladesh. We have more than 25000 products. We sell them online. We have a
-                                7-day money-back guarantee service. We always work with fidelity. Thanks for staying
-                                with us.
+                            <div class="my-3 opacity-70">
+                                {!! $webConfig['web_description'] ?? '' !!}
                             </div>
                             <div class="d-inline-block d-md-block mb-4">
                                 <form class="form-inline" method="POST" action="{{ url('/subscribers') }}">

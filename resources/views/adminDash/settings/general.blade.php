@@ -3,7 +3,74 @@
     WEB SETTINGS
 @endsection
 @section('content')
+    <link rel="stylesheet" href="{{ asset('adminDash/assets/vendor/bootstrap-tagsinput/css/bootstrap-tagsinput.css') }}">
     <style>
+        /* Premium Tagsinput Styling */
+        .bootstrap-tagsinput {
+            width: 100% !important;
+            background: #fafafa !important;
+            border: 1px solid #d1d5db !important;
+            border-radius: 10px !important;
+            padding: 6px 10px !important;
+            box-shadow: none !important;
+            min-height: 44px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .bootstrap-tagsinput:focus-within {
+            background: #ffffff !important;
+            border-color: var(--primary-color) !important;
+            box-shadow: 0 0 0 3px var(--focus-ring) !important;
+        }
+
+        .bootstrap-tagsinput .tag {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%) !important;
+            color: #ffffff !important;
+            border-radius: 6px !important;
+            padding: 4px 10px !important;
+            font-size: 12px !important;
+            font-weight: 600 !important;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 4px rgba(99, 102, 241, 0.15);
+            margin: 2px 0;
+        }
+
+        .bootstrap-tagsinput .tag [data-role="remove"] {
+            margin-left: 4px;
+            cursor: pointer;
+            opacity: 0.85;
+            transition: opacity 0.2s ease;
+        }
+
+        .bootstrap-tagsinput .tag [data-role="remove"]:hover {
+            opacity: 1;
+            color: #fecdd3;
+        }
+
+        .bootstrap-tagsinput .tag [data-role="remove"]:after {
+            content: "×";
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .bootstrap-tagsinput input {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            font-size: 13px !important;
+            color: var(--text-dark) !important;
+            padding: 4px 0 !important;
+            flex: 1;
+            min-width: 120px;
+        }
+
         /* Premium Settings CSS Variables */
         :root {
             --primary-color: #6366f1;
@@ -218,8 +285,9 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">WebSite Tags</label>
-                            <input type="text" class="form-control" value="{{ $webConfig['web_tags']['value'] ?? '' }}"
-                                placeholder="Enter Website Tags" name="webTags">
+                            <input type="text" class="form-control" data-role="tagsinput" value="{{ $webConfig['web_tags']['value'] ?? '' }}"
+                                placeholder="Add tags..." name="webTags">
+                            <small class="text-muted d-block mt-1" style="font-size: 11px;"><i class="fa-solid fa-circle-info mr-1"></i> Type tag & press Enter or comma (,)</small>
                         </div>
                         <button type="submit" class="btn btn-primary">Save Details</button>
                     </form>
@@ -279,8 +347,9 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Meta Tags (Keywords)</label>
-                            <input type="text" class="form-control" value="{{ $webConfig['meta_keyword']['value'] ?? '' }}"
-                                placeholder="Enter Meta Tags" name="meta_keyword">
+                            <input type="text" class="form-control" data-role="tagsinput" value="{{ $webConfig['meta_keyword']['value'] ?? '' }}"
+                                placeholder="Add keywords..." name="meta_keyword">
+                            <small class="text-muted d-block mt-1" style="font-size: 11px;"><i class="fa-solid fa-circle-info mr-1"></i> Type keyword & press Enter or comma (,)</small>
                         </div>
                         <button type="submit" class="btn btn-primary">Save SEO Settings</button>
                     </form>
@@ -787,4 +856,5 @@
             });
         });
     </script>
+    <script src="{{ asset('adminDash/assets/vendor/bootstrap-tagsinput/js/bootstrap-tagsinput.min.js') }}"></script>
 @endsection
