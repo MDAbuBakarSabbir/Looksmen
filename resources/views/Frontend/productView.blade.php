@@ -21,14 +21,14 @@
     <!-- Product Schema Markup -->
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org/",
-      "@type": "Product",
+      "@@context": "https://schema.org/",
+      "@@type": "Product",
       "name": "{{ $singleProduct->title }}",
       "image": "{{ $singleProduct->productImages->count() > 0 ? asset('Uploads/'.$singleProduct->productImages->first()->image) : '' }}",
       "description": "{{ \Illuminate\Support\Str::limit(strip_tags($singleProduct->description), 160) }}",
       "sku": "{{ $singleProduct->sku ?? $singleProduct->id }}",
       "offers": {
-        "@type": "Offer",
+        "@@type": "Offer",
         "url": "{{ url()->current() }}",
         "priceCurrency": "BDT",
         "price": "{{ $singleProduct->new_price }}",
