@@ -1131,7 +1131,7 @@
                                             </div>
                                         </li>
                                     </ul>
-                                    <a class="all-notification" href="{{ Route::has('order-new') ? route('order-new') : '#' }}">
+                                    <a class="all-notification" href="{{ Route::has('order-pending') ? route('order-pending') : (Route::has('order-new') ? route('order-new') : '#') }}">
                                         See all new Orders <i class="ti-arrow-right"></i>
                                     </a>
                                 </div>
