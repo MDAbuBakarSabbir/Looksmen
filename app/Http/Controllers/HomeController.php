@@ -142,12 +142,17 @@ class HomeController extends Controller
             $searched = true;
             $query = Orders::query();
 
+            if ($phone) {
+                $cleanPhone = preg_replace('/[^0-9]/', '', $phone);
+                $last11 = strlen($cleanPhone) >= 11 ? substr($cleanPhone, -11) : $phone;
+            }
+
             if ($orderId && $phone) {
-                $query->where('id', $orderId)->where('phone', $phone);
+                $query->where('id', $orderId)->where('phone', 'like', "%{$last11}%");
             } elseif ($orderId) {
                 $query->where('id', $orderId);
             } else {
-                $query->where('phone', $phone);
+                $query->where('phone', 'like', "%{$last11}%");
             }
 
             $order = $query->latest()->first();

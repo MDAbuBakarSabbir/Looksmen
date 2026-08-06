@@ -122,9 +122,12 @@ class OrderManageController extends Controller
 
         // SEARCH
         if ($request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('id', 'like', "%{$request->search}%")
-                    ->orWhere('phone', 'like', "%{$request->search}%");
+            $search = $request->search;
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
 
@@ -197,6 +200,11 @@ class OrderManageController extends Controller
             }
         } else {
             $order->delivery_status = $request->status;
+            if ($request->status == 'delivered') {
+                $order->payment_status = 'paid';
+                $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
+                $order->grand_total = 0;
+            }
             $order->updated_by = auth()->id();
             $order->save();
         }
@@ -261,10 +269,17 @@ class OrderManageController extends Controller
 
     public function bulkUpdate(Request $request)
     {
-        if ($request->status == 'delivered') {
+        if (str_starts_with($request->status, 'payment_')) {
+            $paymentStatus = str_replace('payment_', '', $request->status);
+            Orders::whereIn('id', $request->ids)
+                ->update(['payment_status' => $paymentStatus]);
+        } elseif ($request->status == 'delivered') {
             $orders = Orders::whereIn('id', $request->ids)->get();
             foreach ($orders as $order) {
                 $order->delivery_status = $request->status;
+                $order->payment_status = 'paid';
+                $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
+                $order->grand_total = 0;
                 $order->save();
                 try {
                     $affiliateController = new AffiliateController;
@@ -340,9 +355,11 @@ class OrderManageController extends Controller
         $query = Orders::with('admin');
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -360,9 +377,11 @@ class OrderManageController extends Controller
         $query = Orders::where('delivery_status', 'hold');
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -381,9 +400,11 @@ class OrderManageController extends Controller
         $query = Orders::where('delivery_status', 'pending');
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -402,9 +423,11 @@ class OrderManageController extends Controller
         $query = Orders::where('delivery_status', 'approved');
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -423,9 +446,11 @@ class OrderManageController extends Controller
         $query = Orders::where('delivery_status', 'packaging');
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -448,9 +473,11 @@ class OrderManageController extends Controller
         ]);
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -469,9 +496,11 @@ class OrderManageController extends Controller
         $query = Orders::whereIn('delivery_status', ['delivered', 'partial_delivered']);
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -490,9 +519,11 @@ class OrderManageController extends Controller
         $query = Orders::whereIn('delivery_status', ['cancel', 'cancelled', 'canceled']);
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -511,9 +542,11 @@ class OrderManageController extends Controller
         $query = Orders::where('delivery_status', 'returned');
         if ($request->search) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
                 $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+                    ->orWhere('phone', 'like', "%{$last11}%");
             });
         }
         $perPage = (int) $request->input('per_page', 10);
@@ -1079,6 +1112,12 @@ class OrderManageController extends Controller
 
         $this->checkOrderAccess($order);
 
+        // Mark the order as viewed when an admin opens the details page
+        if ($order->is_viewed == 0) {
+            $order->is_viewed = 1;
+            $order->save();
+        }
+
         $orderLogs = Logs::with('user')->where('order_id', $id)->latest()->get();
         $phone = $order->phone;
 
@@ -1230,6 +1269,17 @@ class OrderManageController extends Controller
                     $logs->save();
 
                     $order->delivery_status = $request->delivery_status;
+                    if ($request->delivery_status == 'delivered') {
+                        $order->payment_status = 'paid';
+                        $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
+                        $order->grand_total = 0;
+                    }
+                }
+            }
+
+            if ($request->has('payment_status') && $request->delivery_status != 'delivered') {
+                if ($order->payment_status !== $request->payment_status) {
+                    $order->payment_status = $request->payment_status;
                 }
             }
 

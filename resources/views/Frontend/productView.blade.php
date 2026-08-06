@@ -129,14 +129,7 @@
         }
 
         /* Redesign Styles */
-        .prod-main-card {
-            background: #ffffff;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04);
-            border: 1px solid #f1f5f9;
-            padding: 30px;
-            margin-bottom: 30px;
-        }
+        .prod-main-card { border-radius: 24px; }
 
         /* Gallery Styles */
         .product-gallery-container {
@@ -144,19 +137,10 @@
             top: 20px;
         }
         
-        .gallery-main-box {
-            background: #ffffff;
-            border-radius: 16px;
-            border: 1px solid #e2e8f0;
-            overflow: hidden;
-            margin-bottom: 15px;
-            transition: all 0.3s ease;
-        }
+        .gallery-main-box { border-radius: 16px; transition: all 0.3s ease; }
+        
 
-        .gallery-main-box:hover {
-            box-shadow: 0 12px 30px -10px rgba(0,0,0,0.1);
-            border-color: #cbd5e1;
-        }
+        
 
         .product-gallery-thumb .carousel-box {
             border-radius: 12px !important;
@@ -176,24 +160,9 @@
         }
 
         /* Product Details Styles */
-        .product-title-modern {
-            font-size: 1.95rem;
-            font-weight: 700;
-            color: #0f172a;
-            line-height: 1.3;
-            letter-spacing: -0.02em;
-        }
+        .product-title-modern { line-height: 1.3; letter-spacing: -0.02em; }
 
-        .rating-pill-container {
-            display: inline-flex;
-            align-items: center;
-            background: #f1f5f9;
-            padding: 6px 14px;
-            border-radius: 100px;
-            font-size: 0.9rem;
-            gap: 6px;
-            font-weight: 500;
-        }
+        .rating-pill-container { gap: 6px; }
 
         .rating-stars-gold {
             color: #f59e0b;
@@ -201,15 +170,7 @@
             gap: 2px;
         }
 
-        .sold-by-badge {
-            background: rgba(4, 66, 68, 0.06);
-            color: #044244;
-            padding: 8px 16px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: inline-block;
-        }
+        .sold-by-badge { background: rgba(4, 66, 68, 0.06); color: #044244; border-radius: 10px; }
 
         .message-seller-btn {
             background: transparent;
@@ -228,54 +189,18 @@
         }
 
         /* Pricing */
-        .price-box-modern {
-            background: #f8fafc;
-            border-radius: 16px;
-            padding: 20px;
-            border: 1px solid #f1f5f9;
-            margin: 20px 0;
-        }
+        .price-box-modern { border-radius: 16px; }
 
-        .regular-price-label {
-            font-size: 0.9rem;
-            color: #64748b;
-            font-weight: 500;
-        }
+        
 
-        .regular-price-val {
-            font-size: 1.15rem;
-            color: #94a3b8;
-            text-decoration: line-through;
-        }
+        
 
-        .current-price-val {
-            font-size: 2.2rem;
-            font-weight: 800;
-            color: #044244;
-        }
+        
 
-        .save-tag {
-            background: #ef4444;
-            color: white;
-            padding: 4px 10px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            border-radius: 8px;
-            margin-left: 10px;
-            display: inline-block;
-            vertical-align: middle;
-            animation: pulse 2s infinite;
-        }
+        .save-tag { animation: pulse 2s infinite; }
 
         /* Quantity Picker Capsule */
-        .quantity-picker-capsule {
-            display: inline-flex;
-            align-items: center;
-            background: #f1f5f9;
-            border-radius: 100px;
-            padding: 4px;
-            border: 1px solid #e2e8f0;
-        }
+        .quantity-picker-capsule { border-radius: 100px; }
 
         .quantity-picker-btn {
             width: 36px;
@@ -399,21 +324,9 @@
         }
 
         /* Sidebar Top Selling */
-        .sidebar-card-modern {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04);
-            overflow: hidden;
-        }
+        .sidebar-card-modern { border-radius: 16px; }
 
-        .sidebar-title-modern {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: #0f172a;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 20px;
-        }
+        .sidebar-title-modern { border-bottom: 1px solid #f1f5f9; }
 
         .list-group-item-modern {
             border-bottom: 1px solid #f1f5f9 !important;
@@ -437,14 +350,7 @@
         }
 
         /* Main Tab Panels */
-        .tab-card-modern {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04);
-            overflow: hidden;
-            margin-bottom: 30px;
-        }
+        .tab-card-modern { border-radius: 16px; }
 
         .tab-header-modern {
             border-bottom: 1px solid #f1f5f9;
@@ -473,21 +379,9 @@
         }
 
         /* Related Products Section */
-        .related-card-modern {
-            background: white;
-            border-radius: 16px;
-            border: 1px solid #f1f5f9;
-            box-shadow: 0 10px 30px -10px rgba(0,0,0,0.04);
-            overflow: hidden;
-        }
+        .related-card-modern { border-radius: 16px; }
 
-        .related-title-modern {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: #0f172a;
-            border-bottom: 1px solid #f1f5f9;
-            padding: 20px;
-        }
+        .related-title-modern { border-bottom: 1px solid #f1f5f9; }
 
         .rel-product-card {
             background: white;
@@ -583,7 +477,7 @@
 
         <section class="mb-4">
             <div class="container">
-                <div class="prod-main-card">
+                <div class="prod-main-card bg-white shadow-sm border p-4 p-md-5 mb-4">
                     <div class="row">
                         <!-- Product Gallery Section -->
                         <div class="col-xl-5 col-lg-6 mb-4">
@@ -591,7 +485,7 @@
                                 @if ($singleProduct->productImages->count() > 0)
                                     <!-- Main Big Image Preview -->
                                     <div class="col-12 col-md order-1 order-md-2 mb-3 mb-md-0">
-                                        <div class="gallery-main-box border rounded p-2 text-center bg-white shadow-sm img-zoom" style="min-height: 380px; display: flex; align-items: center; justify-content: center;">
+                                        <div class="gallery-main-box border p-2 text-center bg-white shadow-sm img-zoom" style="min-height: 380px; display: flex; align-items: center; justify-content: center;">
                                             <img id="main-product-image" class="img-fluid" style="max-height: 480px; width: 100%; object-fit: contain; transition: opacity 0.2s ease-in-out;"
                                                 src="{{ asset('Uploads/' . $singleProduct->productImages->first()->image) }}"
                                                 onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
@@ -625,10 +519,10 @@
                         <!-- Product Specs/Info Section -->
                         <div class="col-xl-7 col-lg-6">
                             <div class="text-left pl-md-3">
-                                <h1 class="product-title-modern mb-3">{{ $singleProduct->title }}</h1>
+                                <h1 class="product-title-modern h2 font-weight-bold text-dark mb-3">{{ $singleProduct->title }}</h1>
 
                                 <div class="d-flex align-items-center flex-wrap mb-4">
-                                    <div class="rating-pill-container mr-3">
+                                    <div class="rating-pill-container d-inline-flex align-items-center bg-light px-3 py-1 font-weight-bold rounded-pill mr-3">
                                         <span class="rating-stars-gold">
                                             @php
                                                 $avg = $singleProduct->getAverageRating();
@@ -660,11 +554,11 @@
                                 </div>
 
                                 <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
-                                    <div class="sold-by-badge mr-2 mb-1">
+                                    <div class="sold-by-badge px-3 py-2 font-weight-bold d-inline-block mr-2 mb-1">
                                         Sold by: LOOKSMEN
                                     </div>
                                     @if (!empty($singleProduct->code))
-                                        <div class="sold-by-badge mr-2 mb-1" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
+                                        <div class="sold-by-badge px-3 py-2 font-weight-bold d-inline-block mr-2 mb-1" style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1;">
                                             Product Code: <strong class="text-dark">{{ $singleProduct->code }}</strong>
                                         </div>
                                     @endif
@@ -676,22 +570,22 @@
                                 </div>
 
                                 <!-- Pricing Card -->
-                                <div class="price-box-modern text-left">
+                                <div class="price-box-modern bg-light border p-4 my-4 text-left">
                                     @if ($singleProduct->old_price && $singleProduct->old_price > $singleProduct->new_price)
                                         <div class="mb-1">
-                                            <span class="regular-price-label mr-2">Regular Price:</span>
-                                            <span class="regular-price-val">৳{{ $singleProduct->old_price }}</span>
+                                            <span class="regular-price-label text-secondary font-weight-bold mr-2">Regular Price:</span>
+                                            <span class="regular-price-val text-muted" style="text-decoration: line-through;">৳{{ $singleProduct->old_price }}</span>
                                         </div>
                                     @endif
                                     <div class="d-flex align-items-center">
-                                        <span class="current-price-val">৳{{ $singleProduct->new_price }}</span>
+                                        <span class="current-price-val h2 font-weight-bold text-primary">৳{{ $singleProduct->new_price }}</span>
                                         <span class="text-muted ml-1" style="font-size: 1rem; font-weight: 500;">/ pcs</span>
                                         
                                         @if ($singleProduct->old_price && $singleProduct->new_price && $singleProduct->old_price > $singleProduct->new_price)
                                             @php
                                                 $discountPercent = round((($singleProduct->old_price - $singleProduct->new_price) / $singleProduct->old_price) * 100);
                                             @endphp
-                                            <span class="save-tag">SAVE {{ $discountPercent }}%</span>
+                                            <span class="save-tag bg-danger text-white px-2 py-1 small font-weight-bold rounded ml-2 d-inline-block align-middle">SAVE {{ $discountPercent }}%</span>
                                         @endif
                                     </div>
                                 </div>
@@ -707,7 +601,7 @@
                                         </div>
                                         <div class="col-sm-10 text-left">
                                             <div class="d-flex align-items-center">
-                                                <div class="quantity-picker-capsule mr-3">
+                                                <div class="quantity-picker-capsule d-inline-flex align-items-center bg-light p-1 border mr-3">
                                                     <button class="quantity-picker-btn btn col-auto btn-icon btn-sm btn-circle btn-light"
                                                         type="button" data-type="minus" data-field="quantity"
                                                         disabled="">
@@ -750,29 +644,30 @@
                                 </form>
 
                                 <!-- Add to Cart / Buy Now Action buttons -->
-                                <div class="mt-4 pt-2 d-flex flex-wrap align-items-center text-left">
+                                <div class="mt-4 pt-2 d-flex" style="gap: 12px;">
                                     @if ($singleProduct->stock != 0)
                                         <a href="javascript:void(0)"
-                                            class="btn btn-action-modern btn-add-cart-custom add-to-cart-btn mr-3 mb-2"
+                                            class="btn btn-action-modern btn-add-cart-custom add-to-cart-btn flex-fill d-flex justify-content-center align-items-center"
                                             data-title="Add to cart" data-id="{{ $singleProduct->id }}"
-                                            data-type="product">
-                                            <i class="fa fa-shopping-bag" style="font-size: 1.2rem;"></i>
-                                            <span>Add to Cart</span>
+                                            data-type="product" style="gap: 6px; padding: 12px 10px;">
+                                            <i class="fa fa-shopping-bag" style="font-size: 1.1rem;"></i>
+                                            <span style="white-space: nowrap;">Add to Cart</span>
                                         </a>
-                                        <a href="javascript:void(0)" class="btn btn-action-modern btn-buy-now-custom buy-now-btn mb-2"
-                                            data-title="Add to cart" data-id="{{ $singleProduct->id }}"
-                                            data-type="product">
-                                            <i class="fa fa-shopping-cart" style="font-size: 1.2rem;"></i>
-                                            <span>Buy Now</span>
+                                        <a href="javascript:void(0)" class="btn btn-action-modern btn-buy-now-custom buy-now-btn flex-fill d-flex justify-content-center align-items-center"
+                                            data-title="Buy Now" data-id="{{ $singleProduct->id }}"
+                                            data-type="product" style="gap: 6px; padding: 12px 10px;">
+                                            <i class="fa fa-shopping-cart" style="font-size: 1.1rem;"></i>
+                                            <span style="white-space: nowrap;">Buy Now</span>
                                         </a>
                                     @else
-                                        <a href="javascript:void(0)" class="btn btn-action-modern btn-add-cart-custom add-to-cart mr-3 mb-2"
-                                            onclick="addToWishList({{ $singleProduct->id }})">
-                                            <i class="fa fa-heart" style="font-size: 1.2rem;"></i>
-                                            <span>Add to Wishlist</span>
+                                        <a href="javascript:void(0)" class="btn btn-action-modern btn-add-cart-custom add-to-cart flex-fill d-flex justify-content-center align-items-center"
+                                            onclick="addToWishList({{ $singleProduct->id }})" style="gap: 6px; padding: 12px 10px;">
+                                            <i class="fa fa-heart" style="font-size: 1.1rem;"></i>
+                                            <span style="white-space: nowrap;">Add to Wishlist</span>
                                         </a>
-                                        <button class="btn btn-action-modern btn-out-stock-custom mb-2" disabled>
-                                            <i class="fa fa-cart-arrow-down" style="font-size: 1.2rem;"></i> Out of Stock
+                                        <button class="btn btn-action-modern btn-out-stock-custom flex-fill d-flex justify-content-center align-items-center" disabled style="gap: 6px; padding: 12px 10px;">
+                                            <i class="fa fa-cart-arrow-down" style="font-size: 1.1rem;"></i> 
+                                            <span style="white-space: nowrap;">Out of Stock</span>
                                         </button>
                                     @endif
                                 </div>
@@ -793,6 +688,9 @@
                                     
                                     <span class="text-muted ml-sm-auto mt-2 mt-sm-0 d-flex align-items-center fw-600" style="font-size: 0.95rem; color: #044244 !important;">
                                         <i class="fa fa-phone-volume mr-2" style="font-size: 1.3rem; color: #044244;"></i> Hotline Order: 
+                                        <a href="tel:{{ $webConfig['contact_phone'] ?? '' }}" class="ml-2" style="color: #e11d48; text-decoration: none;">
+                                            {{ $webConfig['contact_phone'] ?? 'N/A' }}
+                                        </a>
                                     </span>
                                 </div>
 
@@ -871,8 +769,8 @@
                 <div class="row gutters-16">
                     <!-- Sidebar: Top Selling -->
                     <div class="col-xl-3 order-2 order-xl-1 mb-4">
-                        <div class="sidebar-card-modern">
-                            <div class="sidebar-title-modern">
+                        <div class="sidebar-card-modern bg-white border shadow-sm overflow-hidden">
+                            <div class="sidebar-title-modern h5 font-weight-bold text-dark p-4 mb-0">
                                 Top Selling Products
                             </div>
                             <div class="p-0">
@@ -931,7 +829,7 @@
 
                     <!-- Main Tab Content + Related Products List -->
                     <div class="col-xl-9 order-1 order-xl-2 col-12">
-                        <div class="tab-card-modern">
+                        <div class="tab-card-modern bg-white border shadow-sm overflow-hidden mb-4">
                             <div class="tab-header-modern nav" role="tablist">
                                 <a href="#tab_default_1" data-toggle="tab"
                                     class="tab-link-modern active show">Description</a>
@@ -941,13 +839,32 @@
 
                             <div class="tab-content pt-0">
                                 <div class="tab-pane fade active show" id="tab_default_1">
-                                    <div class="p-4 text-left">
-                                        <div class="mw-100 overflow-hidden aiz-editor-data" style="color: #475569; font-size: 1rem; line-height: 1.7;">
-                                            <h3 class="fw-700 mb-3" style="color: #0f172a; font-size: 1.35rem; letter-spacing: -0.01em;">
+                                    <style>
+                                        .product-desc-content {
+                                            word-wrap: break-word !important;
+                                            overflow-wrap: break-word !important;
+                                            white-space: pre-wrap !important;
+                                            width: 100%;
+                                            overflow-x: hidden;
+                                            font-size: 0.95rem;
+                                            line-height: 1.6;
+                                            color: #475569;
+                                        }
+                                        .product-desc-content * {
+                                            max-width: 100% !important;
+                                            word-wrap: break-word !important;
+                                        }
+                                        .product-desc-content img, .product-desc-content iframe {
+                                            height: auto !important;
+                                        }
+                                    </style>
+                                    <div class="p-3 p-md-4 text-left">
+                                        <div class="mw-100 aiz-editor-data">
+                                            <h3 class="fw-700 mb-3" style="color: #0f172a; font-size: 1.25rem; letter-spacing: -0.01em;">
                                                 Product Description
                                             </h3>
-                                            <div style="white-space: pre-line;">
-                                                {!! nl2br($singleProduct->description) !!}
+                                            <div class="product-desc-content">
+                                                {!! strip_tags($singleProduct->description) == $singleProduct->description ? nl2br($singleProduct->description) : $singleProduct->description !!}
                                             </div>
                                         </div>
                                     </div>
@@ -1002,8 +919,8 @@
 
                         <!-- Related Products Card List -->
                         @if($relProducts && $relProducts->count() > 0)
-                            <div class="related-card-modern text-left">
-                                <div class="related-title-modern d-flex justify-content-between align-items-center">
+                            <div class="related-card-modern bg-white border shadow-sm overflow-hidden text-left">
+                                <div class="related-title-modern h5 font-weight-bold text-dark p-4 mb-0 d-flex justify-content-between align-items-center">
                                     <span>Related Products</span>
                                     <a href="{{ route('catProductView', [$singleProduct->category_id, $singleProduct->category->slug ?? 'category']) }}" 
                                        class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
@@ -1102,9 +1019,12 @@
             function initZoom() {
                 if ($('.img-zoom')[0] && typeof $.fn.zoom === 'function') {
                     $('.img-zoom').trigger('zoom.destroy');
-                    $('.img-zoom').zoom({
-                        magnify: 1.5
-                    });
+                    // Only enable zoom on desktop view (screens 992px and above)
+                    if (window.innerWidth >= 992) {
+                        $('.img-zoom').zoom({
+                            magnify: 1.5
+                        });
+                    }
                 }
             }
 
@@ -1127,6 +1047,38 @@
                 $('.product-thumb-item').css('border-color', '#e2e8f0').removeClass('active-thumb');
                 $(this).css('border-color', '#044244').addClass('active-thumb');
             });
+
+            // Calculate total price based on quantity
+            var productPrice = {{ $singleProduct->new_price ?? 0 }};
+            
+            function calculateTotalPrice() {
+                var quantity = parseInt($('input[name="quantity"]').val());
+                if(isNaN(quantity) || quantity < 1) {
+                    quantity = 1;
+                }
+                var total = productPrice * quantity;
+                
+                if (quantity > 1) {
+                    $('#chosen_price_div').removeClass('d-none');
+                    var formattedTotal = total.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+                    $('#chosen_price').html('৳' + formattedTotal);
+                } else {
+                    $('#chosen_price_div').addClass('d-none');
+                }
+            }
+
+            // Listen to clicks on the plus/minus buttons with a slight delay to allow global scripts to update the input
+            $('.quantity-picker-btn').on('click', function() {
+                setTimeout(calculateTotalPrice, 50);
+            });
+
+            // Listen to manual typing in the input
+            $('input[name="quantity"]').on('input change keyup', function() {
+                calculateTotalPrice();
+            });
+            
+            // Initial calculation
+            calculateTotalPrice();
         });
     </script>
 @endsection

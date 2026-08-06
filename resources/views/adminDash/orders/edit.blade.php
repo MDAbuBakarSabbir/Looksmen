@@ -364,6 +364,14 @@
                             </div>
 
                             <div class="mb-3">
+                                <label class="form-label">Payment Status</label>
+                                <select class="form-select text-uppercase" name="payment_status">
+                                    <option value="unpaid" @if($order->payment_status == 'unpaid') selected @endif>Unpaid</option>
+                                    <option value="paid" @if($order->payment_status == 'paid') selected @endif>Paid</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
                                 <label class="form-label">Staff Comment</label>
                                 <textarea class="form-control" name="comments" rows="3" placeholder="Add comments here...">{{ $order->comments }}</textarea>
                             </div>

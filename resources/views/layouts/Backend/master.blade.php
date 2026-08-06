@@ -47,8 +47,13 @@
 
     if (class_exists('App\Models\Orders')) {
         try {
-            $allorder = \App\Models\Orders::where('delivery_status', 'pending');
-            $orders = $allorder->paginate(5);
+            if (auth()->guard('admin')->check() && (auth()->guard('admin')->user()->role_id === 'admin' || auth()->guard('admin')->user()->hasPermission('pending_order'))) {
+                $allorder = \App\Models\Orders::where('delivery_status', 'pending')->where('is_viewed', 0);
+                $orders = $allorder->paginate(5);
+            } else {
+                $allorder = collect([]);
+                $orders = collect([]);
+            }
 
             if (auth()->check()) {
                 $orderpopup = \App\Models\Orders::where('courier_updated_by', auth()->id())
@@ -215,13 +220,14 @@
             color: white !important;
             border: none;
             border-radius: 30px;
-            padding: 8px 18px;
+            padding: 5px 14px;
             font-size: 13px;
             font-weight: 600;
             letter-spacing: 0.5px;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            line-height: 1.2;
             box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -1107,33 +1113,182 @@
                                 </div>
                             @endif
 
+                            <!-- Premium Notification Section -->
+                            <style>
+                                .notification_dropdown .dropdown-menu {
+                                    width: 320px;
+                                    padding: 0;
+                                    border: none;
+                                    border-radius: 12px;
+                                    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+                                    overflow: hidden;
+                                    animation: slideInDown 0.3s ease-out forwards;
+                                }
+                                .notification_dropdown .noti-header {
+                                    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+                                    padding: 16px 20px;
+                                    color: #fff;
+                                    display: flex;
+                                    justify-content: space-between;
+                                    align-items: center;
+                                }
+                                .notification_dropdown .noti-header h5 {
+                                    margin: 0;
+                                    font-size: 16px;
+                                    font-weight: 600;
+                                    color: #fff;
+                                }
+                                .notification_dropdown .noti-header .badge {
+                                    background: rgba(255,255,255,0.25);
+                                    color: #fff;
+                                    border-radius: 20px;
+                                    padding: 4px 10px;
+                                    font-size: 12px;
+                                    font-weight: 500;
+                                }
+                                .notification_dropdown .noti-body {
+                                    max-height: 320px;
+                                    overflow-y: auto;
+                                }
+                                .notification_dropdown .noti-body::-webkit-scrollbar {
+                                    width: 6px;
+                                }
+                                .notification_dropdown .noti-body::-webkit-scrollbar-thumb {
+                                    background: #e2e8f0;
+                                    border-radius: 4px;
+                                }
+                                .notification_dropdown .noti-item {
+                                    padding: 16px 20px;
+                                    display: flex;
+                                    align-items: flex-start;
+                                    border-bottom: 1px solid #f1f5f9;
+                                    transition: background 0.2s, padding-left 0.2s;
+                                    text-decoration: none;
+                                }
+                                .notification_dropdown .noti-item:hover {
+                                    background: #f8fafc;
+                                    padding-left: 24px;
+                                    text-decoration: none;
+                                }
+                                .notification_dropdown .noti-item:last-child {
+                                    border-bottom: none;
+                                }
+                                .notification_dropdown .noti-icon {
+                                    width: 40px;
+                                    height: 40px;
+                                    border-radius: 50%;
+                                    background: #e0e7ff;
+                                    color: #4f46e5;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-size: 16px;
+                                    margin-right: 15px;
+                                    flex-shrink: 0;
+                                }
+                                .notification_dropdown .noti-content {
+                                    flex-grow: 1;
+                                }
+                                .notification_dropdown .noti-title {
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    color: #1e293b;
+                                    margin-bottom: 4px;
+                                    line-height: 1.3;
+                                }
+                                .notification_dropdown .noti-time {
+                                    font-size: 12px;
+                                    color: #64748b;
+                                    display: flex;
+                                    align-items: center;
+                                }
+                                .notification_dropdown .noti-time i {
+                                    margin-right: 5px;
+                                    font-size: 10px;
+                                }
+                                .notification_dropdown .noti-footer {
+                                    padding: 14px 20px;
+                                    text-align: center;
+                                    background: #f8fafc;
+                                    border-top: 1px solid #e2e8f0;
+                                }
+                                .notification_dropdown .noti-footer a {
+                                    font-size: 14px;
+                                    font-weight: 600;
+                                    color: #4f46e5;
+                                    text-decoration: none;
+                                    transition: color 0.2s;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                }
+                                .notification_dropdown .noti-footer a:hover {
+                                    color: #4338ca;
+                                }
+                                .notification_dropdown .pulse-indicator {
+                                    position: absolute;
+                                    top: 20px;
+                                    right: 6px;
+                                    width: 10px;
+                                    height: 10px;
+                                    background: #ef4444;
+                                    border-radius: 50%;
+                                    border: 2px solid #fff;
+                                    animation: pulse-ring 2s infinite;
+                                }
+                                @keyframes pulse-ring {
+                                    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+                                    70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+                                    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+                                }
+                                @keyframes slideInDown {
+                                    0% { opacity: 0; transform: translateY(-10px); }
+                                    100% { opacity: 1; transform: translateY(0); }
+                                }
+                                .notification_dropdown > a::after {
+                                    display: none !important; /* Hide default dropdown caret if any */
+                                }
+                            </style>
                             <li class="nav-item dropdown notification_dropdown">
-                                <a class="nav-link" href="#" role="button" data-toggle="dropdown">
-                                    <i class="fa-solid fa-bell fa-xl"></i>
+                                <a class="nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="position: relative;">
+                                    <i class="fa-regular fa-bell fa-xl" style="color: #64748b;"></i>
                                     @if ($allorder->count() > 0)
-                                        <div class="pulse-css"></div>
+                                        <div class="pulse-indicator"></div>
                                     @endif
                                 </a>
                                 <div class="dropdown-menu dropdown-menu-right">
-                                    <ul class="list-unstyled">
-                                        <li class="media dropdown-item">
-                                            <div class="media-body">
-                                                @forelse ($orders as $order)
-                                                    <a href="{{ url('/admin/orders/details', $order->id) }}" class="mb-2 d-block">
-                                                        <p class="mb-0"><strong>{{ $order->name }}</strong></p>
-                                                        <span class="notify-time text-muted" style="font-size: 0.75rem;">
-                                                            {{ $order->created_at->format('h:i A, d M y') }}
-                                                        </span>
-                                                    </a>
-                                                @empty
-                                                    <p class="text-center text-muted py-2 mb-0">No pending orders.</p>
-                                                @endforelse
+                                    <div class="noti-header">
+                                        <h5>Notifications</h5>
+                                        @if ($allorder->count() > 0)
+                                            <span class="badge">{{ $allorder->count() }} New</span>
+                                        @endif
+                                    </div>
+                                    <div class="noti-body">
+                                        @forelse ($orders as $order)
+                                            <a href="{{ url('/admin/orders/details', $order->id) }}" class="noti-item">
+                                                <div class="noti-icon">
+                                                    <i class="fa-solid fa-box-open"></i>
+                                                </div>
+                                                <div class="noti-content">
+                                                    <div class="noti-title">New order from {{ $order->name }}</div>
+                                                    <div class="noti-time">
+                                                        <i class="fa-regular fa-clock"></i> 
+                                                        {{ $order->created_at->diffForHumans() }}
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        @empty
+                                            <div class="p-4 text-center text-muted">
+                                                <i class="fa-regular fa-bell-slash fa-2x mb-3" style="color: #cbd5e1;"></i>
+                                                <p class="mb-0" style="font-size: 14px; font-weight: 500;">No pending orders right now</p>
                                             </div>
-                                        </li>
-                                    </ul>
-                                    <a class="all-notification" href="{{ Route::has('order-pending') ? route('order-pending') : (Route::has('order-new') ? route('order-new') : '#') }}">
-                                        See all new Orders <i class="ti-arrow-right"></i>
-                                    </a>
+                                        @endforelse
+                                    </div>
+                                    <div class="noti-footer">
+                                        <a href="{{ Route::has('order-pending') ? route('order-pending') : (Route::has('order-new') ? route('order-new') : '#') }}">
+                                            View All Orders <i class="fa-solid fa-arrow-right ml-2" style="font-size: 12px;"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </li>
 

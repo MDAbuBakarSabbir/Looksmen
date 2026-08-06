@@ -65,12 +65,18 @@
                     {{-- Bulk Status Update --}}
                     <div class="d-flex align-items-center" style="gap: 8px;">
                         <select id="bulkStatus" class="form-control" style="width: 160px; border-radius: 4px; height: 38px; display: inline-block;">
-                            <option value="">Bulk Action</option>
-                            <option value="hold">Hold</option>
-                            <option value="pending">Pending</option>
-                            <option value="approved">Approved</option>
-                            <option value="packaging">Packaging</option>
-                            <option value="cancel">Cancel</option>
+                            <optgroup label="Delivery Status">
+                                <option value="">Bulk Action</option>
+                                <option value="hold">Hold</option>
+                                <option value="pending">Pending</option>
+                                <option value="approved">Approved</option>
+                                <option value="packaging">Packaging</option>
+                                <option value="cancel">Cancel</option>
+                            </optgroup>
+                            <optgroup label="Payment Status">
+                                <option value="payment_paid">Mark as Paid</option>
+                                <option value="payment_unpaid">Mark as Unpaid</option>
+                            </optgroup>
                         </select>
                         <button class="btn btn-danger" id="bulkUpdateBtn" style="height: 38px; border-radius: 4px; padding: 0 16px;">
                             Apply

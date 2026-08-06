@@ -208,17 +208,24 @@
                                         <h4 class="h5 fw-600 text-dark mb-1">Order ID: <span class="text-primary">#{{ $order->id }}</span></h4>
                                         <p class="text-muted mb-0 fs-13">Placed on: {{ $order->created_at->format('d M, Y \a\t h:i A') }}</p>
                                     </div>
-                                    <div class="text-md-right mt-3 mt-md-0">
-                                        <span class="d-block text-muted fs-13">Grand Total:</span>
-                                        <span class="h4 fw-700 text-dark">৳{{ number_format($order->grand_total, 2) }}</span>
-                                    </div>
+                                    @if($order->grand_total > 0)
+                                        <div class="text-md-right mt-3 mt-md-0">
+                                            <span class="d-block text-muted fs-13">Grand Total:</span>
+                                            <span class="h4 fw-700 text-dark">৳{{ number_format($order->grand_total, 2) }}</span>
+                                        </div>
+                                    @elseif(isset($order->paid_amount) && $order->paid_amount > 0)
+                                        <div class="text-md-right mt-3 mt-md-0">
+                                            <span class="d-block text-muted fs-13">Paid Amount:</span>
+                                            <span class="h4 fw-700 text-success">৳{{ number_format($order->paid_amount, 2) }}</span>
+                                        </div>
+                                    @endif
                                 </div>
 
                                 <!-- Timeline Tracking -->
                                 @php
                                     $status = $order->delivery_status;
-                                    $isCanceled = ($status === 'canceled');
-                                    $isReturned = ($status === 'return');
+                                    $isCanceled = in_array($status, ['cancel', 'canceled', 'cancelled']);
+                                    $isReturned = in_array($status, ['return', 'returned']);
                                     
                                     // Map current status to step index (0 to 4)
                                     $stepIndex = 0;

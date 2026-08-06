@@ -208,7 +208,7 @@ class CheckoutController extends Controller
     public function storeIncompleteOrder(Request $request)
     {
         $request->validate([
-            'phone' => 'required|min_digits:11',
+            'phone' => 'required|string|min:11',
         ]);
         $cart = session()->get('cart', []);
 

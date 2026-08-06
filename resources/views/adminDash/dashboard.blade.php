@@ -453,18 +453,6 @@
 
     <div class="row">
         <div class="col-lg-3 col-sm-6 mb-4">
-            <a href="{{ route('order-hold') }}" class="stat-widget-premium" style="background: var(--primary-gradient);">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <div class="stat-text">Hold Orders</div>
-                        <div class="stat-digit">{{ $orders->where('delivery_status', 'hold')->count() }}</div>
-                    </div>
-                    <img src="{{ asset('adminDash/assets/img/orders/boxes.png') }}" alt="img">
-                </div>
-            </a>
-        </div>
-
-        <div class="col-lg-3 col-sm-6 mb-4">
             <a href="{{ route('order-pending') }}" class="stat-widget-premium" style="background: var(--warning-gradient);">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
@@ -472,6 +460,18 @@
                         <div class="stat-digit">{{ $orders->where('delivery_status', 'pending')->count() }}</div>
                     </div>
                     <img src="{{ asset('adminDash/assets/img/orders/pending.png') }}" alt="img">
+                </div>
+            </a>
+        </div>
+        
+        <div class="col-lg-3 col-sm-6 mb-4">
+            <a href="{{ route('order-hold') }}" class="stat-widget-premium" style="background: var(--primary-gradient);">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-text">Hold Orders</div>
+                        <div class="stat-digit">{{ $orders->where('delivery_status', 'hold')->count() }}</div>
+                    </div>
+                    <img src="{{ asset('adminDash/assets/img/orders/boxes.png') }}" alt="img">
                 </div>
             </a>
         </div>
