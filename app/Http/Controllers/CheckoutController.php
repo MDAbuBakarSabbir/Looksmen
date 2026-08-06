@@ -224,7 +224,8 @@ class CheckoutController extends Controller
             [
                 'name' => $request->name ?? 'Customer',
                 'address' => $request->address ?? 'N/A',
-                'district' => $request->district,
+                'district' => \App\Models\District::find($request->district_id)?->name ?? 'N/A',
+                'thana' => \App\Models\Thana::find($request->thana_id)?->name ?? 'N/A',
                 'product_id' => json_encode($productCodes), // Array হিসেবে সেভ
                 'subtotal' => $request->subtotal,
                 'grand_total' => $request->grand_total,
@@ -241,6 +242,7 @@ class CheckoutController extends Controller
         $request->validate([
             'name' => 'required',
             'phone' => 'required',
+            'district_id' => 'required',
             'address' => 'required',
         ]);
 
@@ -277,7 +279,8 @@ class CheckoutController extends Controller
             $order->ip_address = $request->ip();
             $order->name = $request->name;
             $order->phone = $request->phone;
-            $order->district = $request->district; // আপনার ফর্ম থেকে আসা ডিস্ট্রিক্ট নাম
+            $order->district = \App\Models\District::find($request->district_id)?->name ?? 'N/A';
+            $order->thana = \App\Models\Thana::find($request->thana_id)?->name ?? 'N/A';
             $order->address = $request->address;
             $order->total_amount = $request->total_amount; // Subtotal
             $order->coupon_discount = $request->coupon_discount ?? 0;
@@ -479,7 +482,8 @@ class CheckoutController extends Controller
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
             $order->address = $orderData['address'];
-            $order->district = $orderData['district']; // অথবা আইডি থেকে নাম
+            $order->district = \App\Models\District::find($orderData['district_id'] ?? 0)?->name ?? 'N/A';
+            $order->thana = \App\Models\Thana::find($orderData['thana_id'] ?? 0)?->name ?? 'N/A';
             $order->total_amount = $orderData['total_amount'];
             $order->grand_total = $orderData['grand_total'];
             $order->payment_type = 'prepaid';
@@ -595,9 +599,9 @@ class CheckoutController extends Controller
             $order->ip_address = $request->ip();
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
-            // $order->district = $orderData['district'];
             $order->address = $orderData['address'];
-            $order->district = District::find($orderData['district_id'])->name;
+            $order->district = \App\Models\District::find($orderData['district_id'] ?? 0)?->name ?? 'N/A';
+            $order->thana = \App\Models\Thana::find($orderData['thana_id'] ?? 0)?->name ?? 'N/A';
             $order->total_amount = $orderData['total_amount'];
             $order->delivery_charge = $orderData['delivery_charge'];
             $order->coupon_discount = $orderData['coupon_discount'] ?? 0;

@@ -14,7 +14,6 @@
                 <thead class="thead-light">
                     <tr>
                         <th scope="col">Product</th>
-                        <th scope="col">Price</th>
                         <th scope="col" class="text-center">Qty</th>
                         <th scope="col">Total</th>
                         <th scope="col" class="text-right">Action</th>
@@ -48,11 +47,11 @@
                                     <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="size-60px mr-2 rounded">
                                     <div>
                                         <span class="fs-14 fw-600 d-block text-truncate" style="max-width: 150px;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 25) }}</span>
-                                        <small class="text-info font-weight-bold">Code: {{ $code }}</small>
+                                        <small class="text-info font-weight-bold">Code: {{ $code }}</small><br>
+                                        <small class="text-info font-weight-bold">Price: ৳ {{ $price }}</small>
                                     </div>
                                 </div>
                             </td>
-                            <td>৳ {{ $price }}</td>
                             <td>
                                 <div class="d-flex align-items-center justify-content-center">
                                     <div class="input-group aiz-plus-minus" style="width: 100px;">
@@ -106,6 +105,53 @@
             .cart-footer-buttons .btn {
                 width: 100% !important;
                 margin-right: 0 !important;
+            }
+            
+            /* Responsive Cart Table Fixes for Mobile */
+            .table td, .table th {
+                padding: 0.3rem 0.15rem !important;
+                vertical-align: middle !important;
+            }
+            .table th {
+                font-size: 12px !important;
+            }
+            .size-60px {
+                width: 45px !important;
+                height: 45px !important;
+                margin-right: 0.3rem !important;
+            }
+            .fs-14 {
+                font-size: 12px !important;
+                max-width: 110px !important;
+                white-space: normal !important;
+                line-height: 1.2;
+            }
+            .text-info {
+                font-size: 11px !important;
+            }
+            .aiz-plus-minus {
+                width: 80px !important;
+            }
+            .aiz-plus-minus .btn {
+                padding: 0.1rem 0.3rem !important;
+                height: 28px !important;
+            }
+            .aiz-plus-minus .form-control {
+                padding: 0.1rem !important;
+                height: 28px !important;
+                font-size: 12px !important;
+            }
+            .btn-circle.btn-sm {
+                width: 28px !important;
+                height: 28px !important;
+                padding: 0 !important;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin: 0 auto;
+            }
+            .fw-600.text-primary {
+                font-size: 12px !important;
             }
         }
     </style>

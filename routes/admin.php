@@ -83,6 +83,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('admins/search', 'search')->name('admin.search')->middleware('admin.permission:manage_admin');
         Route::get('admins/create', 'create')->name('admin.create')->middleware('admin.permission:manage_admin');
         Route::post('admins/store', 'store')->name('admin.store')->middleware('admin.permission:manage_admin');
+        Route::get('admins/edit/{id}', 'edit')->name('admin.edit')->middleware('admin.permission:manage_admin');
+        Route::post('admins/update/{id}', 'update')->name('admin.update')->middleware('admin.permission:manage_admin');
         Route::get('admins/role', 'role')->name('admin.role')->middleware('admin.permission:manage_admin');
         Route::post('admins/status', 'status')->name('admin.status')->middleware('admin.permission:manage_admin');
         Route::post('admins/bulk-status', 'bulkStatus')->name('admin.bulk-status')->middleware('admin.permission:manage_admin');

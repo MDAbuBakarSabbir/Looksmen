@@ -1071,7 +1071,6 @@
                         <a id="clear-cache-btn" class="clear-cache-premium-btn"
                             href="javascript:void(0)" data-url="{{ Route::has('clear.cache') ? route('clear.cache') : '#' }}">
                             <i class="fa-solid fa-arrows-rotate"></i>
-                            <span class="d-none d-md-inline">Clear Cache</span>
                         </a>
                     </div>
                     @endif
@@ -1099,7 +1098,7 @@
                                 <div class="container d-flex justify-content-center align-items-center">
                                     <div class="balance-box {{ $balanceStatus == 'success' ? 'revealed' : '' }}" id="balanceBox" data-url="{{ route('courier.balance') }}">
                                         <i class="fa-solid fa-wallet balance-icon"></i>
-                                        <span class="balance-label">Balance ({{ $activeCourierName }}):</span>
+                                        <span class="balance-label">({{ $activeCourierName }}):</span>
                                         <div class="balance-content">
                                             <span class="balance-click-to-show"><i class="fa-solid fa-eye mr-1"></i> Tap to check</span>
                                             <span class="balance-spinner"><i class="fa-solid fa-spinner"></i></span>

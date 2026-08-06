@@ -19,7 +19,11 @@
             <span class="badge badge-success px-3 py-1 font-weight-bold" style="border-radius: 12px; font-size: 11px;">Active</span>
         </td>
         <td style="text-align: right; padding-right: 25px;">
-            <a href="{{ route('admin.permission', $admin->id) }}" class="btn btn-sm btn-primary px-3 rounded-pill" style="font-size: 12px; font-weight: 600;">
+            
+            <a href="{{ route('admin.edit', $admin->id) }}" class="btn btn-sm btn-outline-primary px-3 rounded-pill mr-2 mb-1" style="font-size: 12px; font-weight: 600;">
+                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+            </a>
+            <a href="{{ route('admin.permission', $admin->id) }}" class="btn btn-sm btn-primary px-3 rounded-pill mb-1" style="font-size: 12px; font-weight: 600;">
                 <i class="fa-solid fa-user-shield mr-1"></i> Permissions
             </a>
         </td>

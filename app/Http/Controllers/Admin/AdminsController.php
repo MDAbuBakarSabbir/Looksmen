@@ -89,6 +89,45 @@ class AdminsController extends Controller
         return redirect()->route('admin.index')->with('success', 'Admin employee created successfully!');
     }
 
+    public function edit($id)
+    {
+        $admin = Admins::findOrFail($id);
+        $roles = Roles::all();
+        if ($roles->isEmpty()) {
+            Roles::create(['role' => 'admin', 'permission_id' => json_encode([]), 'status' => 1]);
+            Roles::create(['role' => 'manager', 'permission_id' => json_encode([]), 'status' => 1]);
+            Roles::create(['role' => 'editor', 'permission_id' => json_encode([]), 'status' => 1]);
+            $roles = Roles::all();
+        }
+        return view('adminDash.admins.edit', compact('admin', 'roles'));
+    }
+
+    public function update(Request $request, $id)
+    {
+        $admin = Admins::findOrFail($id);
+        
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:admins,email,'.$id,
+            'number' => 'required|string|max:20|unique:admins,number,'.$id,
+            'password' => 'nullable|string|min:8|confirmed',
+            'role_id' => 'required|string|max:50',
+        ]);
+
+        $admin->name = $request->name;
+        $admin->email = $request->email;
+        $admin->number = $request->number;
+        $admin->role_id = $request->role_id;
+        
+        if ($request->filled('password')) {
+            $admin->password = \Illuminate\Support\Facades\Hash::make($request->password);
+        }
+
+        $admin->save();
+
+        return redirect()->route('admin.index')->with('success', 'Admin employee updated successfully!');
+    }
+
     public function role()
     {
 

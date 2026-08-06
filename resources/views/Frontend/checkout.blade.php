@@ -958,9 +958,14 @@
                         url: "{{ url('/get-thanas') }}/" + district_id,
                         type: "GET",
                         success: function(data) {
+                            if (typeof data === 'string') {
+                                try { data = JSON.parse(data.trim()); } catch (e) {}
+                            }
                             thanaSelect.empty().append('<option value="">Select Thana</option>');
                             $.each(data, function(key, value) {
-                                thanaSelect.append('<option value="' + value.id + '">' + value.name + '</option>');
+                                let t_id = value.id !== undefined ? value.id : key;
+                                let t_name = value.name !== undefined ? value.name : value;
+                                thanaSelect.append('<option value="' + t_id + '">' + t_name + '</option>');
                             });
                             thanaSelect.trigger('change');
                         }

@@ -6,6 +6,7 @@ use App\Models\Address;
 use App\Models\Thana;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 
 use function Symfony\Component\Clock\now;
 
@@ -14,25 +15,27 @@ class AddressController extends Controller
     public function getThanasByDistrict($district_id)
     {
         // আপনার মডেল অনুযায়ী Thana বা City টেবিল থেকে ডাটা আনুন
-        $thanas = \Illuminate\Support\Facades\Cache::rememberForever('thanas_by_district_' . $district_id, function () use ($district_id) {
-            return Thana::where('district_id', $district_id)->get(['id', 'name']);
+        $thanas = Cache::rememberForever('thanas_by_district_'.$district_id, function () use ($district_id) {
+            return Thana::where('district_id', $district_id)->get(['id', 'name'])->toArray();
         });
+
         return response()->json($thanas);
     }
+
     public function store(Request $request)
     {
         $request->validate([
-            'address'  => 'required',
-            'phone'    => 'required |min_digits:11',
+            'address' => 'required',
+            'phone' => 'required |min_digits:11',
             'district_id' => 'required',
             'thana_id' => 'required',
         ]);
 
         Address::create([
-            'user_id'  => Auth::user()->id,
-            'name'  => $request->name ?? Auth::user()->name,
-            'address'  => $request->address,
-            'phone'    => $request->phone,
+            'user_id' => Auth::user()->id,
+            'name' => $request->name ?? Auth::user()->name,
+            'address' => $request->address,
+            'phone' => $request->phone,
             'district_id' => $request->district_id,
             'thana_id' => $request->thana_id,
             'created_at' => now(),
@@ -58,8 +61,8 @@ class AddressController extends Controller
     public function update(Request $request, $id)
     {
         $request->validate([
-            'address'  => 'required',
-            'phone'    => 'required |min_digits:11',
+            'address' => 'required',
+            'phone' => 'required |min_digits:11',
             'district_id' => 'required',
             'thana_id' => 'required',
         ]);
@@ -67,9 +70,9 @@ class AddressController extends Controller
         $address = Address::where('user_id', Auth::id())->findOrFail($id);
 
         $address->update([
-            'name'     => $request->name,
-            'address'  => $request->address,
-            'phone'    => $request->phone,
+            'name' => $request->name,
+            'address' => $request->address,
+            'phone' => $request->phone,
             'district_id' => $request->district_id,
             'thana_id' => $request->thana_id,
         ]);
@@ -80,6 +83,7 @@ class AddressController extends Controller
 
         return back()->with('success', 'Address updated successfully!');
     }
+
     public function set_default(Request $request)
     {
         $user_id = auth()->id();
@@ -92,17 +96,18 @@ class AddressController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'অ্যাড্রেসটি ডিফল্ট হিসেবে সেট করা হয়েছে।'
+            'message' => 'অ্যাড্রেসটি ডিফল্ট হিসেবে সেট করা হয়েছে।',
         ]);
     }
-    public function destroy($id)
-{
-    $address = Address::where('user_id', auth()->id())->findOrFail($id);
-    $address->delete();
 
-    return response()->json([
-        'status' => 'success',
-        'message' => 'ঠিকানাটি সফলভাবে মুছে ফেলা হয়েছে।'
-    ]);
-}
+    public function destroy($id)
+    {
+        $address = Address::where('user_id', auth()->id())->findOrFail($id);
+        $address->delete();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'ঠিকানাটি সফলভাবে মুছে ফেলা হয়েছে।',
+        ]);
+    }
 }

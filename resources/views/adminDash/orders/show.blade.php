@@ -771,7 +771,7 @@
                         <div class="mt-4 pt-3 border-top">
                             <div class="font-weight-bold text-dark mb-1" style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px;">Shipping Address:</div>
                             <div class="p-3 bg-light rounded text-muted" style="font-size: 0.9rem; line-height: 1.5; border: 1px solid #e2e8f0;">
-                                {{ $order->address }}
+                                {{ $order->address }},{{ $order->thana }},{{ $order->district }}
                             </div>
                         </div>
 
