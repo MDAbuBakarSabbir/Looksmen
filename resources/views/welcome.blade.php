@@ -79,17 +79,18 @@
                     @foreach ($sliders as $slider)
                         <div class="carousel-item {{ $loop->first ? 'active' : '' }}">
                             <a href="{{ $slider->url ? $slider->url : 'javascript:void(0)' }}">
-                                <img class="d-block w-100" src="{{ asset('Uploads') }}/{{ $slider->image }}" alt="LOOKSMEN promo" height="315"
+                                <img class="d-block w-100" src="{{ asset('Uploads') }}/{{ $slider->image }}" alt="LOOKSMEN promo banner" height="315" width="800"
+                                    fetchpriority="{{ $loop->first ? 'high' : 'auto' }}" loading="{{ $loop->first ? 'eager' : 'lazy' }}" decoding="async"
                                     onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder-rect.jpg';">
                             </a>
                         </div>
                     @endforeach
                     </div>
-                    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+                    <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev" aria-label="Previous Promo Slide">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="sr-only">Previous</span>
                     </a>
-                    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+                    <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next" aria-label="Next Promo Slide">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="sr-only">Next</span>
                     </a>
@@ -111,7 +112,8 @@
                                                     alt="{{ $category->name }}"
                                                     class="lazyload img-fit"
                                                     height="78"
-                                                    onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder-rect.jpg') }}';"
+                                                    width="78"
+                                                    onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder-rect.jpg';"
                                                 >
                                                 <div class="text-truncate fs-12 fw-600 mt-2 opacity-70">{{ $category->name }}</div>
                                             </a>
@@ -123,11 +125,11 @@
                     </div>
 
                     {{-- স্লাইড কন্ট্রোল বাটন --}}
-                    <a class="carousel-control-prev" href="#carouselExampleControls2" role="button" data-slide="prev">
+                    <a class="carousel-control-prev" href="#carouselExampleControls2" role="button" data-slide="prev" aria-label="Previous Category Slide">
                         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
                         <span class="sr-only">Previous</span>
                     </a>
-                    <a class="carousel-control-next" href="#carouselExampleControls2" role="button" data-slide="next">
+                    <a class="carousel-control-next" href="#carouselExampleControls2" role="button" data-slide="next" aria-label="Next Category Slide">
                         <span class="carousel-control-next-icon" aria-hidden="true"></span>
                         <span class="sr-only">Next</span>
                     </a>

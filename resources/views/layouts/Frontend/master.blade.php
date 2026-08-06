@@ -101,9 +101,7 @@
         @endif
     @endif
     <!-- Favicon -->
-    <script src="{{ asset('frontend') }}/assets/js/vendors.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link rel="icon" href="{{ asset('adminDash/assets/img/layouts/'.$webConfig['web_favicon']) }}">
 
     <!-- Google Fonts -->
@@ -115,7 +113,6 @@
     <link rel="stylesheet" href="{{ asset('frontend') }}/assets/css/vendors.css">
     <link rel="stylesheet" href="{{ asset('frontend') }}/assets/css/aiz-core.css">
     <link rel="stylesheet" href="{{ asset('frontend') }}/assets/css/custom-style.css">
-    <script src="{{ asset('frontend') }}/assets/js/jquryui.js"></script>
     <script>
         // Resolve conflict between jQuery UI and Bootstrap tooltip
         if (typeof $.widget !== 'undefined' && typeof $.widget.bridge === 'function') {
@@ -367,7 +364,7 @@
 
                 <div class="col-auto col-xl-3 pl-0 pr-3 d-flex align-items-center">
                     @auth
-                    <button type="button" class="btn p-0 mr-3 d-xl-none mobile-dashboard-toggle" style="font-size: 24px; color: #000; background: none; border: none; outline: none; cursor: pointer;" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
+                    <button type="button" class="btn p-0 mr-3 d-xl-none mobile-dashboard-toggle" aria-label="Open Mobile Menu" style="font-size: 24px; color: #000; background: none; border: none; outline: none; cursor: pointer;" data-toggle="class-toggle" data-backdrop="static" data-target=".aiz-mobile-side-nav">
                         <i class="las la-bars"></i>
                     </button>
                     @endauth
@@ -434,7 +431,7 @@
 
                 </div>
                 <div class="d-lg-none ml-auto mr-0">
-                    <a class="p-2 d-block text-reset" href="javascript:void(0);" data-toggle="class-toggle"
+                    <a class="p-2 d-block text-reset" href="javascript:void(0);" aria-label="Toggle Search" data-toggle="class-toggle"
                         data-target=".front-header-search">
                         <i class="las la-search la-flip-horizontal la-2x"></i>
                     </a>
@@ -445,14 +442,14 @@
                         <form action="{{ route('front.search') }}" method="GET" class="stop-propagation">
                             <div class="d-flex position-relative align-items-center">
                                 <div class="d-lg-none" data-toggle="class-toggle" data-target=".front-header-search">
-                                    <button class="btn px-2" type="button"><i
+                                    <button class="btn px-2" type="button" aria-label="Close Search"><i
                                             class="la la-2x la-long-arrow-left"></i></button>
                                 </div>
                                 <div class="input-group">
                                     <input type="text" class="border-0 border-lg form-control" id="search"
                                         name="keyword" placeholder="I am shopping for..." autocomplete="off">
                                     <div class="input-group-append d-none d-lg-block">
-                                        <button style="border-radius: 0px;" class="btn btn-primary" type="submit">
+                                        <button style="border-radius: 0px;" class="btn btn-primary" type="submit" aria-label="Submit Search">
                                             <i class="la la-search la-flip-horizontal fs-18"></i>
                                         </button>
                                     </div>
@@ -716,19 +713,19 @@
                     <div class="col-lg-4">
                         <ul class="list-inline my-3 my-md-0 social colored text-center">
                             <li class="list-inline-item">
-                                <a href="https://facebook.com/looksmenstore" target="_blank" class="facebook"><i
+                                <a href="https://facebook.com/looksmenstore" target="_blank" rel="noopener noreferrer" aria-label="Facebook Page" class="facebook"><i
                                         class="lab la-facebook-f"></i></a>
                             </li>
                             <li class="list-inline-item">
-                                <a href="https://twitter.com/looksmenstore" target="_blank" class="twitter"><i
+                                <a href="https://twitter.com/looksmenstore" target="_blank" rel="noopener noreferrer" aria-label="Twitter Profile" class="twitter"><i
                                         class="lab la-twitter"></i></a>
                             </li>
                             <li class="list-inline-item">
-                                <a href="https://instagram.com/looksmenstore" target="_blank" class="instagram"><i
+                                <a href="https://instagram.com/looksmenstore" target="_blank" rel="noopener noreferrer" aria-label="Instagram Profile" class="instagram"><i
                                         class="lab la-instagram"></i></a>
                             </li>
                             <li class="list-inline-item">
-                                <a href="https://youtube.com/looksmenstore" target="_blank" class="youtube"><i
+                                <a href="https://youtube.com/looksmenstore" target="_blank" rel="noopener noreferrer" aria-label="YouTube Channel" class="youtube"><i
                                         class="lab la-youtube"></i></a>
                             </li>
                         </ul>
@@ -1036,8 +1033,11 @@
     <div class="user-sidenav-backdrop" id="mobileCategoriesBackdrop" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.5); z-index: 1040; display: none; opacity: 0; transition: opacity 0.3s ease;"></div>
 
     <!-- SCRIPTS -->
-    <script src="{{ asset('frontend') }}/assets/js/aiz-core.js?v={{ time() }}"></script>
-    <script src="{{ asset('frontend') }}/assets/js/custom.js?v={{ time() }}"></script>
+    <script src="{{ asset('frontend') }}/assets/js/vendors.js"></script>
+    <script src="{{ asset('frontend') }}/assets/js/jquryui.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="{{ asset('frontend') }}/assets/js/aiz-core.js?v=1.1"></script>
+    <script src="{{ asset('frontend') }}/assets/js/custom.js?v=1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
@@ -2077,7 +2077,7 @@
     </style>
 
     <!-- Floating Trigger Icon -->
-    <div class="ai-support-widget-btn" onclick="toggleAiChatModal()" id="aiWidgetTrigger" title="Need Help? Chat with Us!">
+    <div class="ai-support-widget-btn" onclick="toggleAiChatModal()" id="aiWidgetTrigger" role="button" aria-label="Open AI Support Chat" title="Need Help? Chat with Us!">
         <i class="fa-solid fa-headset" id="triggerIcon"></i>
     </div>
 
