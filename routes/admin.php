@@ -97,6 +97,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::controller(OrderManageController::class)->group(function () {
         Route::get('orders', 'index')->name('order-index')->middleware('admin.permission:manage_order');
         Route::get('pending-orders', 'pending')->name('order-pending')->middleware('admin.permission:pending_order');
+        Route::get('new-orders', 'pending')->name('order-new')->middleware('admin.permission:pending_order');
         Route::get('hold-orders', 'hold')->name('order-hold')->middleware('admin.permission:hold_order');
         Route::get('approved-orders', 'approved')->name('order-approved')->middleware('admin.permission:approved_order');
         Route::get('packaging-orders', 'packaging')->name('order-packaging')->middleware('admin.permission:packaging_order');

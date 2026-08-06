@@ -453,7 +453,7 @@
 
     <div class="row">
         <div class="col-lg-3 col-sm-6 mb-4">
-            <a href="{{ route('order-new') }}" class="stat-widget-premium" style="background: var(--primary-gradient);">
+            <a href="{{ route('order-hold') }}" class="stat-widget-premium" style="background: var(--primary-gradient);">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="stat-text">Hold Orders</div>
