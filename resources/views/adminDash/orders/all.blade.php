@@ -3,7 +3,7 @@
     @php
         $routeName = request()->route()->getName();
         $title = match ($routeName) {
-            'order-new' => 'HOLD ORDERS',
+            'order-hold' => 'HOLD ORDERS',
             'order-pending' => 'PENDING ORDERS',
             'order-approved' => 'APPROVED ORDERS',
             'order-packaging' => 'PACKAGING ORDERS',
@@ -119,11 +119,11 @@
         $(document).ready(function() {
             // Map the current Laravel route to the active delivery status
             const routeToStatus = {
-                'order-new': 'new',
+                'order-hold': 'hold',
                 'order-pending': 'pending',
                 'order-approved': 'approved',
                 'order-packaging': 'packaging',
-                'order-incourier': 'in_courier',
+                'order-incourier': 'incourier',
                 'order-delivered': 'delivered',
                 'order-canceled': 'cancel',
                 'order-returned': 'returned'

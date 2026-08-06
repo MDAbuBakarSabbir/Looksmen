@@ -352,13 +352,13 @@
                             <div class="mb-3">
                                 <label class="form-label">Order Status</label>
                                 <select class="form-select text-uppercase" name="delivery_status">
-                                    <option value="new" @if($order->delivery_status == 'new') selected @endif>Hold / New</option>
+                                    <option value="hold" @if($order->delivery_status == 'hold' || $order->delivery_status == 'new') selected @endif>Hold</option>
                                     <option value="pending" @if($order->delivery_status == 'pending') selected @endif>Pending</option>
                                     <option value="approved" @if($order->delivery_status == 'approved') selected @endif>Approved</option>
                                     <option value="packaging" @if($order->delivery_status == 'packaging') selected @endif>Packaging</option>
                                     <option value="incourier" @if($order->delivery_status == 'incourier' || $order->delivery_status == 'in_courier') selected @endif>In Courier</option>
                                     <option value="delivered" @if($order->delivery_status == 'delivered') selected @endif>Delivered</option>
-                                    <option value="cancel" @if($order->delivery_status == 'cancel' || $order->delivery_status == 'cancelled') selected @endif>Cancel</option>
+                                    <option value="cancel" @if($order->delivery_status == 'cancel' || $order->delivery_status == 'cancelled' || $order->delivery_status == 'canceled') selected @endif>Cancel</option>
                                     <option value="returned" @if($order->delivery_status == 'returned') selected @endif>Returned</option>
                                 </select>
                             </div>

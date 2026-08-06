@@ -214,9 +214,6 @@
         }
     </style>
 
-    <!-- Font Awesome (local) -->
-
-
     <!-- Google Tag Manager -->
     <script>
         (function(w, d, s, l, i) {
@@ -534,20 +531,17 @@
         </div>
     </div>
     <div class=" border-top border-gray-200 py-1">
-        <!--bg-white-->
         <div class="container">
             <ul class="list-inline mb-0 pl-0 mobile-hor-swipe text-center">
                 <li class="list-inline-item mr-0">
                     <a href="{{ url('/') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
-                        <!--text-reset-->
                         Home
                     </a>
                 </li>
                 <li class="list-inline-item mr-0">
                     <a href="{{ route('front.trackOrder') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
-                        <!--text-reset-->
                         Track Order
                     </a>
                 </li>
@@ -560,7 +554,6 @@
                 <li class="list-inline-item mr-0">
                     <a href="{{ route('front.flashSale') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
-                        <!--text-reset-->
                         Flash Sale
                     </a>
                 </li>
@@ -568,7 +561,6 @@
                 <li class="list-inline-item mr-0">
                     <a href="{{ route('front.allCategory') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
-                        <!--text-reset-->
                         All Categories
                     </a>
                 </li>
@@ -609,14 +601,6 @@
                                         Subscribe
                                     </button>
                                 </form>
-                            </div>
-                            <div class="w-300px mw-100 mx-auto mx-md-0">
-                                <a href="#" target="_blank" class="d-inline-block mr-3 ml-0">
-                                    <img src="{{ asset('frontend') }}/assets/img/play.png" class="mx-100 h-40px">
-                                </a>
-                                <a href="#" target="_blank" class="d-inline-block">
-                                    <img src="{{ asset('frontend') }}/assets/img/app.png" class="mx-100 h-40px">
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -1575,9 +1559,6 @@
                         calculateGrandTotal(response.subtotal);
                     }
                     if (typeof updateNavCart === "function") updateNavCart();
-                    // calculateGrandTotal(response.subtotal);
-
-                    // updateNavCart();
                 }
             }).fail(function() {
                 console.log("Error updating cart");

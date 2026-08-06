@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AddressController;
+use App\Http\Controllers\Admin\AdminAiSupportController;
 use App\Http\Controllers\Admin\AdminsController;
 use App\Http\Controllers\Admin\AdminSupportController;
 use App\Http\Controllers\Admin\AdminWalletPointController;
@@ -95,8 +96,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     Route::controller(OrderManageController::class)->group(function () {
         Route::get('orders', 'index')->name('order-index')->middleware('admin.permission:manage_order');
-        Route::get('new-orders', 'new')->name('order-new')->middleware('admin.permission:hold_order');
         Route::get('pending-orders', 'pending')->name('order-pending')->middleware('admin.permission:pending_order');
+        Route::get('hold-orders', 'hold')->name('order-hold')->middleware('admin.permission:hold_order');
         Route::get('approved-orders', 'approved')->name('order-approved')->middleware('admin.permission:approved_order');
         Route::get('packaging-orders', 'packaging')->name('order-packaging')->middleware('admin.permission:packaging_order');
         Route::get('incourier-orders', 'incourier')->name('order-incourier')->middleware('admin.permission:shipment_order');
@@ -121,6 +122,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
         // {orderId} হলো আপনার নির্দিষ্ট অর্ডারটির আইডি (যেমন: 1, 10, 50)
         Route::post('orders/steadfast-entry/{id}', 'placeCourierOrder')->name('entry.steadfast')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
+        Route::post('orders/bulk-courier-entry', 'bulkCourierEntry')->name('orders.bulk-courier-entry')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::get('orders/courier-track/{id}', 'trackCourierOrder')->name('admin.orders.courier-track')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('/orders/popup-seen/{id}', 'popupSeen')->name('order.popup_seen');
 
@@ -465,7 +467,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     });
 
     // Admin AI & Live Chat Support Routes
-    Route::controller(\App\Http\Controllers\Admin\AdminAiSupportController::class)->group(function () {
+    Route::controller(AdminAiSupportController::class)->group(function () {
         Route::get('/ai-support', 'index')->name('admin.aiSupport.index');
         Route::get('/ai-support/settings', 'settingsIndex')->name('admin.aiSupport.settings');
         Route::post('/ai-support/settings/update', 'updateSettings')->name('admin.aiSupport.updateSettings');

@@ -193,7 +193,6 @@
                         <span class="border-bottom border-primary border-width-2 pb-3 d-inline-block">New Arrivals</span>
                     </h3>
                 </div>
-                <!--Previous Code Start -->
                 <div class="row">
                     @foreach ($newArivals->take(6) as $newArival)
                         <div class="col-md-2 col-lg-2 col-6">
@@ -254,7 +253,6 @@
                         </div>
                     @endforeach
                 </div>
-                <!--Previous Code Ends -->
 
 
             </div>
@@ -552,53 +550,6 @@
                     </div>
                 </div>
 
-                <!-- Top Brands -->
-                {{-- @if($hasBrands)
-                <div class="col-lg-6">
-                    <div class="card shadow-sm border-0 h-100 rounded-lg transition-all hover-shadow-lg">
-                        <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <h3 class="h5 fw-700 text-dark mb-0 d-flex align-items-center">
-                                    <i class="las la-award text-warning mr-2 fs-24"></i> Top Brands
-                                </h3>
-                                @if(Route::has('brand.all'))
-                                    <a href="{{ route('brand.all') }}" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
-                                @else
-                                    <a href="javascript:void(0)" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="card-body p-4 pt-2">
-                            <div class="row gutters-10">
-                                @foreach ($dbBrands as $brand)
-                                @php
-                                    $brandName = is_string($brand) ? $brand : (is_array($brand) ? ($brand['name'] ?? $brand['title'] ?? 'Brand') : ($brand->name ?? $brand->title ?? 'Brand'));
-                                    $brandId = is_string($brand) ? 0 : (is_array($brand) ? ($brand['id'] ?? 0) : ($brand->id ?? 0));
-                                    $brandSlug = is_string($brand) ? \Illuminate\Support\Str::slug($brand) : (is_array($brand) ? ($brand['slug'] ?? \Illuminate\Support\Str::slug($brandName)) : ($brand->slug ?? \Illuminate\Support\Str::slug($brandName)));
-                                    $brandLogo = is_string($brand) ? null : (is_array($brand) ? ($brand['logo'] ?? $brand['image'] ?? null) : ($brand->logo ?? $brand->image ?? null));
-                                @endphp
-                                <div class="col-sm-6 mb-3">
-                                    <a href="{{ Route::has('brandProductView') && $brandId > 0 ? route('brandProductView', [$brandId, $brandSlug]) : 'javascript:void(0)' }}" class="bg-white border border-light d-block text-reset p-3 rounded-lg transition-all brand-card h-100">
-                                        <div class="d-flex align-items-center">
-                                            <div class="brand-logo text-center mr-3 border-right pr-3" style="width: 70px;">
-                                                @if(!empty($brandLogo) && (filter_var($brandLogo, FILTER_VALIDATE_URL) || file_exists(public_path('Uploads/' . $brandLogo))))
-                                                    <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" data-src="{{ filter_var($brandLogo, FILTER_VALIDATE_URL) ? $brandLogo : asset('Uploads/' . $brandLogo) }}" alt="{{ $brandName }}" class="img-fluid lazyload" style="max-height: 40px; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
-                                                @else
-                                                    <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" alt="{{ $brandName }}" class="img-fluid" style="max-height: 40px; object-fit: contain;">
-                                                @endif
-                                            </div>
-                                            <div class="brand-name flex-grow-1">
-                                                <h4 class="fs-15 fw-700 text-dark mb-0">{{ $brandName }}</h4>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                @endif --}}
             </div>
         </div>
     </section>

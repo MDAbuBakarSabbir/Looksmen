@@ -325,8 +325,8 @@
                                 <div class="col-6">
                                     <label for="delivery_status" class="form-label">Delivery Status</label>
                                     <select class="form-select" id="delivery_status" name="delivery_status">
-                                        <option value="new" selected>New (Hold)</option>
-                                        <option value="pending">Pending</option>
+                                        <option value="pending" selected>Pending</option>
+                                        <option value="hold">Hold</option>
                                         <option value="approved">Approved</option>
                                         <option value="packaging">Packaging</option>
                                     </select>

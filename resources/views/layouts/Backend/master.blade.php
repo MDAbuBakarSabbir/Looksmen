@@ -92,7 +92,6 @@
     <!-- Favicon icon -->
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('adminDash/assets/img/layouts') }}/{{ $webConfig['web_favicon'] ?? 'favicon.png' }}">
     <script src="{{ asset('adminDash/assets/vendor/jquery/jquery.min.js') }}"></script>
-    {{-- <link href="{{ asset('adminDash/assets/vendor/jqvmap/css/jqvmap.min.css') }}" rel="stylesheet"> --}}
 
     <!-- Select2 & Summernote -->
     <link rel="stylesheet" href="{{ asset('adminDash/assets/vendor/select2/css/select2.min.css') }}">
@@ -1212,7 +1211,7 @@
                             <li><a href="{{ Route::has('order-pending') ? route('order-pending') : '#' }}">Pending Orders</a></li>
                             @endif
                             @if($user?->hasPermission('hold_order'))
-                            <li><a href="{{ Route::has('order-new') ? route('order-new') : '#' }}">Hold Orders</a></li>
+                            <li><a href="{{ Route::has('order-hold') ? route('order-hold') : '#' }}">Hold Orders</a></li>
                             @endif
                             @if($user?->hasPermission('approved_order'))
                             <li><a href="{{ Route::has('order-approved') ? route('order-approved') : '#' }}">Approved Orders</a></li>
@@ -1507,15 +1506,6 @@
     <script src="{{ asset('adminDash/assets/js/custom.min.js') }}"></script>
     <script src="{{ asset('adminDash/assets/vendor/raphael/raphael.min.js') }}"></script>
     <script src="{{ asset('adminDash/assets/vendor/morris/morris.min.js') }}"></script>
-    {{-- <script src="{{ asset('adminDash/assets/vendor/circle-progress/circle-progress.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/chart.js/Chart.bundle.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/gaugeJS/dist/gauge.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/flot/jquery.flot.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/flot/jquery.flot.resize.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/owl-carousel/js/owl.carousel.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.min.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/jqvmap/js/jquery.vmap.usa.js') }}"></script> --}}
-    {{-- <script src="{{ asset('adminDash/assets/vendor/jquery.counterup/jquery.counterup.min.js') }}"></script> --}}
     @if(Route::is('admin.dashboard'))
     <script src="{{ asset('adminDash/assets/js/dashboard/dashboard-1.js') }}"></script>
     @endif
@@ -1534,25 +1524,36 @@
 
             function playOrderAlert(count) {
                 if (soundElement) {
+                    soundElement.currentTime = 0;
                     soundElement.play().catch(error => {
-                        console.error("Audio playback blocked:", error);
+                        console.warn("Audio playback waiting for user interaction:", error);
                     });
 
                     setTimeout(() => {
-                        soundElement.pause();
-                        soundElement.currentTime = 0;
+                        try {
+                            soundElement.pause();
+                            soundElement.currentTime = 0;
+                        } catch (e) {}
                     }, soundDuration);
-
-                    Swal.fire({
-                        title: `🎉 ${count} New Orders!`,
-                        text: 'Please review new orders immediately.',
-                        icon: 'success',
-                        timer: soundDuration + 1000,
-                        timerProgressBar: true,
-                        showConfirmButton: false,
-                        position: 'center'
-                    });
                 }
+
+                Swal.fire({
+                    title: `🎉 ${count} New Order(s) Received!`,
+                    text: 'Please review new orders immediately.',
+                    icon: 'success',
+                    showConfirmButton: true,
+                    confirmButtonText: 'View Pending Orders',
+                    confirmButtonColor: '#044244',
+                    showCancelButton: true,
+                    cancelButtonText: 'Dismiss',
+                    timer: soundDuration + 5000,
+                    timerProgressBar: true,
+                    position: 'center'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = "{{ Route::has('order-pending') ? route('order-pending') : (Route::has('order-index') ? route('order-index') : '#') }}";
+                    }
+                });
             }
 
             function checkForNewOrders() {
@@ -1563,7 +1564,7 @@
                     url: checkUrl,
                     method: 'GET',
                     success: function(response) {
-                        if (response.new_count > 0) {
+                        if (response && response.new_count > 0) {
                             playOrderAlert(response.new_count);
                         }
                     },
@@ -1578,10 +1579,18 @@
                 checkForNewOrders();
             @endif
 
-            document.body.addEventListener('click', function() {
+            function unlockAudio() {
                 const sound = document.getElementById('orderAlertSound');
-                if (sound) sound.load();
-            }, { once: true });
+                if (sound) {
+                    sound.play().then(() => {
+                        sound.pause();
+                        sound.currentTime = 0;
+                    }).catch(() => {});
+                }
+            }
+            ['click', 'keydown', 'touchstart'].forEach(function(evt) {
+                document.body.addEventListener(evt, unlockAudio, { once: true });
+            });
         });
     </script>
 
@@ -1873,8 +1882,6 @@
             });
         });
     </script>
-
-    {{-- Facebook SDK removed from admin dashboard (was blocking page load) --}}
 
     <script>
         // Dark Mode Toggle Logic

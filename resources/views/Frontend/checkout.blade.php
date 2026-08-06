@@ -714,8 +714,6 @@
                 let selectedOption = $(this).find(':selected');
                 let charge = selectedOption.data('charge');
 
-                console.log("Selected Charge:", charge); // এটি চেক করার জন্য (ব্রাউজার কনসোলে দেখা যাবে)
-
                 if (charge !== undefined && charge !== "") {
                     $('#charge_display').text(charge);
                     $('#hidden_charge_display').val(charge);
@@ -1128,7 +1126,7 @@
                     grand_total: grand_total
                 },
                 success: function(response) {
-                    console.log("Incomplete order updated.");
+                    // Order updated silently
                 }
             });
         }

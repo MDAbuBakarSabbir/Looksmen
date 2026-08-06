@@ -920,13 +920,13 @@
                     </div>
                     <div class="card-body">
                         <div class="status-grid" id="status-container-{{ $order->id }}">
-                            @if ($order->delivery_status == 'new')
+                            @if ($order->delivery_status == 'hold')
                                 <button class="status-btn-option btn-option-pending update-status" data-id="{{ $order->id }}" data-status="pending"><i class="fa-solid fa-hourglass-half"></i> Pending</button>
                                 <button class="status-btn-option btn-option-approved update-status" data-id="{{ $order->id }}" data-status="approved"><i class="fa-solid fa-circle-check"></i> Approve</button>
                                 <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
                                 <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
                             @elseif ($order->delivery_status == 'pending')
-                                <button class="status-btn-option btn-option-new update-status" data-id="{{ $order->id }}" data-status="new"><i class="fa-solid fa-clock"></i>New</button>
+                                <button class="status-btn-option btn-option-new update-status" data-id="{{ $order->id }}" data-status="hold"><i class="fa-solid fa-hand"></i> Hold</button>
                                 <button class="status-btn-option btn-option-approved update-status" data-id="{{ $order->id }}" data-status="approved"><i class="fa-solid fa-circle-check"></i> Approve</button>
                                 <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
                                 <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
