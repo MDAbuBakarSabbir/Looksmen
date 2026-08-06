@@ -46,8 +46,8 @@ class CheckoutController extends Controller
         $featuresConfig = Cache::rememberForever('feature_activations_map', function () {
             return FeatureActivation::pluck('status', 'name')->toArray();
         });
-        
-        $activePaymentMethods = \Illuminate\Support\Facades\DB::table('payment_apis')->where('status', '1')->pluck('paymentapi_name')->toArray();
+
+        $activePaymentMethods = DB::table('payment_apis')->where('status', '1')->pluck('paymentapi_name')->toArray();
         if ($cartEmpty) {
             return redirect()->route('cartView')->with('error', 'Your cart is empty! Please add products first.');
         }
@@ -478,7 +478,7 @@ class CheckoutController extends Controller
             $order->payment_type = 'prepaid';
             $order->payment_status = 'partial_paid';
             $order->payment_id = $payment->id; // Payments টেবিলের আইডি লিঙ্কিং
-            $order->delivery_status = 'new';
+            $order->delivery_status = 'pending';
             $order->save();
 
             // ঘ. Order Details সেভ
@@ -592,7 +592,7 @@ class CheckoutController extends Controller
             $order->coupon_code = $orderData['coupon_code'];
             $order->payment_type = $orderData['payment'];
             $order->note = $orderData['note'];
-            $order->delivery_status = 'new';
+            $order->delivery_status = 'pending';
             $order->payment_type = 'prepaid';
             $order->payment_status = 'partial_paid';
             $order->payment_id = $payment->id;

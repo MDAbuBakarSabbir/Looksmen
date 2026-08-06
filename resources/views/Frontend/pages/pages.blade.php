@@ -33,30 +33,6 @@
     </section>
 </div>
 
-
-    {{-- <div class="content">
-        <section class="contact_us_area section_padding">
-            <div class="container">
-                <div class="row">
-                    <div class="col-xxl-12 col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
-                        <div class="section_title text-center">
-                            <h2><strong>{{ $page->page_name }}</strong></h2>
-                            <a href="">English</a>
-                            <a href="">বাংলা</a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="container section_padding_top">
-                <div class="row gy-4 gx-3">
-                    <p class="font-weight-bold">{!! nl2br(e($page->english_description)) !!}</p>
-                </div>
-                <div class="row gy-4 gx-3">
-                    <p class="font-weight-bold">{!! nl2br(e($page->bangla_description)) !!}</p>
-                </div>
-            </div>
-        </section>
-    </div> --}}
 @endsection
 @section('script')
     <script>

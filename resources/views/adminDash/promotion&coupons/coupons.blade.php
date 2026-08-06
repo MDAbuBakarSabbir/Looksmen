@@ -501,7 +501,6 @@
 
         $(document).on('click', '.editCoupon', function() {
             let id = $(this).data('id');
-            console.log("Fetching data for ID:", id);
 
             fetch(`admin/coupon/edit/${id}`)
                 .then(response => response.json())

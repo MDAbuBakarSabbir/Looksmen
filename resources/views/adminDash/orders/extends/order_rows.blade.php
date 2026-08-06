@@ -159,7 +159,7 @@
                         <i class="fa-regular fa-calendar-plus" style="font-size: 10px; opacity: 0.7;"></i>
                         <span>Created: {{ $order->created_at->format('d M, Y') }}</span>
                     </div>
-                    @if ($order->delivery_status != 'new' && $order->delivery_status != 'hold')
+                    @if ($order->delivery_status != 'hold')
                         <div class="d-flex align-items-center mt-1" style="gap: 4px;">
                             <i class="fa-regular fa-calendar-check" style="font-size: 10px; opacity: 0.7;"></i>
                             <span>Updated: {{ $order->updated_at->format('d M, Y') }}</span>

@@ -1,8 +1,8 @@
 @php
     $currentStatus = $order->delivery_status;
     $allStatuses = [
-        'new' => ['label' => 'Hold / New', 'icon' => 'fa-clock', 'color' => 'text-secondary'],
         'pending' => ['label' => 'Pending', 'icon' => 'fa-hourglass-half', 'color' => 'text-warning'],
+        'hold' => ['label' => 'Hold', 'icon' => 'fa-clock', 'color' => 'text-secondary'],
         'approved' => ['label' => 'Approved', 'icon' => 'fa-circle-check', 'color' => 'text-success'],
         'packaging' => ['label' => 'Packaging', 'icon' => 'fa-box', 'color' => 'text-primary'],
         'incourier' => ['label' => 'In Courier', 'icon' => 'fa-truck', 'color' => 'text-info'],

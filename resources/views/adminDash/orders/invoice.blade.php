@@ -1,4 +1,4 @@
-﻿@extends('layouts.Backend.master')
+@extends('layouts.Backend.master')
 
 @section('title')
     INVOICE #LM-{{ $order->id }}
@@ -22,15 +22,19 @@
     $dueAmt     = $order->grand_total ?? 0;
 
     $statusColors = [
-        'new'        => ['bg' => '#dbeafe', 'text' => '#1e40af', 'label' => 'New / Hold'],
+        'hold'       => ['bg' => '#dbeafe', 'text' => '#1e40af', 'label' => 'Hold'],
         'pending'    => ['bg' => '#fef9c3', 'text' => '#92400e', 'label' => 'Pending'],
         'approved'   => ['bg' => '#d1fae5', 'text' => '#065f46', 'label' => 'Approved'],
         'packaging'  => ['bg' => '#ede9fe', 'text' => '#5b21b6', 'label' => 'Packaging'],
+        'incourier'  => ['bg' => '#ffedd5', 'text' => '#9a3412', 'label' => 'In Courier'],
         'in_courier' => ['bg' => '#ffedd5', 'text' => '#9a3412', 'label' => 'In Courier'],
         'delivered'  => ['bg' => '#d1fae5', 'text' => '#064e3b', 'label' => 'Delivered'],
         'cancel'     => ['bg' => '#fee2e2', 'text' => '#991b1b', 'label' => 'Cancelled'],
         'cancelled'  => ['bg' => '#fee2e2', 'text' => '#991b1b', 'label' => 'Cancelled'],
+        'canceled'   => ['bg' => '#fee2e2', 'text' => '#991b1b', 'label' => 'Cancelled'],
         'returned'   => ['bg' => '#f3f4f6', 'text' => '#374151', 'label' => 'Returned'],
+        // backward compat
+        'new'        => ['bg' => '#dbeafe', 'text' => '#1e40af', 'label' => 'Hold'],
     ];
     $statusStyle = $statusColors[$order->delivery_status] ?? ['bg' => '#f3f4f6', 'text' => '#374151', 'label' => ucfirst($order->delivery_status)];
 @endphp

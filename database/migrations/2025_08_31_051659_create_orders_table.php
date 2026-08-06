@@ -25,7 +25,7 @@ return new class extends Migration
             $table->string('district')->nullable();
             $table->string('thana')->nullable();
             $table->string('address');
-            $table->string('delivery_status')->default('new');
+            $table->string('delivery_status')->default('pending');
             $table->string('payment_type')->nullable();
             $table->string('payment_status')->nullable();
             $table->string('payment_id')->nullable();
@@ -49,7 +49,6 @@ return new class extends Migration
             $table->timestamps();
         });
     }
-
 
     /**
      * Reverse the migrations.

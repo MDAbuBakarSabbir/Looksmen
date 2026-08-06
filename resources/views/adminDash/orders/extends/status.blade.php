@@ -23,7 +23,7 @@
                     </a>
                 </div>
                 <div class="col-lg-3 col-sm-6">
-                    <a href="{{ Route::has('order-new') ? route('order-new') : '#' }}" class="filter-order order-status-btn" data-status="new">
+                    <a href="{{ Route::has('order-hold') ? route('order-hold') : '#' }}" class="filter-order order-status-btn" data-status="hold">
                         <div class="card shadow">
                             <div class="stat-widget-two card-body">
                                 <div class="stat-content">
@@ -32,7 +32,7 @@
                                 <div class="d-flex justify-content-around">
                                     <img style="height: 50px;" src="{{ asset('adminDash') }}/assets/img/orders/hold.png"
                                         alt="img">
-                                    <div class="stat-digit" id="count-new">{{ $countorders->where('delivery_status', 'new')->count() }}</div>
+                                    <div class="stat-digit" id="count-hold">{{ $countorders->filter(fn($o) => $o->delivery_status === 'hold')->count() }}</div>
                                 </div>
                             </div>
                         </div>

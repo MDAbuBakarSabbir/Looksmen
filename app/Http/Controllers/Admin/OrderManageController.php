@@ -2,24 +2,29 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Admin\affiliate\AffiliateController;
 use App\Http\Controllers\Controller;
+use App\Models\CourierApi;
 use App\Models\District;
 use App\Models\FeatureActivation;
 use App\Models\FraudCheck;
 use App\Models\GeneralWebSettings;
+use App\Models\IncompleteOrders;
 use App\Models\Logs;
-use App\Models\Orders;
 use App\Models\OrderDetails;
+use App\Models\Orders;
+use App\Models\PointTransaction;
 use App\Models\Product;
 use App\Models\Thana;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
+use App\Models\User;
 use App\Services\SteadfastService;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Http;
+use Carbon\Carbon;
 use Exception;
-use Illuminate\Container\Attributes\Auth;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class OrderManageController extends Controller
 {
@@ -29,7 +34,7 @@ class OrderManageController extends Controller
     protected function checkOrderAccess(Orders $order)
     {
         $user = auth()->guard('admin')->user();
-        if (!$user) {
+        if (! $user) {
             abort(403, 'Unauthorized.');
         }
 
@@ -46,7 +51,7 @@ class OrderManageController extends Controller
         // Check specific status permissions
         $status = $order->delivery_status;
         $permission = match ($status) {
-            'new' => 'hold_order',
+            'hold' => 'hold_order',
             'pending' => 'pending_order',
             'approved' => 'approved_order',
             'packaging' => 'packaging_order',
@@ -59,7 +64,7 @@ class OrderManageController extends Controller
             default => null
         };
 
-        if (!$permission || !$user->hasPermission($permission)) {
+        if (! $permission || ! $user->hasPermission($permission)) {
             abort(403, 'You do not have permission to access this order.');
         }
     }
@@ -68,32 +73,32 @@ class OrderManageController extends Controller
     {
         $status = $request->status;
         $user = auth()->guard('admin')->user();
-        
-        if (empty($status) && !$user->hasPermission('manage_order')) {
+
+        if (empty($status) && ! $user->hasPermission('manage_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'pending' && !$user->hasPermission('pending_order')) {
+        if ($status === 'pending' && ! $user->hasPermission('pending_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'new' && !$user->hasPermission('hold_order')) {
+        if ($status === 'hold' && ! $user->hasPermission('hold_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'approved' && !$user->hasPermission('approved_order')) {
+        if ($status === 'approved' && ! $user->hasPermission('approved_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'packaging' && !$user->hasPermission('packaging_order')) {
+        if ($status === 'packaging' && ! $user->hasPermission('packaging_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'in_courier' && !$user->hasPermission('shipment_order')) {
+        if ($status === 'in_courier' && ! $user->hasPermission('shipment_order')) {
             abort(403, 'Unauthorized.');
         }
-        if (in_array($status, ['delivered', 'partial_delivered']) && !$user->hasPermission('delivered_order')) {
+        if (in_array($status, ['delivered', 'partial_delivered']) && ! $user->hasPermission('delivered_order')) {
             abort(403, 'Unauthorized.');
         }
-        if (in_array($status, ['cancel', 'cancelled']) && !$user->hasPermission('canceled_order')) {
+        if (in_array($status, ['cancel', 'cancelled']) && ! $user->hasPermission('canceled_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'returned' && !$user->hasPermission('return_order')) {
+        if ($status === 'returned' && ! $user->hasPermission('return_order')) {
             abort(403, 'Unauthorized.');
         }
 
@@ -116,7 +121,7 @@ class OrderManageController extends Controller
         if ($request->from && $request->to) {
             $query->whereBetween('created_at', [
                 Carbon::parse($request->from)->startOfDay(),
-                Carbon::parse($request->to)->endOfDay()
+                Carbon::parse($request->to)->endOfDay(),
             ]);
         }
 
@@ -138,18 +143,18 @@ class OrderManageController extends Controller
             $query->where('updated_by', $request->admin_id);
         }
 
-        $page  = request('page', 1);
+        $page = request('page', 1);
         $orders = $query->latest()->paginate(20)->withQueryString();
 
         $html = view('adminDash.orders.extends.order_rows', compact('orders'))->render();
 
         return response()->json([
-            'html'         => $html,
+            'html' => $html,
             'current_page' => $orders->currentPage(),
-            'last_page'    => $orders->lastPage(),
-            'total'        => $orders->total(),
-            'from'         => $orders->firstItem() ?? 0,
-            'to'           => $orders->lastItem() ?? 0,
+            'last_page' => $orders->lastPage(),
+            'total' => $orders->total(),
+            'from' => $orders->firstItem() ?? 0,
+            'to' => $orders->lastItem() ?? 0,
         ]);
     }
 
@@ -157,7 +162,7 @@ class OrderManageController extends Controller
     {
         $order = Orders::find($request->id);
 
-        if (!$order) {
+        if (! $order) {
             return response()->json(['success' => false, 'message' => 'Order not found!']);
         }
 
@@ -165,12 +170,12 @@ class OrderManageController extends Controller
 
         // Auto courier entry on status changed to in-courier
         if (in_array($request->status, ['incourier', 'in_courier'])) {
-            if (!$order->consignment_id) {
+            if (! $order->consignment_id) {
                 $courierRes = $this->placeCourierOrderInternal($order);
                 if ($courierRes['status'] === 'error') {
                     return response()->json([
                         'success' => false,
-                        'message' => 'Courier booking failed: ' . $courierRes['message']
+                        'message' => 'Courier booking failed: '.$courierRes['message'],
                     ]);
                 }
             } else {
@@ -183,18 +188,18 @@ class OrderManageController extends Controller
             $order->save();
         }
 
-        $logs = new Logs();
+        $logs = new Logs;
         $logs->user_id = auth()->id();
         $logs->order_id = $request->id;
         $logs->action_type = 'status_update';
-        $logs->details = 'Order status changed to ' . $order->delivery_status;
+        $logs->details = 'Order status changed to '.$order->delivery_status;
         $logs->order_status = $order->delivery_status;
         $logs->save();
 
         // Send Order Status Change Mails (Delivered or Cancelled)
         try {
             if ($order->user_id && $order->user_id != '0') {
-                $user = \App\Models\User::find($order->user_id);
+                $user = User::find($order->user_id);
                 if ($user && $user->email) {
                     if ($order->delivery_status == 'delivered') {
                         send_template_mail($user->email, 'order_delivered_mail', [
@@ -211,16 +216,16 @@ class OrderManageController extends Controller
                     }
                 }
             }
-        } catch (\Exception $e) {
-            \Log::error('Order Status Mail Trigger Error: ' . $e->getMessage());
+        } catch (Exception $e) {
+            \Log::error('Order Status Mail Trigger Error: '.$e->getMessage());
         }
 
         if ($order->delivery_status == 'delivered') {
             try {
-                $affiliateController = new \App\Http\Controllers\Admin\affiliate\AffiliateController();
+                $affiliateController = new AffiliateController;
                 $affiliateController->processAffiliatePoints($order);
-            } catch (\Exception $e) {
-                \Log::error('Affiliate status processing error: ' . $e->getMessage());
+            } catch (Exception $e) {
+                \Log::error('Affiliate status processing error: '.$e->getMessage());
             }
             $this->processOrderPoints($order);
         }
@@ -237,7 +242,7 @@ class OrderManageController extends Controller
             'order_id' => $order->id,
             'new_dropdown' => $view,
             'consignment_id' => $order->consignment_id,
-            'tracking_code' => $order->tracking_code
+            'tracking_code' => $order->tracking_code,
         ]);
     }
 
@@ -249,17 +254,17 @@ class OrderManageController extends Controller
                 $order->delivery_status = $request->status;
                 $order->save();
                 try {
-                    $affiliateController = new \App\Http\Controllers\Admin\affiliate\AffiliateController();
+                    $affiliateController = new AffiliateController;
                     $affiliateController->processAffiliatePoints($order);
-                } catch (\Exception $e) {
-                    \Log::error('Affiliate bulk processing error: ' . $e->getMessage());
+                } catch (Exception $e) {
+                    \Log::error('Affiliate bulk processing error: '.$e->getMessage());
                 }
                 $this->processOrderPoints($order);
 
                 // Send delivered mail
                 try {
                     if ($order->user_id && $order->user_id != '0') {
-                        $user = \App\Models\User::find($order->user_id);
+                        $user = User::find($order->user_id);
                         if ($user && $user->email) {
                             send_template_mail($user->email, 'order_delivered_mail', [
                                 'customer_name' => $order->name,
@@ -268,8 +273,8 @@ class OrderManageController extends Controller
                             ]);
                         }
                     }
-                } catch (\Exception $e) {
-                    \Log::error('Bulk Order Delivered Mail Error: ' . $e->getMessage());
+                } catch (Exception $e) {
+                    \Log::error('Bulk Order Delivered Mail Error: '.$e->getMessage());
                 }
             }
         } else {
@@ -281,7 +286,7 @@ class OrderManageController extends Controller
                 foreach ($orders as $order) {
                     try {
                         if ($order->user_id && $order->user_id != '0') {
-                            $user = \App\Models\User::find($order->user_id);
+                            $user = User::find($order->user_id);
                             if ($user && $user->email) {
                                 send_template_mail($user->email, 'order_cancel_mail', [
                                     'customer_name' => $order->name,
@@ -290,8 +295,8 @@ class OrderManageController extends Controller
                                 ]);
                             }
                         }
-                    } catch (\Exception $e) {
-                        \Log::error('Bulk Order Cancel Mail Error: ' . $e->getMessage());
+                    } catch (Exception $e) {
+                        \Log::error('Bulk Order Cancel Mail Error: '.$e->getMessage());
                     }
                 }
             }
@@ -300,125 +305,121 @@ class OrderManageController extends Controller
         return response()->json(['success' => true]);
     }
 
-
-
     public function statusCount()
     {
         return response()->json([
-            'new'        => Orders::where('delivery_status', 'new')->count(),
-            'pending'    => Orders::where('delivery_status', 'pending')->count(),
-            'approved'   => Orders::where('delivery_status', 'approved')->count(),
-            'packaging'  => Orders::where('delivery_status', 'packaging')->count(),
-            'in_courier' => Orders::where('delivery_status', 'in_courier')->count(),
-            'delivered'  => Orders::where('delivery_status', 'delivered')->count(),
-            'canceled'   => Orders::where('delivery_status', 'canceled')->count(),
-            'returned'   => Orders::where('delivery_status', 'returned')->count(),
+            'hold' => Orders::where('delivery_status', 'hold')->count(),
+            'pending' => Orders::where('delivery_status', 'pending')->count(),
+            'approved' => Orders::where('delivery_status', 'approved')->count(),
+            'packaging' => Orders::where('delivery_status', 'packaging')->count(),
+            'in_courier' => Orders::whereIn('delivery_status', ['in_courier', 'incourier'])->count(),
+            'delivered' => Orders::whereIn('delivery_status', ['delivered', 'partial_delivered'])->count(),
+            'canceled' => Orders::whereIn('delivery_status', ['cancel', 'canceled', 'cancelled'])->count(),
+            'returned' => Orders::where('delivery_status', 'returned')->count(),
         ]);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function index()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('manage_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('manage_order')) {
             abort(403, 'You do not have permission to manage orders.');
         }
         $countorders = Orders::with('admin')->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('countorders'));
     }
-    public function new()
+
+    public function hold()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('hold_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('hold_order')) {
             abort(403, 'You do not have permission to view hold orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::where('delivery_status', 'new')->latest()->paginate(20)->withQueryString();
+        $orders = Orders::where('delivery_status', 'hold')->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
+
     public function pending()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('pending_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('pending_order')) {
             abort(403, 'You do not have permission to view pending orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
         $orders = Orders::where('delivery_status', 'pending')->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
+
     public function approved()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('approved_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('approved_order')) {
             abort(403, 'You do not have permission to view approved orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
         $orders = Orders::where('delivery_status', 'approved')->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
+
     public function packaging()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('packaging_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('packaging_order')) {
             abort(403, 'You do not have permission to view packaging orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
         $orders = Orders::where('delivery_status', 'packaging')->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
+
     public function incourier()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('shipment_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('shipment_order')) {
             abort(403, 'You do not have permission to view in-courier orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
         $orders = Orders::whereIn('delivery_status', [
-            'in_courier', 'unknown', 'in_review', 'hold',
+            'in_courier', 'incourier', 'unknown', 'in_review', 'hold',
             'unknown_approval_pending', 'cancelled_approval_pending',
-            'partial_delivered_approval_pending', 'delivered_approval_pending', 'pending'
+            'partial_delivered_approval_pending', 'delivered_approval_pending', 'pending',
         ])->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
+
     public function delivered()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('delivered_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('delivered_order')) {
             abort(403, 'You do not have permission to view delivered orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
         $orders = Orders::whereIn('delivery_status', ['delivered', 'partial_delivered'])->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
+
     public function canceled()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('canceled_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('canceled_order')) {
             abort(403, 'You do not have permission to view canceled orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::whereIn('delivery_status', ['cancel', 'cancelled'])->latest()->paginate(20)->withQueryString();
+        $orders = Orders::whereIn('delivery_status', ['cancel', 'cancelled', 'canceled'])->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
+
     public function returned()
     {
-        if (!auth()->guard('admin')->user()->hasPermission('return_order')) {
+        if (! auth()->guard('admin')->user()->hasPermission('return_order')) {
             abort(403, 'You do not have permission to view returned orders.');
         }
         $countorders = Orders::latest()->paginate(20)->withQueryString();
         $orders = Orders::where('delivery_status', 'returned')->latest()->paginate(20)->withQueryString();
+
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
-
 
     public function getUpazilas($districtId)
     {
@@ -437,21 +438,21 @@ class OrderManageController extends Controller
         $products = Product::with(['firstImage', 'productAttributes.attribute', 'productColors.color'])
             ->where('status', '1')
             ->where(function ($q) use ($term) {
-                $q->where('title', 'LIKE', '%' . $term . '%')
-                  ->orWhere('code', 'LIKE', '%' . $term . '%');
+                $q->where('title', 'LIKE', '%'.$term.'%')
+                    ->orWhere('code', 'LIKE', '%'.$term.'%');
             })
             ->limit(10)
             ->get();
 
         // প্রতিটি প্রোডাক্টের জন্য সঠিক থাম্বনেইল পাথ রিজলভ করে পাঠানো
-        $products->each(function($product) {
+        $products->each(function ($product) {
             $imageSrc = asset('favicon.png');
             if ($product->firstImage) {
                 $imgName = $product->firstImage->image;
-                if (file_exists(public_path('Uploads/' . $imgName))) {
-                    $imageSrc = asset('Uploads/' . $imgName);
+                if (file_exists(public_path('Uploads/'.$imgName))) {
+                    $imageSrc = asset('Uploads/'.$imgName);
                 } else {
-                    $imageSrc = asset('Uploads/' . $imgName);
+                    $imageSrc = asset('Uploads/'.$imgName);
                 }
             }
             $product->first_image_url = $imageSrc;
@@ -478,15 +479,15 @@ class OrderManageController extends Controller
                 'status' => 'success',
                 'message' => 'Order is already booked in courier.',
                 'consignment_id' => $order->consignment_id,
-                'tracking_code' => $order->tracking_code
+                'tracking_code' => $order->tracking_code,
             ];
         }
 
-        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
-        if (!$activeCourier) {
+        $activeCourier = CourierApi::where('status', '1')->first();
+        if (! $activeCourier) {
             return [
                 'status' => 'error',
-                'message' => 'No active courier API configured.'
+                'message' => 'No active courier API configured.',
             ];
         }
 
@@ -496,18 +497,19 @@ class OrderManageController extends Controller
                 'recipient_name' => $order->name,
                 'recipient_phone' => $order->phone,
                 'recipient_address' => $order->address,
-                'cod_amount' => (float)$order->grand_total,
+                'cod_amount' => (float) $order->grand_total,
                 'note' => $order->comments,
             ];
 
             $response = $this->steadfast->createOrder($payload);
 
-            if (!isset($response['status']) || $response['status'] != 200) {
+            if (! isset($response['status']) || $response['status'] != 200) {
                 $errorMsg = $response['message'] ?? 'Steadfast API error';
+
                 return [
                     'status' => 'error',
-                    'message' => 'Steadfast: ' . $errorMsg,
-                    'api_response' => $response
+                    'message' => 'Steadfast: '.$errorMsg,
+                    'api_response' => $response,
                 ];
             }
 
@@ -522,13 +524,13 @@ class OrderManageController extends Controller
                 'status' => 'success',
                 'message' => 'Successfully booked in Steadfast Courier.',
                 'consignment_id' => $order->consignment_id,
-                'tracking_code' => $order->tracking_code
+                'tracking_code' => $order->tracking_code,
             ];
         }
 
         return [
             'status' => 'error',
-            'message' => 'Active courier ' . ucfirst($activeCourier->courier_name) . ' API integration not fully implemented.'
+            'message' => 'Active courier '.ucfirst($activeCourier->courier_name).' API integration not fully implemented.',
         ];
     }
 
@@ -536,7 +538,7 @@ class OrderManageController extends Controller
     public function placeCourierOrder($id)
     {
         $order = Orders::find($id);
-        if (!$order) {
+        if (! $order) {
             return response()->json(['status' => 'error', 'message' => 'Order Not Found']);
         }
 
@@ -549,14 +551,14 @@ class OrderManageController extends Controller
                 'status' => 'success',
                 'message' => $result['message'],
                 'consignment_id' => $result['consignment_id'],
-                'tracking_code' => $result['tracking_code']
+                'tracking_code' => $result['tracking_code'],
             ]);
         }
 
         return response()->json([
             'status' => 'error',
             'message' => $result['message'],
-            'api_response' => $result['api_response'] ?? null
+            'api_response' => $result['api_response'] ?? null,
         ]);
     }
 
@@ -564,6 +566,57 @@ class OrderManageController extends Controller
     public function placeSteadfastOrder($id)
     {
         return $this->placeCourierOrder($id);
+    }
+
+    // AJAX: Bulk Courier Entry — submit multiple orders to courier at once
+    public function bulkCourierEntry(Request $request)
+    {
+        $ids = $request->input('order_ids', []);
+
+        if (empty($ids) || !is_array($ids)) {
+            return response()->json(['status' => 'error', 'message' => 'No orders selected.']);
+        }
+
+        $results = [];
+        $successCount = 0;
+        $failCount = 0;
+
+        foreach ($ids as $id) {
+            $order = Orders::find($id);
+            if (!$order) {
+                $results[] = [
+                    'order_id' => $id,
+                    'status'   => 'error',
+                    'message'  => 'Order #' . $id . ' not found.',
+                ];
+                $failCount++;
+                continue;
+            }
+
+            $result = $this->placeCourierOrderInternal($order);
+
+            $results[] = [
+                'order_id'        => $id,
+                'invoice'         => 'LM-' . $id,
+                'status'          => $result['status'],
+                'message'         => $result['message'],
+                'consignment_id'  => $result['consignment_id'] ?? null,
+                'tracking_code'   => $result['tracking_code'] ?? null,
+            ];
+
+            if ($result['status'] === 'success') {
+                $successCount++;
+            } else {
+                $failCount++;
+            }
+        }
+
+        return response()->json([
+            'status'        => 'done',
+            'success_count' => $successCount,
+            'fail_count'    => $failCount,
+            'results'       => $results,
+        ]);
     }
 
     // Mark popup seen
@@ -574,20 +627,21 @@ class OrderManageController extends Controller
             $order->courier_popup_shown = 1;
             $order->save();
         }
+
         return response()->json(['status' => 'ok']);
     }
 
     // Cron: Update Status from Steadfast
     public function updateStatuses()
     {
-        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
-        if (!$activeCourier) {
-            return "No active courier configuration.";
+        $activeCourier = CourierApi::where('status', '1')->first();
+        if (! $activeCourier) {
+            return 'No active courier configuration.';
         }
 
         if ($activeCourier->courier_name === 'steadfast') {
             $orders = Orders::whereNotNull('consignment_id')
-                ->whereNotIn('delivery_status', ['delivered', 'cancel', 'cancelled', 'returned'])
+                ->whereNotIn('delivery_status', ['delivered', 'cancel', 'cancelled', 'canceled', 'returned'])
                 ->get();
 
             $updatedCount = 0;
@@ -604,17 +658,19 @@ class OrderManageController extends Controller
                         $updatedCount++;
 
                         try {
-                            $logs = new Logs();
+                            $logs = new Logs;
                             $logs->user_id = 0; // system
                             $logs->order_id = $order->id;
                             $logs->action_type = 'status_update';
-                            $logs->details = 'System auto-synced courier status to ' . $newStatus;
+                            $logs->details = 'System auto-synced courier status to '.$newStatus;
                             $logs->order_status = $newStatus;
                             $logs->save();
-                        } catch (\Exception $e) {}
+                        } catch (Exception $e) {
+                        }
                     }
                 }
             }
+
             return "Status Updated: {$updatedCount} orders updated.";
         }
 
@@ -625,18 +681,18 @@ class OrderManageController extends Controller
     public function trackCourierOrder($id)
     {
         $order = Orders::find($id);
-        if (!$order) {
+        if (! $order) {
             return response()->json(['status' => 'error', 'message' => 'Order Not Found']);
         }
 
         $this->checkOrderAccess($order);
 
-        if (!$order->consignment_id) {
+        if (! $order->consignment_id) {
             return response()->json(['status' => 'error', 'message' => 'This order is not booked in any courier yet.']);
         }
 
-        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
-        if (!$activeCourier) {
+        $activeCourier = CourierApi::where('status', '1')->first();
+        if (! $activeCourier) {
             return response()->json(['status' => 'error', 'message' => 'No active courier configuration found.']);
         }
 
@@ -649,10 +705,10 @@ class OrderManageController extends Controller
                     'consignment_id' => $order->consignment_id,
                     'tracking_code' => $order->tracking_code,
                     'delivery_status' => $response['delivery_status'] ?? 'unknown',
-                    'raw_response' => $response
+                    'raw_response' => $response,
                 ]);
             }
-            
+
             $response = $this->steadfast->checkStatusByInvoice($order->order_id);
             if (isset($response['status']) && $response['status'] == 200) {
                 return response()->json([
@@ -661,26 +717,23 @@ class OrderManageController extends Controller
                     'consignment_id' => $order->consignment_id,
                     'tracking_code' => $order->tracking_code,
                     'delivery_status' => $response['delivery_status'] ?? 'unknown',
-                    'raw_response' => $response
+                    'raw_response' => $response,
                 ]);
             }
 
             return response()->json(['status' => 'error', 'message' => 'Failed to retrieve tracking data from Steadfast API.', 'response' => $response]);
         }
 
-        return response()->json(['status' => 'error', 'message' => 'Tracking for ' . ucfirst($activeCourier->courier_name) . ' is not implemented yet.']);
+        return response()->json(['status' => 'error', 'message' => 'Tracking for '.ucfirst($activeCourier->courier_name).' is not implemented yet.']);
     }
-
 
     public function checkNewOrders(Request $request)
     {
-
         $seenOrderIds = session('seen_order_ids', []);
 
-        // ২. নতুন (এবং অদেখা) অর্ডারগুলো খুঁজে বের করা
-        $newOrders = Orders::where('created_at', '>', Carbon::now()->subHour(1)) // গত ১ ঘণ্টার মধ্যে তৈরি হয়েছে
-            ->where('delivery_status', 'new') // শুধু পেন্ডিং অর্ডার দেখাবে
-            ->whereNotIn('id', $seenOrderIds) // যা সেশনে দেখা হয়েছে তা বাদ দেওয়া
+        // ২. নতুন (এবং অদেখা) অর্ডারগুলো খুঁজে বের করা (pending বা hold অবস্থা)
+        $newOrders = Orders::whereIn('delivery_status', ['pending', 'hold'])
+            ->whereNotIn('id', $seenOrderIds)
             ->get();
 
         $newOrderCount = $newOrders->count();
@@ -698,16 +751,9 @@ class OrderManageController extends Controller
 
         // ৪. নতুন অর্ডারের সংখ্যা JSON ফরম্যাটে পাঠানো
         return response()->json([
-            'new_count' => $newOrderCount
+            'new_count' => $newOrderCount,
         ]);
     }
-
-
-
-
-
-
-
 
     public function create(Request $request)
     {
@@ -715,8 +761,9 @@ class OrderManageController extends Controller
         $thanas = Thana::where('status', '1')->get();
         $incompleteOrder = null;
         if ($request->has('incomplete_id')) {
-            $incompleteOrder = \App\Models\IncompleteOrders::find($request->incomplete_id);
+            $incompleteOrder = IncompleteOrders::find($request->incomplete_id);
         }
+
         return view('adminDash.orders.create', compact('districts', 'thanas', 'incompleteOrder'));
     }
 
@@ -735,7 +782,7 @@ class OrderManageController extends Controller
         try {
             DB::beginTransaction();
 
-            $order = new Orders();
+            $order = new Orders;
             $order->user_id = 0; // Created by admin
             $order->ip_address = $request->ip();
             $order->name = $request->name;
@@ -743,8 +790,8 @@ class OrderManageController extends Controller
             $order->address = $request->address;
             $order->comments = $request->comments;
             $order->note = $request->note; // Customer note
-            
-            $order->delivery_status = $request->delivery_status ?? 'new';
+
+            $order->delivery_status = $request->delivery_status ?? 'pending';
             $order->payment_type = $request->payment_type ?? 'Cash On Delivery';
             $order->payment_status = 'pending';
 
@@ -772,20 +819,22 @@ class OrderManageController extends Controller
             $prices = $request->prices ?? [];
 
             $totalAmount = 0;
-            
+
             // Group the products by ID, size, and color to prevent duplicates
             $groupedProducts = [];
             for ($i = 0; $i < count($productIds); $i++) {
-                if (empty($productIds[$i])) continue;
-                
+                if (empty($productIds[$i])) {
+                    continue;
+                }
+
                 $pId = $productIds[$i];
                 $pSize = $sizes[$i] ?? 'N/A';
                 $pColor = $colors[$i] ?? 'N/A';
-                $pQty = (int)($quantities[$i] ?? 1);
-                $pPrice = (float)($prices[$i] ?? 0);
-                
-                $key = $pId . '|' . $pSize . '|' . $pColor;
-                
+                $pQty = (int) ($quantities[$i] ?? 1);
+                $pPrice = (float) ($prices[$i] ?? 0);
+
+                $key = $pId.'|'.$pSize.'|'.$pColor;
+
                 if (isset($groupedProducts[$key])) {
                     $groupedProducts[$key]['qty'] += $pQty;
                 } else {
@@ -800,12 +849,12 @@ class OrderManageController extends Controller
             }
 
             foreach ($groupedProducts as $item) {
-                $detail = new OrderDetails();
+                $detail = new OrderDetails;
                 $detail->order_id = $order->id;
                 $detail->product_id = $item['id'];
                 $detail->product_attribute = $item['size'];
                 $detail->product_colour = $item['color'];
-                
+
                 $detail->product_qty = $item['qty'];
                 $detail->unit_price = $item['price'];
                 $detail->total_price = $item['qty'] * $item['price'];
@@ -816,10 +865,10 @@ class OrderManageController extends Controller
 
             // Update financials
             $order->total_amount = $totalAmount;
-            $order->admin_discount = (float)($request->admin_discount ?? 0);
-            $order->coupon_discount = (float)($request->coupon_discount ?? 0);
-            $order->delivery_charge = (float)($request->delivery_charge ?? 0);
-            $order->paid_amount = (float)($request->paid_amount ?? 0);
+            $order->admin_discount = (float) ($request->admin_discount ?? 0);
+            $order->coupon_discount = (float) ($request->coupon_discount ?? 0);
+            $order->delivery_charge = (float) ($request->delivery_charge ?? 0);
+            $order->paid_amount = (float) ($request->paid_amount ?? 0);
 
             $grandTotalCalculated = $totalAmount - $order->admin_discount - $order->coupon_discount + $order->delivery_charge;
             $order->grand_total = max(0, $grandTotalCalculated - $order->paid_amount);
@@ -828,23 +877,25 @@ class OrderManageController extends Controller
             $order->save();
 
             if ($request->has('incomplete_id')) {
-                \App\Models\IncompleteOrders::where('id', $request->incomplete_id)->delete();
+                IncompleteOrders::where('id', $request->incomplete_id)->delete();
             }
 
             // Log order creation
-            $logs = new Logs();
+            $logs = new Logs;
             $logs->user_id = auth()->id();
             $logs->order_id = $order->id;
             $logs->action_type = 'order_creation';
-            $logs->details = 'New order created by admin: ' . (auth()->user()?->name ?? 'System');
+            $logs->details = 'New order created by admin: '.(auth()->user()?->name ?? 'System');
             $logs->order_status = $order->delivery_status;
             $logs->save();
 
             DB::commit();
+
             return redirect()->route('admin.order-show', $order->id)->with('success', 'Order created successfully!');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'Something went wrong: '.$e->getMessage())->withInput();
         }
     }
 
@@ -855,7 +906,7 @@ class OrderManageController extends Controller
         $order = Orders::with([
             'orderDetails.orderProduct.firstImage',
             'orderDetails.orderProduct.productAttributes.attribute',
-            'orderDetails.orderProduct.productColors.color'
+            'orderDetails.orderProduct.productColors.color',
         ])->findOrFail($id);
 
         $this->checkOrderAccess($order);
@@ -871,12 +922,10 @@ class OrderManageController extends Controller
         return view('adminDash.orders.edit', compact('order', 'districts', 'thanas', 'selectedDistrict', 'selectedThana'));
     }
 
-
-
     public function getCourierHistory(Request $request)
     {
         $request->validate([
-            'phone' => 'required|digits:11'
+            'phone' => 'required|digits:11',
         ]);
 
         $webConfig = GeneralWebSettings::first()->pluck('value', 'name', 'status')->toArray();
@@ -884,38 +933,38 @@ class OrderManageController extends Controller
         $endpoint = $webConfig['fraud_check_api_url'] ?? 'https://api.bdcourier.com/courier-check';
 
         $response = Http::timeout(30)->withHeaders([
-            'Authorization' => 'Bearer ' . $apiKey,
+            'Authorization' => 'Bearer '.$apiKey,
         ])->post($endpoint, [
-            'phone' => $request->phone
+            'phone' => $request->phone,
         ]);
 
         if ($response->failed()) {
             return response()->json([
                 'success' => false,
-                'message' => 'Failed to fetch courier history'
+                'message' => 'Failed to fetch courier history',
             ], 400);
         }
 
         $data = $response->json()['courierData'] ?? null;
 
-        if (!$data || !isset($data['summary'])) {
+        if (! $data || ! isset($data['summary'])) {
             return response()->json([
                 'success' => false,
-                'message' => 'No courier data found'
+                'message' => 'No courier data found',
             ]);
         }
 
         return response()->json([
             'success' => true,
             'summary' => $data['summary'],
-            'details' => collect($data)->except('summary')->values()
+            'details' => collect($data)->except('summary')->values(),
         ]);
     }
 
     public function show($id)
     {
         $order = Orders::where('id', $id)->first();
-        if (!$order) {
+        if (! $order) {
             abort(404);
         }
 
@@ -923,7 +972,7 @@ class OrderManageController extends Controller
 
         $orderLogs = Logs::with('user')->where('order_id', $id)->latest()->get();
         $phone = $order->phone;
-        
+
         $features = FeatureActivation::all();
         $featuresConfig = $features->pluck('status', 'name')->toArray();
 
@@ -939,23 +988,24 @@ class OrderManageController extends Controller
                 if ($apiKey && $endpoint) {
                     try {
                         // ব্যালেন্স চেক করার মতো ফ্রড চেক ডেটাও ১ ঘণ্টার জন্য ক্যাশ করা হচ্ছে (৩৬০০ সেকেন্ড)
-                        $response = cache()->remember('fraud_check_' . $phone, 3600, function () use ($apiKey, $endpoint, $phone) {
+                        $response = cache()->remember('fraud_check_'.$phone, 3600, function () use ($apiKey, $endpoint, $phone) {
                             $apiResponse = Http::withHeaders([
-                                'Authorization' => 'Bearer ' . $apiKey,
+                                'Authorization' => 'Bearer '.$apiKey,
                                 'Content-Type' => 'application/json',
                             ])
-                            ->timeout(3) // দীর্ঘক্ষণ পেজ লোডিং আটকানোর জন্য ৩ সেকেন্ড টাইমআউট
-                            ->post($endpoint, [
-                                'phone' => $phone,
-                            ]);
+                                ->timeout(3) // দীর্ঘক্ষণ পেজ লোডিং আটকানোর জন্য ৩ সেকেন্ড টাইমআউট
+                                ->post($endpoint, [
+                                    'phone' => $phone,
+                                ]);
 
                             if ($apiResponse->successful()) {
                                 return $apiResponse->json();
                             }
+
                             return 'API failed to return status.';
                         });
-                    } catch (\Exception $e) {
-                        Log::error('Fraud Check API Call Exception: ' . $e->getMessage());
+                    } catch (Exception $e) {
+                        Log::error('Fraud Check API Call Exception: '.$e->getMessage());
                         $response = 'Internal server error while fetching status.';
                     }
                 }
@@ -965,16 +1015,15 @@ class OrderManageController extends Controller
         return view('adminDash.orders.show', compact('order', 'response', 'orderLogs'));
     }
 
-
     public function invoice($id)
     {
         $order = Orders::where('id', $id)->get()->first();
-        if (!$order) {
+        if (! $order) {
             abort(404);
         }
         $this->checkOrderAccess($order);
 
-        $webSettings = \App\Models\GeneralWebSettings::whereIn('name', [
+        $webSettings = GeneralWebSettings::whereIn('name', [
             'web_name', 'web_logo', 'contact_address', 'contact_phone', 'contact_email',
         ])->pluck('value', 'name');
 
@@ -992,15 +1041,15 @@ class OrderManageController extends Controller
         }
 
         $fraudCheck = FraudCheck::first();
-        if (!$fraudCheck || empty($fraudCheck->api_key) || empty($fraudCheck->base_url)) {
+        if (! $fraudCheck || empty($fraudCheck->api_key) || empty($fraudCheck->base_url)) {
             return response()->json(['status' => 'error', 'message' => 'BD Courier API credentials are not configured.']);
         }
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $fraudCheck->api_key,
+                'Authorization' => 'Bearer '.$fraudCheck->api_key,
             ])->timeout(5)->post($fraudCheck->base_url, [
-                'phone' => $phone
+                'phone' => $phone,
             ]);
 
             if ($response->successful()) {
@@ -1012,31 +1061,32 @@ class OrderManageController extends Controller
                     $order->timestamps = true;
 
                     // Clear laravel cache key
-                    cache()->forget('fraud_check_' . $phone);
+                    cache()->forget('fraud_check_'.$phone);
 
                     return response()->json([
                         'status' => 'success',
-                        'message' => 'Courier history updated successfully!'
+                        'message' => 'Courier history updated successfully!',
                     ]);
                 } else {
                     return response()->json([
                         'status' => 'error',
-                        'message' => $resData['message'] ?? 'API responded with an error.'
+                        'message' => $resData['message'] ?? 'API responded with an error.',
                     ]);
                 }
             } else {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Failed to reach BD Courier API (HTTP Status: ' . $response->status() . ')'
+                    'message' => 'Failed to reach BD Courier API (HTTP Status: '.$response->status().')',
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'status' => 'error',
-                'message' => 'Server error: ' . $e->getMessage()
+                'message' => 'Server error: '.$e->getMessage(),
             ]);
         }
     }
+
     public function update(Request $request)
     {
         $request->validate([
@@ -1058,18 +1108,18 @@ class OrderManageController extends Controller
             $order->address = $request->address;
             $order->comments = $request->comments;
             $order->note = $request->note; // Customer note
-            
+
             if ($request->has('delivery_status')) {
                 // If status changed, log it
                 if ($order->delivery_status !== $request->delivery_status) {
-                    $logs = new Logs();
+                    $logs = new Logs;
                     $logs->user_id = auth()->id();
                     $logs->order_id = $order->id;
                     $logs->action_type = 'status_update';
-                    $logs->details = 'Order status changed from ' . $order->delivery_status . ' to ' . $request->delivery_status . ' via Order Edit';
+                    $logs->details = 'Order status changed from '.$order->delivery_status.' to '.$request->delivery_status.' via Order Edit';
                     $logs->order_status = $request->delivery_status;
                     $logs->save();
-                    
+
                     $order->delivery_status = $request->delivery_status;
                 }
             }
@@ -1104,16 +1154,18 @@ class OrderManageController extends Controller
             // Group the products by ID, size, and color to prevent duplicates
             $groupedProducts = [];
             for ($i = 0; $i < count($productIds); $i++) {
-                if (empty($productIds[$i])) continue;
-                
+                if (empty($productIds[$i])) {
+                    continue;
+                }
+
                 $pId = $productIds[$i];
                 $pSize = $sizes[$i] ?? 'N/A';
                 $pColor = $colors[$i] ?? 'N/A';
-                $pQty = (int)($quantities[$i] ?? 1);
-                $pPrice = (float)($prices[$i] ?? 0);
-                
-                $key = $pId . '|' . $pSize . '|' . $pColor;
-                
+                $pQty = (int) ($quantities[$i] ?? 1);
+                $pPrice = (float) ($prices[$i] ?? 0);
+
+                $key = $pId.'|'.$pSize.'|'.$pColor;
+
                 if (isset($groupedProducts[$key])) {
                     $groupedProducts[$key]['qty'] += $pQty;
                 } else {
@@ -1128,12 +1180,12 @@ class OrderManageController extends Controller
             }
 
             foreach ($groupedProducts as $item) {
-                $detail = new OrderDetails();
+                $detail = new OrderDetails;
                 $detail->order_id = $order->id;
                 $detail->product_id = $item['id'];
                 $detail->product_attribute = $item['size'];
                 $detail->product_colour = $item['color'];
-                
+
                 $detail->product_qty = $item['qty'];
                 $detail->unit_price = $item['price'];
                 $detail->total_price = $item['qty'] * $item['price'];
@@ -1144,10 +1196,10 @@ class OrderManageController extends Controller
 
             // 3. Update order financials
             $order->total_amount = $totalAmount;
-            $order->admin_discount = (float)($request->admin_discount ?? 0);
-            $order->coupon_discount = (float)($request->coupon_discount ?? 0);
-            $order->delivery_charge = (float)($request->delivery_charge ?? 0);
-            $order->paid_amount = (float)($request->paid_amount ?? 0);
+            $order->admin_discount = (float) ($request->admin_discount ?? 0);
+            $order->coupon_discount = (float) ($request->coupon_discount ?? 0);
+            $order->delivery_charge = (float) ($request->delivery_charge ?? 0);
+            $order->paid_amount = (float) ($request->paid_amount ?? 0);
 
             // Grand Total = Total - Admin Discount - Coupon Discount + Delivery Charge
             // COD/Due = Grand Total - Paid Amount
@@ -1159,22 +1211,23 @@ class OrderManageController extends Controller
 
             if ($request->delivery_status == 'delivered') {
                 try {
-                    $affiliateController = new \App\Http\Controllers\Admin\affiliate\AffiliateController();
+                    $affiliateController = new AffiliateController;
                     $affiliateController->processAffiliatePoints($order);
-                } catch (\Exception $e) {
-                    \Log::error('Affiliate edit processing error: ' . $e->getMessage());
+                } catch (Exception $e) {
+                    \Log::error('Affiliate edit processing error: '.$e->getMessage());
                 }
                 $this->processOrderPoints($order);
             }
 
             DB::commit();
+
             return redirect()->route('admin.order-show', $order->id)->with('success', 'Order updated successfully!');
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Something went wrong: ' . $e->getMessage())->withInput();
+
+            return redirect()->back()->with('error', 'Something went wrong: '.$e->getMessage())->withInput();
         }
     }
-
 
     public function destroy(Request $request)
     {
@@ -1184,24 +1237,22 @@ class OrderManageController extends Controller
     /**
      * BDCourier API থেকে ফোন নম্বর ব্যবহার করে লাইভ স্ট্যাটাস নিয়ে আসে।
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-
     public function orderSearch(Request $request)
     {
         $user = auth()->guard('admin')->user();
-        if (!$user || (
-            !$user->hasPermission('manage_order') &&
-            !$user->hasPermission('pending_order') &&
-            !$user->hasPermission('hold_order') &&
-            !$user->hasPermission('approved_order') &&
-            !$user->hasPermission('packaging_order') &&
-            !$user->hasPermission('shipment_order') &&
-            !$user->hasPermission('delivered_order') &&
-            !$user->hasPermission('canceled_order') &&
-            !$user->hasPermission('return_order') &&
-            !$user->hasPermission('incomplete_order')
+        if (! $user || (
+            ! $user->hasPermission('manage_order') &&
+            ! $user->hasPermission('pending_order') &&
+            ! $user->hasPermission('hold_order') &&
+            ! $user->hasPermission('approved_order') &&
+            ! $user->hasPermission('packaging_order') &&
+            ! $user->hasPermission('shipment_order') &&
+            ! $user->hasPermission('delivered_order') &&
+            ! $user->hasPermission('canceled_order') &&
+            ! $user->hasPermission('return_order') &&
+            ! $user->hasPermission('incomplete_order')
         )) {
             abort(403, 'Unauthorized.');
         }
@@ -1212,62 +1263,63 @@ class OrderManageController extends Controller
         $searchTerm = $request->search;
 
         // কোয়েরি: id অথবা phone দিয়ে সার্চ করবে
-        $orders = Orders::where('id', 'Like', '%' . $searchTerm . '%')
-            ->orWhere('phone', 'Like', '%' . $searchTerm . '%')
+        $orders = Orders::where('id', 'Like', '%'.$searchTerm.'%')
+            ->orWhere('phone', 'Like', '%'.$searchTerm.'%')
             ->get();
 
         // যদি কোনো অর্ডার না পাওয়া যায়
         if ($orders->isEmpty()) {
             $output .= '<tr><td colspan="8" class="text-center text-danger">No Order found.</td></tr>';
+
             return response($output);
         }
 
         // ফলাফলগুলো HTML আকারে তৈরি করা
         foreach ($orders as $order) {
             // **সংশোধন ১:** delivery_status কন্ডিশন (ternary operator) ব্র্যাকেট দিয়ে ঠিক করা হলো
-            $statusDisplay = ($order->delivery_status == 'new')
-                ? '<span class="text-danger">New Order</span>'
-                : '<span class="text-success">' . ucfirst($order->delivery_status) . '</span>';
+            $statusDisplay = in_array($order->delivery_status, ['pending', 'hold'])
+                ? '<span class="text-danger">'.ucfirst($order->delivery_status).'</span>'
+                : '<span class="text-success">'.ucfirst($order->delivery_status).'</span>';
 
             $output .=
                 '<tr>
-            <td scope="row">' . '<input type="checkbox" class="order-check">' . '</td>
-            <td class="text-dark font-weight-bold">' . $order->name . '<br>' .
-                $order->phone . '<br>' .
-                $order->address . '<br>
+            <td scope="row">'.'<input type="checkbox" class="order-check">'.'</td>
+            <td class="text-dark font-weight-bold">'.$order->name.'<br>'.
+                $order->phone.'<br>'.
+                $order->address.'<br>
             </td>
             <td class="text-dark font-weight-bold">
-                <img style="height: 100px; width: 100px" src="' . asset('favicon.png') . '" alt=""><br>' .
-                'Drop Shouder T-Shirt' . '<br>' .
-                'Size : XL ' . ' Colour :' . ' White' .
+                <img style="height: 100px; width: 100px" src="'.asset('favicon.png').'" alt=""><br>'.
+                'Drop Shouder T-Shirt'.'<br>'.
+                'Size : XL '.' Colour :'.' White'.
                 '</td>
-            <td class="text-dark font-weight-bold">LM-' . $order->id . '</td>
+            <td class="text-dark font-weight-bold">LM-'.$order->id.'</td>
             <td class="text-dark font-weight-bold">
-                Total: ' . $order->total_amount . ' BDT <br>
-                Paid: ' . $order->paid_amount . ' BDT <br>
-                Due: ' . $order->grand_total . ' BDT <br>
+                Total: '.$order->total_amount.' BDT <br>
+                Paid: '.$order->paid_amount.' BDT <br>
+                Due: '.$order->grand_total.' BDT <br>
             </td>
             <td class="text-dark font-weight-bold">
-                Status: ' . $statusDisplay . '<br>
-                Created at: ' . $order->created_at . '<br>
-                Created by: ' . $order->created_by . '<br>
+                Status: '.$statusDisplay.'<br>
+                Created at: '.$order->created_at.'<br>
+                Created by: '.$order->created_by.'<br>
             </td>
-            <td class="text-dark font-weight-bold">' . $order->comments . '</td>
+            <td class="text-dark font-weight-bold">'.$order->comments.'</td>
             <td class="text-dark font-weight-bold">
-                <a href="' . route('admin.order-show', $order->id) . '"><i class="fa-solid fa-eye"></i></a>
-                <a href="' . route('admin.order-edit', $order->id) . '"><i class="fa-solid fa-pen-to-square"></i></a>
-                <a href="' . route('admin.order-destroy', $order->id) . '"><i class="fa-solid fa-trash"></i></a>
+                <a href="'.route('admin.order-show', $order->id).'"><i class="fa-solid fa-eye"></i></a>
+                <a href="'.route('admin.order-edit', $order->id).'"><i class="fa-solid fa-pen-to-square"></i></a>
+                <a href="'.route('admin.order-destroy', $order->id).'"><i class="fa-solid fa-trash"></i></a>
             </td>
         </tr>';
         }
+
         return response($output);
     }
-
-
 
     public function live()
     {
         $countorders = Orders::all();
+
         return view('adminDash.orders.live', compact('countorders'));
     }
 
@@ -1290,24 +1342,24 @@ class OrderManageController extends Controller
 
         // 3. Return the response
         return response()->json([
-            'html' => $html
+            'html' => $html,
         ]);
     }
 
     public function orderAutocomplete(Request $request)
     {
         $user = auth()->guard('admin')->user();
-        if (!$user || (
-            !$user->hasPermission('manage_order') &&
-            !$user->hasPermission('pending_order') &&
-            !$user->hasPermission('hold_order') &&
-            !$user->hasPermission('approved_order') &&
-            !$user->hasPermission('packaging_order') &&
-            !$user->hasPermission('shipment_order') &&
-            !$user->hasPermission('delivered_order') &&
-            !$user->hasPermission('canceled_order') &&
-            !$user->hasPermission('return_order') &&
-            !$user->hasPermission('incomplete_order')
+        if (! $user || (
+            ! $user->hasPermission('manage_order') &&
+            ! $user->hasPermission('pending_order') &&
+            ! $user->hasPermission('hold_order') &&
+            ! $user->hasPermission('approved_order') &&
+            ! $user->hasPermission('packaging_order') &&
+            ! $user->hasPermission('shipment_order') &&
+            ! $user->hasPermission('delivered_order') &&
+            ! $user->hasPermission('canceled_order') &&
+            ! $user->hasPermission('return_order') &&
+            ! $user->hasPermission('incomplete_order')
         )) {
             return response()->json([]);
         }
@@ -1328,8 +1380,8 @@ class OrderManageController extends Controller
                 'id' => $order->id,
                 'name' => $order->name,
                 'phone' => $order->phone,
-                'label' => $order->name . ' - LM ' . $order->id,
-                'url' => route('admin.order-show', $order->id)
+                'label' => $order->name.' - LM '.$order->id,
+                'url' => route('admin.order-show', $order->id),
             ];
         });
 
@@ -1340,21 +1392,21 @@ class OrderManageController extends Controller
     {
         try {
             $features = FeatureActivation::pluck('status', 'name')->toArray();
-            if (!isset($features['point_system']) || $features['point_system'] !== '1') {
+            if (! isset($features['point_system']) || $features['point_system'] !== '1') {
                 return;
             }
 
-            if (!$order->user_id) {
+            if (! $order->user_id) {
                 return;
             }
 
-            $user = \App\Models\User::find($order->user_id);
-            if (!$user) {
+            $user = User::find($order->user_id);
+            if (! $user) {
                 return;
             }
 
             // Check if points were already processed/earned for this order
-            $already_earned = \App\Models\PointTransaction::where('order_id', $order->id)
+            $already_earned = PointTransaction::where('order_id', $order->id)
                 ->where('type', 'earn')
                 ->exists();
             if ($already_earned) {
@@ -1379,16 +1431,16 @@ class OrderManageController extends Controller
                 $user->points += $total_points_earned;
                 $user->save();
 
-                \App\Models\PointTransaction::create([
+                PointTransaction::create([
                     'user_id' => $user->id,
                     'points' => $total_points_earned,
                     'type' => 'earn',
                     'order_id' => $order->id,
-                    'details' => "Earned {$total_points_earned} points from order #LM-{$order->id}."
+                    'details' => "Earned {$total_points_earned} points from order #LM-{$order->id}.",
                 ]);
             }
-        } catch (\Exception $e) {
-            Log::error('Error processing order points: ' . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error('Error processing order points: '.$e->getMessage());
         }
     }
 }

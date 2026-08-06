@@ -73,12 +73,12 @@
 
     // Calculate rates dynamically based on the orders list passed from controller
     $totalOrders = $orders->count();
-    $newCount = $orders->where('delivery_status', 'new')->count();
+    $holdCount = $orders->where('delivery_status', 'hold')->count();
     $pendingCount = $orders->where('delivery_status', 'pending')->count();
     $deliveredCount = $orders->where('delivery_status', 'delivered')->count();
     $cancelCount = $orders->whereIn('delivery_status', ['cancel', 'canceled'])->count();
 
-    $confirmedCount = $totalOrders - $newCount - $cancelCount;
+    $confirmedCount = $totalOrders - $holdCount - $cancelCount;
 
     $confirmationRate = $totalOrders > 0 ? ($confirmedCount / $totalOrders) * 100 : 0;
     $pendingRate = $totalOrders > 0 ? ($pendingCount / $totalOrders) * 100 : 0;
@@ -456,8 +456,8 @@
             <a href="{{ route('order-new') }}" class="stat-widget-premium" style="background: var(--primary-gradient);">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <div class="stat-text">New Orders</div>
-                        <div class="stat-digit">{{ $orders->where('delivery_status', 'new')->count() }}</div>
+                        <div class="stat-text">Hold Orders</div>
+                        <div class="stat-digit">{{ $orders->where('delivery_status', 'hold')->count() }}</div>
                     </div>
                     <img src="{{ asset('adminDash/assets/img/orders/boxes.png') }}" alt="img">
                 </div>
