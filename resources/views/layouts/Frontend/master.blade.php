@@ -137,12 +137,7 @@
     <link rel="stylesheet" href="{{ asset('frontend') }}/assets/css/aiz-core.css">
     <link rel="stylesheet" href="{{ asset('frontend') }}/assets/css/custom-style.css">
     <script>
-        // Resolve conflict between jQuery UI and Bootstrap tooltip
-        if (typeof $.widget !== 'undefined' && typeof $.widget.bridge === 'function') {
-            $.widget.bridge('uitooltip', $.ui.tooltip);
-        }
-
-        var AIZ = AIZ || {};
+        window.AIZ = window.AIZ || {};
         AIZ.local = {
             nothing_selected: 'Nothing selected',
             nothing_found: 'Nothing found',
@@ -164,7 +159,7 @@
             complete: 'Complete',
             file: 'File',
             files: 'Files',
-        }
+        };
     </script>
 
     <style>
@@ -1058,6 +1053,11 @@
     <!-- SCRIPTS -->
     <script src="{{ asset('frontend') }}/assets/js/vendors.js"></script>
     <script src="{{ asset('frontend') }}/assets/js/jquryui.js"></script>
+    <script>
+        if (typeof $ !== 'undefined' && typeof $.widget !== 'undefined' && typeof $.widget.bridge === 'function') {
+            $.widget.bridge('uitooltip', $.ui.tooltip);
+        }
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="{{ asset('frontend') }}/assets/js/aiz-core.js?v=1.1"></script>
     <script src="{{ asset('frontend') }}/assets/js/custom.js?v=1.1"></script>
