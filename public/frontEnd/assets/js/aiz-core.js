@@ -8,8 +8,7 @@ $.fn.toggleAttr = function (attr, attr1, attr2) {
 };
 (function ($) {
     // USE STRICT
-    "use strict";
-
+    window.AIZ = window.AIZ || {};
     AIZ.data = {
         csrf: $('meta[name="csrf-token"]').attr("content"),
         appUrl: $('meta[name="app-url"]').attr("content"),
