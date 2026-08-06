@@ -9,9 +9,9 @@
             <div class="row align-items-end mb-4">
                 <div class="col-md-3 mb-3 mb-md-0">
                     <label class="form-label text-dark font-weight-bold" style="font-size: 13px;">Search Order</label>
-                    <input id="orderSearch" name="search" type="search" class="form-control" placeholder="Search with id or phone" style="border-radius: 4px; height: 38px;">
+                    <input id="orderSearch" name="search" type="search" class="form-control" value="{{ request('search') }}" placeholder="Search with id or phone" style="border-radius: 4px; height: 38px;">
                 </div>
-                <div class="col-md-4 mb-3 mb-md-0">
+                <div class="col-md-3 mb-3 mb-md-0">
                     <label class="form-label text-dark font-weight-bold" style="font-size: 13px;">Date Range</label>
                     <div class="d-flex align-items-center">
                         <input class="form-control mr-2" type="date" name="from_date" id="from_date" style="border-radius: 4px; height: 38px;">
@@ -19,7 +19,7 @@
                         <input class="form-control ml-2" type="date" name="to_date" id="to_date" style="border-radius: 4px; height: 38px;">
                     </div>
                 </div>
-                <div class="col-md-2.5 col-lg-2.5 mb-3 mb-md-0" style="flex: 1; padding: 0 15px;">
+                <div class="col-md-2 mb-3 mb-md-0">
                     <label class="form-label text-dark font-weight-bold" style="font-size: 13px;">Filter by Days</label>
                     <select class="form-control daysFilter" style="border-radius: 4px; height: 38px;">
                         <option value="">All Days</option>
@@ -31,7 +31,7 @@
                         <option value="last_year">Last Year</option>
                     </select>
                 </div>
-                <div class="col-md-2.5 col-lg-2.5 mb-3 mb-md-0" style="flex: 1; padding: 0 15px;">
+                <div class="col-md-2 mb-3 mb-md-0">
                     <label class="form-label text-dark font-weight-bold" style="font-size: 13px;">Filter by Admins</label>
                     @php
                         $admins = \App\Models\Admins::all();
@@ -41,6 +41,17 @@
                         @foreach($admins as $admin)
                             <option value="{{ $admin->id }}">{{ $admin->name }}</option>
                         @endforeach
+                    </select>
+                </div>
+                <div class="col-md-2 mb-3 mb-md-0">
+                    <label class="form-label text-dark font-weight-bold" style="font-size: 13px;">Show Per Page</label>
+                    <select class="form-control perPageFilter" style="border-radius: 4px; height: 38px;">
+                        <option value="10" {{ request('per_page', 10) == 10 ? 'selected' : '' }}>10 per page</option>
+                        <option value="20" {{ request('per_page') == 20 ? 'selected' : '' }}>20 per page</option>
+                        <option value="50" {{ request('per_page') == 50 ? 'selected' : '' }}>50 per page</option>
+                        <option value="100" {{ request('per_page') == 100 ? 'selected' : '' }}>100 per page</option>
+                        <option value="200" {{ request('per_page') == 200 ? 'selected' : '' }}>200 per page</option>
+                        <option value="500" {{ request('per_page') == 500 ? 'selected' : '' }}>500 per page</option>
                     </select>
                 </div>
             </div>

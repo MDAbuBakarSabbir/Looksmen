@@ -159,6 +159,48 @@ class GeneralWebSettingsController extends Controller
         return back()->with('error', 'No file was uploaded.');
     }
 
+    public function socialBanner(Request $request)
+    {
+        $request->validate([
+            'social_banner_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096',
+        ]);
+
+        if ($request->hasFile('social_banner_image')) {
+            $file = $request->file('social_banner_image');
+            $newname = 'social_banner_'.time().'_'.Str::random(5).'.webp';
+
+            $setting = GeneralWebSettings::where('name', 'social_banner')->first();
+            if ($setting && $setting->value) {
+                $oldPath = public_path('adminDash/assets/img/layouts/'.$setting->value);
+                if (file_exists($oldPath) && is_file($oldPath)) {
+                    unlink($oldPath);
+                }
+            }
+
+            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $image = $manager->decode($file);
+            $image->scaleDown(width: 1200);
+            $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 80);
+
+            GeneralWebSettings::updateOrCreate(
+                ['name' => 'social_banner'],
+                ['value' => $newname, 'status' => '1']
+            );
+            \Illuminate\Support\Facades\Cache::flush();
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Social share banner updated successfully!',
+                ]);
+            }
+
+            return back()->with('success', 'Social share banner updated successfully!');
+        }
+
+        return back()->with('error', 'No file was uploaded.');
+    }
+
     public function maintainance_mode(Request $request)
     {
         $request->validate([
@@ -236,6 +278,65 @@ class GeneralWebSettingsController extends Controller
         \Illuminate\Support\Facades\Cache::flush();
 
         return back()->with('success', 'Website Details Updated Successfull !');
+    }
+
+    public function webTimezone(Request $request)
+    {
+        $tz = trim($request->timezone);
+
+        if (! empty($tz) && in_array($tz, timezone_identifiers_list())) {
+            GeneralWebSettings::updateOrCreate(
+                ['name' => 'timezone'],
+                [
+                    'value' => $tz,
+                    'status' => '1',
+                ]
+            );
+
+            try {
+                $envPath = base_path('.env');
+                if (file_exists($envPath)) {
+                    $envContent = file_get_contents($envPath);
+                    if (preg_match('/^APP_TIMEZONE=.*/m', $envContent)) {
+                        $envContent = preg_replace('/^APP_TIMEZONE=.*/m', 'APP_TIMEZONE="' . $tz . '"', $envContent);
+                    } else {
+                        $envContent .= "\nAPP_TIMEZONE=\"" . $tz . "\"\n";
+                    }
+                    file_put_contents($envPath, $envContent);
+                }
+                putenv("APP_TIMEZONE={$tz}");
+                $_ENV['APP_TIMEZONE'] = $tz;
+                $_SERVER['APP_TIMEZONE'] = $tz;
+                \Illuminate\Support\Facades\Artisan::call('config:clear');
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('ENV Timezone update error: ' . $e->getMessage());
+            }
+
+            date_default_timezone_set($tz);
+            config(['app.timezone' => $tz]);
+        }
+
+        \Illuminate\Support\Facades\Cache::forget('boot_general_web_settings_map');
+        \Illuminate\Support\Facades\Cache::flush();
+
+        return back()->with('success', 'Timezone Setting Updated Successfully!');
+    }
+
+    public function webThemeColor(Request $request)
+    {
+        if (! empty($request->primary_color)) {
+            GeneralWebSettings::updateOrCreate(
+                ['name' => 'primary_color'],
+                [
+                    'value' => $request->primary_color,
+                    'status' => '1',
+                ]
+            );
+        }
+
+        \Illuminate\Support\Facades\Cache::flush();
+
+        return back()->with('success', 'Theme Primary Color Updated Successfully!');
     }
 
     public function webContact(Request $request)

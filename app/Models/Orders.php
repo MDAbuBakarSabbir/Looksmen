@@ -24,11 +24,18 @@ class Orders extends Model
     {
         static::created(function ($order) {
             try {
-                dispatch(function () use ($order) {
+                if (function_exists('fastcgi_finish_request')) {
+                    dispatch(function () use ($order) {
+                        $fresh = \App\Models\Orders::find($order->id);
+                        if ($fresh) {
+                            $fresh->getCourierHistoryData();
+                        }
+                    })->afterResponse();
+                } else {
                     $order->getCourierHistoryData();
-                })->afterResponse();
+                }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('Deferred courier history check error: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('Courier history check error in Orders model: ' . $e->getMessage());
             }
         });
     }
@@ -63,15 +70,16 @@ class Orders extends Model
             }
         }
 
-        // Check if phone number is valid
-        $phone = preg_replace('/[^0-9]/', '', $this->phone);
+        // Extract 11-digit phone number
+        $digits = preg_replace('/[^0-9]/', '', (string)$this->phone);
+        $phone = strlen($digits) >= 11 ? substr($digits, -11) : $digits;
         if (strlen($phone) !== 11) {
             return null;
         }
 
         try {
-            // Fetch API key and base url from FraudCheck table (used in show.blade.php)
-            $fraudCheck = \App\Models\FraudCheck::first();
+            // Fetch active API key and base url from FraudCheck table
+            $fraudCheck = \App\Models\FraudCheck::where('status', '1')->first() ?? \App\Models\FraudCheck::first();
             if (!$fraudCheck || empty($fraudCheck->api_key) || empty($fraudCheck->base_url)) {
                 return null;
             }
@@ -82,7 +90,7 @@ class Orders extends Model
             // Make the HTTP request to BD Courier API
             $response = \Illuminate\Support\Facades\Http::withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,
-            ])->timeout(3)->post($endpoint, [
+            ])->timeout(8)->post($endpoint, [
                 'phone' => $phone
             ]);
 

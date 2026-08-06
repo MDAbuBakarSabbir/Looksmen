@@ -13,7 +13,7 @@
 
 @section('meta_title', $singleProduct->title)
 @section('meta_description', \Illuminate\Support\Str::limit(strip_tags($singleProduct->description), 160))
-@section('meta_image', $singleProduct->productImages->count() > 0 ? asset('Uploads/'.$singleProduct->productImages->first()->image) : '')
+@section('meta_image', $singleProduct->productImages->count() > 0 ? asset('Uploads/'.$singleProduct->productImages->first()->image) : ($singleProduct->featured_image ? asset('Uploads/'.$singleProduct->featured_image) : ($singleProduct->image ? asset('Uploads/'.$singleProduct->image) : '')))
 @section('canonical', url()->current())
 @section('og_type', 'product')
 

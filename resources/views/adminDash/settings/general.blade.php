@@ -361,7 +361,7 @@
     <!-- Media File Uploads -->
     <div class="row">
         <!-- Header Logo -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="settings-card card">
                 <div class="card-header d-flex align-items-center gap-2">
                     <i class="fa-solid fa-images text-primary mr-2" style="font-size: 16px;"></i>
@@ -394,7 +394,7 @@
         </div>
 
         <!-- Footer Logo -->
-        <div class="col-lg-4 col-md-6">
+        <div class="col-lg-3 col-md-6">
             <div class="settings-card card">
                 <div class="card-header d-flex align-items-center gap-2">
                     <i class="fa-solid fa-images text-primary mr-2" style="font-size: 16px;"></i>
@@ -427,7 +427,7 @@
         </div>
 
         <!-- Favicon -->
-        <div class="col-lg-4 col-md-12">
+        <div class="col-lg-3 col-md-6">
             <div class="settings-card card">
                 <div class="card-header d-flex align-items-center gap-2">
                     <i class="fa-solid fa-face-smile text-primary mr-2" style="font-size: 16px;"></i>
@@ -454,6 +454,39 @@
                             <div class="text-danger mt-2" style="font-size: 12px;">{{ $message }}</div>
                         @enderror
                         <button type="submit" class="btn btn-primary mt-3">Upload Favicon</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Social Share Banner -->
+        <div class="col-lg-3 col-md-6">
+            <div class="settings-card card">
+                <div class="card-header d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-share-nodes text-primary mr-2" style="font-size: 16px;"></i>
+                    <h4>Social Share Banner</h4>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('websettings.socialBanner') }}" method="POST" enctype="multipart/form-data"
+                        class="settingsUpdateForm">
+                        @csrf
+                        <input type="file" name="social_banner_image" id="image-input-4" accept="image/*" hidden>
+                        <div class="image-upload-box {{ !empty($webConfig['social_banner']['value']) ? 'has-image' : '' }}" id="upload-box-4">
+                            <div class="upload-icon-container">
+                                <i class="fa-solid fa-cloud-upload-alt plus-icon mb-2"></i>
+                                <span class="upload-text">Drag & Drop or Click to Upload</span>
+                                <span style="font-size: 10px; color: #94a3b8;">FB/WhatsApp (1200x630)</span>
+                            </div>
+                            <img class="image-preview" id="image-preview-4" 
+                                src="{{ !empty($webConfig['social_banner']['value']) ? asset('adminDash/assets/img/layouts/' . $webConfig['social_banner']['value']) : '#' }}" 
+                                alt="Social Share Banner Preview" 
+                                style="{{ !empty($webConfig['social_banner']['value']) ? 'display:block;' : 'display:none;' }}"
+                                onerror="this.style.display='none'; this.closest('.image-upload-box').classList.remove('has-image');">
+                        </div>
+                        @error('social_banner_image')
+                            <div class="text-danger mt-2" style="font-size: 12px;">{{ $message }}</div>
+                        @enderror
+                        <button type="submit" class="btn btn-primary mt-3">Upload Social Banner</button>
                     </form>
                 </div>
             </div>
@@ -515,6 +548,118 @@
                             </div>
                         @endif
                         <button type="submit" class="btn btn-primary">Save Facebook Scripts</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ==================== Timezone & Theme Appearance ==================== --}}
+    <div class="row mb-2">
+        <!-- Timezone Settings -->
+        <div class="col-lg-6">
+            <div class="settings-card card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-clock text-primary mr-2" style="font-size: 16px;"></i>
+                        <h4>Timezone Settings</h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('websettings.webTimezone') }}" method="POST" class="settingsUpdateForm">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label">System Timezone</label>
+                            @php
+                                $currentTimezone = trim($webConfig['timezone']['value'] ?? config('app.timezone', 'Asia/Dhaka'));
+                                $allTimezones = \DateTimeZone::listIdentifiers();
+                                $now = new \DateTime('now', new \DateTimeZone('UTC'));
+                                $groupedTimezones = [];
+                                foreach ($allTimezones as $tz) {
+                                    try {
+                                        $dtz = new \DateTimeZone($tz);
+                                        $offset = $dtz->getOffset($now);
+                                        $hours = intdiv($offset, 3600);
+                                        $minutes = abs(intdiv($offset % 3600, 60));
+                                        $sign = $offset >= 0 ? '+' : '-';
+                                        $offsetStr = sprintf('UTC%s%02d:%02d', $sign, abs($hours), $minutes);
+                                    } catch (\Exception $e) {
+                                        $offsetStr = 'UTC';
+                                    }
+
+                                    $parts = explode('/', $tz, 2);
+                                    $region = count($parts) > 1 ? $parts[0] : 'General';
+                                    $groupedTimezones[$region][$tz] = "({$offsetStr}) {$tz}";
+                                }
+                            @endphp
+                            <select id="timezoneSelect" class="form-control select2-timezone" name="timezone" style="width: 100%; height: 44px; font-weight: 500;">
+                                @foreach($groupedTimezones as $region => $tzList)
+                                    <optgroup label="{{ $region }}">
+                                        @foreach($tzList as $tzVal => $tzLabel)
+                                            <option value="{{ $tzVal }}" {{ $currentTimezone === $tzVal ? 'selected' : '' }}>
+                                                {{ $tzLabel }}
+                                            </option>
+                                        @endforeach
+                                    </optgroup>
+                                @endforeach
+                            </select>
+                            <small class="text-muted d-block mt-2" style="font-size: 11px;">
+                                <i class="fa-solid fa-circle-info mr-1"></i> Sets default timezone in database & .env file. Search by country, city or UTC offset (e.g. UTC+06:00).
+                            </small>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save Timezone
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme Color Selection -->
+        <div class="col-lg-6">
+            <div class="settings-card card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-palette text-primary mr-2" style="font-size: 16px;"></i>
+                        <h4>Theme Color Selection</h4>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('websettings.webThemeColor') }}" method="POST" class="settingsUpdateForm">
+                        @csrf
+                        <div class="mb-3">
+                            <label class="form-label">Primary Brand Color</label>
+                            @php
+                                $currentColor = $webConfig['primary_color']['value'] ?? '#6366f1';
+                            @endphp
+                            <div class="d-flex align-items-center" style="gap: 12px;">
+                                <input type="color" id="themeColorPicker" class="form-control" value="{{ $currentColor }}" style="height: 44px; width: 56px; padding: 4px; cursor: pointer; border-radius: 8px !important;" onchange="document.getElementById('themeColorInput').value = this.value; document.getElementById('colorPreviewBox').style.backgroundColor = this.value;">
+                                <input type="text" id="themeColorInput" name="primary_color" class="form-control font-weight-bold" value="{{ $currentColor }}" placeholder="#6366f1" style="height: 44px; text-transform: uppercase;" onkeyup="document.getElementById('themeColorPicker').value = this.value; document.getElementById('colorPreviewBox').style.backgroundColor = this.value;">
+                                <div id="colorPreviewBox" style="width: 44px; height: 44px; background-color: {{ $currentColor }}; border-radius: 10px; border: 2px solid #e2e8f0; flex-shrink: 0;" title="Live Preview"></div>
+                            </div>
+
+                            <!-- Color Presets -->
+                            <div class="d-flex align-items-center flex-wrap mt-2" style="gap: 8px;">
+                                <span class="text-muted font-weight-bold" style="font-size: 11px;">Presets:</span>
+                                @php
+                                    $presets = [
+                                        '#6366f1' => 'Indigo',
+                                        '#10b981' => 'Emerald',
+                                        '#2563eb' => 'Royal Blue',
+                                        '#ef4444' => 'Crimson Red',
+                                        '#8b5cf6' => 'Purple',
+                                        '#f59e0b' => 'Amber',
+                                        '#0f172a' => 'Slate Black',
+                                    ];
+                                @endphp
+                                @foreach($presets as $hex => $pName)
+                                    <button type="button" class="btn btn-xs rounded-circle p-0" style="width: 24px; height: 24px; background-color: {{ $hex }}; border: 2px solid #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.15);" title="{{ $pName }} ({{ $hex }})" onclick="document.getElementById('themeColorPicker').value = '{{ $hex }}'; document.getElementById('themeColorInput').value = '{{ $hex }}'; document.getElementById('colorPreviewBox').style.backgroundColor = '{{ $hex }}';"></button>
+                                @endforeach
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Save Theme Color
+                        </button>
                     </form>
                 </div>
             </div>
@@ -711,10 +856,11 @@
                 });
             }
 
-            // Initialize the setup for each image field (1, 2, and 3)
+            // Initialize the setup for each image field (1, 2, 3, and 4)
             setupImageUploader(1);
             setupImageUploader(2);
             setupImageUploader(3);
+            setupImageUploader(4);
         });
     </script>
     <script>
@@ -781,6 +927,15 @@
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Initialize Select2 for Timezone dropdown
+            if ($.fn.select2) {
+                $('#timezoneSelect').select2({
+                    placeholder: "Search timezone or UTC offset...",
+                    allowClear: false,
+                    width: '100%'
+                });
+            }
+
             // CSRF Token setup for AJAX requests
             $.ajaxSetup({
                 headers: {
