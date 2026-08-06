@@ -28,6 +28,13 @@ class AppServiceProvider extends ServiceProvider
                 $settings = \Illuminate\Support\Facades\Cache::rememberForever('boot_general_web_settings_map', function () {
                     return \App\Models\GeneralWebSettings::all()->pluck('value', 'name')->toArray();
                 });
+
+                $tz = $settings['timezone'] ?? env('APP_TIMEZONE') ?? config('app.timezone') ?? 'Asia/Dhaka';
+                if (! empty($tz) && in_array($tz, timezone_identifiers_list())) {
+                    date_default_timezone_set($tz);
+                    config(['app.timezone' => $tz]);
+                }
+
                 if (isset($settings['mailhost']) && !empty($settings['mailhost'])) {
                     config([
                         'mail.mailers.smtp.host' => $settings['mailhost'],

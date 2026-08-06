@@ -157,16 +157,16 @@
                 <div class="text-muted" style="font-size: 11px; line-height: 1.5; min-width: 135px;">
                     <div class="d-flex align-items-center" style="gap: 4px;">
                         <i class="fa-regular fa-calendar-plus" style="font-size: 10px; opacity: 0.7;"></i>
-                        <span>Created: {{ $order->created_at->format('d M, Y') }}</span>
+                        <span>Created: {{ $order->created_at->format('d M, Y | h:i A') }}</span>
                     </div>
                     @if ($order->delivery_status != 'hold')
                         <div class="d-flex align-items-center mt-1" style="gap: 4px;">
                             <i class="fa-regular fa-calendar-check" style="font-size: 10px; opacity: 0.7;"></i>
-                            <span>Updated: {{ $order->updated_at->format('d M, Y') }}</span>
+                            <span>Updated: {{ $order->updated_at->format('d M, Y | h:i A') }}</span>
                         </div>
                         <div class="d-flex align-items-center mt-1 text-primary" style="gap: 4px; font-weight: 500;">
                             <i class="fa-regular fa-user" style="font-size: 10px; opacity: 0.7;"></i>
-                            <span>By: {{ $order->admin?->name ?? 'System' }}</span>
+                            <span>By: {{ $order->admin?->name ?? 'Customer' }}</span>
                         </div>
                     @endif
                 </div>

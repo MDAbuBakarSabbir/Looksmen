@@ -60,25 +60,48 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="dns-prefetch" href="https://fonts.googleapis.com">
 
-    <!-- Schema.org markup for Google+ -->
-    <meta itemprop="name" content="@yield('meta_title', $webConfig['web_name'])">
-    <meta itemprop="description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])">
-    <meta itemprop="image" content="@yield('meta_image', asset('adminDash/assets/img/layouts/'.($webConfig['web_favicon'] ?? 'favicon.png')))">
+    @php
+        $yieldedImg = trim(view()->yieldContent('meta_image'));
+        if (!empty($yieldedImg)) {
+            $shareImage = $yieldedImg;
+        } elseif (!empty($webConfig['social_banner'])) {
+            $shareImage = asset('adminDash/assets/img/layouts/' . $webConfig['social_banner']);
+        } elseif (!empty($webConfig['web_logo'])) {
+            $shareImage = asset('adminDash/assets/img/layouts/' . $webConfig['web_logo']);
+        } elseif (!empty($webConfig['footer_logo'])) {
+            $shareImage = asset('adminDash/assets/img/layouts/' . $webConfig['footer_logo']);
+        } else {
+            $shareImage = asset('adminDash/assets/img/layouts/' . ($webConfig['web_favicon'] ?? 'favicon.png'));
+        }
+
+        if ($shareImage && !preg_match('~^https?://~i', $shareImage)) {
+            $shareImage = url($shareImage);
+        }
+    @endphp
+
+    <!-- Schema.org markup for Google -->
+    <meta itemprop="name" content="@yield('meta_title', $webConfig['web_name'] ?? config('app.name'))">
+    <meta itemprop="description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'] ?? '')">
+    <meta itemprop="image" content="{{ $shareImage }}">
 
     <!-- Twitter Card data -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:site" content="@yield('twitter_site', '@looksmen')">
-    <meta name="twitter:title" content="@yield('meta_title', $webConfig['web_name'])">
-    <meta name="twitter:description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])">
-    <meta name="twitter:image" content="@yield('meta_image', asset('adminDash/assets/img/layouts/'.($webConfig['web_favicon'] ?? 'favicon.png')))">
+    <meta name="twitter:title" content="@yield('meta_title', $webConfig['web_name'] ?? config('app.name'))">
+    <meta name="twitter:description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'] ?? '')">
+    <meta name="twitter:image" content="{{ $shareImage }}">
 
-    <!-- Open Graph data -->
-    <meta property="og:title" content="@yield('meta_title', $webConfig['web_name'])" />
+    <!-- Open Graph data (Facebook, WhatsApp, Messenger, LinkedIn, Telegram) -->
     <meta property="og:type" content="@yield('og_type', 'website')" />
+    <meta property="og:title" content="@yield('meta_title', $webConfig['web_name'] ?? config('app.name'))" />
+    <meta property="og:description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'] ?? '')" />
     <meta property="og:url" content="@yield('canonical', url()->current())" />
-    <meta property="og:image" content="@yield('meta_image', asset('adminDash/assets/img/layouts/'.($webConfig['web_favicon'] ?? 'favicon.png')))" />
-    <meta property="og:description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])" />
-    <meta property="og:site_name" content="{{ $webConfig['web_name'] }}" />
+    <meta property="og:site_name" content="{{ $webConfig['web_name'] ?? config('app.name') }}" />
+    <meta property="og:image" content="{{ $shareImage }}" />
+    <meta property="og:image:secure_url" content="{{ $shareImage }}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content="en_US" />
     <meta property="fb:app_id" content="1125412091428219">
     
     <!-- Facebook Domain Verification -->

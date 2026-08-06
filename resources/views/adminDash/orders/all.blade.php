@@ -174,6 +174,7 @@
                     to: $('#to_date').val(),
                     days: $('.daysFilter').val(),
                     admin_id: $('.adminFilter').val(),
+                    per_page: $('.perPageFilter').val() || 10,
                     page: currentPage
                 };
 
@@ -218,6 +219,12 @@
                 applyFilters($(this).data('status'));
             });
 
+            if ($('#orderSearch').val()) {
+                $('#collapseFilter').addClass('show');
+                const icon = $('#orderFilterHeader').find('.toggle-icon');
+                icon.addClass('open').css('transform', 'rotate(90deg)');
+            }
+
             // Delay Search Inputs — reset page
             let delayTimer;
             $(document).on('keyup input', '#orderSearch', function() {
@@ -228,8 +235,8 @@
                 }, 300);
             });
 
-            // Date, Day & Admin Filters — reset page
-            $(document).on('change', '#from_date, #to_date, .daysFilter, .adminFilter', function() {
+            // Date, Day, Admin & Per Page Filters — reset page
+            $(document).on('change', '#from_date, #to_date, .daysFilter, .adminFilter, .perPageFilter', function() {
                 currentPage = 1;
                 applyFilters();
             });

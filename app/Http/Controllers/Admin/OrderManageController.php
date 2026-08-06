@@ -89,16 +89,16 @@ class OrderManageController extends Controller
         if ($status === 'packaging' && ! $user->hasPermission('packaging_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'in_courier' && ! $user->hasPermission('shipment_order')) {
+        if (in_array($status, ['in_courier', 'incourier']) && ! $user->hasPermission('shipment_order')) {
             abort(403, 'Unauthorized.');
         }
         if (in_array($status, ['delivered', 'partial_delivered']) && ! $user->hasPermission('delivered_order')) {
             abort(403, 'Unauthorized.');
         }
-        if (in_array($status, ['cancel', 'cancelled']) && ! $user->hasPermission('canceled_order')) {
+        if (in_array($status, ['cancel', 'canceled', 'cancelled']) && ! $user->hasPermission('canceled_order')) {
             abort(403, 'Unauthorized.');
         }
-        if ($status === 'returned' && ! $user->hasPermission('return_order')) {
+        if (in_array($status, ['returned', 'return']) && ! $user->hasPermission('return_order')) {
             abort(403, 'Unauthorized.');
         }
 
@@ -106,7 +106,18 @@ class OrderManageController extends Controller
 
         // STATUS
         if ($request->status) {
-            $query->where('delivery_status', $request->status);
+            $st = $request->status;
+            if (in_array($st, ['in_courier', 'incourier'])) {
+                $query->whereIn('delivery_status', ['in_courier', 'incourier']);
+            } elseif (in_array($st, ['delivered', 'partial_delivered'])) {
+                $query->whereIn('delivery_status', ['delivered', 'partial_delivered']);
+            } elseif (in_array($st, ['cancel', 'canceled', 'cancelled'])) {
+                $query->whereIn('delivery_status', ['cancel', 'canceled', 'cancelled']);
+            } elseif (in_array($st, ['returned', 'return'])) {
+                $query->whereIn('delivery_status', ['returned', 'return']);
+            } else {
+                $query->where('delivery_status', $st);
+            }
         }
 
         // SEARCH
@@ -144,7 +155,9 @@ class OrderManageController extends Controller
         }
 
         $page = request('page', 1);
-        $orders = $query->latest()->paginate(20)->withQueryString();
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
 
         $html = view('adminDash.orders.extends.order_rows', compact('orders'))->render();
 
@@ -319,104 +332,194 @@ class OrderManageController extends Controller
         ]);
     }
 
-    public function index()
+    public function index(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('manage_order')) {
             abort(403, 'You do not have permission to manage orders.');
         }
-        $countorders = Orders::with('admin')->latest()->paginate(20)->withQueryString();
+        $query = Orders::with('admin');
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $countorders = $query->latest()->paginate($perPage)->withQueryString();
 
         return view('adminDash.orders.all', compact('countorders'));
     }
 
-    public function hold()
+    public function hold(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('hold_order')) {
             abort(403, 'You do not have permission to view hold orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::where('delivery_status', 'hold')->latest()->paginate(20)->withQueryString();
+        $query = Orders::where('delivery_status', 'hold');
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
-    public function pending()
+    public function pending(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('pending_order')) {
             abort(403, 'You do not have permission to view pending orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::where('delivery_status', 'pending')->latest()->paginate(20)->withQueryString();
+        $query = Orders::where('delivery_status', 'pending');
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
-    public function approved()
+    public function approved(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('approved_order')) {
             abort(403, 'You do not have permission to view approved orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::where('delivery_status', 'approved')->latest()->paginate(20)->withQueryString();
+        $query = Orders::where('delivery_status', 'approved');
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
-    public function packaging()
+    public function packaging(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('packaging_order')) {
             abort(403, 'You do not have permission to view packaging orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::where('delivery_status', 'packaging')->latest()->paginate(20)->withQueryString();
+        $query = Orders::where('delivery_status', 'packaging');
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
-    public function incourier()
+    public function incourier(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('shipment_order')) {
             abort(403, 'You do not have permission to view in-courier orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::whereIn('delivery_status', [
+        $query = Orders::whereIn('delivery_status', [
             'in_courier', 'incourier', 'unknown', 'in_review', 'hold',
             'unknown_approval_pending', 'cancelled_approval_pending',
             'partial_delivered_approval_pending', 'delivered_approval_pending', 'pending',
-        ])->latest()->paginate(20)->withQueryString();
+        ]);
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
-    public function delivered()
+    public function delivered(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('delivered_order')) {
             abort(403, 'You do not have permission to view delivered orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::whereIn('delivery_status', ['delivered', 'partial_delivered'])->latest()->paginate(20)->withQueryString();
+        $query = Orders::whereIn('delivery_status', ['delivered', 'partial_delivered']);
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
-    public function canceled()
+    public function canceled(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('canceled_order')) {
             abort(403, 'You do not have permission to view canceled orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::whereIn('delivery_status', ['cancel', 'cancelled', 'canceled'])->latest()->paginate(20)->withQueryString();
+        $query = Orders::whereIn('delivery_status', ['cancel', 'cancelled', 'canceled']);
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
-    public function returned()
+    public function returned(Request $request)
     {
         if (! auth()->guard('admin')->user()->hasPermission('return_order')) {
             abort(403, 'You do not have permission to view returned orders.');
         }
-        $countorders = Orders::latest()->paginate(20)->withQueryString();
-        $orders = Orders::where('delivery_status', 'returned')->latest()->paginate(20)->withQueryString();
+        $query = Orders::where('delivery_status', 'returned');
+        if ($request->search) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            });
+        }
+        $perPage = (int) $request->input('per_page', 10);
+        if ($perPage <= 0) { $perPage = 10; }
+        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
         return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
@@ -890,6 +993,12 @@ class OrderManageController extends Controller
             $logs->save();
 
             DB::commit();
+
+            try {
+                $order->getCourierHistoryData();
+            } catch (Exception $e) {
+                Log::error('Admin order creation courier history check error: '.$e->getMessage());
+            }
 
             return redirect()->route('admin.order-show', $order->id)->with('success', 'Order created successfully!');
         } catch (Exception $e) {

@@ -97,7 +97,6 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     Route::controller(OrderManageController::class)->group(function () {
         Route::get('orders', 'index')->name('order-index')->middleware('admin.permission:manage_order');
         Route::get('pending-orders', 'pending')->name('order-pending')->middleware('admin.permission:pending_order');
-        Route::get('new-orders', 'pending')->name('order-new')->middleware('admin.permission:pending_order');
         Route::get('hold-orders', 'hold')->name('order-hold')->middleware('admin.permission:hold_order');
         Route::get('approved-orders', 'approved')->name('order-approved')->middleware('admin.permission:approved_order');
         Route::get('packaging-orders', 'packaging')->name('order-packaging')->middleware('admin.permission:packaging_order');
@@ -114,7 +113,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('orders/update', 'update')->name('admin.order-update')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::get('orders/destroy', 'destroy')->name('admin.order-destroy')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('orders/status', 'updateStatus')->name('order.update.status')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
-        Route::get('/orders/filter', 'orderFilter')->name('admin.order-filter');
+        Route::get('/orders/filter', 'filter')->name('admin.order-filter');
         Route::get('orders/search', 'orderSearch')->name('admin.order-search');
         Route::get('orders/autocomplete', 'orderAutocomplete')->name('admin.orders.autocomplete');
         Route::get('/api/check-new-orders', 'checkNewOrders')->name('check.new.orders');
@@ -377,7 +376,10 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('/websettings/headerLogo', 'headerLogo')->name('websettings.headerLogo')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/footerLogo', 'footerLogo')->name('websettings.footerLogo')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/favicon', 'favicon')->name('websettings.favicon')->middleware('admin.permission:setup_general_settings');
+        Route::post('/websettings/socialBanner', 'socialBanner')->name('websettings.socialBanner')->middleware('admin.permission:setup_general_settings');
 
+        Route::post('/websettings/webTimezone', 'webTimezone')->name('websettings.webTimezone')->middleware('admin.permission:setup_general_settings');
+        Route::post('/websettings/webThemeColor', 'webThemeColor')->name('websettings.webThemeColor')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/maintainance', 'maintainance_mode')->name('websettings.maintainance')->middleware('admin.permission:setup_general_settings');
         Route::get('/smtpsettings', 'smtp')->name('websettings.smtp')->middleware('admin.permission:setup_general_settings');
         Route::get('/gtag&fbpixel', 'gtag_fbpixel')->name('websettings.gtag_fbpixel')->middleware('admin.permission:setup_general_settings');

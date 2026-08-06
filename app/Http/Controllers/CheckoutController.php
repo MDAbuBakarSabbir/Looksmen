@@ -347,6 +347,13 @@ class CheckoutController extends Controller
 
             DB::commit();
 
+            // Fetch & save Courier History to database immediately
+            try {
+                $order->getCourierHistoryData();
+            } catch (\Exception $e) {
+                \Log::error('Order creation courier history check error: '.$e->getMessage());
+            }
+
             // Send Order Confirmation Mail
             try {
                 if (auth()->check() && auth()->user()->email) {
@@ -496,6 +503,12 @@ class CheckoutController extends Controller
             }
 
             DB::commit();
+
+            try {
+                $order->getCourierHistoryData();
+            } catch (\Exception $e) {
+                \Log::error('bKash finalize order courier history check error: '.$e->getMessage());
+            }
             session()->forget(['cart', 'pending_order_data']);
 
             return redirect()->route('order.invoice', $order->id)->with('order_placed', 'success');
@@ -613,6 +626,12 @@ class CheckoutController extends Controller
             }
             IncompleteOrders::where('phone', $orderData['phone'])->delete();
             DB::commit();
+
+            try {
+                $order->getCourierHistoryData();
+            } catch (\Exception $e) {
+                \Log::error('SSLCommerz success order courier history check error: '.$e->getMessage());
+            }
             session()->forget(['cart', 'pending_order_data']);
 
             return redirect()->route('order.invoice', $order->id)->with('success', 'Order Placed Successfully!');

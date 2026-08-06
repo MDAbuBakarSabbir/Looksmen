@@ -709,6 +709,13 @@
 
             <!-- Right Side Column (4 Cols) -->
             <div class="col-lg-4">
+                @php
+                    $sameCustomerOrders = \App\Models\Orders::where('phone', $order->phone)->latest()->get();
+                    $sameCustomerCount = $sameCustomerOrders->count();
+                    $deliveredCount = $sameCustomerOrders->whereIn('delivery_status', ['delivered', 'partial_delivered'])->count();
+                    $returnedCount = $sameCustomerOrders->whereIn('delivery_status', ['returned', 'return'])->count();
+                    $cancelledCount = $sameCustomerOrders->whereIn('delivery_status', ['cancel', 'cancelled'])->count();
+                @endphp
                 <!-- Customer Profile Card -->
                 <div class="premium-card">
                     <div class="card-header">
@@ -723,6 +730,9 @@
                             <span class="text-muted font-weight-medium" style="font-size: 0.9rem;">
                                 <i class="fa-solid fa-phone mr-1"></i> {{ $order->phone }}
                             </span>
+                            <a href="{{ route('order-index', ['search' => $order->phone]) }}" class="badge badge-info px-3 py-1.5 mt-2 font-weight-bold" style="font-size: 0.75rem; border-radius: 20px; text-decoration: none;" title="View all website orders for this phone number">
+                                <i class="fa-solid fa-bag-shopping mr-1"></i> {{ $sameCustomerCount }} Website {{ Str::plural('Order', $sameCustomerCount) }}
+                            </a>
                             @if ($order->ip_address)
                                 <div class="mt-2">
                                     <div class="d-flex align-items-center justify-content-center flex-wrap" style="gap: 6px;">
@@ -780,6 +790,68 @@
                                 <i class="fa-regular fa-copy"></i>
                             </button>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Website Customer Order History Card -->
+                <div class="premium-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fa-solid fa-store mr-2 text-primary"></i>Website Order History</span>
+                        <span class="badge badge-primary px-3 py-1 font-weight-bold" style="border-radius: 30px; font-size: 0.8rem;">
+                            {{ $sameCustomerCount }} {{ Str::plural('Order', $sameCustomerCount) }}
+                        </span>
+                    </div>
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded text-center" style="gap: 4px; font-size: 0.8rem; border: 1px solid #e2e8f0;">
+                            <div class="flex-grow-1 border-right pr-1">
+                                <span class="text-muted d-block" style="font-size: 0.65rem; text-transform: uppercase;">Total</span>
+                                <strong class="text-dark" style="font-size: 0.9rem;">{{ $sameCustomerCount }}</strong>
+                            </div>
+                            <div class="flex-grow-1 border-right pr-1">
+                                <span class="text-muted d-block" style="font-size: 0.65rem; text-transform: uppercase;">Delivered</span>
+                                <strong class="text-success" style="font-size: 0.9rem;">{{ $deliveredCount }}</strong>
+                            </div>
+                            <div class="flex-grow-1 border-right pr-1">
+                                <span class="text-muted d-block" style="font-size: 0.65rem; text-transform: uppercase;">Returned</span>
+                                <strong style="font-size: 0.9rem; color: #d97706;" class="font-weight-bold">{{ $returnedCount }}</strong>
+                            </div>
+                            <div class="flex-grow-1">
+                                <span class="text-muted d-block" style="font-size: 0.65rem; text-transform: uppercase;">Cancelled</span>
+                                <strong class="text-danger" style="font-size: 0.9rem;">{{ $cancelledCount }}</strong>
+                            </div>
+                        </div>
+
+                        @if($sameCustomerCount > 0)
+                            <div class="list-group list-group-flush mb-3" style="max-height: 260px; overflow-y: auto;">
+                                @foreach($sameCustomerOrders as $cOrder)
+                                    <a href="{{ route('admin.order-show', $cOrder->id) }}" class="list-group-item list-group-item-action p-2 mb-1 border rounded text-decoration-none {{ $cOrder->id == $order->id ? 'border-primary bg-light' : 'border-light' }}" style="font-size: 0.85rem; transition: all 0.2s ease;">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <span class="text-primary font-weight-bold">#LM-{{ $cOrder->id }}</span>
+                                                @if($cOrder->id == $order->id)
+                                                    <span class="badge badge-primary ml-1" style="font-size: 0.65rem;">Current</span>
+                                                @endif
+                                                <div class="text-muted" style="font-size: 0.75rem;">{{ $cOrder->created_at->format('d M, Y | h:i A') }}</div>
+                                            </div>
+                                            <div class="text-right">
+                                                <span class="status-badge-lg status-{{ $cOrder->delivery_status }}-lg" style="font-size: 0.7rem; padding: 2px 8px;">
+                                                    {{ ucfirst($cOrder->delivery_status) }}
+                                                </span>
+                                                <div class="font-weight-bold text-dark mt-1" style="font-size: 0.85rem;">৳{{ number_format($cOrder->grand_total, 2) }}</div>
+                                            </div>
+                                        </div>
+                                    </a>
+                                @endforeach
+                            </div>
+
+                            <a href="{{ route('order-index', ['search' => $order->phone]) }}" class="btn btn-sm btn-outline-primary w-100 font-weight-bold text-center" style="border-radius: 8px; font-size: 0.85rem;">
+                                <i class="fa-solid fa-list-check mr-1"></i> View All Customer Orders ({{ $sameCustomerCount }})
+                            </a>
+                        @else
+                            <div class="text-center py-2">
+                                <p class="text-muted mb-0" style="font-size: 0.85rem;">No previous orders found for this phone number.</p>
+                            </div>
+                        @endif
                     </div>
                 </div>
 
