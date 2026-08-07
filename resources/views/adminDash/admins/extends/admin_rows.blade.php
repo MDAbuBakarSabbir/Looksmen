@@ -20,9 +20,14 @@
         </td>
         <td style="text-align: right; padding-right: 25px;">
             
-            <a href="{{ route('admin.edit', $admin->id) }}" class="btn btn-sm btn-outline-primary px-3 rounded-pill mr-2 mb-1" style="font-size: 12px; font-weight: 600;">
+            <button type="button" class="btn btn-sm btn-outline-primary px-3 rounded-pill mr-2 mb-1 edit-admin-btn" style="font-size: 12px; font-weight: 600;"
+                    data-id="{{ $admin->id }}"
+                    data-name="{{ $admin->name }}"
+                    data-email="{{ $admin->email }}"
+                    data-number="{{ $admin->number }}"
+                    data-role="{{ $admin->role_id }}">
                 <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
-            </a>
+            </button>
             <a href="{{ route('admin.permission', $admin->id) }}" class="btn btn-sm btn-primary px-3 rounded-pill mb-1" style="font-size: 12px; font-weight: 600;">
                 <i class="fa-solid fa-user-shield mr-1"></i> Permissions
             </a>

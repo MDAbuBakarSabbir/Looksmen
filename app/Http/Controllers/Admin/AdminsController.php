@@ -9,10 +9,23 @@ use Illuminate\Http\Request;
 
 class AdminsController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $admins = Admins::all();
-        return view('adminDash.admins.adminList',compact('admins'));
+        $query = Admins::query();
+        if ($request->has('role')) {
+            $query->where('role_id', $request->role);
+        }
+        $admins = $query->get();
+        
+        $roles = Roles::all();
+        if ($roles->isEmpty()) {
+            Roles::create(['role' => 'admin', 'permission_id' => json_encode([]), 'status' => 1]);
+            Roles::create(['role' => 'manager', 'permission_id' => json_encode([]), 'status' => 1]);
+            Roles::create(['role' => 'editor', 'permission_id' => json_encode([]), 'status' => 1]);
+            $roles = Roles::all();
+        }
+
+        return view('adminDash.admins.adminList',compact('admins', 'roles'));
     }
     public function search(Request $request)
     {
@@ -21,7 +34,8 @@ class AdminsController extends Controller
             $query->where('name', 'like', "%{$term}%")
                   ->orWhere('id', 'like', "%{$term}%")
                   ->orWhere('email', 'like', "%{$term}%")
-                  ->orWhere('number', 'like', "%{$term}%");
+                  ->orWhere('number', 'like', "%{$term}%")
+                  ->orWhere('role_id', 'like', "%{$term}%");
         })->get();
 
         return view('adminDash.admins.extends.admin_rows', compact('admins'))->render();
@@ -86,6 +100,10 @@ class AdminsController extends Controller
             'status' => 1,
         ]);
 
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Admin employee created successfully!']);
+        }
+
         return redirect()->route('admin.index')->with('success', 'Admin employee created successfully!');
     }
 
@@ -125,15 +143,82 @@ class AdminsController extends Controller
 
         $admin->save();
 
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Admin employee updated successfully!']);
+        }
+
         return redirect()->route('admin.index')->with('success', 'Admin employee updated successfully!');
     }
 
     public function role()
     {
-
         $roles = Roles::all();
         return view('adminDash.admins.roles',compact('roles'));
     }
+
+    public function roleStore(Request $request)
+    {
+        $request->validate(['role_name' => 'required|string|max:255']);
+        $role = Roles::create([
+            'role' => $request->role_name,
+            'permission_id' => json_encode([]),
+            'status' => 1
+        ]);
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Role created successfully', 'role' => $role]);
+        }
+        return back()->with('success', 'Role created successfully!');
+    }
+
+    public function roleUpdate(Request $request, $id)
+    {
+        $role = Roles::findOrFail($id);
+        $request->validate(['role_name' => 'required|string|max:255']);
+        $role->role = $request->role_name;
+        $role->save();
+        if ($request->ajax()) {
+            return response()->json(['success' => true, 'message' => 'Role updated successfully']);
+        }
+        return back()->with('success', 'Role updated successfully!');
+    }
+
+    public function roleDestroy($id)
+    {
+        $role = Roles::findOrFail($id);
+        if ($role->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot delete the main admin role']);
+        }
+        $role->delete();
+        return response()->json(['success' => true, 'message' => 'Role deleted successfully']);
+    }
+
+    public function roleStatus(Request $request)
+    {
+        $role = Roles::findOrFail($request->id);
+        if ($role->role === 'admin') {
+            return response()->json(['success' => false, 'message' => 'Cannot disable the main admin role']);
+        }
+        $role->status = $request->status == 1 ? 1 : 0;
+        $role->save();
+        return response()->json(['success' => true, 'status' => $role->status]);
+    }
+
+    public function rolePermission($id)
+    {
+        $role = Roles::findOrFail($id);
+        return view('adminDash.admins.role_permissions', compact('role'));
+    }
+
+    public function roleUpdatePermission(Request $request, $id)
+    {
+        $role = Roles::findOrFail($id);
+        $permissions = $request->input('permissions', []);
+        $role->permission_id = json_encode($permissions);
+        $role->save();
+
+        return redirect()->route('admin.role')->with('success', 'Role permissions updated successfully!');
+    }
+
     public function permission($id)
     {
 

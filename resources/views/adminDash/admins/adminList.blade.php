@@ -1,4 +1,4 @@
-﻿@extends('layouts.Backend.master')
+@extends('layouts.Backend.master')
 @section('title')
     EMPLOYEES
 @endsection
@@ -78,9 +78,9 @@
                     <i class="fa-solid fa-magnifying-glass search-icon" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; transition: color 0.3s ease;"></i>
                     <input class="form-control" type="search" name="search" id="search" placeholder="Search name, email, ID, phone..." style="padding-left: 38px; border-radius: 30px; font-size: 13px; font-weight: 500; border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 2px 4px rgba(0,0,0,0.01); transition: all 0.3s ease; height: 38px;">
                 </div>
-                <a class="btn btn-primary px-4 d-flex align-items-center" href="{{route('admin.create')}}" style="border-radius: 30px; font-weight: 600; font-size: 13px; height: 38px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); gap: 8px;">
+                <button type="button" class="btn btn-primary px-4 d-flex align-items-center" data-toggle="modal" data-target="#addEmployeeModal" data-bs-toggle="modal" data-bs-target="#addEmployeeModal" style="border-radius: 30px; font-weight: 600; font-size: 13px; height: 38px; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.25); gap: 8px;">
                     <i class="fa-solid fa-user-plus"></i> Add Employee
-                </a>
+                </button>
             </div>
         </div>
         <div class="card-body p-4">
@@ -249,5 +249,259 @@
             });
             $('#adminCheckAll').prop('checked', false);
         });
+
+        // Edit Employee Modal Open
+        $(document).on('click', '.edit-admin-btn', function(e) {
+            e.preventDefault();
+            let id = $(this).data('id');
+            let name = $(this).data('name');
+            let email = $(this).data('email');
+            let number = $(this).data('number');
+            let role = $(this).data('role');
+
+            $('#edit_admin_id').val(id);
+            $('#edit_name').val(name);
+            $('#edit_email').val(email);
+            $('#edit_number').val(number);
+            $('#edit_role_id').val(role);
+            
+            // Clear previous errors
+            $('#editEmployeeForm').find('.is-invalid').removeClass('is-invalid');
+            $('#editEmployeeForm').find('.invalid-feedback').html('');
+
+            let editModal = $('#editEmployeeModal');
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                new bootstrap.Modal(editModal[0]).show();
+            } else {
+                editModal.addClass('show').css({display: 'block'});
+                if(!$('.modal-backdrop').length) {
+                    $('<div class="modal-backdrop fade show"></div>').appendTo(document.body);
+                }
+            }
+        });
+
+        // Edit Employee AJAX Submit
+        $('#editEmployeeForm').on('submit', function(e) {
+            e.preventDefault();
+            let form = $(this);
+            let btn = form.find('button[type="submit"]');
+            let originalText = btn.html();
+            let id = $('#edit_admin_id').val();
+            btn.html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Updating...').prop('disabled', true);
+            
+            // Clear previous errors
+            form.find('.is-invalid').removeClass('is-invalid');
+            form.find('.invalid-feedback').html('');
+
+            $.ajax({
+                url: '/admin/admins/update/' + id,
+                type: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    let editModal = $('#editEmployeeModal');
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        let modalInstance = bootstrap.Modal.getInstance(editModal[0]);
+                        if(modalInstance) modalInstance.hide();
+                    } else {
+                        editModal.modal('hide');
+                    }
+                    
+                    Toast.fire({ icon: 'success', title: response.message || 'Admin employee updated successfully!' });
+                    setTimeout(() => { window.location.reload(); }, 1000);
+                },
+                error: function(xhr) {
+                    btn.html(originalText).prop('disabled', false);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let field in errors) {
+                            form.find('#edit_' + field).addClass('is-invalid');
+                            form.find('.error-' + field).html(errors[field][0]).show();
+                        }
+                    } else {
+                        Toast.fire({ icon: 'error', title: 'Something went wrong!' });
+                    }
+                }
+            });
+        });
+
+        // Add Employee AJAX Submit
+        $('#addEmployeeForm').on('submit', function(e) {
+            e.preventDefault();
+            let form = $(this);
+            let btn = form.find('button[type="submit"]');
+            let originalText = btn.html();
+            btn.html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...').prop('disabled', true);
+            
+            // Clear previous errors
+            form.find('.is-invalid').removeClass('is-invalid');
+            form.find('.invalid-feedback').html('');
+
+            $.ajax({
+                url: form.attr('action'),
+                type: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    let addModal = $('#addEmployeeModal');
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        let modalInstance = bootstrap.Modal.getInstance(addModal[0]);
+                        if(modalInstance) modalInstance.hide();
+                    } else {
+                        addModal.modal('hide');
+                    }
+                    
+                    Toast.fire({ icon: 'success', title: response.message || 'Admin employee created successfully!' });
+                    setTimeout(() => { window.location.reload(); }, 1000);
+                },
+                error: function(xhr) {
+                    btn.html(originalText).prop('disabled', false);
+                    if (xhr.status === 422) {
+                        let errors = xhr.responseJSON.errors;
+                        for (let field in errors) {
+                            form.find('#' + field).addClass('is-invalid');
+                            form.find('.error-' + field).html(errors[field][0]).show();
+                        }
+                    } else {
+                        Toast.fire({ icon: 'error', title: 'Something went wrong!' });
+                    }
+                }
+            });
+        });
+
+        // Close Modals Fallback
+        $('[data-dismiss="modal"], [data-bs-dismiss="modal"]').on('click', function(e) {
+            e.preventDefault();
+            if (typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+                $(this).closest('.modal').removeClass('show').css({display: 'none'});
+                $('.modal-backdrop').remove();
+            }
+        });
     </script>
+    </div>
+
+    <!-- Add Employee Modal -->
+    <div class="modal fade" id="addEmployeeModal" tabindex="-1" aria-labelledby="addEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-sm border-0" style="border-radius: 12px;">
+                <div class="modal-header border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title font-weight-bold text-dark mb-0" id="addEmployeeModalLabel">
+                        <i class="fa-solid fa-user-plus me-2 text-primary"></i> Add New Admin Employee
+                    </h5>
+                    <button type="button" class="btn-close text-muted" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="addEmployeeForm" action="{{ route('admin.store') }}" method="POST">
+                        @csrf
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="name" class="form-label font-weight-bold text-muted">Admin Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="name" name="name" placeholder="Enter full name" required style="border-radius: 8px;">
+                                <div class="invalid-feedback error-name"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label font-weight-bold text-muted">Email Address <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email" placeholder="Enter email address" required style="border-radius: 8px;">
+                                <div class="invalid-feedback error-email"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="number" class="form-label font-weight-bold text-muted">Phone Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="number" name="number" placeholder="Enter phone number" required style="border-radius: 8px;">
+                                <div class="invalid-feedback error-number"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="role_id" class="form-label font-weight-bold text-muted">Select Role <span class="text-danger">*</span></label>
+                                <select class="form-control" id="role_id" name="role_id" required style="border-radius: 8px; height: auto; padding: 10px;">
+                                    <option value="" disabled selected>Choose a role...</option>
+                                    @foreach($roles ?? [] as $role)
+                                        <option value="{{ $role->role }}">{{ ucfirst($role->role) }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback error-role_id"></div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="password" class="form-label font-weight-bold text-muted">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password" name="password" placeholder="Minimum 8 characters" required style="border-radius: 8px;">
+                                <div class="invalid-feedback error-password"></div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="password_confirmation" class="form-label font-weight-bold text-muted">Confirm Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Repeat password" required style="border-radius: 8px;">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button type="button" class="btn btn-light px-4 mr-2" style="border-radius: 8px;" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-5" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.3);">
+                                <i class="fa fa-check-circle mr-1"></i> Save Admin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Employee Modal -->
+    <div class="modal fade" id="editEmployeeModal" tabindex="-1" aria-labelledby="editEmployeeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content shadow-sm border-0" style="border-radius: 12px;">
+                <div class="modal-header border-0 pt-4 px-4 pb-0 d-flex justify-content-between align-items-center">
+                    <h5 class="modal-title font-weight-bold text-dark mb-0" id="editEmployeeModalLabel">
+                        <i class="fa-solid fa-pen-to-square me-2 text-primary"></i> Edit Admin Employee
+                    </h5>
+                    <button type="button" class="btn-close text-muted" data-bs-dismiss="modal" data-dismiss="modal" aria-label="Close" style="background: transparent; border: none; font-size: 1.5rem; cursor: pointer;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <div class="modal-body p-4">
+                    <form id="editEmployeeForm">
+                        @csrf
+                        <input type="hidden" id="edit_admin_id" name="id">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_name" class="form-label font-weight-bold text-muted">Admin Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="edit_name" name="name" placeholder="Enter full name" required style="border-radius: 8px;">
+                                <div class="invalid-feedback error-name"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_email" class="form-label font-weight-bold text-muted">Email Address <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="edit_email" name="email" placeholder="Enter email address" required style="border-radius: 8px;">
+                                <div class="invalid-feedback error-email"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_number" class="form-label font-weight-bold text-muted">Phone Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="edit_number" name="number" placeholder="Enter phone number" required style="border-radius: 8px;">
+                                <div class="invalid-feedback error-number"></div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="edit_role_id" class="form-label font-weight-bold text-muted">Select Role <span class="text-danger">*</span></label>
+                                <select class="form-control" id="edit_role_id" name="role_id" required style="border-radius: 8px; height: auto; padding: 10px;">
+                                    <option value="" disabled>Choose a role...</option>
+                                    @foreach($roles ?? [] as $role)
+                                        <option value="{{ $role->role }}">{{ ucfirst($role->role) }}</option>
+                                    @endforeach
+                                </select>
+                                <div class="invalid-feedback error-role_id"></div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="edit_password" class="form-label font-weight-bold text-muted">New Password <small>(Leave blank to keep current)</small></label>
+                                <input type="password" class="form-control" id="edit_password" name="password" placeholder="Minimum 8 characters" style="border-radius: 8px;">
+                                <div class="invalid-feedback error-password"></div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <label for="edit_password_confirmation" class="form-label font-weight-bold text-muted">Confirm New Password</label>
+                                <input type="password" class="form-control" id="edit_password_confirmation" name="password_confirmation" placeholder="Repeat password" style="border-radius: 8px;">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button type="button" class="btn btn-light px-4 mr-2" style="border-radius: 8px;" data-dismiss="modal" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary px-5" style="border-radius: 8px; box-shadow: 0 4px 12px rgba(105, 108, 255, 0.3);">
+                                <i class="fa fa-save mr-1"></i> Update Admin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection

@@ -13,7 +13,7 @@
 @endphp
 
 @section('title')
-    {{ $activeMode === 'register' ? 'CREATE ACCOUNT' : 'CUSTOMER LOGIN' }}
+    {{ $activeMode === 'register' ? 'CREATE ACCOUNT' : ($activeMode === 'forgot' ? 'RESET PASSWORD' : 'CUSTOMER LOGIN') }}
 @endsection
 
 @section('content')
@@ -385,7 +385,7 @@
             <div class="auth-form-panel">
                 
                 <!-- TAB SWITCHER HEADER -->
-                <div class="auth-tabs-header">
+                <div class="auth-tabs-header {{ $activeMode === 'forgot' ? 'd-none' : '' }}">
                     <button class="auth-tab-item {{ $activeMode !== 'register' ? 'active' : '' }}" onclick="switchAuthTab('login')">
                         <i class="fa-solid fa-right-to-bracket"></i> Sign In
                     </button>
@@ -395,7 +395,7 @@
                 </div>
 
                 <!-- LOGIN FORM PANEL -->
-                <div id="loginFormPanel" class="{{ $activeMode === 'register' ? 'd-none' : '' }}">
+                <div id="loginFormPanel" class="{{ $activeMode !== 'login' ? 'd-none' : '' }}">
                     <div class="mb-4">
                         <h2 class="font-weight-bold text-dark mb-1" style="font-size: 1.6rem; letter-spacing: -0.3px;">Welcome Back!</h2>
                         <p class="text-muted" style="font-size: 0.92rem;">Sign in with your email address to continue shopping.</p>
@@ -521,12 +521,50 @@
                         </div>
 
                         <button type="submit" id="btnRegBtn" class="btn-submit-action">
-                            <i class="fa-solid fa-user-plus mr-1"></i> Create Free Account
+                            <i class="fa-solid fa-user-check mr-1"></i> Create My Account
                         </button>
                     </form>
 
                     <div class="auth-bottom-switch">
-                        Already registered? <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="text-primary font-weight-bold ml-1">Sign In here</a>
+                        Already have an account? <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="text-primary font-weight-bold ml-1">Sign in here</a>
+                    </div>
+                </div>
+
+                <!-- FORGOT PASSWORD FORM PANEL -->
+                <div id="forgotFormPanel" class="{{ $activeMode !== 'forgot' ? 'd-none' : '' }}">
+                    <div class="mb-4">
+                        <h2 class="font-weight-bold text-dark mb-1" style="font-size: 1.6rem; letter-spacing: -0.3px;">Reset Password</h2>
+                        <p class="text-muted" style="font-size: 0.92rem;">Enter your email to receive a password reset link.</p>
+                    </div>
+
+                    <!-- Session Status -->
+                    @if (session('status'))
+                        <div class="alert alert-success border-0 shadow-sm" style="border-radius: 8px;">
+                            <i class="fa-solid fa-circle-check mr-2"></i>{{ session('status') }}
+                        </div>
+                    @endif
+
+                    <form action="{{ route('password.email') }}" method="POST" id="formForgotSubmit">
+                        @csrf
+
+                        <div class="form-group-custom mb-4">
+                            <label class="form-label-custom" for="forgot_email">Email Address <span class="text-danger">*</span></label>
+                            <div class="input-box-wrapper">
+                                <input type="email" name="email" id="forgot_email" class="auth-input-control @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="example@gmail.com" required autofocus>
+                                <i class="fa-solid fa-envelope input-box-icon"></i>
+                            </div>
+                            @error('email')
+                                <span class="invalid-feedback-custom">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <button type="submit" id="btnForgotBtn" class="btn-submit-action mt-2">
+                            <i class="fa-solid fa-paper-plane mr-1"></i> Send Reset Link
+                        </button>
+                    </form>
+
+                    <div class="auth-bottom-switch mt-4 text-center" style="margin-top: 1.5rem;">
+                        Remember your password? <a href="javascript:void(0)" onclick="switchAuthTab('login')" class="text-primary font-weight-bold ml-1">Back to Sign In</a>
                     </div>
                 </div>
 
@@ -539,6 +577,9 @@
 @section('script')
 <script>
     function switchAuthTab(tab) {
+        $('.auth-tabs-header').removeClass('d-none');
+        $('#forgotFormPanel').addClass('d-none');
+
         if (tab === 'register') {
             $('#loginFormPanel').addClass('d-none');
             $('#registerFormPanel').removeClass('d-none');
@@ -578,6 +619,12 @@
         $('#formRegisterSubmit').on('submit', function() {
             const btn = $('#btnRegBtn');
             btn.html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> Creating Account...');
+            btn.prop('disabled', true);
+        });
+
+        $('#formForgotSubmit').on('submit', function() {
+            const btn = $('#btnForgotBtn');
+            btn.html('<i class="fa-solid fa-spinner fa-spin mr-2"></i> Sending Link...');
             btn.prop('disabled', true);
         });
     });

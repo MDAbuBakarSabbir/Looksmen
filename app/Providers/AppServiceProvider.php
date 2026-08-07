@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
-require_once __DIR__ . '/../helpers.php';
+require_once __DIR__.'/../helpers.php';
 
+use App\Models\GeneralWebSettings;
+use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,12 +24,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        \Illuminate\Pagination\Paginator::useBootstrapFour();
+        Paginator::useBootstrapFour();
 
         if (class_exists('App\Models\GeneralWebSettings')) {
             try {
-                $settings = \Illuminate\Support\Facades\Cache::rememberForever('boot_general_web_settings_map', function () {
-                    return \App\Models\GeneralWebSettings::all()->pluck('value', 'name')->toArray();
+                $settings = Cache::rememberForever('boot_general_web_settings_map', function () {
+                    return GeneralWebSettings::all()->pluck('value', 'name')->toArray();
                 });
 
                 $tz = $settings['timezone'] ?? env('APP_TIMEZONE') ?? config('app.timezone') ?? 'Asia/Dhaka';
@@ -35,7 +38,7 @@ class AppServiceProvider extends ServiceProvider
                     config(['app.timezone' => $tz]);
                 }
 
-                if (isset($settings['mailhost']) && !empty($settings['mailhost'])) {
+                if (isset($settings['mailhost']) && ! empty($settings['mailhost'])) {
                     config([
                         'mail.mailers.smtp.host' => $settings['mailhost'],
                         'mail.mailers.smtp.port' => $settings['mailport'] ?? 2525,
@@ -46,10 +49,10 @@ class AppServiceProvider extends ServiceProvider
                         'mail.from.name' => env('APP_NAME', 'FreshEcom'),
                     ]);
                 }
-            } catch (\Exception $e) {}
+            } catch (\Exception $e) {
+            }
         }
     }
 }
 
 // Global helper functions moved to app/helpers.php
-

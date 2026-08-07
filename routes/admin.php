@@ -91,6 +91,14 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('admins/permission/assaign/{id}', 'permission')->name('admin.permission')->middleware('admin.permission:manage_admin');
         Route::post('admins/permission/assaign/{id}', 'updatePermission')->name('admin.permission.update')->middleware('admin.permission:manage_admin');
 
+        // Roles Management
+        Route::post('admins/role/store', 'roleStore')->name('admin.role.store')->middleware('admin.permission:manage_admin');
+        Route::post('admins/role/status', 'roleStatus')->name('admin.role.status')->middleware('admin.permission:manage_admin');
+        Route::post('admins/role/update/{id}', 'roleUpdate')->name('admin.role.update')->middleware('admin.permission:manage_admin');
+        Route::post('admins/role/destroy/{id}', 'roleDestroy')->name('admin.role.destroy')->middleware('admin.permission:manage_admin');
+        Route::get('admins/role/permission/{id}', 'rolePermission')->name('admin.role.permission')->middleware('admin.permission:manage_admin');
+        Route::post('admins/role/permission/{id}', 'roleUpdatePermission')->name('admin.role.permission.update')->middleware('admin.permission:manage_admin');
+
         // Admin Profile Update
         Route::get('profile', 'profile')->name('admin.profile');
         Route::post('profile/update', 'profileUpdate')->name('admin.profile.update');
