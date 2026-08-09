@@ -52,7 +52,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="index, follow">
     <meta name="description" content="@yield('meta_description', $webConfig['meta_description'] ?? $webConfig['web_description'])" />
-    <meta name="keywords" content="@yield('meta_keyword', $webConfig['meta_keyword'] ?? 'looksmen, online shopping')">
+    <meta name="keywords" content="@yield('meta_keyword', $webConfig['meta_keyword'] ?? 'looksmen, online shopping Bangladesh, men fashion BD, gadgets Bangladesh, buy online BD, ecommerce Bangladesh')">
     <link rel="canonical" href="@yield('canonical', url()->current())" />
 
     <!-- Preconnect & DNS Prefetch -->
@@ -171,7 +171,7 @@
         :root {
             --primary: #044244;
             --hov-primary: #044244;
-            --soft-primary: ;
+            --soft-primary: rgba(4, 66, 68, 0.1);
         }
 
         #map {
@@ -1206,7 +1206,7 @@
             // Add close button to user-sidenav header if on mobile
             if ($('.user-sidenav').length > 0 && $('#mobile-sidenav-close-btn').length === 0) {
                 $('.user-sidenav-header').addClass('position-relative').prepend(
-                    '<button type="button" id="mobile-sidenav-close-btn" class="btn p-0 d-lg-none" style="position: absolute; top: 15px; right: 15px; color: white; font-size: 24px; z-index: 10; border: none; background: none; outline: none;"></button>'
+                    '<button type="button" id="mobile-sidenav-close-btn" class="btn p-0 d-lg-none" style="position: absolute; top: 15px; right: 15px; color: white; font-size: 24px; z-index: 10; border: none; background: none; outline: none;">&times;</button>'
                 );
             }
 
@@ -1555,7 +1555,7 @@
                 Swal.fire({
                     icon: 'warning',
                     title: 'Stock Limit!',
-                    text: 'দুঃখিত, আমাদের কাছে মাত্র' + maxVal + ' টি স্টক আছে।',
+                    text: 'দুঃখিত, আমাদের কাছে মাত্র ' + maxQty + ' টি স্টক আছে।',
                     confirmButtonColor: '#3085d6',
                     timer: 2000
                 });
@@ -2300,6 +2300,30 @@
         }
     </script>
     @endif
+    <script>
+  !function(f,b,e,v,n,t,s)
+  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+  n.queue=[];t=b.createElement(e);t.async=!0;
+  t.src=v;s=b.getElementsByTagName(e)[0];
+  s.parentNode.insertBefore(t,s)}(window, document,'script',
+  'https://connect.facebook.net/en_US/fbevents.js');
+
+  @auth
+    // কাস্টমার লগইন থাকলে তার প্রোফাইল ডাটা
+    fbq('init', 'YOUR_PIXEL_ID', {
+      em: '{{ strtolower(trim(auth()->user()->email ?? "")) }}',
+      ph: '{{ preg_replace("/[^0-9]/", "", auth()->user()->phone ?? "") }}',
+      fn: '{{ strtolower(trim(auth()->user()->name ?? "")) }}'
+    });
+  @else
+    // কাস্টমার গেস্ট হলে নরমাল পিক্সেল
+    fbq('init', 'YOUR_PIXEL_ID');
+  @endauth
+
+  fbq('track', 'PageView');
+</script>
 
     @yield('script')
 </body>

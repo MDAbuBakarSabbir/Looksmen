@@ -6,8 +6,8 @@
 @endphp
 
 @extends('layouts.Frontend.master')
-@section('title')
-    HOME
+@section('title') 
+HOME
 @endsection
 @section('content')
     <div class="home-banner-area">
@@ -209,10 +209,10 @@
                                             onerror="this.onerror=null;this.src='{{ asset('frontend') }}/assets/img/placeholder.jpg';">
                                     </a>
                                     <div class="absolute-top-right aiz-p-hov-icon">
-                                        <a href="javascript:void(0)" onclick="addToWishList()">
+                                        <a href="javascript:void(0)" onclick="addToWishList({{ $newArival->id }})">
                                             <i class="la la-heart-o"></i>
                                         </a>
-                                        <a href="javascript:void(0)" onclick="addToCompare()">
+                                        <a href="javascript:void(0)" onclick="addToCompare({{ $newArival->id }})">
                                             <i class="las la-sync"></i>
                                         </a>
                                     </div>
@@ -371,12 +371,12 @@
                                                         alt="{{ $product->title }}">
                                                 </a>
                                                 <div class="absolute-top-right aiz-p-hov-icon">
-                                                    <a href="javascript:void(0)" onclick="addToWishList(282)"
+                                                    <a href="javascript:void(0)" onclick="addToWishList({{ $product->id }})"
                                                         data-toggle="tooltip" data-title="Add to wishlist"
                                                         data-placement="left">
                                                         <i class="la la-heart-o"></i>
                                                     </a>
-                                                    <a href="javascript:void(0)" onclick="addToCompare(282)"
+                                                    <a href="javascript:void(0)" onclick="addToCompare({{ $product->id }})"
                                                         data-toggle="tooltip" data-title="Add to compare"
                                                         data-placement="left">
                                                         <i class="las la-sync"></i>
@@ -425,7 +425,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <input type="hidden" id="product_id" value="{{ $product->id }}">
+                                    {{-- product_id hidden input removed: duplicate id inside foreach causes invalid HTML --}}
                                 @endforeach
                             </div>
                         </div>

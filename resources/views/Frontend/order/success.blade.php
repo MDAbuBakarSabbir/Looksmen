@@ -206,6 +206,97 @@
         0% { transform: scale(1); opacity: 0.5; }
         100% { transform: scale(1.3); opacity: 0; }
     }
+
+    .order-items-box {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 16px;
+        padding: 24px;
+        text-align: left;
+        margin-bottom: 24px;
+    }
+    
+    .success-product-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    
+    .success-product-item:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .success-product-item:first-of-type {
+        padding-top: 0;
+    }
+    
+    .success-item-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .success-item-img {
+        width: 50px;
+        height: 50px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #ffffff;
+        flex-shrink: 0;
+    }
+
+    .success-item-img-placeholder {
+        width: 50px;
+        height: 50px;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+        background: #f1f5f9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #94a3b8;
+        flex-shrink: 0;
+    }
+    
+    .success-item-details {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    
+    .success-item-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1e293b;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
+    .success-item-qty-price {
+        font-size: 12px;
+        color: #64748b;
+        margin-top: 2px;
+    }
+    
+    .success-item-right {
+        text-align: right;
+        margin-left: 12px;
+        flex-shrink: 0;
+    }
+    
+    .success-item-total {
+        font-size: 14px;
+        font-weight: 700;
+        color: #1e293b;
+    }
 </style>
 
 <div class="success-body">
@@ -217,6 +308,40 @@
         <h2 class="success-title">অর্ডার সফলভাবে সম্পন্ন হয়েছে!</h2>
         <p class="success-subtitle">অভিনন্দন! আপনার অর্ডারটি সফলভাবে গৃহীত হয়েছে। খুব শীঘ্রই আমাদের একজন প্রতিনিধি আপনার সাথে যোগাযোগ করবেন।</p>
         
+        <!-- Product Items -->
+        <div class="order-items-box">
+            <div class="details-title">Ordered Items</div>
+            @foreach($order->orderDetails as $detail)
+                @php
+                    $firstImage = $detail->orderProduct?->firstImage?->image ?? '';
+                    if (empty($firstImage)) {
+                        $fallbackImg = \App\Models\ProductImage::where('product_id', $detail->product_id)->first();
+                        $firstImage = $fallbackImg ? $fallbackImg->image : '';
+                    }
+                    $unitPrice = $detail->unit_price > 0 ? $detail->unit_price : ($detail->orderProduct->new_price ?? 0);
+                    $totalPrice = $detail->total_price > 0 ? $detail->total_price : ($detail->product_qty * $unitPrice);
+                @endphp
+                <div class="success-product-item">
+                    <div class="success-item-left">
+                        @if(!empty($firstImage))
+                            <img class="success-item-img" src="{{ asset('Uploads/' . $firstImage) }}" alt="Product Image">
+                        @else
+                            <div class="success-item-img-placeholder">
+                                <i class="las la-image"></i>
+                            </div>
+                        @endif
+                        <div class="success-item-details">
+                            <span class="success-item-title" title="{{ $detail->orderProduct->title ?? 'N/A' }}">{{ $detail->orderProduct->title ?? 'N/A' }}</span>
+                            <span class="success-item-qty-price">{{ $detail->product_qty }} x {{ single_price($unitPrice) }}</span>
+                        </div>
+                    </div>
+                    <div class="success-item-right">
+                        <span class="success-item-total">{{ single_price($totalPrice) }}</span>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+
         <div class="order-details-box">
             <div class="details-title">Order Information</div>
             
@@ -249,9 +374,26 @@
                 <span class="details-value text-right" style="max-width: 250px;">{{ $order->address }}</span>
             </div>
             
+            <div class="details-row" style="border-top: 1px dashed #e2e8f0; padding-top: 12px; margin-top: 12px;">
+                <span class="details-label">সাবটোটাল</span>
+                <span class="details-value">{{ single_price($order->total_amount) }}</span>
+            </div>
+            
             <div class="details-row">
-                <span class="details-label">সর্বমোট মূল্য</span>
-                <span class="details-value text-success" style="font-size: 16px;">{{ single_price($order->grand_total) }}</span>
+                <span class="details-label">ডেলিভারি চার্জ</span>
+                <span class="details-value">{{ single_price($order->delivery_charge) }}</span>
+            </div>
+            
+            @if(($order->coupon_discount ?? 0) > 0)
+            <div class="details-row">
+                <span class="details-label">ডিসকাউন্ট</span>
+                <span class="details-value text-danger">- {{ single_price($order->coupon_discount) }}</span>
+            </div>
+            @endif
+            
+            <div class="details-row" style="border-top: 1px solid #e2e8f0; padding-top: 12px; font-weight: 700;">
+                <span class="details-label" style="color: #0f172a; font-weight: 700;">মোট বিল</span>
+                <span class="details-value text-success" style="font-size: 18px;">{{ single_price($order->grand_total) }}</span>
             </div>
         </div>
         
@@ -294,6 +436,46 @@
         confirmButtonText: 'ঠিক আছে',
         confirmButtonColor: '#10b981'
     });
+</script>
+@endif
+@endsection
+
+@section('script')
+@if(session('order_placed') || session('success'))
+@php
+    $productNames = [];
+    $productIds = [];
+    foreach($order->orderDetails as $detail) {
+        if ($detail->orderProduct) {
+            $productNames[] = $detail->orderProduct->title;
+            $productIds[] = $detail->product_id;
+        }
+    }
+    $productNamesStr = implode(', ', $productNames);
+@endphp
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    if (typeof fbq !== 'undefined') {
+        fbq('setUserProperties', {
+            'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
+            'fn': '{{ strtolower(trim($order->name ?? "")) }}',
+            'ct': '{{ strtolower(trim($order->district->name ?? "")) }}',
+            'st': 'BD'
+        });
+
+        fbq('track', 'Purchase', {
+            content_type: 'product',
+            content_name: '{{ addslashes($productNamesStr) }}',
+            content_ids: {!! json_encode($productIds) !!},
+            value: {{ (float) ($order->grand_total ?? 0) }},
+            currency: 'BDT',
+            order_id: '{{ $order->id ?? "" }}'
+        }, {
+            // ডুপ্লিকেট ট্র্যাকিং রোধ করতে একই Order ID কে eventID হিসেবে পাঠানো
+            eventID: 'order_{{ $order->id }}'
+        });
+    }
+});
 </script>
 @endif
 @endsection

@@ -1294,5 +1294,19 @@
             });
         </script>
     @endif
+    @push('script')
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        if (typeof fbq !== 'undefined') {
+            fbq('track', 'InitiateCheckout', {
+                content_type: 'product',
+                value: {{ $subtotal ?? 0 }},
+                currency: 'BDT',
+                num_items: {{ count($cart ?? []) }}
+            });
+        }
+    });
+</script>
+@endpush
 @endsection
 
