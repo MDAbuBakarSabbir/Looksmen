@@ -713,37 +713,115 @@ class OrderManageController extends Controller
             return response()->json(['status' => 'error', 'message' => 'No orders selected.']);
         }
 
+        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
+        
         $results = [];
         $successCount = 0;
         $failCount = 0;
 
-        foreach ($ids as $id) {
-            $order = Orders::find($id);
-            if (!$order) {
-                $results[] = [
-                    'order_id' => $id,
-                    'status'   => 'error',
-                    'message'  => 'Order #' . $id . ' not found.',
+        if ($activeCourier && $activeCourier->courier_name === 'steadfast') {
+            // Steadfast Bulk API
+            $data = [];
+            $orderMap = []; // To easily fetch orders later
+
+            foreach ($ids as $id) {
+                $order = Orders::find($id);
+                if (!$order) {
+                    $results[] = ['order_id' => $id, 'status' => 'error', 'message' => 'Order not found.'];
+                    $failCount++;
+                    continue;
+                }
+                if ($order->consignment_id) {
+                    $results[] = ['order_id' => $id, 'invoice' => 'LM-' . $id, 'status' => 'success', 'message' => 'Already booked.', 'consignment_id' => $order->consignment_id, 'tracking_code' => $order->tracking_code];
+                    $successCount++;
+                    continue;
+                }
+
+                $invoice = (string) ($order->order_id ?? 'LM-' . $order->id);
+                $data[] = [
+                    'invoice' => $invoice,
+                    'recipient_name' => (string) $order->name,
+                    'recipient_address' => (string) $order->address,
+                    'recipient_phone' => (string) $order->phone,
+                    'cod_amount' => (float) $order->grand_total,
+                    'note' => (string) $order->comments,
                 ];
-                $failCount++;
-                continue;
+                $orderMap[$invoice] = $order;
             }
 
-            $result = $this->placeCourierOrderInternal($order);
+            if (!empty($data)) {
+                $response = $this->steadfast->bulkCreate($data);
+                
+                // Steadfast Bulk API returns an array directly, but our service might return ['status' => 500] if it threw an exception
+                if (isset($response['status']) && $response['status'] == 500) {
+                    return response()->json(['status' => 'error', 'message' => $response['message']]);
+                }
 
-            $results[] = [
-                'order_id'        => $id,
-                'invoice'         => 'LM-' . $id,
-                'status'          => $result['status'],
-                'message'         => $result['message'],
-                'consignment_id'  => $result['consignment_id'] ?? null,
-                'tracking_code'   => $result['tracking_code'] ?? null,
-            ];
+                // If response is an array, iterate over it
+                if (is_array($response)) {
+                    foreach ($response as $item) {
+                        $inv = $item['invoice'] ?? '';
+                        $order = $orderMap[$inv] ?? null;
+                        
+                        if (isset($item['status']) && $item['status'] === 'success') {
+                            if ($order) {
+                                $order->consignment_id = $item['consignment_id'];
+                                $order->tracking_code = $item['tracking_code'] ?? null;
+                                $order->delivery_status = 'incourier';
+                                $order->courier_updated_by = auth()->id();
+                                $order->courier_popup_shown = 0;
+                                $order->save();
+                            }
+                            
+                            $results[] = [
+                                'order_id' => $order ? $order->id : '',
+                                'invoice' => $inv,
+                                'status' => 'success',
+                                'message' => 'Successfully booked in bulk.',
+                                'consignment_id' => $item['consignment_id'],
+                                'tracking_code' => $item['tracking_code'] ?? null,
+                            ];
+                            $successCount++;
+                        } else {
+                            $results[] = [
+                                'order_id' => $order ? $order->id : '',
+                                'invoice' => $inv,
+                                'status' => 'error',
+                                'message' => 'Steadfast Bulk Error: ' . json_encode($item),
+                            ];
+                            $failCount++;
+                        }
+                    }
+                } else {
+                    return response()->json(['status' => 'error', 'message' => 'Invalid API Response from Steadfast']);
+                }
+            }
+        } else {
+            // Fallback for single orders or other couriers
+            foreach ($ids as $id) {
+                $order = Orders::find($id);
+                if (!$order) {
+                    $results[] = ['order_id' => $id, 'status' => 'error', 'message' => 'Order #' . $id . ' not found.'];
+                    $failCount++;
+                    continue;
+                }
 
-            if ($result['status'] === 'success') {
-                $successCount++;
-            } else {
-                $failCount++;
+                $result = $this->placeCourierOrderInternal($order);
+
+                $results[] = [
+                    'order_id'        => $id,
+                    'invoice'         => 'LM-' . $id,
+                    'status'          => $result['status'],
+                    'message'         => $result['message'],
+                    'consignment_id'  => $result['consignment_id'] ?? null,
+                    'tracking_code'   => $result['tracking_code'] ?? null,
+                ];
+
+                if ($result['status'] === 'success') {
+                    $successCount++;
+                } else {
+                    $failCount++;
+                }
             }
         }
 

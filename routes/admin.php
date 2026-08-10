@@ -88,6 +88,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('admins/role', 'role')->name('admin.role')->middleware('admin.permission:manage_admin');
         Route::post('admins/status', 'status')->name('admin.status')->middleware('admin.permission:manage_admin');
         Route::post('admins/bulk-status', 'bulkStatus')->name('admin.bulk-status')->middleware('admin.permission:manage_admin');
+        Route::post('admins/destroy/{id}', 'destroy')->name('admin.destroy')->middleware('admin.permission:manage_admin');
+        Route::post('admins/bulk-delete', 'bulkDelete')->name('admin.bulk-delete')->middleware('admin.permission:manage_admin');
         Route::get('admins/permission/assaign/{id}', 'permission')->name('admin.permission')->middleware('admin.permission:manage_admin');
         Route::post('admins/permission/assaign/{id}', 'updatePermission')->name('admin.permission.update')->middleware('admin.permission:manage_admin');
 
@@ -100,8 +102,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('admins/role/permission/{id}', 'roleUpdatePermission')->name('admin.role.permission.update')->middleware('admin.permission:manage_admin');
 
         // Admin Profile Update
-        Route::get('profile', 'profile')->name('admin.profile');
-        Route::post('profile/update', 'profileUpdate')->name('admin.profile.update');
+        Route::get('profile', 'profile')->name('admin.profile')->middleware('admin.permission:manage_profile');
+        Route::post('profile/update', 'profileUpdate')->name('admin.profile.update')->middleware('admin.permission:manage_profile');
     });
 
     Route::controller(OrderManageController::class)->group(function () {
@@ -123,22 +125,22 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('orders/update', 'update')->name('admin.order-update')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::get('orders/destroy', 'destroy')->name('admin.order-destroy')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('orders/status', 'updateStatus')->name('order.update.status')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
-        Route::get('/orders/filter', 'filter')->name('admin.order-filter');
-        Route::get('orders/search', 'orderSearch')->name('admin.order-search');
-        Route::get('orders/autocomplete', 'orderAutocomplete')->name('admin.orders.autocomplete');
-        Route::get('/api/check-new-orders', 'checkNewOrders')->name('check.new.orders');
-        Route::get('/get-upazilas/{district}', 'getUpazilas');
-        Route::get('/admin/product-search', 'searchProducts')->name('admin.product-search');
+        Route::get('/orders/filter', 'filter')->name('admin.order-filter')->middleware('admin.permission:manage_order');
+        Route::get('orders/search', 'orderSearch')->name('admin.order-search')->middleware('admin.permission:manage_order');
+        Route::get('orders/autocomplete', 'orderAutocomplete')->name('admin.orders.autocomplete')->middleware('admin.permission:manage_order');
+        Route::get('/api/check-new-orders', 'checkNewOrders')->name('check.new.orders')->middleware('admin.permission:manage_order');
+        Route::get('/get-upazilas/{district}', 'getUpazilas')->middleware('admin.permission:manage_order,create_order');
+        Route::get('/admin/product-search', 'searchProducts')->name('admin.product-search')->middleware('admin.permission:manage_order,manage_product,create_order');
 
         // {orderId} হলো আপনার নির্দিষ্ট অর্ডারটির আইডি (যেমন: 1, 10, 50)
         Route::post('orders/steadfast-entry/{id}', 'placeCourierOrder')->name('entry.steadfast')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('orders/bulk-courier-entry', 'bulkCourierEntry')->name('orders.bulk-courier-entry')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::get('orders/courier-track/{id}', 'trackCourierOrder')->name('admin.orders.courier-track')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
-        Route::post('/orders/popup-seen/{id}', 'popupSeen')->name('order.popup_seen');
+        Route::post('/orders/popup-seen/{id}', 'popupSeen')->name('order.popup_seen')->middleware('admin.permission:manage_order,pending_order');
 
-        Route::post('/courier/history', 'getCourierHistory')->name('courier.history');
+        Route::post('/courier/history', 'getCourierHistory')->name('courier.history')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
 
-        Route::get('/live', 'live')->name('live');
+        Route::get('/live', 'live')->name('live')->middleware('admin.permission:view_live_status');
     });
 
     Route::controller(IncompleteOrdersController::class)->group(function () {
@@ -151,7 +153,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     Route::prefix('orders')->middleware('auth:admin')->group(function () {
         Route::get('/filter', [OrderManageController::class, 'filter'])
-            ->name('admin.orders.filter');
+            ->name('admin.orders.filter')->middleware('admin.permission:manage_order');
 
         Route::post('/update-status', [OrderManageController::class, 'updateStatus'])
             ->name('admin.orders.update-status')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
@@ -160,7 +162,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
             ->name('admin.orders.bulk-update')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
 
         Route::get('/status-count', [OrderManageController::class, 'statusCount'])
-            ->name('admin.orders.status-count');
+            ->name('admin.orders.status-count')->middleware('admin.permission:manage_order');
     });
 
     // Products Routes
@@ -455,39 +457,39 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('/wallet/points-config/store', 'pointConfigStore')->name('admin.wallet.points-config.store')->middleware('admin.permission:manage_wallet');
     });
     Route::controller(ConversationController::class)->group(function () {
-        Route::get('/conversation/facebook', 'facebook')->name('conversation.facebook');
-        Route::get('/conversation/whatsapp', 'whatsapp')->name('conversation.whatsapp');
-        Route::get('/conversation/whatsapp/contacts', 'getWhatsappContacts')->name('conversation.whatsapp.contacts');
-        Route::get('/conversation/whatsapp/messages/{contact_id}', 'getWhatsappMessages')->name('conversation.whatsapp.messages');
-        Route::post('/conversation/whatsapp/send', 'sendWhatsappMessage')->name('conversation.whatsapp.send');
+        Route::get('/conversation/facebook', 'facebook')->name('conversation.facebook')->middleware('admin.permission:manage_conversations');
+        Route::get('/conversation/whatsapp', 'whatsapp')->name('conversation.whatsapp')->middleware('admin.permission:manage_conversations');
+        Route::get('/conversation/whatsapp/contacts', 'getWhatsappContacts')->name('conversation.whatsapp.contacts')->middleware('admin.permission:manage_conversations');
+        Route::get('/conversation/whatsapp/messages/{contact_id}', 'getWhatsappMessages')->name('conversation.whatsapp.messages')->middleware('admin.permission:manage_conversations');
+        Route::post('/conversation/whatsapp/send', 'sendWhatsappMessage')->name('conversation.whatsapp.send')->middleware('admin.permission:manage_conversations');
 
         // Facebook Messenger integration routes
-        Route::get('/conversation/facebook/contacts', 'getFacebookContacts')->name('conversation.facebook.contacts');
-        Route::get('/conversation/facebook/messages/{contact_id}', 'getFacebookMessages')->name('conversation.facebook.messages');
-        Route::post('/conversation/facebook/send', 'sendFacebookMessage')->name('conversation.facebook.send');
+        Route::get('/conversation/facebook/contacts', 'getFacebookContacts')->name('conversation.facebook.contacts')->middleware('admin.permission:manage_conversations');
+        Route::get('/conversation/facebook/messages/{contact_id}', 'getFacebookMessages')->name('conversation.facebook.messages')->middleware('admin.permission:manage_conversations');
+        Route::post('/conversation/facebook/send', 'sendFacebookMessage')->name('conversation.facebook.send')->middleware('admin.permission:manage_conversations');
 
         // Facebook comments moderation routes
-        Route::get('/conversation/facebook/posts', 'getFacebookPosts')->name('conversation.facebook.posts');
-        Route::get('/conversation/facebook/comments/{post_id}', 'getFacebookPostComments')->name('conversation.facebook.comments');
-        Route::post('/conversation/facebook/comment/reply', 'replyToFacebookComment')->name('conversation.facebook.comment.reply');
+        Route::get('/conversation/facebook/posts', 'getFacebookPosts')->name('conversation.facebook.posts')->middleware('admin.permission:manage_conversations');
+        Route::get('/conversation/facebook/comments/{post_id}', 'getFacebookPostComments')->name('conversation.facebook.comments')->middleware('admin.permission:manage_conversations');
+        Route::post('/conversation/facebook/comment/reply', 'replyToFacebookComment')->name('conversation.facebook.comment.reply')->middleware('admin.permission:manage_conversations');
 
         // Instagram Direct Message integration routes
-        Route::get('/conversation/instagram/contacts', 'getInstagramContacts')->name('conversation.instagram.contacts');
-        Route::get('/conversation/instagram/messages/{contact_id}', 'getInstagramMessages')->name('conversation.instagram.messages');
-        Route::post('/conversation/instagram/send', 'sendInstagramMessage')->name('conversation.instagram.send');
+        Route::get('/conversation/instagram/contacts', 'getInstagramContacts')->name('conversation.instagram.contacts')->middleware('admin.permission:manage_conversations');
+        Route::get('/conversation/instagram/messages/{contact_id}', 'getInstagramMessages')->name('conversation.instagram.messages')->middleware('admin.permission:manage_conversations');
+        Route::post('/conversation/instagram/send', 'sendInstagramMessage')->name('conversation.instagram.send')->middleware('admin.permission:manage_conversations');
 
-        Route::get('/conversation/facebook-business-suit', 'metaBusinessSuit')->name('conversation.facebookBusinessSuit');
+        Route::get('/conversation/facebook-business-suit', 'metaBusinessSuit')->name('conversation.facebookBusinessSuit')->middleware('admin.permission:manage_conversations');
     });
 
     // Admin AI & Live Chat Support Routes
     Route::controller(AdminAiSupportController::class)->group(function () {
-        Route::get('/ai-support', 'index')->name('admin.aiSupport.index');
-        Route::get('/ai-support/settings', 'settingsIndex')->name('admin.aiSupport.settings');
-        Route::post('/ai-support/settings/update', 'updateSettings')->name('admin.aiSupport.updateSettings');
-        Route::get('/ai-support/messages/{session_id}', 'getMessages')->name('admin.aiSupport.messages');
-        Route::post('/ai-support/reply', 'replyMessage')->name('admin.aiSupport.reply');
-        Route::post('/ai-support/toggle-transfer', 'toggleTransfer')->name('admin.aiSupport.toggleTransfer');
-        Route::post('/ai-support/close', 'closeChat')->name('admin.aiSupport.close');
+        Route::get('/ai-support', 'index')->name('admin.aiSupport.index')->middleware('admin.permission:manage_ai_support');
+        Route::get('/ai-support/settings', 'settingsIndex')->name('admin.aiSupport.settings')->middleware('admin.permission:manage_ai_support');
+        Route::post('/ai-support/settings/update', 'updateSettings')->name('admin.aiSupport.updateSettings')->middleware('admin.permission:manage_ai_support');
+        Route::get('/ai-support/messages/{session_id}', 'getMessages')->name('admin.aiSupport.messages')->middleware('admin.permission:manage_ai_support');
+        Route::post('/ai-support/reply', 'replyMessage')->name('admin.aiSupport.reply')->middleware('admin.permission:manage_ai_support');
+        Route::post('/ai-support/toggle-transfer', 'toggleTransfer')->name('admin.aiSupport.toggleTransfer')->middleware('admin.permission:manage_ai_support');
+        Route::post('/ai-support/close', 'closeChat')->name('admin.aiSupport.close')->middleware('admin.permission:manage_ai_support');
     });
 });
 Route::match(['get', 'post'], '/webhook/whatsapp', [ConversationController::class, 'handleWhatsApp']);

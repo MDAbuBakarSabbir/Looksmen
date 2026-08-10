@@ -150,6 +150,39 @@ class AdminsController extends Controller
         return redirect()->route('admin.index')->with('success', 'Admin employee updated successfully!');
     }
 
+    public function destroy($id)
+    {
+        $admin = Admins::findOrFail($id);
+        if ($admin->role_id === 'admin' || $admin->id === 1) {
+            return response()->json(['success' => false, 'message' => 'Cannot delete the master admin!']);
+        }
+        $admin->delete();
+        return response()->json(['success' => true, 'message' => 'Admin deleted successfully!']);
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->input('ids', []);
+        if (empty($ids)) {
+            return response()->json(['success' => false, 'message' => 'No admins selected']);
+        }
+        
+        $admins = Admins::whereIn('id', $ids)->get();
+        $deletedCount = 0;
+        foreach ($admins as $admin) {
+            if ($admin->role_id !== 'admin' && $admin->id !== 1) {
+                $admin->delete();
+                $deletedCount++;
+            }
+        }
+        
+        if ($deletedCount === 0) {
+            return response()->json(['success' => false, 'message' => 'Could not delete selected admins.']);
+        }
+
+        return response()->json(['success' => true, 'message' => $deletedCount . ' admins deleted successfully!']);
+    }
+
     public function role()
     {
         $roles = Roles::all();

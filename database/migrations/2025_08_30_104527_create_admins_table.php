@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('number')->unique();
             $table->string('role_id')->default('admin');
-            $table->string('permission_id')->nullable();
+            $table->longText('permission_id')->nullable();
             $table->string('status')->default(1);
             $table->string('password');
             $table->timestamps();

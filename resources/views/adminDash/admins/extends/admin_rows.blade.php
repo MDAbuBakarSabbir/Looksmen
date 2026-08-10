@@ -26,10 +26,13 @@
                     data-email="{{ $admin->email }}"
                     data-number="{{ $admin->number }}"
                     data-role="{{ $admin->role_id }}">
-                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                <i class="fa-solid fa-pen-to-square mr-1"></i>
             </button>
             <a href="{{ route('admin.permission', $admin->id) }}" class="btn btn-sm btn-primary px-3 rounded-pill mb-1" style="font-size: 12px; font-weight: 600;">
-                <i class="fa-solid fa-user-shield mr-1"></i> Permissions
+                <i class="fa-solid fa-user-shield mr-1"></i>
+            </a>
+            <a href="#" class="btn btn-sm btn-danger px-3 rounded-pill mb-1" style="font-size: 12px; font-weight: 600;" onclick="deleteAdmin({{ $admin->id }})">
+                <i class="fa-solid fa-trash mr-1"></i>
             </a>
         </td>
     </tr>

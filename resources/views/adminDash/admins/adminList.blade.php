@@ -89,6 +89,7 @@
                     <option value="">Bulk Action</option>
                     <option value="activate">Activate</option>
                     <option value="deactivate">Deactivate</option>
+                    <option value="delete">Delete</option>
                 </select>
                 <button class="btn btn-danger" id="bulkAdminBtn" style="height: 38px; border-radius: 4px; padding: 0 20px;">
                     Apply Action
@@ -223,32 +224,37 @@
                 Toast.fire({ icon: 'warning', title: 'No admins selected' });
                 return;
             }
-            let status = action === 'activate' ? 1 : 0;
-            let requests = selectedIds.map(id => {
-                return fetch("{{ route('admin.status') }}", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "X-CSRF-TOKEN": "{{ csrf_token() }}"
-                    },
-                    body: JSON.stringify({ id: id, status: status })
-                }).then(res => res.json());
-            });
-            Promise.all(requests).then(results => {
-                let failed = results.filter(r => !r.success).length;
-                if (failed === 0) {
-                    Toast.fire({ icon: 'success', title: selectedIds.length + ' admins updated' });
-                    $('.admin-check:checked').closest('tr').each(function() {
-                        $(this).find('.status-switch').prop('checked', status == 1);
-                    });
+            let url = action === 'delete' ? "{{ route('admin.bulk-delete') }}" : "{{ route('admin.bulk-status') }}";
+            let payload = action === 'delete' ? { ids: selectedIds } : { ids: selectedIds, status: action === 'activate' ? 1 : 0 };
+
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify(payload)
+            }).then(res => res.json())
+            .then(response => {
+                if (response.success) {
+                    Toast.fire({ icon: 'success', title: response.message || selectedIds.length + ' admins updated' });
+                    if (action === 'delete') {
+                        setTimeout(() => { window.location.reload(); }, 1000);
+                    } else {
+                        $('.admin-check:checked').closest('tr').each(function() {
+                            $(this).find('.status-switch').prop('checked', action === 'activate');
+                        });
+                    }
                 } else {
-                    Toast.fire({ icon: 'error', title: failed + ' updates failed' });
+                    Toast.fire({ icon: 'error', title: response.message || 'Action failed' });
                 }
+                $('#adminCheckAll').prop('checked', false);
             }).catch(() => {
                 Toast.fire({ icon: 'error', title: 'Network error' });
+                $('#adminCheckAll').prop('checked', false);
             });
-            $('#adminCheckAll').prop('checked', false);
         });
+
 
         // Edit Employee Modal Open
         $(document).on('click', '.edit-admin-btn', function(e) {
@@ -375,6 +381,40 @@
                 $('.modal-backdrop').remove();
             }
         });
+
+        // Individual Delete Admin
+        window.deleteAdmin = function(id) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        url: '/admin/admins/destroy/' + id,
+                        type: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}'
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Toast.fire({ icon: 'success', title: response.message });
+                                setTimeout(() => { window.location.reload(); }, 1000);
+                            } else {
+                                Toast.fire({ icon: 'error', title: response.message });
+                            }
+                        },
+                        error: function() {
+                            Toast.fire({ icon: 'error', title: 'Something went wrong!' });
+                        }
+                    });
+                }
+            });
+        };
     </script>
     </div>
 
