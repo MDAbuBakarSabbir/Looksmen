@@ -441,42 +441,78 @@
 @endsection
 
 @section('script')
-@if(session('order_placed') || session('success'))
 @php
+    $itemsArr = [];
     $productNames = [];
     $productIds = [];
-    foreach($order->orderDetails as $detail) {
-        if ($detail->orderProduct) {
-            $productNames[] = $detail->orderProduct->title;
-            $productIds[] = $detail->product_id;
+    if (!empty($order->orderDetails)) {
+        foreach($order->orderDetails as $detail) {
+            $pTitle = $detail->orderProduct->title ?? ('Product #' . $detail->product_id);
+            $productNames[] = $pTitle;
+            $productIds[] = (string) $detail->product_id;
+            $uPrice = $detail->unit_price > 0 ? $detail->unit_price : ($detail->orderProduct->new_price ?? 0);
+            $itemsArr[] = [
+                'item_id' => (string) $detail->product_id,
+                'item_name' => $pTitle,
+                'price' => (float) $uPrice,
+                'quantity' => (int) $detail->product_qty
+            ];
         }
     }
     $productNamesStr = implode(', ', $productNames);
+    $purchaseEventId = 'purchase_' . ($order->id ?? time());
 @endphp
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-    if (typeof fbq !== 'undefined') {
-        fbq('setUserProperties', {
-            'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
-            'fn': '{{ strtolower(trim($order->name ?? "")) }}',
-            'ct': '{{ strtolower(trim($order->district->name ?? "")) }}',
-            'st': 'BD'
-        });
+    var eventId = '{{ $purchaseEventId }}';
+    var orderId = '{{ $order->id ?? "" }}';
+    var totalValue = {{ (float) ($order->grand_total ?? 0) }};
 
-        fbq('track', 'Purchase', {
-            content_type: 'product',
-            content_name: '{{ addslashes($productNamesStr) }}',
-            content_ids: {!! json_encode($productIds) !!},
-            value: {{ (float) ($order->grand_total ?? 0) }},
-            currency: 'BDT',
-            order_id: '{{ $order->id ?? "" }}'
-        }, {
-            // ডুপ্লিকেট ট্র্যাকিং রোধ করতে একই Order ID কে eventID হিসেবে পাঠানো
-            eventID: 'order_{{ $order->id }}'
+    // 1. Google Tag Manager (DataLayer) Event
+    try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+            'event': 'purchase',
+            'event_id': eventId,
+            'order_id': orderId,
+            'ecommerce': {
+                'transaction_id': orderId,
+                'value': totalValue,
+                'tax': 0,
+                'shipping': {{ (float) ($order->delivery_charge ?? 0) }},
+                'currency': 'BDT',
+                'items': {!! json_encode($itemsArr) !!}
+            }
         });
+    } catch (e) {
+        console.error("GTM Purchase Error:", e);
+    }
+
+    // 2. Direct Meta Pixel Event (with matching eventID for deduplication)
+    try {
+        if (typeof window.fbq === 'function') {
+            window.fbq('setUserProperties', {
+                'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
+                'fn': {!! json_encode(strtolower(trim($order->name ?? ""))) !!},
+                'st': 'BD'
+            });
+
+            window.fbq('track', 'Purchase', {
+                content_type: 'product',
+                content_name: {!! json_encode($productNamesStr) !!},
+                content_ids: {!! json_encode($productIds) !!},
+                value: totalValue,
+                currency: 'BDT',
+                order_id: orderId
+            }, {
+                eventID: eventId
+            });
+        }
+    } catch (e) {
+        console.error("Meta Pixel Purchase Error:", e);
     }
 });
 </script>
-@endif
 @endsection
 

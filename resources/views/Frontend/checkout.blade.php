@@ -1295,15 +1295,65 @@
         </script>
     @endif
     @push('script')
+@php
+    $checkoutItemsArr = [];
+    if (!empty($cart)) {
+        foreach ($cart as $cItem) {
+            if (is_object($cItem)) {
+                $pId = $cItem->product_id;
+                $pName = $cItem->product->title ?? ('Product #' . $pId);
+                $pPrice = (float) ($cItem->product->new_price ?? 0);
+                $pQty = (int) $cItem->quantity;
+            } else {
+                $pId = $cItem['id'] ?? 0;
+                $pName = $cItem['name'] ?? ('Product #' . $pId);
+                $pPrice = (float) ($cItem['price'] ?? 0);
+                $pQty = (int) ($cItem['quantity'] ?? 1);
+            }
+            $checkoutItemsArr[] = [
+                'item_id' => (string) $pId,
+                'item_name' => $pName,
+                'price' => $pPrice,
+                'quantity' => $pQty
+            ];
+        }
+    }
+    $checkoutEventId = 'begin_checkout_' . time();
+@endphp
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        if (typeof fbq !== 'undefined') {
-            fbq('track', 'InitiateCheckout', {
-                content_type: 'product',
-                value: {{ $subtotal ?? 0 }},
-                currency: 'BDT',
-                num_items: {{ count($cart ?? []) }}
+        var eventId = '{{ $checkoutEventId }}';
+        var totalVal = {{ (float) ($subtotal ?? 0) }};
+
+        // 1. Google Tag Manager (DataLayer) Event
+        try {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push({
+                'event': 'begin_checkout',
+                'event_id': eventId,
+                'ecommerce': {
+                    'currency': 'BDT',
+                    'value': totalVal,
+                    'items': {!! json_encode($checkoutItemsArr) !!}
+                }
             });
+        } catch (e) {
+            console.error("GTM InitiateCheckout Error:", e);
+        }
+
+        // 2. Direct Meta Pixel Event (with matching eventID for deduplication)
+        try {
+            if (typeof window.fbq === 'function') {
+                window.fbq('track', 'InitiateCheckout', {
+                    content_type: 'product',
+                    value: totalVal,
+                    currency: 'BDT',
+                    num_items: {{ count($cart ?? []) }}
+                }, { eventID: eventId });
+            }
+        } catch (e) {
+            console.error("Meta Pixel InitiateCheckout Error:", e);
         }
     });
 </script>

@@ -231,6 +231,7 @@
 
     <!-- Google Tag Manager -->
     <script>
+        window.dataLayer = window.dataLayer || [];
         (function(w, d, s, l, i) {
             w[l] = w[l] || [];
             w[l].push({
@@ -247,11 +248,28 @@
     </script>
     <!-- End Google Tag Manager -->
 
-    <!-- Facebook Pixel Code -->
+    <!-- Facebook Pixel / Meta Pixel Code -->
     @if (!empty($webConfig['fb_pixel']))
         {!! $webConfig['fb_pixel'] !!}
+    @else
+        <!-- Meta Pixel Code -->
+        <script>
+          !function(f,b,e,v,n,t,s)
+          {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+          n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+          if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+          n.queue=[];t=b.createElement(e);t.async=!0;
+          t.src=v;s=b.getElementsByTagName(e)[0];
+          s.parentNode.insertBefore(t,s)}(window, document,'script',
+          'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('init', '1795805000795623');
+          fbq('track', 'PageView');
+        </script>
+        <noscript><img height="1" width="1" style="display:none"
+          src="https://www.facebook.com/tr?id=1795805000795623&ev=PageView&noscript=1"
+        /></noscript>
+        <!-- End Meta Pixel Code -->
     @endif
-    <!-- End Facebook Pixel Code -->
 
     <style>
         img.mw-100.h-30px.h-md-40px {
@@ -1415,6 +1433,54 @@
             });
         });
 
+        // Track AddToCart Event for Meta Pixel & GTM DataLayer (Isolated & Non-blocking)
+        function trackAddToCart(data) {
+            if (!data || data.status !== 'success') return;
+            var productId = data.product_id || '';
+            var productName = data.product_name || '';
+            var productPrice = parseFloat(data.product_price) || 0;
+            var quantity = parseInt(data.quantity) || 1;
+            var currency = data.currency || 'BDT';
+            var eventId = 'add_to_cart_' + productId + '_' + Date.now();
+
+            // 1. Google Tag Manager (DataLayer) Event
+            try {
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ ecommerce: null });
+                window.dataLayer.push({
+                    'event': 'add_to_cart',
+                    'event_id': eventId,
+                    'ecommerce': {
+                        'currency': currency,
+                        'value': productPrice * quantity,
+                        'items': [{
+                            'item_id': String(productId),
+                            'item_name': productName,
+                            'price': productPrice,
+                            'quantity': quantity
+                        }]
+                    }
+                });
+            } catch (e) {
+                console.error("GTM AddToCart Error:", e);
+            }
+
+            // 2. Direct Meta Pixel Event (with matching eventID for deduplication)
+            try {
+                if (typeof window.fbq === 'function') {
+                    window.fbq('track', 'AddToCart', {
+                        content_type: 'product',
+                        content_ids: [String(productId)],
+                        content_name: productName,
+                        value: productPrice * quantity,
+                        currency: currency
+                    }, { eventID: eventId });
+                }
+            } catch (e) {
+                console.error("Meta Pixel AddToCart Error:", e);
+            }
+        }
+
         // ২. মেইন Add to Cart ফাংশন
         function addToCart(id, options = {}) {
             if (!options.quantity) {
@@ -1430,6 +1496,7 @@
                     $('#cart-modal-content').html(data.view);
                     $('#cart-modal').modal('show');
                 } else if (data.status === 'success') {
+                    trackAddToCart(data);
                     // নেভবার আপডেট
                     updateNavCart();
 
@@ -1493,6 +1560,7 @@
                 quantity: quantity
             }, function(data) {
                 if (data.status === 'success') {
+                    trackAddToCart(data);
                     $('#cart-modal').modal('hide');
                     updateNavCart();
 
@@ -1726,6 +1794,7 @@
                     $('#cart-modal-content').find('button').attr('onclick', 'confirmBuyNow()');
 
                 } else if (data.status === 'success') {
+                    trackAddToCart(data);
                     // ২. যদি কোনো অ্যাট্রিবিউট না থাকে, সরাসরি চেকআউটে রিডাইরেক্ট
                     window.location.href = "{{ route('checkout') }}";
                 }
@@ -1780,6 +1849,7 @@
                 quantity: quantity
             }, function(data) {
                 if (data.status === 'success') {
+                    trackAddToCart(data);
                     // মডাল হাইড করে সরাসরি চেকআউট পেজে রিডাইরেক্ট
                     $('#cart-modal').modal('hide');
                     window.location.href = "{{ route('checkout') }}";

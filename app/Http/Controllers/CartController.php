@@ -96,7 +96,12 @@ class CartController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'Product added to cart!',
-            'cart_count' => $totalCount
+            'cart_count' => $totalCount,
+            'product_id' => (string) $product->id,
+            'product_name' => $product->title,
+            'product_price' => (float) $product->new_price,
+            'quantity' => $qty,
+            'currency' => 'BDT'
         ]);
     }
 
