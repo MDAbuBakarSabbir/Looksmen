@@ -474,11 +474,17 @@
     $purchaseEventId = 'purchase_' . ($order->id ?? time());
 @endphp
 <script>
-@if(session('order_placed'))
     (function () {
         var eventId = '{{ $purchaseEventId }}';
         var orderId = '{{ $order->id ?? "" }}';
         var totalValue = {{ (float) ($order->grand_total ?? 0) }};
+
+        // Prevent duplicate trigger using sessionStorage
+        var trackedKey = 'purchase_tracked_' + orderId;
+        if (sessionStorage.getItem(trackedKey)) {
+            return; // Already tracked for this session
+        }
+        sessionStorage.setItem(trackedKey, '1');
 
         // 1. Google Tag Manager (DataLayer) Event
         try {
@@ -539,14 +545,19 @@
             if (typeof window.fbq === 'function') {
                 fireMetaPixel();
             } else {
-                // If fbq is loaded asynchronously, wait a bit
-                setTimeout(fireMetaPixel, 1000);
+                var attempts = 0;
+                var interval = setInterval(function() {
+                    if (typeof window.fbq === 'function') {
+                        fireMetaPixel();
+                        clearInterval(interval);
+                    }
+                    if (++attempts > 20) clearInterval(interval);
+                }, 500);
             }
         } catch (e) {
             console.error("Meta Pixel Purchase Error:", e);
         }
     })();
-@endif
 </script>
 @endsection
 

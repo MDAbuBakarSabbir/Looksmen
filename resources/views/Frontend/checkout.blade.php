@@ -1370,8 +1370,14 @@
             if (typeof window.fbq === 'function') {
                 fireMetaPixel();
             } else {
-                // If fbq is loaded asynchronously, wait a bit
-                setTimeout(fireMetaPixel, 1000);
+                var attempts = 0;
+                var interval = setInterval(function() {
+                    if (typeof window.fbq === 'function') {
+                        fireMetaPixel();
+                        clearInterval(interval);
+                    }
+                    if (++attempts > 20) clearInterval(interval);
+                }, 500);
             }
         } catch (e) {
             console.error("Meta Pixel InitiateCheckout Error:", e);
