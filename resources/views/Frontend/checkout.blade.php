@@ -1331,58 +1331,54 @@
     $checkoutEventId = 'begin_checkout_' . time();
 @endphp
 <script>
-    (function () {
-        var eventId = '{{ $checkoutEventId }}';
-        var totalVal = {{ (float) ($subtotal ?? 0) }};
+    var eventId = '{{ $checkoutEventId }}';
+    var totalVal = {{ (float) ($subtotal ?? 0) }};
 
-        // 1. Google Tag Manager (DataLayer) Event
-        try {
-            window.dataLayer = window.dataLayer || [];
-            window.dataLayer.push({ ecommerce: null });
-            window.dataLayer.push({
-                'event': 'begin_checkout',
-                'event_id': eventId,
-                'ecommerce': {
-                    'currency': 'BDT',
-                    'value': totalVal,
-                    'items': {!! json_encode($checkoutItemsArr) !!}
-                }
-            });
-        } catch (e) {
-            console.error("GTM InitiateCheckout Error:", e);
-        }
-
-        // 2. Direct Meta Pixel Event
-        try {
-            var fireMetaPixel = function() {
-                if (typeof window.fbq === 'function') {
-                    window.fbq('track', 'InitiateCheckout', {
-                        content_type: 'product',
-                        content_ids: {!! json_encode($checkoutContentIds) !!},
-                        contents: {!! json_encode($checkoutFbContents) !!},
-                        value: totalVal,
-                        currency: 'BDT',
-                        num_items: {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }}
-                    }, { eventID: eventId });
-                }
-            };
-            
-            if (typeof window.fbq === 'function') {
-                fireMetaPixel();
-            } else {
-                var attempts = 0;
-                var interval = setInterval(function() {
-                    if (typeof window.fbq === 'function') {
-                        fireMetaPixel();
-                        clearInterval(interval);
-                    }
-                    if (++attempts > 20) clearInterval(interval);
-                }, 500);
+    // 1. Google Tag Manager (DataLayer) Event
+    try {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push({
+            'event': 'begin_checkout',
+            'event_id': eventId,
+            'ecommerce': {
+                'currency': 'BDT',
+                'value': totalVal,
+                'items': {!! json_encode($checkoutItemsArr) !!}
             }
-        } catch (e) {
-            console.error("Meta Pixel InitiateCheckout Error:", e);
+        });
+    } catch (e) {
+        console.error("GTM InitiateCheckout Error:", e);
+    }
+
+    // 2. Direct Meta Pixel Event
+    try {
+        var trackCheckout = function() {
+            if (typeof window.fbq === 'function') {
+                window.fbq('track', 'InitiateCheckout', {
+                    content_type: 'product',
+                    content_ids: {!! json_encode($checkoutContentIds) !!},
+                    contents: {!! json_encode($checkoutFbContents) !!},
+                    value: totalVal,
+                    currency: 'BDT',
+                    num_items: {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }}
+                }, { eventID: eventId });
+                return true;
+            }
+            return false;
+        };
+        
+        if (!trackCheckout()) {
+            var checkoutAttempts = 0;
+            var checkoutInterval = setInterval(function() {
+                if (trackCheckout() || ++checkoutAttempts > 20) {
+                    clearInterval(checkoutInterval);
+                }
+            }, 500);
         }
-    })();
+    } catch (e) {
+        console.error("Meta Pixel InitiateCheckout Error:", e);
+    }
 </script>
 @endsection
 
