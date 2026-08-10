@@ -1332,13 +1332,11 @@
 @endphp
 <script>
     var eventId = '{{ $checkoutEventId }}';
-    var totalVal = {{ (float) ($subtotal ?? 0) }};
+    var totalVal = Number("{{ (float) ($subtotal ?? 0) }}");
 
     // 1. Google Tag Manager (DataLayer) Event
     try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
+        var gtmPayload = {
             'event': 'begin_checkout',
             'event_id': eventId,
             'ecommerce': {
@@ -1346,32 +1344,41 @@
                 'value': totalVal,
                 'items': {!! json_encode($checkoutItemsArr) !!}
             }
-        });
+        };
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({ ecommerce: null });
+        window.dataLayer.push(gtmPayload);
+        console.log("GTM InitiateCheckout Fired:", gtmPayload);
     } catch (e) {
         console.error("GTM InitiateCheckout Error:", e);
     }
 
     // 2. Direct Meta Pixel Event
     try {
+        var fbPayload = {
+            content_type: 'product',
+            content_ids: {!! json_encode($checkoutContentIds) !!},
+            contents: {!! json_encode($checkoutFbContents) !!},
+            value: totalVal,
+            currency: 'BDT',
+            num_items: {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }}
+        };
+        
         var trackCheckout = function() {
             if (typeof window.fbq === 'function') {
-                window.fbq('track', 'InitiateCheckout', {
-                    content_type: 'product',
-                    content_ids: {!! json_encode($checkoutContentIds) !!},
-                    contents: {!! json_encode($checkoutFbContents) !!},
-                    value: totalVal,
-                    currency: 'BDT',
-                    num_items: {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }}
-                }, { eventID: eventId });
+                window.fbq('track', 'InitiateCheckout', fbPayload, { eventID: eventId });
+                console.log("Meta Pixel InitiateCheckout Fired:", fbPayload);
                 return true;
             }
             return false;
         };
         
         if (!trackCheckout()) {
+            console.log("Waiting for Meta Pixel (fbq) to load...");
             var checkoutAttempts = 0;
             var checkoutInterval = setInterval(function() {
-                if (trackCheckout() || ++checkoutAttempts > 20) {
+                if (trackCheckout() || ++checkoutAttempts > 40) { // Try for 20 seconds
+                    if (checkoutAttempts > 40) console.warn("Meta Pixel (fbq) did not load in time.");
                     clearInterval(checkoutInterval);
                 }
             }, 500);
