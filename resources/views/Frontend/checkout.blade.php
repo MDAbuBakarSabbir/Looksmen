@@ -1331,7 +1331,7 @@
     $checkoutEventId = 'begin_checkout_' . time();
 @endphp
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+    (function () {
         var eventId = '{{ $checkoutEventId }}';
         var totalVal = {{ (float) ($subtotal ?? 0) }};
 
@@ -1354,20 +1354,29 @@
 
         // 2. Direct Meta Pixel Event
         try {
+            var fireMetaPixel = function() {
+                if (typeof window.fbq === 'function') {
+                    window.fbq('track', 'InitiateCheckout', {
+                        content_type: 'product',
+                        content_ids: {!! json_encode($checkoutContentIds) !!},
+                        contents: {!! json_encode($checkoutFbContents) !!},
+                        value: totalVal,
+                        currency: 'BDT',
+                        num_items: {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }}
+                    }, { eventID: eventId });
+                }
+            };
+            
             if (typeof window.fbq === 'function') {
-                window.fbq('track', 'InitiateCheckout', {
-                    content_type: 'product',
-                    content_ids: {!! json_encode($checkoutContentIds) !!},
-                    contents: {!! json_encode($checkoutFbContents) !!},
-                    value: totalVal,
-                    currency: 'BDT',
-                    num_items: {{ count($cart ?? []) }}
-                }, { eventID: eventId });
+                fireMetaPixel();
+            } else {
+                // If fbq is loaded asynchronously, wait a bit
+                setTimeout(fireMetaPixel, 1000);
             }
         } catch (e) {
             console.error("Meta Pixel InitiateCheckout Error:", e);
         }
-    });
+    })();
 </script>
 @endsection
 

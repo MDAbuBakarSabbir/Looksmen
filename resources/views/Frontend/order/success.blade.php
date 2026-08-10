@@ -474,68 +474,79 @@
     $purchaseEventId = 'purchase_' . ($order->id ?? time());
 @endphp
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    var eventId = '{{ $purchaseEventId }}';
-    var orderId = '{{ $order->id ?? "" }}';
-    var totalValue = {{ (float) ($order->grand_total ?? 0) }};
+@if(session('order_placed'))
+    (function () {
+        var eventId = '{{ $purchaseEventId }}';
+        var orderId = '{{ $order->id ?? "" }}';
+        var totalValue = {{ (float) ($order->grand_total ?? 0) }};
 
-    // 1. Google Tag Manager (DataLayer) Event
-    try {
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({ ecommerce: null });
-        window.dataLayer.push({
-            'event': 'purchase',
-            'event_id': eventId,
-            'order_id': orderId,
-            'user_data': {
-                'email': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
-                'phone_number': {!! json_encode(preg_replace("/[^0-9]/", "", $order->phone ?? '')) !!},
-                'first_name': {!! json_encode(strtolower(trim($order->name ?? ''))) !!},
-                'address': {
-                    'country': 'BD'
+        // 1. Google Tag Manager (DataLayer) Event
+        try {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push({
+                'event': 'purchase',
+                'event_id': eventId,
+                'order_id': orderId,
+                'user_data': {
+                    'email': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
+                    'phone_number': {!! json_encode(preg_replace("/[^0-9]/", "", $order->phone ?? '')) !!},
+                    'first_name': {!! json_encode(strtolower(trim($order->name ?? ''))) !!},
+                    'address': {
+                        'country': 'BD'
+                    }
+                },
+                'ecommerce': {
+                    'transaction_id': orderId,
+                    'value': totalValue,
+                    'tax': 0,
+                    'shipping': {{ (float) ($order->delivery_charge ?? 0) }},
+                    'currency': 'BDT',
+                    'items': {!! json_encode($itemsArr) !!}
                 }
-            },
-            'ecommerce': {
-                'transaction_id': orderId,
-                'value': totalValue,
-                'tax': 0,
-                'shipping': {{ (float) ($order->delivery_charge ?? 0) }},
-                'currency': 'BDT',
-                'items': {!! json_encode($itemsArr) !!}
-            }
-        });
-    } catch (e) {
-        console.error("GTM Purchase Error:", e);
-    }
-
-    // 2. Direct Meta Pixel Event (Product + Customer Data)
-    try {
-        if (typeof window.fbq === 'function') {
-            window.fbq('setUserProperties', {
-                'em': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
-                'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
-                'fn': {!! json_encode(strtolower(trim($order->name ?? ""))) !!},
-                'st': 'BD',
-                'external_id': '{{ $order->user_id ?? "" }}'
             });
-
-            window.fbq('track', 'Purchase', {
-                content_type: 'product',
-                content_name: {!! json_encode($productNamesStr) !!},
-                content_ids: {!! json_encode($productIds) !!},
-                contents: {!! json_encode($fbContentsArr) !!},
-                num_items: {{ count($itemsArr) }},
-                value: totalValue,
-                currency: 'BDT',
-                order_id: orderId
-            }, {
-                eventID: eventId
-            });
+        } catch (e) {
+            console.error("GTM Purchase Error:", e);
         }
-    } catch (e) {
-        console.error("Meta Pixel Purchase Error:", e);
-    }
-});
+
+        // 2. Direct Meta Pixel Event (Product + Customer Data)
+        try {
+            var fireMetaPixel = function() {
+                if (typeof window.fbq === 'function') {
+                    window.fbq('setUserProperties', {
+                        'em': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
+                        'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
+                        'fn': {!! json_encode(strtolower(trim($order->name ?? ""))) !!},
+                        'st': 'BD',
+                        'external_id': '{{ $order->user_id ?? "" }}'
+                    });
+
+                    window.fbq('track', 'Purchase', {
+                        content_type: 'product',
+                        content_name: {!! json_encode($productNamesStr) !!},
+                        content_ids: {!! json_encode($productIds) !!},
+                        contents: {!! json_encode($fbContentsArr) !!},
+                        num_items: {{ count($itemsArr) }},
+                        value: totalValue,
+                        currency: 'BDT',
+                        order_id: orderId
+                    }, {
+                        eventID: eventId
+                    });
+                }
+            };
+            
+            if (typeof window.fbq === 'function') {
+                fireMetaPixel();
+            } else {
+                // If fbq is loaded asynchronously, wait a bit
+                setTimeout(fireMetaPixel, 1000);
+            }
+        } catch (e) {
+            console.error("Meta Pixel Purchase Error:", e);
+        }
+    })();
+@endif
 </script>
 @endsection
 
