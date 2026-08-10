@@ -1327,6 +1327,7 @@
         var eventId = '{{ $checkoutEventId }}';
         var totalVal = {{ (float) ($subtotal ?? 0) }};
 
+        // 1. Google Tag Manager (DataLayer) Event
         try {
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ ecommerce: null });
@@ -1341,6 +1342,20 @@
             });
         } catch (e) {
             console.error("GTM InitiateCheckout Error:", e);
+        }
+
+        // 2. Direct Meta Pixel Event
+        try {
+            if (typeof window.fbq === 'function') {
+                window.fbq('track', 'InitiateCheckout', {
+                    content_type: 'product',
+                    value: totalVal,
+                    currency: 'BDT',
+                    num_items: {{ count($cart ?? []) }}
+                }, { eventID: eventId });
+            }
+        } catch (e) {
+            console.error("Meta Pixel InitiateCheckout Error:", e);
         }
     });
 </script>

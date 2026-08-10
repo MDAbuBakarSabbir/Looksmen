@@ -1441,7 +1441,7 @@
             });
         });
 
-        // Track AddToCart Event for GTM DataLayer & Meta Pixel (Single Source of Truth)
+        // Track AddToCart Event for GTM DataLayer & Meta Pixel
         function trackAddToCart(data) {
             if (!data || data.status !== 'success') return;
             var productId = data.product_id || '';
@@ -1451,6 +1451,7 @@
             var currency = data.currency || 'BDT';
             var eventId = 'add_to_cart_' + productId + '_' + Date.now();
 
+            // 1. Google Tag Manager (DataLayer) Event
             try {
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({ ecommerce: null });
@@ -1470,6 +1471,21 @@
                 });
             } catch (e) {
                 console.error("GTM AddToCart Error:", e);
+            }
+
+            // 2. Direct Meta Pixel Event
+            try {
+                if (typeof window.fbq === 'function') {
+                    window.fbq('track', 'AddToCart', {
+                        content_type: 'product',
+                        content_ids: [String(productId)],
+                        content_name: productName,
+                        value: productPrice * quantity,
+                        currency: currency
+                    }, { eventID: eventId });
+                }
+            } catch (e) {
+                console.error("Meta Pixel AddToCart Error:", e);
             }
         }
 

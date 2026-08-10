@@ -1082,7 +1082,7 @@
         });
     </script>
 
-    <!-- DataLayer ViewContent Event (Single Source of Truth for GTM) -->
+    <!-- DataLayer & Meta Pixel ViewContent Event -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             var productId = '{{ $singleProduct->id }}';
@@ -1090,6 +1090,7 @@
             var price = parseFloat('{{ $singleProduct->new_price ?? 0 }}') || 0;
             var eventId = 'view_item_' + productId + '_' + Date.now();
 
+            // 1. Google Tag Manager (DataLayer) Event
             try {
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({ ecommerce: null });
@@ -1109,6 +1110,21 @@
                 });
             } catch (e) {
                 console.error("GTM ViewContent Error:", e);
+            }
+
+            // 2. Direct Meta Pixel Event
+            try {
+                if (typeof window.fbq === 'function') {
+                    window.fbq('track', 'ViewContent', {
+                        content_type: 'product',
+                        content_ids: [String(productId)],
+                        content_name: productName,
+                        value: price,
+                        currency: 'BDT'
+                    }, { eventID: eventId });
+                }
+            } catch (e) {
+                console.error("Meta Pixel ViewContent Error:", e);
             }
         });
     </script>
