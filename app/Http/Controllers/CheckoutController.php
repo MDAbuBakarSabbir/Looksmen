@@ -350,25 +350,34 @@ class CheckoutController extends Controller
 
             DB::commit();
 
-            // Fetch & save Courier History to database immediately
-            try {
-                $order->getCourierHistoryData();
-            } catch (\Exception $e) {
-                \Log::error('Order creation courier history check error: '.$e->getMessage());
-            }
+            // Defer slow operations until after the response is sent
+            $orderId = $order->id;
+            $userEmail = auth()->check() ? auth()->user()->email : null;
+            $customerName = $order->name;
+            $grandTotal = $order->grand_total;
+            
+            app()->terminating(function () use ($orderId, $userEmail, $customerName, $grandTotal) {
+                $order = \App\Models\Orders::find($orderId);
+                if ($order) {
+                    try {
+                        $order->getCourierHistoryData();
+                    } catch (\Exception $e) {
+                        \Log::error('Order creation courier history check error: '.$e->getMessage());
+                    }
 
-            // Send Order Confirmation Mail
-            try {
-                if (auth()->check() && auth()->user()->email) {
-                    send_template_mail(auth()->user()->email, 'order_confirmation_mail', [
-                        'customer_name' => $order->name,
-                        'order_id' => $order->id,
-                        'order_total' => $order->grand_total,
-                    ]);
+                    try {
+                        if ($userEmail) {
+                            send_template_mail($userEmail, 'order_confirmation_mail', [
+                                'customer_name' => $customerName,
+                                'order_id' => $orderId,
+                                'order_total' => $grandTotal,
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Order Confirmation Mail Trigger Error: '.$e->getMessage());
+                    }
                 }
-            } catch (\Exception $e) {
-                \Log::error('Order Confirmation Mail Trigger Error: '.$e->getMessage());
-            }
+            });
 
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');

@@ -1275,6 +1275,21 @@
                     text: 'দয়া করে আপনার জেলা নির্বাচন করুন।'
                 });
                 $('.select2-selection').css('border', '1px solid red');
+                return false;
+            }
+            
+            // Show preloader and disable button to prevent multiple clicks
+            $('#confirm_order_btn').prop('disabled', true).html('<i class="las la-spinner la-spin"></i> Processing...');
+            
+            if (typeof Swal !== 'undefined') {
+                Swal.fire({
+                    title: 'অপেক্ষা করুন...',
+                    text: 'আপনার অর্ডারটি প্রসেস করা হচ্ছে।',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
             }
         });
 
