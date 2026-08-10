@@ -147,7 +147,7 @@
                                     <del class="price-old" style="font-size: 13px; color: #94a3b8; text-decoration: line-through;">৳{{ $product->old_price }}</del>
                                 @endif
                             </div>
-                            <button type="button" class="btn-gradient-primary w-100 add-to-cart-btn" data-id="{{ $product->id }}" data-type="product" style="background: linear-gradient(135deg, #4f46e5, #6366f1); border: none; color: #fff; font-weight: 600; padding: 10px; border-radius: 8px; transition: opacity 0.2s;">
+                            <button type="button" class="btn-gradient-primary w-100 action-add-to-cart" data-id="{{ $product->id }}" data-type="product" style="background: linear-gradient(135deg, #4f46e5, #6366f1); border: none; color: #fff; font-weight: 600; padding: 10px; border-radius: 8px; transition: opacity 0.2s;">
                                 <i class="las la-shopping-cart mr-1"></i> Add to Cart
                             </button>
                         </div>

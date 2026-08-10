@@ -247,9 +247,9 @@ HOME
                                     <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
                                         <a href="{{ route('ProductView', [$newArival->id, $newArival->slug]) }}" class="d-block text-reset">{{ $newArival->title }}</a>
                                     </h3>
-                                    <a href="javascript:void(0)" class="btn btn-primary add-to-cart-btn mt-2" style="width: 100%" data-title="Add to cart" data-id="{{ $newArival->id }}" data-type="product">
+                                    <button type="button" class="btn btn-primary action-add-to-cart mt-2" style="width: 100%" data-title="Add to cart" data-id="{{ $newArival->id }}" data-type="product">
                                         Add to Cart
-                                    </a>
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -416,11 +416,11 @@ HOME
                                                         class="d-block text-reset">{{ $product->title }}</a>
                                                 </h3>
 
-                                                <a href="javascript:void(0)" class="btn btn-primary add-to-cart-btn mt-2"
+                                                <button type="button" class="btn btn-primary action-add-to-cart mt-2"
                                                     style="width: 100%" data-title="Add to cart"
                                                     data-id="{{ $product->id }}" data-type="product">
                                                     Add to Cart
-                                                </a>
+                                                </button>
 
                                             </div>
                                         </div>

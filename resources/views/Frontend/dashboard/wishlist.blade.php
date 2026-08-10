@@ -66,7 +66,7 @@
                                             <del class="price-old">&#2547;{{ $wishlist->product->old_price }}</del>
                                         @endif
                                     </div>
-                                    <button type="button" class="btn-gradient-primary w-100 add-to-cart-btn" data-id="{{ $wishlist->product->id }}" data-type="product">
+                                    <button type="button" class="btn-gradient-primary w-100 action-add-to-cart" data-id="{{ $wishlist->product->id }}" data-type="product">
                                         <i class="las la-shopping-cart mr-1"></i> Add to Cart
                                     </button>
                                 </div>

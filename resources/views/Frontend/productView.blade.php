@@ -646,13 +646,13 @@
                                 <!-- Add to Cart / Buy Now Action buttons -->
                                 <div class="mt-4 pt-2 d-flex" style="gap: 12px;">
                                     @if ($singleProduct->stock != 0)
-                                        <a href="javascript:void(0)"
-                                            class="btn btn-action-modern btn-add-cart-custom add-to-cart-btn flex-fill d-flex justify-content-center align-items-center"
+                                        <button type="button"
+                                            class="btn btn-action-modern btn-add-cart-custom action-add-to-cart flex-fill d-flex justify-content-center align-items-center"
                                             data-title="Add to cart" data-id="{{ $singleProduct->id }}"
-                                            data-type="product" style="gap: 6px; padding: 12px 10px;">
+                                            data-type="product" style="gap: 6px; padding: 12px 10px; border: none;">
                                             <i class="fa fa-shopping-bag" style="font-size: 1.1rem;"></i>
                                             <span style="white-space: nowrap;">Add to Cart</span>
-                                        </a>
+                                        </button>
                                         <a href="javascript:void(0)" class="btn btn-action-modern btn-buy-now-custom buy-now-btn flex-fill d-flex justify-content-center align-items-center"
                                             data-title="Buy Now" data-id="{{ $singleProduct->id }}"
                                             data-type="product" style="gap: 6px; padding: 12px 10px;">

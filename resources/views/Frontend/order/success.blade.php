@@ -443,19 +443,30 @@
 @section('script')
 @php
     $itemsArr = [];
+    $fbContentsArr = [];
     $productNames = [];
     $productIds = [];
     if (!empty($order->orderDetails)) {
         foreach($order->orderDetails as $detail) {
-            $pTitle = $detail->orderProduct->title ?? ('Product #' . $detail->product_id);
+            $pId = (string) $detail->product_id;
+            $pTitle = $detail->orderProduct->title ?? ('Product #' . $pId);
+            $pQty = (int) $detail->product_qty;
+            $uPrice = (float) ($detail->unit_price > 0 ? $detail->unit_price : ($detail->orderProduct->new_price ?? 0));
+
             $productNames[] = $pTitle;
-            $productIds[] = (string) $detail->product_id;
-            $uPrice = $detail->unit_price > 0 ? $detail->unit_price : ($detail->orderProduct->new_price ?? 0);
+            $productIds[] = $pId;
+
             $itemsArr[] = [
-                'item_id' => (string) $detail->product_id,
+                'item_id' => $pId,
                 'item_name' => $pTitle,
-                'price' => (float) $uPrice,
-                'quantity' => (int) $detail->product_qty
+                'price' => $uPrice,
+                'quantity' => $pQty
+            ];
+
+            $fbContentsArr[] = [
+                'id' => $pId,
+                'quantity' => $pQty,
+                'item_price' => $uPrice
             ];
         }
     }
@@ -476,6 +487,14 @@ document.addEventListener("DOMContentLoaded", function () {
             'event': 'purchase',
             'event_id': eventId,
             'order_id': orderId,
+            'user_data': {
+                'email': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
+                'phone_number': {!! json_encode(preg_replace("/[^0-9]/", "", $order->phone ?? '')) !!},
+                'first_name': {!! json_encode(strtolower(trim($order->name ?? ''))) !!},
+                'address': {
+                    'country': 'BD'
+                }
+            },
             'ecommerce': {
                 'transaction_id': orderId,
                 'value': totalValue,
@@ -489,19 +508,23 @@ document.addEventListener("DOMContentLoaded", function () {
         console.error("GTM Purchase Error:", e);
     }
 
-    // 2. Direct Meta Pixel Event
+    // 2. Direct Meta Pixel Event (Product + Customer Data)
     try {
         if (typeof window.fbq === 'function') {
             window.fbq('setUserProperties', {
+                'em': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
                 'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
                 'fn': {!! json_encode(strtolower(trim($order->name ?? ""))) !!},
-                'st': 'BD'
+                'st': 'BD',
+                'external_id': '{{ $order->user_id ?? "" }}'
             });
 
             window.fbq('track', 'Purchase', {
                 content_type: 'product',
                 content_name: {!! json_encode($productNamesStr) !!},
                 content_ids: {!! json_encode($productIds) !!},
+                contents: {!! json_encode($fbContentsArr) !!},
+                num_items: {{ count($itemsArr) }},
                 value: totalValue,
                 currency: 'BDT',
                 order_id: orderId

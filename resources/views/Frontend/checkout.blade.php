@@ -1299,24 +1299,32 @@
 @section('script')
 @php
     $checkoutItemsArr = [];
+    $checkoutContentIds = [];
+    $checkoutFbContents = [];
     if (!empty($cart)) {
         foreach ($cart as $cItem) {
             if (is_object($cItem)) {
-                $pId = $cItem->product_id;
+                $pId = (string) $cItem->product_id;
                 $pName = $cItem->product->title ?? ('Product #' . $pId);
                 $pPrice = (float) ($cItem->product->new_price ?? 0);
                 $pQty = (int) $cItem->quantity;
             } else {
-                $pId = $cItem['id'] ?? 0;
+                $pId = (string) ($cItem['id'] ?? 0);
                 $pName = $cItem['name'] ?? ('Product #' . $pId);
                 $pPrice = (float) ($cItem['price'] ?? 0);
                 $pQty = (int) ($cItem['quantity'] ?? 1);
             }
             $checkoutItemsArr[] = [
-                'item_id' => (string) $pId,
+                'item_id' => $pId,
                 'item_name' => $pName,
                 'price' => $pPrice,
                 'quantity' => $pQty
+            ];
+            $checkoutContentIds[] = $pId;
+            $checkoutFbContents[] = [
+                'id' => $pId,
+                'quantity' => $pQty,
+                'item_price' => $pPrice
             ];
         }
     }
@@ -1349,6 +1357,8 @@
             if (typeof window.fbq === 'function') {
                 window.fbq('track', 'InitiateCheckout', {
                     content_type: 'product',
+                    content_ids: {!! json_encode($checkoutContentIds) !!},
+                    contents: {!! json_encode($checkoutFbContents) !!},
                     value: totalVal,
                     currency: 'BDT',
                     num_items: {{ count($cart ?? []) }}

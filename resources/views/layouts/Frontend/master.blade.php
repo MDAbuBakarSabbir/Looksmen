@@ -1402,7 +1402,7 @@
     <script>
         $(document).ready(function() {
             // ১. Add to Cart Click
-            $(document).on('click', '.add-to-cart-btn', function(e) {
+            $(document).on('click', '.action-add-to-cart', function(e) {
                 e.preventDefault();
                 let id = $(this).data('id');
                 let quantity = $('input[name="quantity"]').val() || 1;
@@ -1480,6 +1480,11 @@
                         content_type: 'product',
                         content_ids: [String(productId)],
                         content_name: productName,
+                        contents: [{
+                            id: String(productId),
+                            quantity: quantity,
+                            item_price: productPrice
+                        }],
                         value: productPrice * quantity,
                         currency: currency
                     }, { eventID: eventId });
