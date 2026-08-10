@@ -468,7 +468,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var orderId = '{{ $order->id ?? "" }}';
     var totalValue = {{ (float) ($order->grand_total ?? 0) }};
 
-    // 1. Google Tag Manager (DataLayer) Event
     try {
         window.dataLayer = window.dataLayer || [];
         window.dataLayer.push({ ecommerce: null });
@@ -487,30 +486,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     } catch (e) {
         console.error("GTM Purchase Error:", e);
-    }
-
-    // 2. Direct Meta Pixel Event (with matching eventID for deduplication)
-    try {
-        if (typeof window.fbq === 'function') {
-            window.fbq('setUserProperties', {
-                'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
-                'fn': {!! json_encode(strtolower(trim($order->name ?? ""))) !!},
-                'st': 'BD'
-            });
-
-            window.fbq('track', 'Purchase', {
-                content_type: 'product',
-                content_name: {!! json_encode($productNamesStr) !!},
-                content_ids: {!! json_encode($productIds) !!},
-                value: totalValue,
-                currency: 'BDT',
-                order_id: orderId
-            }, {
-                eventID: eventId
-            });
-        }
-    } catch (e) {
-        console.error("Meta Pixel Purchase Error:", e);
     }
 });
 </script>

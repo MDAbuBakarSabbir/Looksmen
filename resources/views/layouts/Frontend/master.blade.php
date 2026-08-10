@@ -262,7 +262,15 @@
           t.src=v;s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
-          fbq('init', '1795805000795623');
+          @auth
+            fbq('init', '1795805000795623', {
+              em: '{{ strtolower(trim(auth()->user()->email ?? "")) }}',
+              ph: '{{ preg_replace("/[^0-9]/", "", auth()->user()->phone ?? "") }}',
+              fn: '{{ strtolower(trim(auth()->user()->name ?? "")) }}'
+            });
+          @else
+            fbq('init', '1795805000795623');
+          @endauth
           fbq('track', 'PageView');
         </script>
         <noscript><img height="1" width="1" style="display:none"
@@ -1433,7 +1441,7 @@
             });
         });
 
-        // Track AddToCart Event for Meta Pixel & GTM DataLayer (Isolated & Non-blocking)
+        // Track AddToCart Event for GTM DataLayer & Meta Pixel (Single Source of Truth)
         function trackAddToCart(data) {
             if (!data || data.status !== 'success') return;
             var productId = data.product_id || '';
@@ -1443,7 +1451,6 @@
             var currency = data.currency || 'BDT';
             var eventId = 'add_to_cart_' + productId + '_' + Date.now();
 
-            // 1. Google Tag Manager (DataLayer) Event
             try {
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({ ecommerce: null });
@@ -1463,21 +1470,6 @@
                 });
             } catch (e) {
                 console.error("GTM AddToCart Error:", e);
-            }
-
-            // 2. Direct Meta Pixel Event (with matching eventID for deduplication)
-            try {
-                if (typeof window.fbq === 'function') {
-                    window.fbq('track', 'AddToCart', {
-                        content_type: 'product',
-                        content_ids: [String(productId)],
-                        content_name: productName,
-                        value: productPrice * quantity,
-                        currency: currency
-                    }, { eventID: eventId });
-                }
-            } catch (e) {
-                console.error("Meta Pixel AddToCart Error:", e);
             }
         }
 
@@ -2370,31 +2362,6 @@
         }
     </script>
     @endif
-    <script>
-  !function(f,b,e,v,n,t,s)
-  {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-  n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-  if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-  n.queue=[];t=b.createElement(e);t.async=!0;
-  t.src=v;s=b.getElementsByTagName(e)[0];
-  s.parentNode.insertBefore(t,s)}(window, document,'script',
-  'https://connect.facebook.net/en_US/fbevents.js');
-
-  @auth
-    // কাস্টমার লগইন থাকলে তার প্রোফাইল ডাটা
-    fbq('init', 'YOUR_PIXEL_ID', {
-      em: '{{ strtolower(trim(auth()->user()->email ?? "")) }}',
-      ph: '{{ preg_replace("/[^0-9]/", "", auth()->user()->phone ?? "") }}',
-      fn: '{{ strtolower(trim(auth()->user()->name ?? "")) }}'
-    });
-  @else
-    // কাস্টমার গেস্ট হলে নরমাল পিক্সেল
-    fbq('init', 'YOUR_PIXEL_ID');
-  @endauth
-
-  fbq('track', 'PageView');
-</script>
-
     @yield('script')
 </body>
 </html>
