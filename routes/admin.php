@@ -76,7 +76,43 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         } catch (Exception $e) {
             return response()->json(['success' => false, 'message' => 'Something went wrong!'], 500);
         }
-    })->name('clear.cache')->middleware('admin.permission:setup_general_settings');
+    })->name('clear.cache')->middleware('admin.permission:setup_system_commands');
+
+    Route::get('/optimize', function () {
+        try {
+            Artisan::call('config:cache');
+            Artisan::call('route:cache');
+            Artisan::call('view:cache');
+
+            return response()->json(['success' => true, 'message' => 'Application optimized (config, route, view cached) successfully!']);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Something went wrong: '.$e->getMessage()], 500);
+        }
+    })->name('optimize')->middleware('admin.permission:setup_system_commands');
+
+    Route::get('/migrate', function () {
+        try {
+            Artisan::call('migrate', ['--force' => true]);
+
+            return response()->json(['success' => true, 'message' => 'Database migrated successfully!', 'output' => Artisan::output()]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Something went wrong: '.$e->getMessage()], 500);
+        }
+    })->name('migrate')->middleware('admin.permission:setup_system_commands');
+
+    Route::get('/seed', function () {
+        try {
+            Artisan::call('db:seed', ['--force' => true]);
+
+            return response()->json(['success' => true, 'message' => 'Database seeded successfully!', 'output' => Artisan::output()]);
+        } catch (Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Something went wrong: '.$e->getMessage()], 500);
+        }
+    })->name('seed')->middleware('admin.permission:setup_system_commands');
+
+    // System Commands UI and Truncate Routes
+    Route::get('/system-commands', [GeneralWebSettingsController::class, 'systemCommands'])->name('system-commands')->middleware('admin.permission:setup_system_commands');
+    Route::post('/system-commands/truncate', [GeneralWebSettingsController::class, 'truncateTable'])->name('system-commands.truncate')->middleware('admin.permission:setup_system_commands');
 
     Route::controller(AdminsController::class)->group(function () {
         Route::get('admins', 'index')->name('admin.index')->middleware('admin.permission:manage_admin');

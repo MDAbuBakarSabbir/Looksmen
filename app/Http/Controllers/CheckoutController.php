@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
+use App\Jobs\CheckCourierHistory;
 
 class CheckoutController extends Controller
 {
@@ -224,8 +225,8 @@ class CheckoutController extends Controller
             [
                 'name' => $request->name ?? 'Customer',
                 'address' => $request->address ?? 'N/A',
-                'district' => \App\Models\District::find($request->district_id)?->name ?? 'N/A',
-                'thana' => \App\Models\Thana::find($request->thana_id)?->name ?? 'N/A',
+                'district' => \App\Models\District::getNameById($request->district_id),
+                'thana' => \App\Models\Thana::getNameById($request->thana_id),
                 'product_id' => json_encode($productCodes), // Array হিসেবে সেভ
                 'subtotal' => $request->subtotal,
                 'grand_total' => $request->grand_total,
@@ -279,8 +280,8 @@ class CheckoutController extends Controller
             $order->ip_address = $request->ip();
             $order->name = $request->name;
             $order->phone = $request->phone;
-            $order->district = \App\Models\District::find($request->district_id)?->name ?? 'N/A';
-            $order->thana = \App\Models\Thana::find($request->thana_id)?->name ?? 'N/A';
+            $order->district = \App\Models\District::getNameById($request->district_id);
+            $order->thana = \App\Models\Thana::getNameById($request->thana_id);
             $order->address = $request->address;
             $order->total_amount = $request->total_amount; // Subtotal
             $order->coupon_discount = $request->coupon_discount ?? 0;
@@ -323,61 +324,42 @@ class CheckoutController extends Controller
                 $order->save();
             }
 
-            // ৩. OrderDetails টেবিলে লুপ চালিয়ে প্রোডাক্ট সেভ
+            // ৩. OrderDetails টেবিলে লুপ চালিয়ে প্রোডাক্ট সেভ (Bulk Insert)
+            $orderDetails = [];
+            $now = now();
+            $referralCode = request()->cookie('referral_code');
+
             foreach ($cart as $item) {
-                $orderDetail = new OrderDetails;
-                $orderDetail->order_id = $order->id;
-                $orderDetail->product_id = $item['id'];
-                $orderDetail->product_attribute = $item['attribute'] ?? 'N/A';
-                $orderDetail->product_colour = $item['color'] ?? 'N/A';
-                $orderDetail->unit_price = (float) $item['price'];
-                $orderDetail->product_qty = $item['quantity'];
-                $orderDetail->total_price = (float) $item['price'] * (int) $item['quantity'];
-                if (request()->hasCookie('referral_code')) {
-                    $orderDetail->product_referral_code = request()->cookie('referral_code');
-                }
-                $orderDetail->save();
+                $orderDetails[] = [
+                    'order_id' => $order->id,
+                    'product_id' => $item['id'],
+                    'product_attribute' => $item['attribute'] ?? 'N/A',
+                    'product_colour' => $item['color'] ?? 'N/A',
+                    'unit_price' => (float) $item['price'],
+                    'product_qty' => $item['quantity'],
+                    'total_price' => (float) $item['price'] * (int) $item['quantity'],
+                    'product_referral_code' => $referralCode,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
+            OrderDetails::insert($orderDetails);
 
             // ৪. ইনকমপ্লিট অর্ডার ডিলিট করা (ফোন নম্বর দিয়ে ম্যাচ করে)
             IncompleteOrders::where('phone', $request->phone)->delete();
             if ($request->coupon_code) {
-                $coupon = Coupons::where('code', $request->coupon_code)->first();
-                if ($coupon) {
-                    $coupon->increment('used'); // used কলামের মান ১ বাড়বে
-                }
+                Coupons::where('code', $request->coupon_code)->increment('used');
             }
 
             DB::commit();
 
-            // Defer slow operations until after the response is sent
+            // Dispatch job to check courier history and send email asynchronously
             $orderId = $order->id;
             $userEmail = auth()->check() ? auth()->user()->email : null;
             $customerName = $order->name;
             $grandTotal = $order->grand_total;
             
-            app()->terminating(function () use ($orderId, $userEmail, $customerName, $grandTotal) {
-                $order = \App\Models\Orders::find($orderId);
-                if ($order) {
-                    try {
-                        $order->getCourierHistoryData();
-                    } catch (\Exception $e) {
-                        \Log::error('Order creation courier history check error: '.$e->getMessage());
-                    }
-
-                    try {
-                        if ($userEmail) {
-                            send_template_mail($userEmail, 'order_confirmation_mail', [
-                                'customer_name' => $customerName,
-                                'order_id' => $orderId,
-                                'order_total' => $grandTotal,
-                            ]);
-                        }
-                    } catch (\Exception $e) {
-                        \Log::error('Order Confirmation Mail Trigger Error: '.$e->getMessage());
-                    }
-                }
-            });
+            CheckCourierHistory::dispatch($orderId, $userEmail, $customerName, $grandTotal);
 
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');
@@ -491,8 +473,8 @@ class CheckoutController extends Controller
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
             $order->address = $orderData['address'];
-            $order->district = \App\Models\District::find($orderData['district_id'] ?? 0)?->name ?? 'N/A';
-            $order->thana = \App\Models\Thana::find($orderData['thana_id'] ?? 0)?->name ?? 'N/A';
+            $order->district = \App\Models\District::getNameById($orderData['district_id'] ?? 0);
+            $order->thana = \App\Models\Thana::getNameById($orderData['thana_id'] ?? 0);
             $order->total_amount = $orderData['total_amount'];
             $order->grand_total = $orderData['grand_total'];
             $order->payment_type = 'prepaid';
@@ -501,9 +483,13 @@ class CheckoutController extends Controller
             $order->delivery_status = 'pending';
             $order->save();
 
-            // ঘ. Order Details সেভ
+            // ঘ. Order Details সেভ (Bulk Insert)
+            $orderDetails = [];
+            $now = now();
+            $referralCode = request()->cookie('referral_code');
+
             foreach ($cart as $item) {
-                OrderDetails::create([
+                $orderDetails[] = [
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
                     'product_qty' => $item['quantity'],
@@ -511,17 +497,17 @@ class CheckoutController extends Controller
                     'total_price' => $item['price'] * $item['quantity'],
                     'product_attribute' => $item['attribute'] ?? 'N/A',
                     'product_colour' => $item['color'] ?? 'N/A',
-                    'product_referral_code' => request()->cookie('referral_code'),
-                ]);
+                    'product_referral_code' => $referralCode,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
+            OrderDetails::insert($orderDetails);
 
             DB::commit();
 
-            try {
-                $order->getCourierHistoryData();
-            } catch (\Exception $e) {
-                \Log::error('bKash finalize order courier history check error: '.$e->getMessage());
-            }
+            $userEmail = auth()->check() ? auth()->user()->email : null;
+            CheckCourierHistory::dispatch($order->id, $userEmail, $order->name, $order->grand_total);
             session()->forget(['cart', 'pending_order_data']);
 
             return redirect()->route('order.invoice', $order->id)->with('order_placed', 'success');
@@ -539,8 +525,8 @@ class CheckoutController extends Controller
         // ১. ফর্ম ডাটা সেশনে রাখা
         session()->put('pending_order_data', $request->all());
 
-        $district = District::find($request->district_id);
-        $payableAmount = $district->delivery_charge; // শুধুমাত্র ডেলিভারি চার্জ
+        $district = District::getById($request->district_id);
+        $payableAmount = $district ? $district->delivery_charge : 0; // শুধুমাত্র ডেলিভারি চার্জ
 
         $post_data = [
             'store_id' => env('SSLC_STORE_ID'),
@@ -555,7 +541,7 @@ class CheckoutController extends Controller
             'cus_name' => $request->name,
             'cus_phone' => $request->phone,
             'cus_add1' => $request->address,
-            'cus_city' => $district->name,
+            'cus_city' => $district ? $district->name : 'N/A',
             'cus_country' => 'Bangladesh',
             'shipping_method' => 'NO',
             'product_name' => 'Delivery Charge',
@@ -609,8 +595,8 @@ class CheckoutController extends Controller
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
             $order->address = $orderData['address'];
-            $order->district = \App\Models\District::find($orderData['district_id'] ?? 0)?->name ?? 'N/A';
-            $order->thana = \App\Models\Thana::find($orderData['thana_id'] ?? 0)?->name ?? 'N/A';
+            $order->district = \App\Models\District::getNameById($orderData['district_id'] ?? 0);
+            $order->thana = \App\Models\Thana::getNameById($orderData['thana_id'] ?? 0);
             $order->total_amount = $orderData['total_amount'];
             $order->delivery_charge = $orderData['delivery_charge'];
             $order->coupon_discount = $orderData['coupon_discount'] ?? 0;
@@ -624,9 +610,13 @@ class CheckoutController extends Controller
             $order->payment_id = $payment->id;
             $order->save();
 
-            // ৩. Order Details
+            // ৩. Order Details (Bulk Insert)
+            $orderDetails = [];
+            $now = now();
+            $referralCode = request()->cookie('referral_code');
+
             foreach ($cart as $item) {
-                OrderDetails::create([
+                $orderDetails[] = [
                     'order_id' => $order->id,
                     'product_id' => $item['id'],
                     'product_attribute' => $item['attribute'] ?? 'N/A',
@@ -634,17 +624,17 @@ class CheckoutController extends Controller
                     'product_qty' => $item['quantity'],
                     'unit_price' => $item['price'],
                     'total_price' => $item['price'] * $item['quantity'],
-                    'product_referral_code' => request()->cookie('referral_code'),
-                ]);
+                    'product_referral_code' => $referralCode,
+                    'created_at' => $now,
+                    'updated_at' => $now,
+                ];
             }
+            OrderDetails::insert($orderDetails);
             IncompleteOrders::where('phone', $orderData['phone'])->delete();
             DB::commit();
 
-            try {
-                $order->getCourierHistoryData();
-            } catch (\Exception $e) {
-                \Log::error('SSLCommerz success order courier history check error: '.$e->getMessage());
-            }
+            $userEmail = auth()->check() ? auth()->user()->email : null;
+            CheckCourierHistory::dispatch($order->id, $userEmail, $order->name, $order->grand_total);
             session()->forget(['cart', 'pending_order_data']);
 
             return redirect()->route('order.invoice', $order->id)->with('success', 'Order Placed Successfully!');

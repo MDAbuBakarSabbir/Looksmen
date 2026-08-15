@@ -73,11 +73,16 @@
         </td>
         <td style="vertical-align: middle;">
             <div class="d-flex flex-column" style="gap: 10px;">
-                @forelse ($order->orderDetails as $detail)
+                @php
+                    $detail = $order->orderDetails->first();
+                @endphp
+                
+                @if ($detail)
                     @php
                         $product = $detail->orderProduct;
                         $firstImg = $product?->firstImage;
                         $imgPath = $firstImg ? asset('Uploads/' . $firstImg->image) : asset('favicon.png');
+                        $moreCount = $order->orderDetails->count() - 1;
                     @endphp
                     <div class="d-flex align-items-center" style="gap: 8px;">
                         <img style="height: 50px; width: 50px; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; background-color: #f8fafc;" 
@@ -88,7 +93,7 @@
                             <span class="text-dark font-weight-bold d-block text-wrap" style="font-size: 12.5px; max-width: 220px;">
                                 {{ $product?->title ?? 'Deleted Product' }}
                             </span>
-                            <div class="d-flex flex-wrap mt-1" style="gap: 4px; font-size: 10px;">
+                            <div class="d-flex flex-wrap mt-1 align-items-center" style="gap: 4px; font-size: 10px;">
                                 <span class="badge badge-light px-2 py-1 text-dark" style="border: 1px solid #e2e8f0;">Qty: {{ $detail->product_qty }}</span>
                                 @if(!empty($detail->product_attribute))
                                     <span class="badge badge-light px-2 py-1 text-dark" style="border: 1px solid #e2e8f0;">Size: {{ $detail->product_attribute }}</span>
@@ -96,12 +101,15 @@
                                 @if(!empty($detail->product_colour))
                                     <span class="badge badge-light px-2 py-1 text-dark" style="border: 1px solid #e2e8f0;">Color: {{ $detail->product_colour }}</span>
                                 @endif
+                                @if($moreCount > 0)
+                                    <span class="badge px-2 py-1" style="background-color: #e2e8f0; color: #475569; border: 1px solid #cbd5e1;">+{{ $moreCount }} more</span>
+                                @endif
                             </div>
                         </div>
                     </div>
-                @empty
+                @else
                     <span class="text-muted" style="font-size: 11.5px; font-style: italic;">No items associated</span>
-                @endforelse
+                @endif
             </div>
         </td>
 

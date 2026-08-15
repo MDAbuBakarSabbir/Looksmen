@@ -973,6 +973,8 @@
                 title: '{{ session('success') }}'
             });
         @endif
+
+
     </script>
 @endsection
 

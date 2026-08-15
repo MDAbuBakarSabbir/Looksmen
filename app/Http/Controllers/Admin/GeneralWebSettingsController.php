@@ -496,4 +496,43 @@ class GeneralWebSettingsController extends Controller
 
         return view('maintainance');
     }
+    public function systemCommands()
+    {
+        $tables = [];
+        $rawTables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
+        
+        foreach ($rawTables as $table) {
+            $tableName = array_values((array)$table)[0];
+            $tables[] = $tableName;
+        }
+
+        return view('adminDash.settings.system_commands', compact('tables'));
+    }
+
+    public function truncateTable(Request $request)
+    {
+        $request->validate([
+            'table_name' => 'required|string',
+        ]);
+
+        $table = $request->table_name;
+        
+        // Exclude critical tables to prevent catastrophic failure
+        $restrictedTables = ['users', 'admins', 'roles', 'permissions', 'migrations', 'general_web_settings', 'feature_activations'];
+        
+        if (in_array($table, $restrictedTables)) {
+            return response()->json(['success' => false, 'message' => "Truncating the '{$table}' table is restricted for safety reasons."], 403);
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            \Illuminate\Support\Facades\DB::table($table)->truncate();
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            return response()->json(['success' => true, 'message' => "Table '{$table}' has been successfully truncated!"]);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            return response()->json(['success' => false, 'message' => 'Error truncating table: ' . $e->getMessage()], 500);
+        }
+    }
 }

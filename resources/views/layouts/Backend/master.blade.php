@@ -1595,10 +1595,13 @@
                     </li>
                     @endif
 
-                    @if($user?->hasPermission('setup_general_settings') || $user?->hasPermission('setup_feature_activation') || $user?->hasPermission('setup_address') || $user?->hasPermission('setup_social_links') || $user?->hasPermission('setup_smtp') || $user?->hasPermission('setup_fraud_check') || $user?->hasPermission('setup_courier_api') || $user?->hasPermission('setup_payment_api'))
+                    @if($user?->hasPermission('setup_general_settings') || $user?->hasPermission('setup_feature_activation') || $user?->hasPermission('setup_address') || $user?->hasPermission('setup_social_links') || $user?->hasPermission('setup_smtp') || $user?->hasPermission('setup_fraud_check') || $user?->hasPermission('setup_courier_api') || $user?->hasPermission('setup_payment_api') || $user?->hasPermission('setup_system_commands'))
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="fa-solid fa-gears mr-2"></i><span class="nav-text">Setup & Config</span></a>
                         <ul aria-expanded="false">
+                            @if($user?->hasPermission('setup_system_commands'))
+                            <li><a href="{{ Route::has('system-commands') ? route('system-commands') : '#' }}">System Commands</a></li>
+                            @endif
                             @if($user?->hasPermission('setup_general_settings'))
                             <li><a href="{{ Route::has('websettings.index') ? route('websettings.index') : '#' }}">General Settings</a></li>
                             @endif
