@@ -686,10 +686,13 @@
                                         <i class="fa fa-sync" style="font-size: 1.1rem;"></i> Add to compare
                                     </button>
                                     
+                                    @php
+                                        $hotlinePhone = $webConfig['contact_phone'] ?? (function_exists('get_setting') ? get_setting('contact_phone') : null) ?? \App\Models\GeneralWebSettings::where('name', 'contact_phone')->value('value') ?? '+8801568482005';
+                                    @endphp
                                     <span class="text-muted ml-sm-auto mt-2 mt-sm-0 d-flex align-items-center fw-600" style="font-size: 0.95rem; color: #044244 !important;">
                                         <i class="fa fa-phone-volume mr-2" style="font-size: 1.3rem; color: #044244;"></i> Hotline Order: 
-                                        <a href="tel:{{ $webConfig['contact_phone'] ?? '' }}" class="ml-2" style="color: #e11d48; text-decoration: none;">
-                                            {{ $webConfig['contact_phone'] ?? 'N/A' }}
+                                        <a href="tel:{{ $hotlinePhone }}" class="ml-2 font-weight-bold" style="color: #e11d48; text-decoration: none;">
+                                            {{ $hotlinePhone }}
                                         </a>
                                     </span>
                                 </div>

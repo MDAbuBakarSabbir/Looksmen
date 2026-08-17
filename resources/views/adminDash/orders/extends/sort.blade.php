@@ -77,6 +77,11 @@
                                 <option value="payment_paid">Mark as Paid</option>
                                 <option value="payment_unpaid">Mark as Unpaid</option>
                             </optgroup>
+                            @if(auth()->guard('admin')->user()->hasPermission('delete_order'))
+                                <optgroup label="Danger Zone">
+                                    <option value="delete" style="color: #dc3545; font-weight: bold;">Delete Selected</option>
+                                </optgroup>
+                            @endif
                         </select>
                         <button class="btn btn-danger" id="bulkUpdateBtn" style="height: 38px; border-radius: 4px; padding: 0 16px;">
                             Apply

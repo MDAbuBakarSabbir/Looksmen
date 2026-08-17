@@ -1540,6 +1540,7 @@
                                     class="fa-solid fa-handshake mr-2"></i><span class="nav-text">Affiliate Manage</span></a>
                             <ul aria-expanded="false">
                                 @if($user?->hasPermission('manage_affiliate_configs'))
+                                <li><a href="{{ Route::has('admin.affiliate.index') ? route('admin.affiliate.index') : '#' }}">Affiliate Options</a></li>
                                 <li><a href="{{ Route::has('affiliate.configs') ? route('affiliate.configs') : '#' }}">Configurations</a></li>
                                 @endif
                                 @if($user?->hasPermission('manage_affiliate_users'))
@@ -1599,9 +1600,6 @@
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="fa-solid fa-gears mr-2"></i><span class="nav-text">Setup & Config</span></a>
                         <ul aria-expanded="false">
-                            @if($user?->hasPermission('setup_system_commands'))
-                            <li><a href="{{ Route::has('system-commands') ? route('system-commands') : '#' }}">System Commands</a></li>
-                            @endif
                             @if($user?->hasPermission('setup_general_settings'))
                             <li><a href="{{ Route::has('websettings.index') ? route('websettings.index') : '#' }}">General Settings</a></li>
                             @endif
@@ -1630,9 +1628,10 @@
                                 
                             @endif
                             @if($user?->hasPermission('setup_payment_api'))
-                                
                                 <li><a href="{{ Route::has('payment.index') ? route('payment.index') : '#' }}">Payment API</a></li>
-                                
+                            @endif
+                            @if($user?->hasPermission('setup_system_commands'))
+                            <li><a href="{{ Route::has('system-commands') ? route('system-commands') : '#' }}">System Commands</a></li>
                             @endif
                         </ul>
                     </li>

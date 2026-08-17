@@ -7,7 +7,13 @@ use App\Models\FeatureActivation;
 use App\Models\GeneralWebSettings;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class GeneralWebSettingsController extends Controller
 {
@@ -48,7 +54,7 @@ class GeneralWebSettingsController extends Controller
                 }
             }
 
-            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $manager = new ImageManager(new Driver);
             $image = $manager->decode($file);
             $image->scaleDown(width: 300);
             $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 60);
@@ -56,7 +62,7 @@ class GeneralWebSettingsController extends Controller
             GeneralWebSettings::where('name', 'web_logo')->update([
                 'value' => $newname,
             ]);
-            \Illuminate\Support\Facades\Cache::flush();
+            Cache::flush();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -92,7 +98,7 @@ class GeneralWebSettingsController extends Controller
                 }
             }
 
-            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $manager = new ImageManager(new Driver);
             $image = $manager->decode($file);
             $image->scaleDown(width: 300);
             $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 60);
@@ -100,7 +106,7 @@ class GeneralWebSettingsController extends Controller
             GeneralWebSettings::where('name', 'footer_logo')->update([
                 'value' => $newname,
             ]);
-            \Illuminate\Support\Facades\Cache::flush();
+            Cache::flush();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -136,7 +142,7 @@ class GeneralWebSettingsController extends Controller
                 }
             }
 
-            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $manager = new ImageManager(new Driver);
             $image = $manager->decode($file);
             $image->scaleDown(width: 150);
             $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 60);
@@ -144,7 +150,7 @@ class GeneralWebSettingsController extends Controller
             GeneralWebSettings::where('name', 'web_favicon')->update([
                 'value' => $newname,
             ]);
-            \Illuminate\Support\Facades\Cache::flush();
+            Cache::flush();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -177,7 +183,7 @@ class GeneralWebSettingsController extends Controller
                 }
             }
 
-            $manager = new \Intervention\Image\ImageManager(new \Intervention\Image\Drivers\Gd\Driver());
+            $manager = new ImageManager(new Driver);
             $image = $manager->decode($file);
             $image->scaleDown(width: 1200);
             $image->save(public_path('adminDash/assets/img/layouts/'.$newname), quality: 80);
@@ -186,7 +192,7 @@ class GeneralWebSettingsController extends Controller
                 ['name' => 'social_banner'],
                 ['value' => $newname, 'status' => '1']
             );
-            \Illuminate\Support\Facades\Cache::flush();
+            Cache::flush();
 
             if ($request->ajax()) {
                 return response()->json([
@@ -252,7 +258,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         return back()->with('success', 'Website Details Updated Successfull !');
     }
@@ -275,7 +281,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         return back()->with('success', 'Website Details Updated Successfull !');
     }
@@ -298,26 +304,26 @@ class GeneralWebSettingsController extends Controller
                 if (file_exists($envPath)) {
                     $envContent = file_get_contents($envPath);
                     if (preg_match('/^APP_TIMEZONE=.*/m', $envContent)) {
-                        $envContent = preg_replace('/^APP_TIMEZONE=.*/m', 'APP_TIMEZONE="' . $tz . '"', $envContent);
+                        $envContent = preg_replace('/^APP_TIMEZONE=.*/m', 'APP_TIMEZONE="'.$tz.'"', $envContent);
                     } else {
-                        $envContent .= "\nAPP_TIMEZONE=\"" . $tz . "\"\n";
+                        $envContent .= "\nAPP_TIMEZONE=\"".$tz."\"\n";
                     }
                     file_put_contents($envPath, $envContent);
                 }
                 putenv("APP_TIMEZONE={$tz}");
                 $_ENV['APP_TIMEZONE'] = $tz;
                 $_SERVER['APP_TIMEZONE'] = $tz;
-                \Illuminate\Support\Facades\Artisan::call('config:clear');
+                Artisan::call('config:clear');
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('ENV Timezone update error: ' . $e->getMessage());
+                Log::error('ENV Timezone update error: '.$e->getMessage());
             }
 
             date_default_timezone_set($tz);
             config(['app.timezone' => $tz]);
         }
 
-        \Illuminate\Support\Facades\Cache::forget('boot_general_web_settings_map');
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::forget('boot_general_web_settings_map');
+        Cache::flush();
 
         return back()->with('success', 'Timezone Setting Updated Successfully!');
     }
@@ -334,7 +340,7 @@ class GeneralWebSettingsController extends Controller
             );
         }
 
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         return back()->with('success', 'Theme Primary Color Updated Successfully!');
     }
@@ -356,7 +362,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         return back()->with('success', 'Website Contact Details Updated Successfull !');
     }
@@ -378,7 +384,7 @@ class GeneralWebSettingsController extends Controller
                 ]);
             }
         }
-        \Illuminate\Support\Facades\Cache::flush();
+        Cache::flush();
 
         return back()->with('success', 'Website Meta Details Updated Successfull !');
     }
@@ -496,17 +502,190 @@ class GeneralWebSettingsController extends Controller
 
         return view('maintainance');
     }
+
     public function systemCommands()
     {
         $tables = [];
-        $rawTables = \Illuminate\Support\Facades\DB::select('SHOW TABLES');
-        
-        foreach ($rawTables as $table) {
-            $tableName = array_values((array)$table)[0];
-            $tables[] = $tableName;
+        try {
+            $rawTables = DB::select('SHOW TABLES');
+            foreach ($rawTables as $table) {
+                $tableName = array_values((array) $table)[0];
+                $tables[] = $tableName;
+            }
+        } catch (\Exception $e) {
+            $tables = [];
         }
 
-        return view('adminDash.settings.system_commands', compact('tables'));
+        $restrictedTables = [
+            'admins', 'roles', 'permissions', 'migrations', 'general_web_settings',
+            'feature_activations', 'courier_apis', 'payment_apis', 'districts',
+            'thanas', 'pages', 'social_media', 'affiliate_options', 'affiliate_configs',
+            'password_reset_tokens', 'failed_jobs', 'personal_access_tokens', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches',
+        ];
+
+        $predefinedGroups = [
+            'Orders & Sales' => [
+                'icon' => 'fa-solid fa-cart-shopping',
+                'color' => '#3b82f6',
+                'description' => 'Customer orders, invoices, abandoned carts and checkout transactions',
+                'tables' => [
+                    'orders' => 'Orders',
+                    'order_details' => 'Order Line Items / Details',
+                    'incomplete_orders' => 'Incomplete / Abandoned Orders',
+                    'payments' => 'Payment Records',
+                    'fraud_checks' => 'Fraud Verification History',
+                    'carts' => 'Active Shopping Carts',
+                    'wishlists' => 'User Wishlists',
+                ],
+            ],
+            'Products & Catalog' => [
+                'icon' => 'fa-solid fa-box-open',
+                'color' => '#10b981',
+                'description' => 'Products, category trees, attributes, variants and reviews',
+                'tables' => [
+                    'products' => 'Products',
+                    'product_images' => 'Product Gallery Images',
+                    'product_attributes' => 'Product Attribute Mappings',
+                    'product_colors' => 'Product Color Mappings',
+                    'categories' => 'Main Categories',
+                    'sub_categories' => 'Sub Categories',
+                    'child_categories' => 'Child Categories',
+                    'attributes' => 'Attribute Types',
+                    'attribute_values' => 'Attribute Options & Values',
+                    'colors' => 'Color Options',
+                    'reviews' => 'Product Ratings & Reviews',
+                    'comments' => 'Product Comments / Q&A',
+                ],
+            ],
+            'Customers & Accounts' => [
+                'icon' => 'fa-solid fa-users',
+                'color' => '#8b5cf6',
+                'description' => 'Registered customer accounts, addresses, points and wallets',
+                'tables' => [
+                    'users' => 'Registered Customer Accounts',
+                    'addresses' => 'Saved Customer Addresses',
+                    'wallet_transactions' => 'Wallet Balance Transactions',
+                    'point_transactions' => 'Reward Point Logs',
+                    'blocked_ips' => 'Security Blocked IPs',
+                ],
+            ],
+            'Promotions & Marketing' => [
+                'icon' => 'fa-solid fa-tags',
+                'color' => '#f59e0b',
+                'description' => 'Promo discount coupons, storefront banners and sliders',
+                'tables' => [
+                    'coupons' => 'Discount Coupons & Vouchers',
+                    'sliders' => 'Homepage Sliders',
+                    'banners' => 'Promotional Banners',
+                ],
+            ],
+            'Affiliate Program' => [
+                'icon' => 'fa-solid fa-handshake',
+                'color' => '#06b6d4',
+                'description' => 'Affiliate partners, commissions, stats and withdraw requests',
+                'tables' => [
+                    'affiliate_users' => 'Affiliate Partner Accounts',
+                    'affiliate_withdraw_requests' => 'Affiliate Payout Requests',
+                    'affiliate_payments' => 'Affiliate Payment History',
+                    'affiliate_logs' => 'Affiliate Commission Logs',
+                    'affiliate_stats' => 'Affiliate Performance Stats',
+                ],
+            ],
+            'Communications & Support' => [
+                'icon' => 'fa-solid fa-comments',
+                'color' => '#ec4899',
+                'description' => 'Live chats, support tickets, WhatsApp, FB & IG customer messages',
+                'tables' => [
+                    'support_tickets' => 'Support Tickets',
+                    'support_chats' => 'Support Live Chats',
+                    'chat_messages' => 'Customer Support Messages',
+                    'whatsapp_messages' => 'WhatsApp Chat Messages',
+                    'whatsapp_contacts' => 'WhatsApp Contacts',
+                    'facebook_messages' => 'Facebook Chat Messages',
+                    'facebook_contacts' => 'Facebook Contacts',
+                    'instagram_messages' => 'Instagram Chat Messages',
+                    'instagram_contacts' => 'Instagram Contacts',
+                ],
+            ],
+            'Logs & System Activity' => [
+                'icon' => 'fa-solid fa-file-lines',
+                'color' => '#64748b',
+                'description' => 'System activity audits and operational logs',
+                'tables' => [
+                    'logs' => 'System & Activity Audit Logs',
+                ],
+            ],
+        ];
+
+        $tableGroups = [];
+        $accountedTables = [];
+        $totalRecords = 0;
+        $totalClearableTables = 0;
+
+        foreach ($predefinedGroups as $groupTitle => $groupData) {
+            $groupItems = [];
+            $groupRecordCount = 0;
+            foreach ($groupData['tables'] as $tbl => $label) {
+                if (in_array($tbl, $tables) && ! in_array($tbl, $restrictedTables)) {
+                    $accountedTables[] = $tbl;
+                    try {
+                        $cnt = DB::table($tbl)->count();
+                    } catch (\Exception $e) {
+                        $cnt = 0;
+                    }
+                    $groupItems[] = [
+                        'table' => $tbl,
+                        'label' => $label,
+                        'count' => $cnt,
+                    ];
+                    $groupRecordCount += $cnt;
+                    $totalRecords += $cnt;
+                    $totalClearableTables++;
+                }
+            }
+            if (! empty($groupItems)) {
+                $tableGroups[$groupTitle] = [
+                    'icon' => $groupData['icon'],
+                    'color' => $groupData['color'],
+                    'description' => $groupData['description'],
+                    'items' => $groupItems,
+                    'total_count' => $groupRecordCount,
+                ];
+            }
+        }
+
+        // Capture any other database tables that exist but are not restricted or predefined
+        $otherTables = array_diff($tables, $accountedTables, $restrictedTables);
+        if (! empty($otherTables)) {
+            $otherItems = [];
+            $otherRecordCount = 0;
+            foreach ($otherTables as $tbl) {
+                try {
+                    $cnt = DB::table($tbl)->count();
+                } catch (\Exception $e) {
+                    $cnt = 0;
+                }
+                $otherItems[] = [
+                    'table' => $tbl,
+                    'label' => ucwords(str_replace('_', ' ', $tbl)),
+                    'count' => $cnt,
+                ];
+                $otherRecordCount += $cnt;
+                $totalRecords += $cnt;
+                $totalClearableTables++;
+            }
+            if (! empty($otherItems)) {
+                $tableGroups['Other System Data'] = [
+                    'icon' => 'fa-solid fa-cubes',
+                    'color' => '#6b7280',
+                    'description' => 'Miscellaneous database tables in this environment',
+                    'items' => $otherItems,
+                    'total_count' => $otherRecordCount,
+                ];
+            }
+        }
+
+        return view('adminDash.settings.system_commands', compact('tables', 'tableGroups', 'totalRecords', 'totalClearableTables', 'restrictedTables'));
     }
 
     public function truncateTable(Request $request)
@@ -516,23 +695,111 @@ class GeneralWebSettingsController extends Controller
         ]);
 
         $table = $request->table_name;
-        
+
         // Exclude critical tables to prevent catastrophic failure
-        $restrictedTables = ['users', 'admins', 'roles', 'permissions', 'migrations', 'general_web_settings', 'feature_activations'];
-        
+        $restrictedTables = [
+            'admins', 'roles', 'permissions', 'migrations', 'general_web_settings',
+            'feature_activations', 'courier_apis', 'payment_apis', 'districts',
+            'thanas', 'pages', 'social_media', 'affiliate_options', 'affiliate_configs',
+            'password_reset_tokens', 'failed_jobs', 'personal_access_tokens', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches',
+        ];
+
         if (in_array($table, $restrictedTables)) {
             return response()->json(['success' => false, 'message' => "Truncating the '{$table}' table is restricted for safety reasons."], 403);
         }
 
-        try {
-            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-            \Illuminate\Support\Facades\DB::table($table)->truncate();
-            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (! Schema::hasTable($table)) {
+            return response()->json(['success' => false, 'message' => "Table '{$table}' does not exist."], 404);
+        }
 
-            return response()->json(['success' => true, 'message' => "Table '{$table}' has been successfully truncated!"]);
+        try {
+            $countBefore = DB::table($table)->count();
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            DB::table($table)->truncate();
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            return response()->json([
+                'success' => true,
+                'message' => "Table '{$table}' has been successfully cleared! ({$countBefore} records removed)",
+                'table' => $table,
+                'deleted_count' => $countBefore,
+            ]);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1;');
-            return response()->json(['success' => false, 'message' => 'Error truncating table: ' . $e->getMessage()], 500);
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            return response()->json(['success' => false, 'message' => 'Error truncating table: '.$e->getMessage()], 500);
+        }
+    }
+
+    public function bulkClearDatabase(Request $request)
+    {
+        $request->validate([
+            'tables' => 'required|array|min:1',
+            'tables.*' => 'required|string',
+        ]);
+
+        $restrictedTables = [
+            'admins', 'roles', 'permissions', 'migrations', 'general_web_settings',
+            'feature_activations', 'courier_apis', 'payment_apis', 'districts',
+            'thanas', 'pages', 'social_media', 'affiliate_options', 'affiliate_configs',
+            'password_reset_tokens', 'failed_jobs', 'personal_access_tokens', 'sessions', 'cache', 'cache_locks', 'jobs', 'job_batches',
+        ];
+
+        $tablesToClear = array_unique($request->tables);
+        $clearedTables = [];
+        $totalDeletedCount = 0;
+        $errors = [];
+
+        // Check for restricted tables
+        $violatingTables = array_intersect($tablesToClear, $restrictedTables);
+        if (! empty($violatingTables)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Operation aborted: Table(s) ['.implode(', ', $violatingTables).'] are protected system tables and cannot be cleared.',
+            ], 403);
+        }
+
+        try {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+
+            foreach ($tablesToClear as $table) {
+                if (Schema::hasTable($table)) {
+                    try {
+                        $countBefore = DB::table($table)->count();
+                        DB::table($table)->truncate();
+                        $clearedTables[] = [
+                            'table' => $table,
+                            'records' => $countBefore,
+                        ];
+                        $totalDeletedCount += $countBefore;
+                    } catch (\Exception $e) {
+                        $errors[] = "Failed to clear {$table}: ".$e->getMessage();
+                    }
+                }
+            }
+
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            if (! empty($errors) && empty($clearedTables)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => implode(' | ', $errors),
+                ], 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Successfully cleared '.count($clearedTables).' table(s) with a total of '.number_format($totalDeletedCount).' record(s) purged.',
+                'cleared_tables' => array_column($clearedTables, 'table'),
+                'total_deleted' => $totalDeletedCount,
+            ]);
+        } catch (\Exception $e) {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error clearing database: '.$e->getMessage(),
+            ], 500);
         }
     }
 }

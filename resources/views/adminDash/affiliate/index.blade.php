@@ -1,5 +1,5 @@
 @extends('layouts.Backend.master')
-
+@section('title', 'AFFILIATE')
 
 @section('content')
 

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\FeatureActivation;
+use App\Models\FraudCheck;
 use App\Models\GeneralWebSettings;
 use App\Models\IncompleteOrders;
 use Illuminate\Http\Request;
@@ -93,15 +95,24 @@ class IncompleteOrdersController extends Controller
     public function checkFraud(Request $request)
     {
         $phone = $request->phone;
-        $webConfig = GeneralWebSettings::first()->pluck('value', 'name', 'status')->toArray();
-        $apiKey = $webConfig['fraud_check_api_key'];
 
-
-        if ($webConfig['fraud_check_api_url'] == null) {
-            $base_url = 'https://api.bdcourier.com/courier-check';
-        } else {
-            $base_url = $webConfig['fraud_check_api_url'];
+        // Check if feature is active
+        $featuresConfig = FeatureActivation::pluck('status', 'name')->toArray();
+        if (isset($featuresConfig['fraud_check_api']) && $featuresConfig['fraud_check_api'] == '0') {
+            return response()->json(['error' => 'Fraud check is disabled.'], 403);
         }
+        if (isset($featuresConfig['fraud_check_incomplete_order']) && $featuresConfig['fraud_check_incomplete_order'] == '0') {
+            return response()->json(['error' => 'Incomplete order fraud check is disabled.'], 403);
+        }
+
+        $fraudCheck = FraudCheck::where('status', '1')->first();
+        if (!$fraudCheck || ($fraudCheck->status ?? '0') !== '1' || empty($fraudCheck->api_key) || empty($fraudCheck->base_url)) {
+            return response()->json(['error' => 'No active Fraud Check API provider enabled.'], 400);
+        }
+
+        $apiKey = $fraudCheck->api_key;
+        $base_url = $fraudCheck->base_url;
+
         try {
             $response = Http::timeout(30)->withHeaders([
                 'Authorization' => 'Bearer ' . $apiKey,

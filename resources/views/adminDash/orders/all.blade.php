@@ -271,26 +271,112 @@
                     Toast.fire({ icon: 'warning', title: 'No orders selected' });
                     return;
                 }
-                $.ajax({
-                    url: "{{ route('admin.orders.bulk-update') }}",
-                    type: 'POST',
-                    data: {
-                        _token: "{{ csrf_token() }}",
-                        ids: selectedIds,
-                        status: status
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Toast.fire({ icon: 'success', title: 'Orders updated successfully' });
-                            currentPage = 1;
-                            applyFilters();
+
+                let executeBulkUpdate = function() {
+                    $.ajax({
+                        url: "{{ route('admin.orders.bulk-update') }}",
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            ids: selectedIds,
+                            status: status
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Toast.fire({ icon: 'success', title: response.message || 'Orders updated successfully' });
+                                $('#orderCheckAll').prop('checked', false);
+                                $('#bulkStatus').val('');
+                                currentPage = 1;
+                                applyFilters();
+                            } else {
+                                Toast.fire({ icon: 'error', title: response.message || 'Failed to update orders' });
+                            }
+                        },
+                        error: function(xhr) {
+                            let msg = 'Failed to update orders';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            Toast.fire({ icon: 'error', title: msg });
                         }
-                    },
-                    error: function(xhr) {
-                        console.error(xhr.responseText);
-                        Toast.fire({ icon: 'error', title: 'Failed to update orders' });
+                    });
+                };
+
+                if (status === 'delete' || status === 'force-delete' || status === 'bulk_delete') {
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Delete Selected Orders?',
+                            text: 'Are you sure you want to permanently delete ' + selectedIds.length + ' order(s)? This action cannot be reversed!',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#6c757d',
+                            confirmButtonText: 'Yes, Delete Permanent!',
+                            cancelButtonText: 'Cancel'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                executeBulkUpdate();
+                            }
+                        });
+                    } else if (confirm('Are you sure you want to permanently delete ' + selectedIds.length + ' order(s)?')) {
+                        executeBulkUpdate();
                     }
-                });
+                    return;
+                }
+
+                executeBulkUpdate();
+            });
+
+            // Single Order Delete Handler
+            $(document).on('click', '.delete-order-btn', function(e) {
+                e.preventDefault();
+                let orderId = $(this).data('id');
+                if (!orderId) return;
+
+                let executeSingleDelete = function() {
+                    $.ajax({
+                        url: "{{ route('admin.order-destroy') }}",
+                        type: 'POST',
+                        data: {
+                            _token: "{{ csrf_token() }}",
+                            id: orderId
+                        },
+                        success: function(response) {
+                            if (response.success) {
+                                Toast.fire({ icon: 'success', title: response.message || 'Order deleted successfully' });
+                                applyFilters();
+                            } else {
+                                Toast.fire({ icon: 'error', title: response.message || 'Failed to delete order' });
+                            }
+                        },
+                        error: function(xhr) {
+                            let msg = 'Failed to delete order';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                msg = xhr.responseJSON.message;
+                            }
+                            Toast.fire({ icon: 'error', title: msg });
+                        }
+                    });
+                };
+
+                if (typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        title: 'Delete Order #LM-' + orderId + '?',
+                        text: 'Are you sure you want to permanently delete this order? All related details and logs will be removed.',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#d33',
+                        cancelButtonColor: '#6c757d',
+                        confirmButtonText: 'Yes, Delete Permanent!',
+                        cancelButtonText: 'Cancel'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            executeSingleDelete();
+                        }
+                    });
+                } else if (confirm('Are you sure you want to permanently delete Order #LM-' + orderId + '?')) {
+                    executeSingleDelete();
+                }
             });
         });
 

@@ -74,7 +74,7 @@
                     </div>
                     <div class="alert flex-column justify-content-center" style="color: #004085;background-color: #cce5ff;border-color: #b8daff;margin-bottom:0;margin-top:10px;">
                         <p>Configure your Affiliate Marketing program settings and commission rates.</p>
-                        <a class="d-flex justify-content-center" href="{{ route('affiliate.index') }}">Configure Now</a>
+                        <a class="d-flex justify-content-center" href="{{ route('admin.affiliate.index') }}">Configure Now</a>
                     </div>
                 </div>
             </div>

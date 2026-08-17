@@ -121,22 +121,6 @@
                     </a>
                 </div>
                 <div class="col-lg-3 col-sm-6 mb-3">
-                    <a href="{{ Route::has('order-canceled') ? route('order-canceled') : '#' }}" class="filter-order order-status-btn" data-status="canceled">
-                        <div class="card shadow">
-                            <div class="stat-widget-two card-body">
-                                <div class="stat-content">
-                                    <div class="stat-text">CANCELED ORDER</div>
-                                </div>
-                                <div class="d-flex justify-content-around">
-                                    <img style="height: 50px;" src="{{ asset('adminDash') }}/assets/img/orders/cancel.png"
-                                        alt="img">
-                                    <div class="stat-digit" id="count-canceled">{{ $realCounts['canceled'] }}</div>
-                                </div>
-                            </div>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-3 col-sm-6 mb-3">
                     <a href="{{ Route::has('order-returned') ? route('order-returned') : '#' }}" class="filter-order order-status-btn" data-status="returned">
                         <div class="card shadow">
                             <div class="stat-widget-two card-body">
@@ -147,6 +131,22 @@
                                     <img style="height: 50px;"
                                         src="{{ asset('adminDash') }}/assets/img/orders/product-return.png" alt="img">
                                     <div class="stat-digit" id="count-returned">{{ $realCounts['returned'] }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-lg-3 col-sm-6 mb-3">
+                    <a href="{{ Route::has('order-canceled') ? route('order-canceled') : '#' }}" class="filter-order order-status-btn" data-status="canceled">
+                        <div class="card shadow">
+                            <div class="stat-widget-two card-body">
+                                <div class="stat-content">
+                                    <div class="stat-text">CANCELED ORDER</div>
+                                </div>
+                                <div class="d-flex justify-content-around">
+                                    <img style="height: 50px;" src="{{ asset('adminDash') }}/assets/img/orders/cancel.png"
+                                        alt="img">
+                                    <div class="stat-digit" id="count-canceled">{{ $realCounts['canceled'] }}</div>
                                 </div>
                             </div>
                         </div>

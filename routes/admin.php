@@ -113,6 +113,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
     // System Commands UI and Truncate Routes
     Route::get('/system-commands', [GeneralWebSettingsController::class, 'systemCommands'])->name('system-commands')->middleware('admin.permission:setup_system_commands');
     Route::post('/system-commands/truncate', [GeneralWebSettingsController::class, 'truncateTable'])->name('system-commands.truncate')->middleware('admin.permission:setup_system_commands');
+    Route::post('/system-commands/clear-database', [GeneralWebSettingsController::class, 'bulkClearDatabase'])->name('system-commands.clear-database')->middleware('admin.permission:setup_system_commands');
 
     Route::controller(AdminsController::class)->group(function () {
         Route::get('admins', 'index')->name('admin.index')->middleware('admin.permission:manage_admin');
@@ -159,7 +160,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('order-invoice/{id}', 'invoice')->name('order-invoice')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::get('orders/edit/{id}', 'edit')->name('admin.order-edit')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('orders/update', 'update')->name('admin.order-update')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
-        Route::get('orders/destroy', 'destroy')->name('admin.order-destroy')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
+        Route::match(['get', 'post', 'delete'], 'orders/destroy/{id?}', 'destroy')->name('admin.order-destroy')->middleware('admin.permission:delete_order');
         Route::post('orders/status', 'updateStatus')->name('order.update.status')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::get('/orders/filter', 'filter')->name('admin.order-filter')->middleware('admin.permission:manage_order');
         Route::get('orders/search', 'orderSearch')->name('admin.order-search')->middleware('admin.permission:manage_order');
@@ -195,7 +196,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
             ->name('admin.orders.update-status')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
 
         Route::post('/bulk-update', [OrderManageController::class, 'bulkUpdate'])
-            ->name('admin.orders.bulk-update')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
+            ->name('admin.orders.bulk-update')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order,delete_order');
 
         Route::get('/status-count', [OrderManageController::class, 'statusCount'])
             ->name('admin.orders.status-count')->middleware('admin.permission:manage_order');
@@ -352,7 +353,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
     // Affiliate Routes
     Route::controller(AffiliateController::class)->group(function () {
-        Route::get('/affiliate', 'index')->name('affiliate.index')->middleware('admin.permission:manage_affiliate_configs');
+        Route::get('/affiliate', 'admin_index')->name('admin.affiliate.index')->middleware('admin.permission:manage_affiliate_configs');
         Route::post('/affiliate/affiliate_option_store', 'affiliate_option_store')->name('affiliate.store')->middleware('admin.permission:manage_affiliate_configs');
 
         Route::get('/affiliate/configs', 'configs')->name('affiliate.configs')->middleware('admin.permission:manage_affiliate_configs');

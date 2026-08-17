@@ -101,6 +101,7 @@
             'return_order' => 'Returned Orders View',
             'incomplete_order' => 'Incomplete Orders View',
             'create_order' => 'POS (Create Order)',
+            'delete_order' => 'Delete Orders',
         ],
         'Product Management' => [
             'manage_product' => 'All Products View',

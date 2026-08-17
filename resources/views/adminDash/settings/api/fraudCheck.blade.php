@@ -414,9 +414,9 @@
                 </div>
                 <div class="card-body-inner">
                     @if(!empty($bdcourier->api_key ?? $webConfig['fraud_check_api_key'] ?? ''))
-                    <div class="api-status-row">
+                    <div class="api-status-row" id="status-row-bdcourier">
                         <div class="api-status-dot"></div>
-                        <span>API Key configured — {{ ($bdcourier->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
+                        <span id="status-text-bdcourier">API Key configured — {{ ($bdcourier->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
                         <span class="key-masked ms-auto">••••{{ substr($bdcourier->api_key ?? $webConfig['fraud_check_api_key'] ?? '', -6) }}</span>
                     </div>
                     @endif
@@ -530,9 +530,9 @@
                 </div>
                 <div class="card-body-inner">
                     @if(!empty($zachaikori->api_key ?? ''))
-                    <div class="api-status-row" style="background: #ecfdf5; border-color: #a7f3d0; color: #065f46;">
+                    <div class="api-status-row" id="status-row-zachaikori" style="background: #ecfdf5; border-color: #a7f3d0; color: #065f46;">
                         <div class="api-status-dot"></div>
-                        <span>API Key configured — {{ ($zachaikori->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
+                        <span id="status-text-zachaikori">API Key configured — {{ ($zachaikori->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
                         <span class="key-masked ms-auto">••••{{ substr($zachaikori->api_key ?? '', -6) }}</span>
                     </div>
                     @endif
@@ -644,9 +644,9 @@
                 </div>
                 <div class="card-body-inner">
                     @if(!empty($fraudshield->api_key ?? ''))
-                    <div class="api-status-row" style="background: #fff1f2; border-color: #fecdd3; color: #9f1239;">
+                    <div class="api-status-row" id="status-row-fraudshield" style="background: #fff1f2; border-color: #fecdd3; color: #9f1239;">
                         <div class="api-status-dot" style="background: #f43f5e;"></div>
-                        <span>API Key configured — {{ ($fraudshield->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
+                        <span id="status-text-fraudshield">API Key configured — {{ ($fraudshield->status ?? '0') == '1' ? 'Active' : 'Disabled' }}</span>
                         <span class="key-masked ms-auto">••••{{ substr($fraudshield->api_key ?? '', -6) }}</span>
                     </div>
                     @endif
@@ -743,13 +743,16 @@
         document.querySelectorAll('.provider-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.provider-tab').forEach(t => t.classList.remove('active'));
 
-        document.getElementById('panel-' + name).classList.add('active');
-        document.getElementById('tab-'   + name).classList.add('active');
+        const targetPanel = document.getElementById('panel-' + name);
+        const targetTab   = document.getElementById('tab-'   + name);
+        if (targetPanel) targetPanel.classList.add('active');
+        if (targetTab)   targetTab.classList.add('active');
     }
 
     // ===== Toggle API Key Visibility =====
     function toggleKey(inputId, iconEl) {
         const input = document.getElementById(inputId);
+        if (!input) return;
         if (input.type === 'password') {
             input.type = 'text';
             iconEl.classList.replace('fa-eye', 'fa-eye-slash');
@@ -757,6 +760,34 @@
             input.type = 'password';
             iconEl.classList.replace('fa-eye-slash', 'fa-eye');
         }
+    }
+
+    // ===== Helper to sync all UI provider toggles and badges =====
+    function syncProvidersUI(providersMap) {
+        if (!providersMap) return;
+        const allProviders = ['bdcourier', 'zachaikori', 'fraudshield'];
+        
+        allProviders.forEach(function(prov) {
+            const status = providersMap[prov] ?? '0';
+            const isActive = status === '1' || status === 1;
+
+            // 1. Checkbox toggle
+            $(`.fraud-status-toggle[data-provider="${prov}"]`).prop('checked', isActive);
+
+            // 2. Tab badge
+            const tabBadge = $(`#tab-badge-${prov}`);
+            if (tabBadge.length) {
+                tabBadge.text(isActive ? 'ON' : 'OFF')
+                        .toggleClass('badge-success', isActive)
+                        .toggleClass('badge-secondary', !isActive);
+            }
+
+            // 3. Card status text
+            const statusText = $(`#status-text-${prov}`);
+            if (statusText.length) {
+                statusText.text(`API Key configured — ${isActive ? 'Active' : 'Disabled'}`);
+            }
+        });
     }
 
     $(document).ready(function() {
@@ -823,16 +854,17 @@
             });
         });
 
-        // ===== Provider Status Switch Toggle AJAX =====
+        // ===== Provider Status Switch Toggle AJAX (Exclusive Single Active Provider) =====
         $('.fraud-status-toggle').on('change', function() {
             const checkbox = $(this);
             const provider = checkbox.data('provider');
             const isChecked = checkbox.is(':checked') ? 1 : 0;
-            const tabBadge = $('#tab-badge-' + provider);
 
             Swal.fire({
-                title: 'Change Provider Status?',
-                text: `Are you sure you want to ${isChecked ? 'Activate' : 'Deactivate'} ${provider.toUpperCase()} Fraud Checker?`,
+                title: isChecked ? `Activate ${provider.toUpperCase()}?` : `Deactivate ${provider.toUpperCase()}?`,
+                text: isChecked 
+                    ? `Activating ${provider.toUpperCase()} will set it as the active fraud checker and deactivate any other provider.` 
+                    : `Deactivating will turn off fraud checking for this provider.`,
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: isChecked ? '#10b981' : '#dc3545',
@@ -856,10 +888,9 @@
                                     timer: 1500,
                                     showConfirmButton: false
                                 });
-                                if (tabBadge.length) {
-                                    tabBadge.text(isChecked ? 'ON' : 'OFF')
-                                            .toggleClass('badge-success', isChecked)
-                                            .toggleClass('badge-secondary', !isChecked);
+                                // Sync all providers UI so only 1 provider is shown active
+                                if (response.providers) {
+                                    syncProvidersUI(response.providers);
                                 }
                             }
                         },
@@ -896,6 +927,9 @@
                             timer: 1500,
                             showConfirmButton: false
                         });
+                        if (response.providers) {
+                            syncProvidersUI(response.providers);
+                        }
                     }
                 },
                 error: function(xhr) {

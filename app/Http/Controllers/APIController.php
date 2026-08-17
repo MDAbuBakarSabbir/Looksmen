@@ -36,6 +36,19 @@ class APIController extends Controller
         $baseUrl = $validated['base_url'] ?: ($defaultUrls[$provider] ?? '');
         $status = isset($validated['status']) ? ($validated['status'] ? '1' : '0') : '1';
 
+        if ($status === '1') {
+            // Deactivate all other providers so only this provider is active
+            FraudCheck::where('name', '!=', $provider)->update(['status' => '0']);
+            foreach (['bdcourier', 'zachaikori', 'fraudshield'] as $other) {
+                if ($other !== $provider) {
+                    GeneralWebSettings::updateOrCreate(
+                        ['name' => 'fraud_check_status_' . $other],
+                        ['value' => '0', 'status' => 1]
+                    );
+                }
+            }
+        }
+
         // 1. Update or create in fraud_checks table
         $fraudChecker = FraudCheck::updateOrCreate(
             ['name' => $provider],
@@ -47,27 +60,38 @@ class APIController extends Controller
         );
 
         // 2. Update or create in general_web_settings table
-        GeneralWebSettings::updateOrCreate(
-            ['name' => 'fraud_check_api_key'],
-            ['value' => $validated['api_key'], 'status' => 1]
-        );
+        if ($status === '1') {
+            GeneralWebSettings::updateOrCreate(
+                ['name' => 'fraud_check_api_key'],
+                ['value' => $validated['api_key'], 'status' => 1]
+            );
+
+            GeneralWebSettings::updateOrCreate(
+                ['name' => 'fraud_check_api_url'],
+                ['value' => $baseUrl, 'status' => 1]
+            );
+
+            GeneralWebSettings::updateOrCreate(
+                ['name' => 'fraud_check_active_provider'],
+                ['value' => $provider, 'status' => 1]
+            );
+        }
 
         GeneralWebSettings::updateOrCreate(
-            ['name' => 'fraud_check_api_url'],
-            ['value' => $baseUrl, 'status' => 1]
-        );
-
-        GeneralWebSettings::updateOrCreate(
-            ['name' => 'fraud_check_active_provider'],
-            ['value' => $provider, 'status' => 1]
+            ['name' => 'fraud_check_status_' . $provider],
+            ['value' => $status, 'status' => 1]
         );
 
         Cache::forget('fraud_check_settings_first');
+
+        $providersMap = FraudCheck::all()->pluck('status', 'name')->toArray();
 
         return response()->json([
             'success' => true,
             'message' => ucfirst($provider) . ' Fraud Check API credentials updated successfully!',
             'provider' => $fraudChecker,
+            'providers' => $providersMap,
+            'active_provider' => $status === '1' ? $provider : null,
         ]);
     }
 
@@ -81,6 +105,19 @@ class APIController extends Controller
         $provider = $validated['provider_name'];
         $statusStr = $validated['status'] ? '1' : '0';
 
+        if ($statusStr === '1') {
+            // Only 1 provider can be active: turn off all other providers
+            FraudCheck::where('name', '!=', $provider)->update(['status' => '0']);
+            foreach (['bdcourier', 'zachaikori', 'fraudshield'] as $other) {
+                if ($other !== $provider) {
+                    GeneralWebSettings::updateOrCreate(
+                        ['name' => 'fraud_check_status_' . $other],
+                        ['value' => '0', 'status' => 1]
+                    );
+                }
+            }
+        }
+
         // Update status for this provider
         $fraudChecker = FraudCheck::updateOrCreate(
             ['name' => $provider],
@@ -93,14 +130,46 @@ class APIController extends Controller
             ['value' => $statusStr, 'status' => 1]
         );
 
+        if ($statusStr === '1') {
+            GeneralWebSettings::updateOrCreate(
+                ['name' => 'fraud_check_active_provider'],
+                ['value' => $provider, 'status' => 1]
+            );
+            if (!empty($fraudChecker->api_key)) {
+                GeneralWebSettings::updateOrCreate(
+                    ['name' => 'fraud_check_api_key'],
+                    ['value' => $fraudChecker->api_key, 'status' => 1]
+                );
+            }
+            if (!empty($fraudChecker->base_url)) {
+                GeneralWebSettings::updateOrCreate(
+                    ['name' => 'fraud_check_api_url'],
+                    ['value' => $fraudChecker->base_url, 'status' => 1]
+                );
+            }
+        } else {
+            // If deactivated, check if any provider is still active
+            $hasActive = FraudCheck::where('status', '1')->first();
+            if (!$hasActive) {
+                GeneralWebSettings::updateOrCreate(
+                    ['name' => 'fraud_check_active_provider'],
+                    ['value' => null, 'status' => 1]
+                );
+            }
+        }
+
         Cache::forget('fraud_check_settings_first');
 
         $statusText = $validated['status'] ? 'activated' : 'deactivated';
+
+        $providersMap = FraudCheck::all()->pluck('status', 'name')->toArray();
 
         return response()->json([
             'success' => true,
             'message' => ucfirst($provider) . ' fraud check status has been ' . $statusText . ' successfully!',
             'status' => $statusStr,
+            'active_provider' => $statusStr === '1' ? $provider : null,
+            'providers' => $providersMap,
         ]);
     }
 

@@ -66,9 +66,10 @@ class CheckoutController extends Controller
             return FeatureActivation::pluck('status', 'name')->toArray();
         });
 
-        // 1. Check if Frontend Fraud Check is enabled
+        // 1. Check if Fraud Check API & Frontend Fraud Check are enabled
+        $apiEnabled = ($features['fraud_check_api'] ?? '1') === '1';
         $frontendEnabled = ($features['fraud_check_frontend'] ?? '1') === '1';
-        if (! $frontendEnabled) {
+        if (! $apiEnabled || ! $frontendEnabled) {
             return response()->json([
                 'success' => false,
                 'disabled' => true,
@@ -77,33 +78,32 @@ class CheckoutController extends Controller
         }
 
         // 2. Fetch active provider (must have status == 1)
-        $fraudCheck = Cache::rememberForever('fraud_check_settings_first', function () {
-            return FraudCheck::where('status', '1')->first() ?? FraudCheck::first();
-        });
+        $fraudCheck = FraudCheck::getActiveProvider();
 
-        if (! $fraudCheck || ($fraudCheck->status ?? '0') != '1') {
+        $status = is_array($fraudCheck) ? ($fraudCheck['status'] ?? '0') : ($fraudCheck->status ?? '0');
+        $apiKey = is_array($fraudCheck) ? ($fraudCheck['api_key'] ?? null) : ($fraudCheck->api_key ?? null);
+        $endpoint = is_array($fraudCheck) ? ($fraudCheck['base_url'] ?? null) : ($fraudCheck->base_url ?? null);
+
+        if (! $fraudCheck || $status !== '1' || empty($apiKey) || empty($endpoint)) {
             return response()->json([
                 'success' => false,
                 'disabled' => true,
-                'message' => 'No active Fraud Check API provider enabled.',
+                'message' => 'No active Fraud Check API provider enabled or configuration missing.',
             ]);
         }
 
-        $apiKey = $fraudCheck->api_key;
-        $endpoint = $fraudCheck->base_url;
-
-        if (! $apiKey || ! $endpoint) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Courier API configuration missing.',
-            ], 500);
+        $phone = $request->phone;
+        $cacheKey = 'fraud_check_phone_' . $phone;
+        $cachedResult = Cache::get($cacheKey);
+        if ($cachedResult) {
+            return response()->json($cachedResult);
         }
 
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer '.$apiKey,
-            ])->timeout(10)->post($endpoint, [
-                'phone' => $request->phone,
+            ])->timeout(4)->post($endpoint, [
+                'phone' => $phone,
             ]);
 
             if ($response->failed()) {
@@ -125,7 +125,7 @@ class CheckoutController extends Controller
 
             $minRate = 60;
 
-            return response()->json([
+            $resultData = [
                 'success' => true,
                 'data' => [
                     'total' => (int) $summary['total_parcel'],
@@ -134,7 +134,12 @@ class CheckoutController extends Controller
                     'success_rate' => (int) $summary['success_ratio'],
                 ],
                 'min_rate' => $minRate,
-            ]);
+            ];
+
+            // Cache successful result for 30 minutes to make subsequent lookups instantaneous
+            Cache::put($cacheKey, $resultData, 1800);
+
+            return response()->json($resultData);
         } catch (\Throwable $e) {
             return response()->json([
                 'success' => false,
@@ -359,7 +364,7 @@ class CheckoutController extends Controller
             $customerName = $order->name;
             $grandTotal = $order->grand_total;
             
-            CheckCourierHistory::dispatch($orderId, $userEmail, $customerName, $grandTotal);
+            CheckCourierHistory::dispatch($orderId, $userEmail, $customerName, $grandTotal)->afterResponse();
 
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');
@@ -634,7 +639,7 @@ class CheckoutController extends Controller
             DB::commit();
 
             $userEmail = auth()->check() ? auth()->user()->email : null;
-            CheckCourierHistory::dispatch($order->id, $userEmail, $order->name, $order->grand_total);
+            CheckCourierHistory::dispatch($order->id, $userEmail, $order->name, $order->grand_total)->afterResponse();
             session()->forget(['cart', 'pending_order_data']);
 
             return redirect()->route('order.invoice', $order->id)->with('success', 'Order Placed Successfully!');

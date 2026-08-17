@@ -79,6 +79,7 @@ return array(
     'App\\Http\\Middleware\\EnsureCustomerEmailIsVerified' => $baseDir . '/app/Http/Middleware/EnsureCustomerEmailIsVerified.php',
     'App\\Http\\Middleware\\MaintainanceMiddlewere' => $baseDir . '/app/Http/Middleware/MaintainanceMiddlewere.php',
     'App\\Http\\Requests\\Auth\\LoginRequest' => $baseDir . '/app/Http/Requests/Auth/LoginRequest.php',
+    'App\\Jobs\\CheckCourierHistory' => $baseDir . '/app/Jobs/CheckCourierHistory.php',
     'App\\Mail\\WelcomeUserMail' => $baseDir . '/app/Mail/WelcomeUserMail.php',
     'App\\Models\\Address' => $baseDir . '/app/Models/Address.php',
     'App\\Models\\Admins' => $baseDir . '/app/Models/Admins.php',

@@ -782,6 +782,7 @@ class ComposerStaticInit36793882908b6cbdd344b5a4840231db
         'App\\Http\\Middleware\\EnsureCustomerEmailIsVerified' => __DIR__ . '/../..' . '/app/Http/Middleware/EnsureCustomerEmailIsVerified.php',
         'App\\Http\\Middleware\\MaintainanceMiddlewere' => __DIR__ . '/../..' . '/app/Http/Middleware/MaintainanceMiddlewere.php',
         'App\\Http\\Requests\\Auth\\LoginRequest' => __DIR__ . '/../..' . '/app/Http/Requests/Auth/LoginRequest.php',
+        'App\\Jobs\\CheckCourierHistory' => __DIR__ . '/../..' . '/app/Jobs/CheckCourierHistory.php',
         'App\\Mail\\WelcomeUserMail' => __DIR__ . '/../..' . '/app/Mail/WelcomeUserMail.php',
         'App\\Models\\Address' => __DIR__ . '/../..' . '/app/Models/Address.php',
         'App\\Models\\Admins' => __DIR__ . '/../..' . '/app/Models/Admins.php',

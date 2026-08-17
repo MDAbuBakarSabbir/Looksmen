@@ -269,14 +269,59 @@ class OrderManageController extends Controller
 
     public function bulkUpdate(Request $request)
     {
-        if (str_starts_with($request->status, 'payment_')) {
-            $paymentStatus = str_replace('payment_', '', $request->status);
-            Orders::whereIn('id', $request->ids)
+        $admin = auth()->guard('admin')->user();
+        if (! $admin) {
+            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        }
+
+        $ids = $request->ids ?? [];
+        if (empty($ids) || ! is_array($ids)) {
+            return response()->json(['success' => false, 'message' => 'No orders selected.'], 400);
+        }
+
+        $status = $request->status;
+
+        // Handle Bulk Delete
+        if (in_array($status, ['delete', 'force-delete', 'bulk_delete'])) {
+            if (! $admin->hasPermission('delete_order')) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: You do not have permission to delete orders.'
+                ], 403);
+            }
+
+            try {
+                DB::beginTransaction();
+
+                OrderDetails::whereIn('order_id', $ids)->delete();
+                Logs::whereIn('order_id', $ids)->delete();
+                Orders::whereIn('id', $ids)->delete();
+
+                DB::commit();
+
+                return response()->json([
+                    'success' => true,
+                    'message' => count($ids) . ' orders deleted permanently.'
+                ]);
+            } catch (Exception $e) {
+                DB::rollBack();
+                Log::error('Bulk Order Delete Error: ' . $e->getMessage());
+
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to delete orders: ' . $e->getMessage()
+                ], 500);
+            }
+        }
+
+        if (str_starts_with($status, 'payment_')) {
+            $paymentStatus = str_replace('payment_', '', $status);
+            Orders::whereIn('id', $ids)
                 ->update(['payment_status' => $paymentStatus]);
-        } elseif ($request->status == 'delivered') {
-            $orders = Orders::whereIn('id', $request->ids)->get();
+        } elseif ($status == 'delivered') {
+            $orders = Orders::whereIn('id', $ids)->get();
             foreach ($orders as $order) {
-                $order->delivery_status = $request->status;
+                $order->delivery_status = $status;
                 $order->payment_status = 'paid';
                 $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
                 $order->grand_total = 0;
@@ -306,11 +351,11 @@ class OrderManageController extends Controller
                 }
             }
         } else {
-            Orders::whereIn('id', $request->ids)
-                ->update(['delivery_status' => $request->status]);
+            Orders::whereIn('id', $ids)
+                ->update(['delivery_status' => $status]);
 
-            if (in_array($request->status, ['cancel', 'cancelled'])) {
-                $orders = Orders::whereIn('id', $request->ids)->get();
+            if (in_array($status, ['cancel', 'cancelled'])) {
+                $orders = Orders::whereIn('id', $ids)->get();
                 foreach ($orders as $order) {
                     try {
                         if ($order->user_id && $order->user_id != '0') {
@@ -330,7 +375,7 @@ class OrderManageController extends Controller
             }
         }
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'message' => 'Orders updated successfully.']);
     }
 
     public function statusCount()
@@ -1148,9 +1193,16 @@ class OrderManageController extends Controller
             'phone' => 'required|digits:11',
         ]);
 
-        $webConfig = GeneralWebSettings::first()->pluck('value', 'name', 'status')->toArray();
-        $apiKey = $webConfig['fraud_check_api_key'];
-        $endpoint = $webConfig['fraud_check_api_url'] ?? 'https://api.bdcourier.com/courier-check';
+        $fraudCheck = FraudCheck::where('status', '1')->first();
+        if (! $fraudCheck || ($fraudCheck->status ?? '0') !== '1' || empty($fraudCheck->api_key) || empty($fraudCheck->base_url)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No active Fraud Check API provider enabled.',
+            ], 400);
+        }
+
+        $apiKey = $fraudCheck->api_key;
+        $endpoint = $fraudCheck->base_url;
 
         $response = Http::timeout(30)->withHeaders([
             'Authorization' => 'Bearer '.$apiKey,
@@ -1176,18 +1228,21 @@ class OrderManageController extends Controller
 
         return response()->json([
             'success' => true,
-            'summary' => $data['summary'],
-            'details' => collect($data)->except('summary')->values(),
+            'data' => [
+                'total' => $data['summary']['total_parcel'],
+                'success' => $data['summary']['success_parcel'],
+                'failed' => $data['summary']['cancelled_parcel'],
+                'success_rate' => $data['summary']['success_ratio'],
+            ],
         ]);
     }
 
     public function show($id)
     {
-        $order = Orders::where('id', $id)->first();
+        $order = Orders::with(['orderDetails.product.productImages', 'admin'])->where('id', $id)->first();
         if (! $order) {
             abort(404);
         }
-
         $this->checkOrderAccess($order);
 
         // Mark the order as viewed when an admin opens the details page
@@ -1204,10 +1259,10 @@ class OrderManageController extends Controller
 
         $response = null;
 
-        // শুধুমাত্র fraud_check_api সক্রিয় থাকলেই এপিআই কল করা হবে
-        if (isset($featuresConfig['fraud_check_api']) && $featuresConfig['fraud_check_api'] == '1') {
-            $fraudCheck = FraudCheck::first();
-            if ($fraudCheck) {
+        // শুধুমাত্র fraud_check_api সক্রিয় থাকলেই এবং প্রভাইডার সক্রিয় থাকলেই এপিআই কল করা হবে
+        if (isset($featuresConfig['fraud_check_api']) && $featuresConfig['fraud_check_api'] == '1' && (!isset($featuresConfig['fraud_check_order']) || $featuresConfig['fraud_check_order'] == '1')) {
+            $fraudCheck = FraudCheck::where('status', '1')->first();
+            if ($fraudCheck && ($fraudCheck->status ?? '0') === '1') {
                 $apiKey = $fraudCheck->api_key;
                 $endpoint = $fraudCheck->base_url;
 
@@ -1266,9 +1321,9 @@ class OrderManageController extends Controller
             return response()->json(['status' => 'error', 'message' => 'Invalid phone number format. Must be 11 digits.']);
         }
 
-        $fraudCheck = FraudCheck::first();
-        if (! $fraudCheck || empty($fraudCheck->api_key) || empty($fraudCheck->base_url)) {
-            return response()->json(['status' => 'error', 'message' => 'BD Courier API credentials are not configured.']);
+        $fraudCheck = FraudCheck::where('status', '1')->first();
+        if (! $fraudCheck || ($fraudCheck->status ?? '0') !== '1' || empty($fraudCheck->api_key) || empty($fraudCheck->base_url)) {
+            return response()->json(['status' => 'error', 'message' => 'No active Fraud Check API provider enabled.']);
         }
 
         try {
@@ -1466,9 +1521,65 @@ class OrderManageController extends Controller
         }
     }
 
-    public function destroy(Request $request)
+    public function destroy(Request $request, $id = null)
     {
-        //
+        $admin = auth()->guard('admin')->user();
+        if (! $admin || ! $admin->hasPermission('delete_order')) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized: You do not have permission to delete orders.'
+                ], 403);
+            }
+            abort(403, 'Unauthorized: You do not have permission to delete orders.');
+        }
+
+        $orderId = $id ?? $request->id ?? $request->order_id;
+        if (! $orderId) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Order ID is required.'], 400);
+            }
+            return redirect()->back()->with('error', 'Order ID is required.');
+        }
+
+        try {
+            DB::beginTransaction();
+
+            $order = Orders::find($orderId);
+            if (! $order) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
+                }
+                return redirect()->back()->with('error', 'Order not found.');
+            }
+
+            OrderDetails::where('order_id', $orderId)->delete();
+            Logs::where('order_id', $orderId)->delete();
+            $order->delete();
+
+            DB::commit();
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Order #LM-' . $orderId . ' deleted successfully.'
+                ]);
+            }
+
+            return redirect()->route('order-index')->with('success', 'Order #LM-' . $orderId . ' deleted successfully.');
+        } catch (Exception $e) {
+            DB::rollBack();
+            Log::error('Order Delete Error: ' . $e->getMessage());
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Failed to delete order: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()->with('error', 'Failed to delete order: ' . $e->getMessage());
+        }
     }
 
     /**

@@ -45,6 +45,11 @@ class AffiliateController extends Controller
         return view('Frontend.affiliate.index');
     }
 
+    public function admin_index()
+    {
+        return view('adminDash.affiliate.index');
+    }
+
     public function affiliate_option_store(Request $request)
     {
         // dd($request->all());

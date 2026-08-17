@@ -30,3 +30,11 @@
         </button>
     @endif
 @endforeach
+
+@if(auth()->guard('admin')->user()->hasPermission('delete_order'))
+    <div class="dropdown-divider" style="border-top: 1px solid #e5e7eb; margin: 6px 0;"></div>
+    <button type="button" class="dropdown-item d-flex align-items-center text-danger delete-order-btn" data-id="{{ $order->id }}">
+        <i class="fa-solid fa-trash text-danger" style="width: 20px;"></i>
+        <span>Delete Order</span>
+    </button>
+@endif
