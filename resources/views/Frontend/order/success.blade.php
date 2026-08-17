@@ -472,12 +472,44 @@
     }
     $productNamesStr = implode(', ', $productNames);
     $purchaseEventId = 'purchase_' . ($order->id ?? time());
+
+    // Customer Information for GTM DataLayer & Meta Pixel
+    $customerFullName = trim($order->name ?? '');
+    $nameParts = explode(' ', $customerFullName, 2);
+    $customerFirstName = $nameParts[0] ?? '';
+    $customerLastName = $nameParts[1] ?? '';
+
+    $rawPhone = preg_replace("/[^0-9]/", "", $order->phone ?? '');
+    $internationalPhone = $rawPhone;
+    if (strlen($rawPhone) == 11 && str_starts_with($rawPhone, '01')) {
+        $internationalPhone = '88' . $rawPhone;
+    }
+
+    $customerEmail = strtolower(trim($order->email ?? ($order->user->email ?? '')));
+    $customerAddress = trim($order->address ?? '');
+    $customerDistrict = trim($order->district ?? '');
+    $customerThana = trim($order->thana ?? '');
+    $customerCity = !empty($customerDistrict) ? $customerDistrict : 'Dhaka';
 @endphp
 <script>
     (function () {
         var eventId = '{{ $purchaseEventId }}';
         var orderId = '{{ $order->id ?? "" }}';
         var totalValue = {{ (float) ($order->grand_total ?? 0) }};
+        var shippingCost = {{ (float) ($order->delivery_charge ?? 0) }};
+        var couponDiscount = {{ (float) ($order->coupon_discount ?? 0) }};
+        var couponCode = {!! json_encode($order->coupon_code ?? '') !!};
+
+        var customerName = {!! json_encode($customerFullName) !!};
+        var customerFirstName = {!! json_encode($customerFirstName) !!};
+        var customerLastName = {!! json_encode($customerLastName) !!};
+        var customerPhone = {!! json_encode($rawPhone) !!};
+        var customerPhoneInt = {!! json_encode($internationalPhone) !!};
+        var customerEmail = {!! json_encode($customerEmail) !!};
+        var customerAddress = {!! json_encode($customerAddress) !!};
+        var customerCity = {!! json_encode($customerCity) !!};
+        var customerDistrict = {!! json_encode($customerDistrict) !!};
+        var customerThana = {!! json_encode($customerThana) !!};
 
         // Prevent duplicate trigger using sessionStorage
         var trackedKey = 'purchase_tracked_' + orderId;
@@ -486,47 +518,104 @@
         }
         sessionStorage.setItem(trackedKey, '1');
 
-        // 1. Google Tag Manager (DataLayer) Event
+        // 1. Google Tag Manager (DataLayer) Event with Full Customer Data
         try {
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ ecommerce: null });
             window.dataLayer.push({
                 'event': 'purchase',
                 'event_id': eventId,
-                'order_id': orderId,
+                'transaction_id': orderId,
+                'value': totalValue,
+                'currency': 'BDT',
+
+                // Root-level Customer Information
+                'customer_name': customerName,
+                'customer_first_name': customerFirstName,
+                'customer_last_name': customerLastName,
+                'customer_phone': customerPhone,
+                'customer_phone_international': customerPhoneInt,
+                'customer_email': customerEmail,
+                'customer_address': customerAddress,
+                'customer_city': customerCity,
+                'customer_district': customerDistrict,
+                'customer_thana': customerThana,
+                'customer_country': 'Bangladesh',
+                'customer_country_code': 'BD',
+
+                // Common Direct Aliases for GTM Variables
+                'name': customerName,
+                'phone': customerPhone,
+                'email': customerEmail,
+                'address': customerAddress,
+                'city': customerCity,
+                'district': customerDistrict,
+
+                // GA4 Enhanced Conversions user_data format
                 'user_data': {
-                    'email': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
-                    'phone_number': {!! json_encode(preg_replace("/[^0-9]/", "", $order->phone ?? '')) !!},
-                    'first_name': {!! json_encode(strtolower(trim($order->name ?? ''))) !!},
+                    'email': customerEmail,
+                    'phone_number': customerPhoneInt ? ('+' + customerPhoneInt) : customerPhone,
+                    'first_name': customerFirstName,
+                    'last_name': customerLastName,
                     'address': {
+                        'first_name': customerFirstName,
+                        'last_name': customerLastName,
+                        'street': customerAddress,
+                        'city': customerCity,
+                        'region': customerDistrict,
+                        'postal_code': '',
                         'country': 'BD'
                     }
                 },
+
+                // Standard Customer Info Object (Server-side / Stape / Elevar)
+                'customer': {
+                    'id': '{{ $order->user_id ?? 0 }}',
+                    'name': customerName,
+                    'first_name': customerFirstName,
+                    'last_name': customerLastName,
+                    'email': customerEmail,
+                    'phone': customerPhone,
+                    'phone_international': customerPhoneInt,
+                    'address': customerAddress,
+                    'city': customerCity,
+                    'district': customerDistrict,
+                    'country': 'Bangladesh',
+                    'country_code': 'BD'
+                },
+
+                // Standard GA4 Ecommerce Object
                 'ecommerce': {
                     'transaction_id': orderId,
                     'value': totalValue,
                     'tax': 0,
-                    'shipping': {{ (float) ($order->delivery_charge ?? 0) }},
+                    'shipping': shippingCost,
+                    'coupon': couponCode,
                     'currency': 'BDT',
                     'items': {!! json_encode($itemsArr) !!}
                 }
             });
         } catch (e) {
-            console.error("GTM Purchase Error:", e);
+            console.error("GTM Purchase DataLayer Error:", e);
         }
 
-        // 2. Direct Meta Pixel Event (Product + Customer Data)
+        // 2. Direct Meta Pixel Event (Product + Advanced Customer Matching)
         try {
             var fireMetaPixel = function() {
                 if (typeof window.fbq === 'function') {
+                    // Advanced matching properties
                     window.fbq('setUserProperties', {
-                        'em': {!! json_encode(strtolower(trim($order->email ?? ''))) !!},
-                        'ph': '{{ preg_replace("/[^0-9]/", "", $order->phone ?? "") }}',
-                        'fn': {!! json_encode(strtolower(trim($order->name ?? ""))) !!},
-                        'st': 'BD',
-                        'external_id': '{{ $order->user_id ?? "" }}'
+                        'fn': customerFirstName ? customerFirstName.toLowerCase() : '',
+                        'ln': customerLastName ? customerLastName.toLowerCase() : '',
+                        'em': customerEmail ? customerEmail.toLowerCase() : '',
+                        'ph': customerPhoneInt ? customerPhoneInt : customerPhone,
+                        'ct': customerCity ? customerCity.toLowerCase() : '',
+                        'st': customerDistrict ? customerDistrict.toLowerCase() : 'bd',
+                        'country': 'bd',
+                        'external_id': '{{ $order->user_id > 0 ? (string)$order->user_id : "order_" . $order->id }}'
                     });
 
+                    // Track Purchase Event
                     window.fbq('track', 'Purchase', {
                         content_type: 'product',
                         content_name: {!! json_encode($productNamesStr) !!},
@@ -535,7 +624,14 @@
                         num_items: {{ count($itemsArr) }},
                         value: totalValue,
                         currency: 'BDT',
-                        order_id: orderId
+                        order_id: orderId,
+                        // Customer parameters in event payload
+                        customer_name: customerName,
+                        customer_phone: customerPhone,
+                        customer_email: customerEmail,
+                        customer_address: customerAddress,
+                        customer_city: customerCity,
+                        customer_district: customerDistrict
                     }, {
                         eventID: eventId
                     });
