@@ -20,8 +20,30 @@
                     <div class="row gutters-10">
                         <div class="col-lg-12">
                             <div class="card shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
-                                <div class="card-header bg-white" style="border-bottom: 1px solid #e2e8f0;">
-                                    <h5 class="mb-0 h6 fw-600">Order History</h5>
+                                <div class="card-header bg-white d-flex align-items-center justify-content-between flex-wrap" style="border-bottom: 1px solid #e2e8f0; padding: 12px 20px;">
+                                    <div class="d-flex align-items-center" style="gap: 10px;">
+                                        <a href="{{ route('purchaseHistory') }}" class="btn btn-sm fw-600 rounded-pill px-4 py-2" style="background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%); color: #ffffff; border: none;">
+                                            <i class="las la-history mr-1"></i> Order History
+                                        </a>
+                                        <a href="{{ route('toReview') }}" class="btn btn-sm fw-600 rounded-pill px-4 py-2" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #475569; text-decoration: none;">
+                                            <i class="las la-star-half-alt mr-1 text-warning"></i> To Review
+                                            @php
+                                                $pendingReviewsCount = \App\Models\Orders::where('user_id', Auth::id())
+                                                    ->whereIn('delivery_status', ['delivered', 'partial_delivered'])
+                                                    ->with('orderDetails')
+                                                    ->get()
+                                                    ->pluck('orderDetails')
+                                                    ->flatten()
+                                                    ->pluck('product_id')
+                                                    ->unique()
+                                                    ->diff(\App\Models\Reviews::where('user_id', Auth::id())->pluck('product_id'))
+                                                    ->count();
+                                            @endphp
+                                            @if($pendingReviewsCount > 0)
+                                                <span class="badge badge-danger ml-1" style="background: #ef4444; border-radius: 50px; font-size: 11px;">{{ $pendingReviewsCount }}</span>
+                                            @endif
+                                        </a>
+                                    </div>
                                 </div>
                                 <div class="card-body p-0">
                                     <div class="table-responsive">

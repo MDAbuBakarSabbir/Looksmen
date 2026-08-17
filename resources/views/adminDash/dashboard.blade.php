@@ -84,6 +84,33 @@
     $pendingRate = $totalOrders > 0 ? ($pendingCount / $totalOrders) * 100 : 0;
     $deliveryRate = $totalOrders > 0 ? ($deliveredCount / $totalOrders) * 100 : 0;
     $cancelRate = $totalOrders > 0 ? ($cancelCount / $totalOrders) * 100 : 0;
+
+    // Customer Feedback & Reviews Calculations
+    $totalReviewsCount = $reviews->count();
+    $avgRating = $totalReviewsCount > 0 ? (float) $reviews->avg('review_star') : 5.0;
+    $avgRatingFormatted = number_format($avgRating, 1);
+
+    // Star Breakdown
+    $star5Count = $reviews->filter(fn($r) => (int)$r->review_star == 5)->count();
+    $star4Count = $reviews->filter(fn($r) => (int)$r->review_star == 4)->count();
+    $star3Count = $reviews->filter(fn($r) => (int)$r->review_star == 3)->count();
+    $star2Count = $reviews->filter(fn($r) => (int)$r->review_star == 2)->count();
+    $star1Count = $reviews->filter(fn($r) => (int)$r->review_star == 1)->count();
+
+    $star5Percent = $totalReviewsCount > 0 ? ($star5Count / $totalReviewsCount) * 100 : 0;
+    $star4Percent = $totalReviewsCount > 0 ? ($star4Count / $totalReviewsCount) * 100 : 0;
+    $star3Percent = $totalReviewsCount > 0 ? ($star3Count / $totalReviewsCount) * 100 : 0;
+    $star2Percent = $totalReviewsCount > 0 ? ($star2Count / $totalReviewsCount) * 100 : 0;
+    $star1Percent = $totalReviewsCount > 0 ? ($star1Count / $totalReviewsCount) * 100 : 0;
+
+    // Sentiment breakdown (4-5 stars: Positive, 3 stars: Neutral, 1-2 stars: Negative)
+    $positiveReviewsCount = $star5Count + $star4Count;
+    $neutralReviewsCount = $star3Count;
+    $negativeReviewsCount = $star2Count + $star1Count;
+
+    $positivePercent = $totalReviewsCount > 0 ? round(($positiveReviewsCount / $totalReviewsCount) * 100, 1) : 100;
+    $neutralPercent = $totalReviewsCount > 0 ? round(($neutralReviewsCount / $totalReviewsCount) * 100, 1) : 0;
+    $negativePercent = $totalReviewsCount > 0 ? round(($negativeReviewsCount / $totalReviewsCount) * 100, 1) : 0;
 @endphp
 
 @extends('layouts.Backend.master')
@@ -351,6 +378,94 @@
             color: var(--text-main);
         }
 
+        /* Customer Feedback Widget */
+        .feedback-score-box {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(168, 85, 247, 0.08) 100%);
+            border: 2px solid rgba(99, 102, 241, 0.15);
+            border-radius: 20px;
+            padding: 16px 20px;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 140px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feedback-score-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.35);
+        }
+
+        .feedback-score-num {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: #1e1b4b;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .feedback-stars {
+            color: #f59e0b;
+            font-size: 0.85rem;
+            letter-spacing: 2px;
+        }
+
+        .rating-bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .rating-bar-label {
+            width: 45px;
+            text-align: left;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .rating-bar-track {
+            flex: 1;
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 0 10px;
+        }
+
+        .rating-bar-fill {
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+
+        .rating-bar-count {
+            width: 28px;
+            text-align: right;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+        }
+
+        .sentiment-tile {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 10px 6px;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            transition: all 0.2s ease;
+        }
+
+        .sentiment-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
+
         /* Feedback Circle */
         .feedback-circle {
             width: 120px;
@@ -563,22 +678,107 @@
     <div class="row">
         <div class="col-xl-4 col-lg-5">
             <div class="glass-card h-100">
-                <div class="premium-header text-center border-0">
-                    <h4>Customer Feedback</h4>
+                <div class="premium-header d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Customer Feedback</h4>
+                    <a href="{{ Route::has('reviews.index') ? route('reviews.index') : '#' }}" class="badge badge-soft-info" style="font-size: 0.75rem; text-decoration: none; padding: 6px 12px; border-radius: 50px;">
+                        Manage <i class="fa-solid fa-arrow-up-right-from-square ml-1" style="font-size: 10px;"></i>
+                    </a>
                 </div>
-                <div class="card-body text-center d-flex flex-column justify-content-center">
-                    <div class="feedback-circle">
-                        {{ $reviews->count() }}
+                <div class="card-body text-center d-flex flex-column justify-content-between p-4">
+                    <!-- Rating Score Badge -->
+                    <div class="my-2">
+                        <div class="feedback-score-box">
+                            <div class="feedback-score-num">{{ $avgRatingFormatted }}</div>
+                            <div class="feedback-stars mb-1">
+                                @php
+                                    $fullStars = floor($avgRating);
+                                    $hasHalfStar = ($avgRating - $fullStars) >= 0.3 && ($avgRating - $fullStars) <= 0.7;
+                                    $hasExtraFull = ($avgRating - $fullStars) > 0.7;
+                                @endphp
+                                @for($i = 1; $i <= 5; $i++)
+                                    @if($i <= $fullStars || ($i == $fullStars + 1 && $hasExtraFull))
+                                        <i class="fa-solid fa-star text-warning"></i>
+                                    @elseif($i == $fullStars + 1 && $hasHalfStar)
+                                        <i class="fa-solid fa-star-half-stroke text-warning"></i>
+                                    @else
+                                        <i class="fa-regular fa-star text-muted" style="opacity: 0.4;"></i>
+                                    @endif
+                                @endfor
+                            </div>
+                            <small class="text-muted font-weight-bold" style="font-size: 0.75rem;">Out of 5.0</small>
+                        </div>
+                        <p class="text-muted small mt-2 mb-0 font-weight-semibold">
+                            Based on <strong>{{ $totalReviewsCount }}</strong> {{ Str::plural('Customer Review', $totalReviewsCount) }}
+                        </p>
                     </div>
 
-                    <div class="row mt-4 px-3">
-                        <div class="col-6 border-right">
-                            <h3 class="text-success fw-bold mb-1">99%</h3>
-                            <p class="text-muted fw-semibold mb-0"><i class="ti-hand-point-up me-1"></i> Positive</p>
+                    <!-- Star Distribution Progress Bars -->
+                    <div class="px-2 my-3 text-left">
+                        <div class="rating-bar-row">
+                            <span class="rating-bar-label"><i class="fa-solid fa-star text-warning mr-1" style="font-size: 10px;"></i>5</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill bg-success" style="width: {{ $star5Percent }}%;"></div>
+                            </div>
+                            <span class="rating-bar-count">{{ $star5Count }}</span>
                         </div>
-                        <div class="col-6">
-                            <h3 class="text-danger fw-bold mb-1">1%</h3>
-                            <p class="text-muted fw-semibold mb-0"><i class="ti-hand-point-down me-1"></i> Negative</p>
+                        <div class="rating-bar-row">
+                            <span class="rating-bar-label"><i class="fa-solid fa-star text-warning mr-1" style="font-size: 10px;"></i>4</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill bg-info" style="width: {{ $star4Percent }}%;"></div>
+                            </div>
+                            <span class="rating-bar-count">{{ $star4Count }}</span>
+                        </div>
+                        <div class="rating-bar-row">
+                            <span class="rating-bar-label"><i class="fa-solid fa-star text-warning mr-1" style="font-size: 10px;"></i>3</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill bg-warning" style="width: {{ $star3Percent }}%;"></div>
+                            </div>
+                            <span class="rating-bar-count">{{ $star3Count }}</span>
+                        </div>
+                        <div class="rating-bar-row">
+                            <span class="rating-bar-label"><i class="fa-solid fa-star text-warning mr-1" style="font-size: 10px;"></i>2</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill" style="background-color: #f97316; width: {{ $star2Percent }}%;"></div>
+                            </div>
+                            <span class="rating-bar-count">{{ $star2Count }}</span>
+                        </div>
+                        <div class="rating-bar-row">
+                            <span class="rating-bar-label"><i class="fa-solid fa-star text-warning mr-1" style="font-size: 10px;"></i>1</span>
+                            <div class="rating-bar-track">
+                                <div class="rating-bar-fill bg-danger" style="width: {{ $star1Percent }}%;"></div>
+                            </div>
+                            <span class="rating-bar-count">{{ $star1Count }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Sentiment Summary Tiles -->
+                    <div class="row pt-2" style="margin-left: -6px; margin-right: -6px;">
+                        <div class="col-4 px-1">
+                            <div class="sentiment-tile">
+                                <div class="text-success font-weight-bold mb-1" style="font-size: 1.1rem;">{{ number_format($positivePercent, 0) }}%</div>
+                                <div class="text-muted" style="font-size: 0.72rem; font-weight: 600;">
+                                    <i class="fa-solid fa-face-smile text-success mr-1"></i> Positive
+                                </div>
+                                <div class="text-muted" style="font-size: 0.68rem;">({{ $positiveReviewsCount }})</div>
+                            </div>
+                        </div>
+                        <div class="col-4 px-1">
+                            <div class="sentiment-tile">
+                                <div class="text-warning font-weight-bold mb-1" style="font-size: 1.1rem;">{{ number_format($neutralPercent, 0) }}%</div>
+                                <div class="text-muted" style="font-size: 0.72rem; font-weight: 600;">
+                                    <i class="fa-solid fa-face-meh text-warning mr-1"></i> Neutral
+                                </div>
+                                <div class="text-muted" style="font-size: 0.68rem;">({{ $neutralReviewsCount }})</div>
+                            </div>
+                        </div>
+                        <div class="col-4 px-1">
+                            <div class="sentiment-tile">
+                                <div class="text-danger font-weight-bold mb-1" style="font-size: 1.1rem;">{{ number_format($negativePercent, 0) }}%</div>
+                                <div class="text-muted" style="font-size: 0.72rem; font-weight: 600;">
+                                    <i class="fa-solid fa-face-frown text-danger mr-1"></i> Negative
+                                </div>
+                                <div class="text-muted" style="font-size: 0.68rem;">({{ $negativeReviewsCount }})</div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -48,6 +48,10 @@ Route::middleware(['maintainance'])->group(function () {
         Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
         Route::get('/purchase-history', [ProfileController::class, 'purchaseHistory'])->name('purchaseHistory');
+        Route::get('/to-review', [ProfileController::class, 'toReview'])->name('toReview');
+        Route::post('/review/store', [ProfileController::class, 'storeReview'])->name('review.store');
+        Route::post('/review/update', [ProfileController::class, 'updateReview'])->name('review.update');
+        Route::post('/review/get-data', [ProfileController::class, 'getReviewData'])->name('review.getData');
         Route::get('/wishlist', [ProfileController::class, 'wishlist'])->name('wishlist');
         Route::post('/wishlist/add', [ProfileController::class, 'addWishlist'])->name('wishlist.add');
         Route::post('/wishlist/remove', [ProfileController::class, 'removeWishlist'])->name('wishlist.remove');

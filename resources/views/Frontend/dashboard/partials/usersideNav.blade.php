@@ -110,6 +110,11 @@
             </a>
         </li>
         <li>
+            <a href="{{ route('toReview') }}" class="user-nav-link {{ Route::currentRouteName() == 'toReview' ? 'active' : '' }}">
+                <i class="las la-star-half-alt"></i> To Review
+            </a>
+        </li>
+        <li>
             <a href="{{ route('wishlist') }}" class="user-nav-link {{ Route::currentRouteName() == 'wishlist' ? 'active' : '' }}">
                 <i class="la la-heart-o"></i> Wishlist
             </a>
