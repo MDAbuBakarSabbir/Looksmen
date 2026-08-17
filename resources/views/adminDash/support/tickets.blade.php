@@ -112,7 +112,7 @@
 
                                                 <!-- Open Chat Link -->
                                                 @if($ticket->user_id)
-                                                    <a href="{{ route('admin.chat', ['user_id' => $ticket->user_id]) }}" 
+                                                    <a href=""
                                                         class="btn btn-sm btn-outline-primary btn-icon" 
                                                         title="Open Chat with Customer" style="border-radius: 0 20px 20px 0;">
                                                         <i class="fa-solid fa-message"></i> Chat

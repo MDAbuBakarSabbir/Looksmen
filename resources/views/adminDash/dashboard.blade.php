@@ -490,7 +490,7 @@
         </div>
 
         <div class="col-lg-3 col-sm-6 mb-4">
-            <a href="{{ route('order-index') }}" class="stat-widget-premium" style="background: var(--info-gradient);">
+            <a href="{{ route('admin.tickets') }}" class="stat-widget-premium" style="background: var(--info-gradient);">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <div class="stat-text">Support Tickets</div>
