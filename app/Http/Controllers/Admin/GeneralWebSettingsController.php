@@ -469,6 +469,10 @@ class GeneralWebSettingsController extends Controller
     public function webFbpixel(Request $request)
     {
         $fbDetails = [
+            'fb_pixel_id' => $request->fb_pixel_id,
+            'fb_capi_access_token' => $request->fb_capi_access_token,
+            'fb_capi_test_code' => $request->fb_capi_test_code,
+            'fb_capi_status' => $request->has('fb_capi_status') ? '1' : ($request->fb_capi_status ?? '0'),
             'fb_pixel' => $request->fb_pixel,
             'fbdomainverify' => $request->fbdomainverify,
             'fbiframe' => $request->fbiframe,
@@ -482,7 +486,10 @@ class GeneralWebSettingsController extends Controller
             );
         }
 
-        return back()->with('success', 'Facebook Pixel Settings Updated Successfully!');
+        Cache::forget('global_webconfig_pluck');
+        Cache::forget('global_webinfo_first');
+
+        return back()->with('success', 'Facebook Pixel & Meta CAPI Settings Updated Successfully!');
     }
 
     public function maintainance()

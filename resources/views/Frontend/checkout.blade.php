@@ -1344,20 +1344,35 @@
         }
     }
     $checkoutEventId = 'begin_checkout_' . time();
+    $authUser = auth()->user();
+    $authEmail = $authUser ? strtolower(trim($authUser->email ?? '')) : '';
+    $authPhone = $authUser ? preg_replace('/[^0-9]/', '', $authUser->phone ?? '') : '';
+    $authName = $authUser ? trim($authUser->name ?? '') : '';
 @endphp
 <script>
     var eventId = '{{ $checkoutEventId }}';
     var totalVal = Number("{{ (float) ($subtotal ?? 0) }}");
+    var checkoutItems = {!! json_encode($checkoutItemsArr) !!};
+    var checkoutContentIds = {!! json_encode($checkoutContentIds) !!};
+    var checkoutFbContents = {!! json_encode($checkoutFbContents) !!};
 
     // 1. Google Tag Manager (DataLayer) Event
     try {
         var gtmPayload = {
             'event': 'begin_checkout',
             'event_id': eventId,
+            'value': totalVal,
+            'currency': 'BDT',
+            'content_type': 'product',
+            'content_ids': checkoutContentIds,
+            'num_items': {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }},
+            'customer_name': {!! json_encode($authName) !!},
+            'customer_phone': {!! json_encode($authPhone) !!},
+            'customer_email': {!! json_encode($authEmail) !!},
             'ecommerce': {
                 'currency': 'BDT',
                 'value': totalVal,
-                'items': {!! json_encode($checkoutItemsArr) !!}
+                'items': checkoutItems
             }
         };
         window.dataLayer = window.dataLayer || [];
@@ -1372,8 +1387,8 @@
     try {
         var fbPayload = {
             content_type: 'product',
-            content_ids: {!! json_encode($checkoutContentIds) !!},
-            contents: {!! json_encode($checkoutFbContents) !!},
+            content_ids: checkoutContentIds,
+            contents: checkoutFbContents,
             value: totalVal,
             currency: 'BDT',
             num_items: {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }}
@@ -1381,6 +1396,13 @@
         
         var trackCheckout = function() {
             if (typeof window.fbq === 'function') {
+                @if ($authUser)
+                    window.fbq('setUserProperties', {
+                        'em': '{{ $authEmail }}',
+                        'ph': '{{ $authPhone }}',
+                        'fn': '{{ strtolower(trim($authName)) }}'
+                    });
+                @endif
                 window.fbq('track', 'InitiateCheckout', fbPayload, { eventID: eventId });
                 console.log("Meta Pixel InitiateCheckout Fired:", fbPayload);
                 return true;
@@ -1389,14 +1411,12 @@
         };
         
         if (!trackCheckout()) {
-            console.log("Waiting for Meta Pixel (fbq) to load...");
             var checkoutAttempts = 0;
             var checkoutInterval = setInterval(function() {
-                if (trackCheckout() || ++checkoutAttempts > 40) { // Try for 20 seconds
-                    if (checkoutAttempts > 40) console.warn("Meta Pixel (fbq) did not load in time.");
+                if (trackCheckout() || ++checkoutAttempts > 40) {
                     clearInterval(checkoutInterval);
                 }
-            }, 500);
+            }, 400);
         }
     } catch (e) {
         console.error("Meta Pixel InitiateCheckout Error:", e);

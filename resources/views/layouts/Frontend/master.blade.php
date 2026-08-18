@@ -249,6 +249,9 @@
     <!-- End Google Tag Manager -->
 
     <!-- Facebook Pixel / Meta Pixel Code -->
+    @php
+        $fbPixelId = !empty($webConfig['fb_pixel_id']) ? trim($webConfig['fb_pixel_id']) : '1814018549762511';
+    @endphp
     @if (!empty($webConfig['fb_pixel']))
         {!! $webConfig['fb_pixel'] !!}
     @else
@@ -263,18 +266,18 @@
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
           @auth
-            fbq('init', '1795805000795623', {
+            fbq('init', '{{ $fbPixelId }}', {
               em: '{{ strtolower(trim(auth()->user()->email ?? "")) }}',
               ph: '{{ preg_replace("/[^0-9]/", "", auth()->user()->phone ?? "") }}',
               fn: '{{ strtolower(trim(auth()->user()->name ?? "")) }}'
             });
           @else
-            fbq('init', '1795805000795623');
+            fbq('init', '{{ $fbPixelId }}');
           @endauth
           fbq('track', 'PageView');
         </script>
         <noscript><img height="1" width="1" style="display:none"
-          src="https://www.facebook.com/tr?id=1795805000795623&ev=PageView&noscript=1"
+          src="https://www.facebook.com/tr?id={{ $fbPixelId }}&ev=PageView&noscript=1"
         /></noscript>
         <!-- End Meta Pixel Code -->
     @endif
@@ -1444,50 +1447,77 @@
         // Track AddToCart Event for GTM DataLayer & Meta Pixel
         function trackAddToCart(data) {
             if (!data || data.status !== 'success') return;
-            var productId = data.product_id || '';
+            var productId = String(data.product_id || '');
             var productName = data.product_name || '';
             var productPrice = parseFloat(data.product_price) || 0;
             var quantity = parseInt(data.quantity) || 1;
             var currency = data.currency || 'BDT';
+            var totalVal = productPrice * quantity;
             var eventId = 'add_to_cart_' + productId + '_' + Date.now();
 
             // 1. Google Tag Manager (DataLayer) Event
             try {
                 window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({ ecommerce: null });
+                window.dataLayer.push({ ecommerce: null }); // Clear previous ecommerce object
                 window.dataLayer.push({
                     'event': 'add_to_cart',
                     'event_id': eventId,
+                    'content_name': productName,
+                    'content_ids': [productId],
+                    'content_type': 'product',
+                    'value': totalVal,
+                    'currency': currency,
+                    'quantity': quantity,
+                    'item_id': productId,
+                    'item_name': productName,
+                    'price': productPrice,
                     'ecommerce': {
                         'currency': currency,
-                        'value': productPrice * quantity,
+                        'value': totalVal,
                         'items': [{
-                            'item_id': String(productId),
+                            'item_id': productId,
                             'item_name': productName,
                             'price': productPrice,
-                            'quantity': quantity
+                            'quantity': quantity,
+                            'currency': currency
                         }]
                     }
                 });
+                console.log("GTM AddToCart Event Pushed:", eventId, productName);
             } catch (e) {
                 console.error("GTM AddToCart Error:", e);
             }
 
             // 2. Direct Meta Pixel Event
             try {
-                if (typeof window.fbq === 'function') {
-                    window.fbq('track', 'AddToCart', {
-                        content_type: 'product',
-                        content_ids: [String(productId)],
-                        content_name: productName,
-                        contents: [{
-                            id: String(productId),
-                            quantity: quantity,
-                            item_price: productPrice
-                        }],
-                        value: productPrice * quantity,
-                        currency: currency
-                    }, { eventID: eventId });
+                var firePixelAddToCart = function() {
+                    if (typeof window.fbq === 'function') {
+                        window.fbq('track', 'AddToCart', {
+                            content_type: 'product',
+                            content_ids: [productId],
+                            content_name: productName,
+                            contents: [{
+                                id: productId,
+                                quantity: quantity,
+                                item_price: productPrice
+                            }],
+                            value: totalVal,
+                            currency: currency,
+                            num_items: quantity
+                        }, { eventID: eventId });
+                        console.log("Meta Pixel AddToCart Fired:", eventId);
+                        return true;
+                    }
+                    return false;
+                };
+
+                if (!firePixelAddToCart()) {
+                    var attempts = 0;
+                    var interval = setInterval(function() {
+                        if (firePixelAddToCart() || ++attempts > 20) {
+                            clearInterval(interval);
+                        }
+                    }, 300);
                 }
             } catch (e) {
                 console.error("Meta Pixel AddToCart Error:", e);

@@ -519,35 +519,67 @@
             </div>
         </div>
 
-        <!-- FB Pixel -->
+        <!-- FB Pixel & Meta CAPI -->
         <div class="col-lg-6">
             <div class="settings-card card">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i class="fa-brands fa-facebook text-primary mr-2" style="font-size: 16px;"></i>
-                    <h4>FB Pixel & SDK</h4>
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="fa-brands fa-facebook text-primary mr-2" style="font-size: 18px;"></i>
+                        <h4 class="mb-0">Meta Pixel & Conversions API (CAPI)</h4>
+                    </div>
                 </div>
                 <div class="card-body">
                     <form action="{{ route('websettings.webFbpixel') }}" method="POST" class="settingsUpdateForm">
                         @csrf
                         <div class="mb-3">
-                            <label class="form-label">Facebook Pixel Code</label>
-                            <textarea class="form-control" name="fb_pixel" placeholder="Paste Facebook Pixel Javascript Code here">{{ $webConfig['fb_pixel']['value'] ?? '' }}</textarea>
+                            <label class="form-label font-weight-bold">Meta (Facebook) Pixel ID</label>
+                            <input type="text" class="form-control" name="fb_pixel_id" value="{{ $webConfig['fb_pixel_id']['value'] ?? '1814018549762511' }}" placeholder="e.g. 1814018549762511">
+                            <small class="text-muted">Enter your numeric Meta Pixel ID from Events Manager.</small>
                         </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                <label class="form-label font-weight-bold mb-0">Conversions API (CAPI) Access Token</label>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="fb_capi_status" name="fb_capi_status" value="1" {{ ($webConfig['fb_capi_status']['value'] ?? '1') == '1' ? 'checked' : '' }}>
+                                    <label class="custom-control-label font-weight-bold text-success" for="fb_capi_status">Enable CAPI</label>
+                                </div>
+                            </div>
+                            <textarea class="form-control" name="fb_capi_access_token" rows="3" placeholder="Paste your Meta System User or Conversions API Access Token">{{ $webConfig['fb_capi_access_token']['value'] ?? 'EAAWVCFJjBBQBSbD68VZAUIMvlsaOO4EC8l0yXPDMEwDVuZBPDGW0B8bkMNtM4g4BgPAZBxHZByZA8JyDwo1ZBsux6vk6Bjd5U6Q9MRq4JZCZBm9M6mLoZAJswHaqTG1FTDHbz9xC1MFUgPOK1uU1prCate3BZBTfrJWPbpe30cbeYp7LkkxtiHe9gUzxNSpZBDMWodXNgZDZD' }}</textarea>
+                            <small class="text-muted">Generated from Meta Events Manager > Settings > Conversions API.</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label font-weight-bold">Meta CAPI Test Event Code <span class="badge badge-secondary text-white">Optional</span></label>
+                            <input type="text" class="form-control" name="fb_capi_test_code" value="{{ $webConfig['fb_capi_test_code']['value'] ?? 'TEST23234' }}" placeholder="e.g. TEST23234">
+                            <small class="text-muted">Leave empty in production or enter code from Meta "Test Events" tab to test server events live.</small>
+                        </div>
+
+                        <hr class="my-3">
+
+                        <div class="mb-3">
+                            <label class="form-label">Custom Facebook Pixel Header Code <small class="text-muted">(Optional override)</small></label>
+                            <textarea class="form-control" name="fb_pixel" rows="2" placeholder="Leave empty to use automatic standard Meta Pixel script">{{ $webConfig['fb_pixel']['value'] ?? '' }}</textarea>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label">Facebook Domain Verification</label>
-                            <textarea class="form-control" name="fbdomainverify" placeholder="Paste verification meta code">{{ $webConfig['fbdomainverify']['value'] ?? '' }}</textarea>
+                            <textarea class="form-control" name="fbdomainverify" rows="1" placeholder="Paste verification meta code">{{ $webConfig['fbdomainverify']['value'] ?? '' }}</textarea>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label">Facebook Page Iframe</label>
-                            <textarea class="form-control" name="fbiframe" placeholder="Paste page plugin iframe code">{{ $webConfig['fbiframe']['value'] ?? '' }}</textarea>
+                            <textarea class="form-control" name="fbiframe" rows="1" placeholder="Paste page plugin iframe code">{{ $webConfig['fbiframe']['value'] ?? '' }}</textarea>
                         </div>
+
                         @if (isset($featuresConfig['facebook_api']) && $featuresConfig['facebook_api'] == '1')
                             <div class="mb-3">
                                 <label class="form-label">Facebook Chat Plugin Code</label>
                                 <textarea class="form-control" name="fbchatplugin" placeholder="Paste Chat Plugin code">{{ $webConfig['fbchatplugin']['value'] ?? '' }}</textarea>
                             </div>
                         @endif
-                        <button type="submit" class="btn btn-primary">Save Facebook Scripts</button>
+
+                        <button type="submit" class="btn btn-primary btn-block">Save Facebook & CAPI Settings</button>
                     </form>
                 </div>
             </div>

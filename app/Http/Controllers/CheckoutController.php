@@ -22,6 +22,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
 use App\Jobs\CheckCourierHistory;
+use App\Jobs\SendMetaCapiPurchaseJob;
 
 class CheckoutController extends Controller
 {
@@ -366,6 +367,15 @@ class CheckoutController extends Controller
             
             CheckCourierHistory::dispatch($orderId, $userEmail, $customerName, $grandTotal)->afterResponse();
 
+            // Dispatch Meta Conversions API (CAPI) Purchase Event (Server-Side Tracking)
+            $capiContext = [
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'fbp' => request()->cookie('_fbp'),
+                'fbc' => request()->cookie('_fbc'),
+            ];
+            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_' . $order->id, $capiContext)->afterResponse();
+
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');
             if (auth()->check()) {
@@ -512,7 +522,17 @@ class CheckoutController extends Controller
             DB::commit();
 
             $userEmail = auth()->check() ? auth()->user()->email : null;
-            CheckCourierHistory::dispatch($order->id, $userEmail, $order->name, $order->grand_total);
+            CheckCourierHistory::dispatch($order->id, $userEmail, $order->name, $order->grand_total)->afterResponse();
+
+            // Dispatch Meta Conversions API (CAPI) Purchase Event (Server-Side Tracking)
+            $capiContext = [
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'fbp' => request()->cookie('_fbp'),
+                'fbc' => request()->cookie('_fbc'),
+            ];
+            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_' . $order->id, $capiContext)->afterResponse();
+
             session()->forget(['cart', 'pending_order_data']);
 
             return redirect()->route('order.invoice', $order->id)->with('order_placed', 'success');
@@ -640,6 +660,16 @@ class CheckoutController extends Controller
 
             $userEmail = auth()->check() ? auth()->user()->email : null;
             CheckCourierHistory::dispatch($order->id, $userEmail, $order->name, $order->grand_total)->afterResponse();
+
+            // Dispatch Meta Conversions API (CAPI) Purchase Event (Server-Side Tracking)
+            $capiContext = [
+                'ip' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+                'fbp' => request()->cookie('_fbp'),
+                'fbc' => request()->cookie('_fbc'),
+            ];
+            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_' . $order->id, $capiContext)->afterResponse();
+
             session()->forget(['cart', 'pending_order_data']);
 
             return redirect()->route('order.invoice', $order->id)->with('success', 'Order Placed Successfully!');
