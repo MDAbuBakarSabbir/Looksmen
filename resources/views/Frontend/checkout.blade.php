@@ -1381,6 +1381,9 @@
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ ecommerce: null });
             window.dataLayer.push(gtmPayload);
+
+            // Also push initiate_checkout alias so all GTM trigger naming conventions match
+            window.dataLayer.push(Object.assign({}, gtmPayload, { 'event': 'initiate_checkout' }));
             console.log("GTM BeginCheckout DataLayer Event Pushed:", gtmPayload);
         } catch (e) {
             console.error("GTM BeginCheckout Error:", e);
