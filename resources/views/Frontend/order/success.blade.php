@@ -511,13 +511,6 @@
         var customerDistrict = {!! json_encode($customerDistrict) !!};
         var customerThana = {!! json_encode($customerThana) !!};
 
-        // Prevent duplicate trigger using sessionStorage
-        var trackedKey = 'purchase_tracked_' + orderId;
-        if (sessionStorage.getItem(trackedKey)) {
-            return; // Already tracked for this session
-        }
-        sessionStorage.setItem(trackedKey, '1');
-
         // Google Tag Manager (DataLayer) Purchase Event with Full Customer & Order Data
         try {
             window.dataLayer = window.dataLayer || [];
