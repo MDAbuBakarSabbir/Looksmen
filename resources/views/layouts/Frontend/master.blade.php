@@ -248,17 +248,6 @@
     </script>
     <!-- End Google Tag Manager -->
 
-    <!-- Disable Meta Pixel Automatic Button Scraping (Stops duplicate ob3_plugin-set events) -->
-    @php
-        $fbPixelId = !empty($webConfig['fb_pixel_id']) ? trim($webConfig['fb_pixel_id']) : '1814018549762511';
-    @endphp
-    <script>
-        window.fbq = window.fbq || function() {
-            (window.fbq.q = window.fbq.q || []).push(arguments);
-        };
-        fbq('set', 'autoConfig', false, '{{ $fbPixelId }}');
-    </script>
-
     <!-- Custom Tracking / Header Code (if provided) -->
     @if (!empty($webConfig['fb_pixel']))
         {!! $webConfig['fb_pixel'] !!}
