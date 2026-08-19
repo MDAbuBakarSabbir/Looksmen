@@ -1350,7 +1350,11 @@
     $authName = $authUser ? trim($authUser->name ?? '') : '';
 @endphp
 <script>
-    var eventId = '{{ $checkoutEventId }}';
+    (function () {
+        if (window.__initiateCheckoutTracked) return;
+        window.__initiateCheckoutTracked = true;
+
+        var eventId = '{{ $checkoutEventId }}';
     var totalVal = Number("{{ (float) ($subtotal ?? 0) }}");
     var checkoutItems = {!! json_encode($checkoutItemsArr) !!};
     var checkoutContentIds = {!! json_encode($checkoutContentIds) !!};
@@ -1421,6 +1425,7 @@
     } catch (e) {
         console.error("Meta Pixel InitiateCheckout Error:", e);
     }
+    })();
 </script>
 @endsection
 

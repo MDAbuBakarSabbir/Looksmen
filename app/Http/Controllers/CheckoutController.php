@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\CheckCourierHistory;
+use App\Jobs\SendMetaCapiPurchaseJob;
 use App\Models\Address;
 use App\Models\Cart;
 use App\Models\Coupons;
@@ -13,6 +15,7 @@ use App\Models\IncompleteOrders;
 use App\Models\OrderDetails;
 use App\Models\Orders;
 use App\Models\Payment;
+use App\Models\Thana;
 use App\Models\WalletTransaction;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
@@ -21,8 +24,6 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
-use App\Jobs\CheckCourierHistory;
-use App\Jobs\SendMetaCapiPurchaseJob;
 
 class CheckoutController extends Controller
 {
@@ -94,7 +95,7 @@ class CheckoutController extends Controller
         }
 
         $phone = $request->phone;
-        $cacheKey = 'fraud_check_phone_' . $phone;
+        $cacheKey = 'fraud_check_phone_'.$phone;
         $cachedResult = Cache::get($cacheKey);
         if ($cachedResult) {
             return response()->json($cachedResult);
@@ -231,8 +232,8 @@ class CheckoutController extends Controller
             [
                 'name' => $request->name ?? 'Customer',
                 'address' => $request->address ?? 'N/A',
-                'district' => \App\Models\District::getNameById($request->district_id),
-                'thana' => \App\Models\Thana::getNameById($request->thana_id),
+                'district' => District::getNameById($request->district_id),
+                'thana' => Thana::getNameById($request->thana_id),
                 'product_id' => json_encode($productCodes), // Array হিসেবে সেভ
                 'subtotal' => $request->subtotal,
                 'grand_total' => $request->grand_total,
@@ -286,8 +287,8 @@ class CheckoutController extends Controller
             $order->ip_address = $request->ip();
             $order->name = $request->name;
             $order->phone = $request->phone;
-            $order->district = \App\Models\District::getNameById($request->district_id);
-            $order->thana = \App\Models\Thana::getNameById($request->thana_id);
+            $order->district = District::getNameById($request->district_id);
+            $order->thana = Thana::getNameById($request->thana_id);
             $order->address = $request->address;
             $order->total_amount = $request->total_amount; // Subtotal
             $order->coupon_discount = $request->coupon_discount ?? 0;
@@ -364,7 +365,7 @@ class CheckoutController extends Controller
             $userEmail = auth()->check() ? auth()->user()->email : null;
             $customerName = $order->name;
             $grandTotal = $order->grand_total;
-            
+
             CheckCourierHistory::dispatch($orderId, $userEmail, $customerName, $grandTotal)->afterResponse();
 
             // Dispatch Meta Conversions API (CAPI) Purchase Event (Server-Side Tracking)
@@ -374,7 +375,7 @@ class CheckoutController extends Controller
                 'fbp' => request()->cookie('_fbp'),
                 'fbc' => request()->cookie('_fbc'),
             ];
-            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_' . $order->id, $capiContext)->afterResponse();
+            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_'.$order->id, $capiContext)->afterResponse();
 
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');
@@ -484,12 +485,12 @@ class CheckoutController extends Controller
             // গ. Orders টেবিলে ডাটা ইনসার্ট
             $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
-            $order->ip_address = $request->ip();
+            $order->ip_address = request()->ip();
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
             $order->address = $orderData['address'];
-            $order->district = \App\Models\District::getNameById($orderData['district_id'] ?? 0);
-            $order->thana = \App\Models\Thana::getNameById($orderData['thana_id'] ?? 0);
+            $order->district = District::getNameById($orderData['district_id'] ?? 0);
+            $order->thana = Thana::getNameById($orderData['thana_id'] ?? 0);
             $order->total_amount = $orderData['total_amount'];
             $order->grand_total = $orderData['grand_total'];
             $order->payment_type = 'prepaid';
@@ -531,7 +532,7 @@ class CheckoutController extends Controller
                 'fbp' => request()->cookie('_fbp'),
                 'fbc' => request()->cookie('_fbc'),
             ];
-            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_' . $order->id, $capiContext)->afterResponse();
+            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_'.$order->id, $capiContext)->afterResponse();
 
             session()->forget(['cart', 'pending_order_data']);
 
@@ -620,8 +621,8 @@ class CheckoutController extends Controller
             $order->name = $orderData['name'];
             $order->phone = $orderData['phone'];
             $order->address = $orderData['address'];
-            $order->district = \App\Models\District::getNameById($orderData['district_id'] ?? 0);
-            $order->thana = \App\Models\Thana::getNameById($orderData['thana_id'] ?? 0);
+            $order->district = District::getNameById($orderData['district_id'] ?? 0);
+            $order->thana = Thana::getNameById($orderData['thana_id'] ?? 0);
             $order->total_amount = $orderData['total_amount'];
             $order->delivery_charge = $orderData['delivery_charge'];
             $order->coupon_discount = $orderData['coupon_discount'] ?? 0;
@@ -668,7 +669,7 @@ class CheckoutController extends Controller
                 'fbp' => request()->cookie('_fbp'),
                 'fbc' => request()->cookie('_fbc'),
             ];
-            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_' . $order->id, $capiContext)->afterResponse();
+            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_'.$order->id, $capiContext)->afterResponse();
 
             session()->forget(['cart', 'pending_order_data']);
 

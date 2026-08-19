@@ -265,6 +265,7 @@
           t.src=v;s=b.getElementsByTagName(e)[0];
           s.parentNode.insertBefore(t,s)}(window, document,'script',
           'https://connect.facebook.net/en_US/fbevents.js');
+          fbq('set', 'autoConfig', false, '{{ $fbPixelId }}');
           @auth
             fbq('init', '{{ $fbPixelId }}', {
               em: '{{ strtolower(trim(auth()->user()->email ?? "")) }}',
@@ -1092,9 +1093,6 @@
     <script src="{{ asset('frontend') }}/assets/js/custom.js?v=1.1"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
-    @yield('script')
-
     <script>
         $(document).ready(function() {
             // Mobile Sidenav drawer logic
@@ -1905,9 +1903,8 @@
 
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous"
-        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=1"
+        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=0"
         nonce="mvlbA8Xg"></script>
-    </div>
 
     <script>
         function addToCompare(id) {
@@ -2216,7 +2213,6 @@
     <div class="ai-support-widget-btn" onclick="toggleAiChatModal()" id="aiWidgetTrigger" role="button" aria-label="Open AI Support Chat" title="Need Help? Chat with Us!">
         <i class="fa-solid fa-headset" id="triggerIcon"></i>
     </div>
-
     <!-- Chat Modal Window -->
     <div class="ai-chat-box-modal" id="aiChatModal">
         <div class="ai-chat-header">

@@ -1087,7 +1087,10 @@
 
     <!-- DataLayer & Meta Pixel ViewContent Event -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        (function () {
+            if (window.__viewContentTracked_{{ $singleProduct->id }}) return;
+            window.__viewContentTracked_{{ $singleProduct->id }} = true;
+
             var productId = '{{ $singleProduct->id }}';
             var productName = {!! json_encode($singleProduct->title ?? '') !!};
             var price = parseFloat('{{ $singleProduct->new_price ?? 0 }}') || 0;
@@ -1117,19 +1120,32 @@
 
             // 2. Direct Meta Pixel Event
             try {
-                if (typeof window.fbq === 'function') {
-                    window.fbq('track', 'ViewContent', {
-                        content_type: 'product',
-                        content_ids: [String(productId)],
-                        content_name: productName,
-                        value: price,
-                        currency: 'BDT'
-                    }, { eventID: eventId });
+                var firePixelViewContent = function() {
+                    if (typeof window.fbq === 'function') {
+                        window.fbq('track', 'ViewContent', {
+                            content_type: 'product',
+                            content_ids: [String(productId)],
+                            content_name: productName,
+                            value: price,
+                            currency: 'BDT'
+                        }, { eventID: eventId });
+                        return true;
+                    }
+                    return false;
+                };
+
+                if (!firePixelViewContent()) {
+                    var attempts = 0;
+                    var interval = setInterval(function() {
+                        if (firePixelViewContent() || ++attempts > 20) {
+                            clearInterval(interval);
+                        }
+                    }, 300);
                 }
             } catch (e) {
                 console.error("Meta Pixel ViewContent Error:", e);
             }
-        });
+        })();
     </script>
 @endsection
 
