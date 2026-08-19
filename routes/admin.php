@@ -432,6 +432,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('/websettings/maintainance', 'maintainance_mode')->name('websettings.maintainance')->middleware('admin.permission:setup_general_settings');
         Route::get('/smtpsettings', 'smtp')->name('websettings.smtp')->middleware('admin.permission:setup_general_settings');
         Route::get('/gtag&fbpixel', 'gtag_fbpixel')->name('websettings.gtag_fbpixel')->middleware('admin.permission:setup_general_settings');
+        Route::get('/tracking-settings', 'trackingSettings')->name('tracking.settings')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/webGtag', 'webGtag')->name('websettings.webGtag')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/webFbpixel', 'webFbpixel')->name('websettings.webFbpixel')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/webDomain', 'webDomain')->name('websettings.webDomain')->middleware('admin.permission:setup_general_settings');

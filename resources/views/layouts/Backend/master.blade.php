@@ -1602,6 +1602,7 @@
                         <ul aria-expanded="false">
                             @if($user?->hasPermission('setup_general_settings'))
                             <li><a href="{{ Route::has('websettings.index') ? route('websettings.index') : '#' }}">General Settings</a></li>
+                            <li><a href="{{ Route::has('tracking.settings') ? route('tracking.settings') : '#' }}">Tracking Settings</a></li>
                             @endif
                             @if($user?->hasPermission('setup_feature_activation'))
                             <li><a href="{{ Route::has('feature.index') ? route('feature.index') : '#' }}">Feature Activation</a></li>

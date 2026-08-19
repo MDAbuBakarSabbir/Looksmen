@@ -444,9 +444,24 @@ class GeneralWebSettingsController extends Controller
         return back()->with('success', 'Domain settings updated successfully! Changes will take effect immediately.');
     }
 
+    public function trackingSettings()
+    {
+        $webinfo = GeneralWebSettings::all();
+        $webConfig = $webinfo->keyBy('name')->map(function ($item) {
+            return [
+                'value' => $item->value,
+                'status' => $item->status,
+            ];
+        })->toArray();
+        $features = FeatureActivation::all();
+        $featuresConfig = $features->pluck('status', 'name')->toArray();
+
+        return view('adminDash.settings.tracking', compact('webConfig', 'featuresConfig'));
+    }
+
     public function gtag_fbpixel()
     {
-        return redirect()->route('websettings.index');
+        return redirect()->route('tracking.settings');
     }
 
     public function webGtag(Request $request)

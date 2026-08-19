@@ -1085,7 +1085,7 @@
         });
     </script>
 
-    <!-- DataLayer & Meta Pixel ViewContent Event -->
+    <!-- Google Tag Manager (DataLayer) ViewItem Event -->
     <script>
         (function () {
             if (window.__viewContentTracked_{{ $singleProduct->id }}) return;
@@ -1096,7 +1096,6 @@
             var price = parseFloat('{{ $singleProduct->new_price ?? 0 }}') || 0;
             var eventId = 'view_item_' + productId + '_' + Date.now();
 
-            // 1. Google Tag Manager (DataLayer) Event
             try {
                 window.dataLayer = window.dataLayer || [];
                 window.dataLayer.push({ ecommerce: null });
@@ -1114,36 +1113,9 @@
                         }]
                     }
                 });
+                console.log("GTM ViewItem DataLayer Event Pushed:", eventId, productName);
             } catch (e) {
                 console.error("GTM ViewContent Error:", e);
-            }
-
-            // 2. Direct Meta Pixel Event
-            try {
-                var firePixelViewContent = function() {
-                    if (typeof window.fbq === 'function') {
-                        window.fbq('track', 'ViewContent', {
-                            content_type: 'product',
-                            content_ids: [String(productId)],
-                            content_name: productName,
-                            value: price,
-                            currency: 'BDT'
-                        }, { eventID: eventId });
-                        return true;
-                    }
-                    return false;
-                };
-
-                if (!firePixelViewContent()) {
-                    var attempts = 0;
-                    var interval = setInterval(function() {
-                        if (firePixelViewContent() || ++attempts > 20) {
-                            clearInterval(interval);
-                        }
-                    }, 300);
-                }
-            } catch (e) {
-                console.error("Meta Pixel ViewContent Error:", e);
             }
         })();
     </script>

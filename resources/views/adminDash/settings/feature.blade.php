@@ -244,8 +244,8 @@
                         </label>
                     </div>
                     <div class="alert flex-column justify-content-center" style="color: #004085;background-color: #cce5ff;border-color: #b8daff;margin-bottom:0;margin-top:10px;">
-                        <p>Configure Facebook Pixel, domain verification and chat plugin in Web Settings.</p>
-                        <a class="d-flex justify-content-center" href="{{ route('websettings.index') }}#facebook">Configure Now</a>
+                        <p>Configure Facebook Pixel, Conversions API (CAPI) and chat plugin in Tracking Settings.</p>
+                        <a class="d-flex justify-content-center" href="{{ route('tracking.settings') }}">Configure Now</a>
                     </div>
                 </div>
             </div>

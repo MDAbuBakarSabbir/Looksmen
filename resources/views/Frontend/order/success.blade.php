@@ -518,7 +518,7 @@
         }
         sessionStorage.setItem(trackedKey, '1');
 
-        // 1. Google Tag Manager (DataLayer) Event with Full Customer Data
+        // Google Tag Manager (DataLayer) Purchase Event with Full Customer & Order Data
         try {
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push({ ecommerce: null });
@@ -595,63 +595,9 @@
                     'items': {!! json_encode($itemsArr) !!}
                 }
             });
+            console.log("GTM Purchase DataLayer Event Pushed:", eventId, orderId, totalValue);
         } catch (e) {
             console.error("GTM Purchase DataLayer Error:", e);
-        }
-
-        // 2. Direct Meta Pixel Event (Product + Advanced Customer Matching)
-        try {
-            var fireMetaPixel = function() {
-                if (typeof window.fbq === 'function') {
-                    // Advanced matching properties
-                    window.fbq('setUserProperties', {
-                        'fn': customerFirstName ? customerFirstName.toLowerCase() : '',
-                        'ln': customerLastName ? customerLastName.toLowerCase() : '',
-                        'em': customerEmail ? customerEmail.toLowerCase() : '',
-                        'ph': customerPhoneInt ? customerPhoneInt : customerPhone,
-                        'ct': customerCity ? customerCity.toLowerCase() : '',
-                        'st': customerDistrict ? customerDistrict.toLowerCase() : 'bd',
-                        'country': 'bd',
-                        'external_id': '{{ $order->user_id > 0 ? (string)$order->user_id : "order_" . $order->id }}'
-                    });
-
-                    // Track Purchase Event
-                    window.fbq('track', 'Purchase', {
-                        content_type: 'product',
-                        content_name: {!! json_encode($productNamesStr) !!},
-                        content_ids: {!! json_encode($productIds) !!},
-                        contents: {!! json_encode($fbContentsArr) !!},
-                        num_items: {{ count($itemsArr) }},
-                        value: totalValue,
-                        currency: 'BDT',
-                        order_id: orderId,
-                        // Customer parameters in event payload
-                        customer_name: customerName,
-                        customer_phone: customerPhone,
-                        customer_email: customerEmail,
-                        customer_address: customerAddress,
-                        customer_city: customerCity,
-                        customer_district: customerDistrict
-                    }, {
-                        eventID: eventId
-                    });
-                }
-            };
-            
-            if (typeof window.fbq === 'function') {
-                fireMetaPixel();
-            } else {
-                var attempts = 0;
-                var interval = setInterval(function() {
-                    if (typeof window.fbq === 'function') {
-                        fireMetaPixel();
-                        clearInterval(interval);
-                    }
-                    if (++attempts > 20) clearInterval(interval);
-                }, 500);
-            }
-        } catch (e) {
-            console.error("Meta Pixel Purchase Error:", e);
         }
     })();
 </script>

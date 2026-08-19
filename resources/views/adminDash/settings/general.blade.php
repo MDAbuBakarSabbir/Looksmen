@@ -493,94 +493,25 @@
         </div>
     </div>
 
-    <!-- Integrations -->
-    <div class="row">
-        <!-- Google Tag -->
-        <div class="col-lg-6">
-            <div class="settings-card card">
-                <div class="card-header d-flex align-items-center gap-2">
-                    <i class="fa-solid fa-code text-primary mr-2" style="font-size: 16px;"></i>
-                    <h4>Google TAG</h4>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('websettings.webGtag') }}" method="POST" class="settingsUpdateForm">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label">GOOGLE TAG MANAGER ID</label>
-                            <input type="text" class="form-control" name="gtagid" value="{{ $webConfig['gtagid']['value'] ?? '' }}" placeholder="GTM-XXXXXX">
+    <!-- Integrations Banner / Link to Dedicated Page -->
+    <div class="row mb-2">
+        <div class="col-12">
+            <div class="settings-card card bg-light" style="border: 1px dashed #cbd5e1;">
+                <div class="card-body py-3 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="width: 44px; height: 44px; border-radius: 12px; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 20px;">
+                            <i class="fa-solid fa-chart-line"></i>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">GOOGLE Domain Verification</label>
-                            <textarea class="form-control" name="gdomainverify" placeholder="Paste verification meta tag or token">{{ $webConfig['gdomainverify']['value'] ?? '' }}</textarea>
+                        <div>
+                            <h5 class="mb-1 font-weight-bold text-dark">Looking for Google Tag Manager & Meta Pixel / CAPI Tracking?</h5>
+                            <p class="text-muted mb-0" style="font-size: 13px;">Manage GTM DataLayer, Meta Pixel ID, and Server-Side CAPI tokens on the dedicated Tracking Settings page.</p>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save Google Scripts</button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <!-- FB Pixel & Meta CAPI -->
-        <div class="col-lg-6">
-            <div class="settings-card card">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center gap-2">
-                        <i class="fa-brands fa-facebook text-primary mr-2" style="font-size: 18px;"></i>
-                        <h4 class="mb-0">Meta Pixel & Conversions API (CAPI)</h4>
                     </div>
-                </div>
-                <div class="card-body">
-                    <form action="{{ route('websettings.webFbpixel') }}" method="POST" class="settingsUpdateForm">
-                        @csrf
-                        <div class="mb-3">
-                            <label class="form-label font-weight-bold">Meta (Facebook) Pixel ID</label>
-                            <input type="text" class="form-control" name="fb_pixel_id" value="{{ $webConfig['fb_pixel_id']['value'] ?? '1814018549762511' }}" placeholder="e.g. 1814018549762511">
-                            <small class="text-muted">Enter your numeric Meta Pixel ID from Events Manager.</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <div class="d-flex justify-content-between align-items-center mb-1">
-                                <label class="form-label font-weight-bold mb-0">Conversions API (CAPI) Access Token</label>
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="fb_capi_status" name="fb_capi_status" value="1" {{ ($webConfig['fb_capi_status']['value'] ?? '1') == '1' ? 'checked' : '' }}>
-                                    <label class="custom-control-label font-weight-bold text-success" for="fb_capi_status">Enable CAPI</label>
-                                </div>
-                            </div>
-                            <textarea class="form-control" name="fb_capi_access_token" rows="3" placeholder="Paste your Meta System User or Conversions API Access Token">{{ $webConfig['fb_capi_access_token']['value'] ?? 'EAAWVCFJjBBQBSbD68VZAUIMvlsaOO4EC8l0yXPDMEwDVuZBPDGW0B8bkMNtM4g4BgPAZBxHZByZA8JyDwo1ZBsux6vk6Bjd5U6Q9MRq4JZCZBm9M6mLoZAJswHaqTG1FTDHbz9xC1MFUgPOK1uU1prCate3BZBTfrJWPbpe30cbeYp7LkkxtiHe9gUzxNSpZBDMWodXNgZDZD' }}</textarea>
-                            <small class="text-muted">Generated from Meta Events Manager > Settings > Conversions API.</small>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label font-weight-bold">Meta CAPI Test Event Code <span class="badge badge-secondary text-white">Optional</span></label>
-                            <input type="text" class="form-control" name="fb_capi_test_code" value="{{ $webConfig['fb_capi_test_code']['value'] ?? 'TEST23234' }}" placeholder="e.g. TEST23234">
-                            <small class="text-muted">Leave empty in production or enter code from Meta "Test Events" tab to test server events live.</small>
-                        </div>
-
-                        <hr class="my-3">
-
-                        <div class="mb-3">
-                            <label class="form-label">Custom Facebook Pixel Header Code <small class="text-muted">(Optional override)</small></label>
-                            <textarea class="form-control" name="fb_pixel" rows="2" placeholder="Leave empty to use automatic standard Meta Pixel script">{{ $webConfig['fb_pixel']['value'] ?? '' }}</textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Facebook Domain Verification</label>
-                            <textarea class="form-control" name="fbdomainverify" rows="1" placeholder="Paste verification meta code">{{ $webConfig['fbdomainverify']['value'] ?? '' }}</textarea>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Facebook Page Iframe</label>
-                            <textarea class="form-control" name="fbiframe" rows="1" placeholder="Paste page plugin iframe code">{{ $webConfig['fbiframe']['value'] ?? '' }}</textarea>
-                        </div>
-
-                        @if (isset($featuresConfig['facebook_api']) && $featuresConfig['facebook_api'] == '1')
-                            <div class="mb-3">
-                                <label class="form-label">Facebook Chat Plugin Code</label>
-                                <textarea class="form-control" name="fbchatplugin" placeholder="Paste Chat Plugin code">{{ $webConfig['fbchatplugin']['value'] ?? '' }}</textarea>
-                            </div>
-                        @endif
-
-                        <button type="submit" class="btn btn-primary btn-block">Save Facebook & CAPI Settings</button>
-                    </form>
+                    <div>
+                        <a href="{{ route('tracking.settings') }}" class="btn btn-primary btn-sm px-3">
+                            <i class="fa-solid fa-arrow-up-right-from-square mr-1"></i> Open Tracking Settings
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
