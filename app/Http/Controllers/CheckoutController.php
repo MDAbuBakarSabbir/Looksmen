@@ -375,7 +375,7 @@ class CheckoutController extends Controller
                 'fbp' => request()->cookie('_fbp'),
                 'fbc' => request()->cookie('_fbc'),
             ];
-            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_'.$order->id, $capiContext)->afterResponse();
+            SendMetaCapiPurchaseJob::dispatchSync($order->id, 'purchase_'.$order->id, $capiContext);
 
             // ৫. কার্ট ক্লিয়ার করা
             session()->forget('cart');
@@ -532,7 +532,7 @@ class CheckoutController extends Controller
                 'fbp' => request()->cookie('_fbp'),
                 'fbc' => request()->cookie('_fbc'),
             ];
-            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_'.$order->id, $capiContext)->afterResponse();
+            SendMetaCapiPurchaseJob::dispatchSync($order->id, 'purchase_'.$order->id, $capiContext);
 
             session()->forget(['cart', 'pending_order_data']);
 
@@ -669,7 +669,7 @@ class CheckoutController extends Controller
                 'fbp' => request()->cookie('_fbp'),
                 'fbc' => request()->cookie('_fbc'),
             ];
-            SendMetaCapiPurchaseJob::dispatch($order->id, 'purchase_'.$order->id, $capiContext)->afterResponse();
+            SendMetaCapiPurchaseJob::dispatchSync($order->id, 'purchase_'.$order->id, $capiContext);
 
             session()->forget(['cart', 'pending_order_data']);
 
