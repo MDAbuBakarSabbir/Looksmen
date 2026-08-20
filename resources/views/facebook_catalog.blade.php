@@ -33,7 +33,9 @@
                     $salePrice = null;
                 }
 
-                $cleanDesc = trim(strip_tags($product->description ?? ''));
+                $rawDesc = $product->description ?? '';
+                $cleanDesc = trim(strip_tags(html_entity_decode($rawDesc, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+                $cleanDesc = preg_replace('/\s+/', ' ', $cleanDesc);
                 if (empty($cleanDesc)) {
                     $cleanDesc = $product->title;
                 }
