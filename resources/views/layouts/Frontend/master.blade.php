@@ -682,12 +682,12 @@
                                     </li>
                                 @endauth
                                 <li class="mb-2">
-                                    <a class="opacity-50 hov-opacity-100 text-reset" href="">
+                                    <a class="opacity-50 hov-opacity-100 text-reset" href="{{ route('purchaseHistory') }}">
                                         Order History
                                     </a>
                                 </li>
                                 <li class="mb-2">
-                                    <a class="opacity-50 hov-opacity-100 text-reset" href="">
+                                    <a class="opacity-50 hov-opacity-100 text-reset" href="{{ route('wishlist') }}">
                                         My Wishlist
                                     </a>
                                 </li>
@@ -725,7 +725,7 @@
                 <div class="row align-items-center">
                     <div class="col-lg-4">
                         <div class="text-center text-md-left" current-verison="5.5.4">
-                            <p>All Rights Reserved By <a href="https://looksmen.com" style="color: white;>LOOKSMEN</a><br></p>
+                            <p>All Rights Reserved By <a href="https://looksmen.com" style="color: white;">LOOKSMEN</a><br></p>
                             <p>
                             </p>
                         </div>
