@@ -521,6 +521,10 @@
                 'transaction_id': orderId,
                 'value': totalValue,
                 'currency': 'BDT',
+                'content_type': 'product',
+                'content_ids': {!! json_encode($productIds) !!},
+                'contents': {!! json_encode($fbContentsArr) !!},
+                'num_items': {{ count($itemsArr) }},
 
                 // Root-level Customer Information
                 'customer_name': customerName,

@@ -9,6 +9,7 @@ use App\Http\Controllers\ChatController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\CompareController;
 use App\Http\Controllers\Customer\WalletPointController;
+use App\Http\Controllers\FacebookCatalogController;
 use App\Http\Controllers\FrontCategoryController;
 use App\Http\Controllers\Frontend\AiSupportController;
 use App\Http\Controllers\HomeController;
@@ -33,6 +34,9 @@ Route::middleware(['maintainance'])->group(function () {
     Route::get('/', [HomeController::class, 'home'])->name('home');
     Route::match(['get', 'post'], '/track-order', [HomeController::class, 'trackOrder'])->name('front.trackOrder');
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+    Route::get('/facebook-catalog.xml', [FacebookCatalogController::class, 'index'])->name('facebook.catalog.xml');
+    Route::get('/facebook-feed.xml', [FacebookCatalogController::class, 'index']);
+    Route::get('/products-feed.xml', [FacebookCatalogController::class, 'index']);
     Route::get('/flash-sale', [HomeController::class, 'flashSale'])->name('front.flashSale');
     Route::get('/search', [HomeController::class, 'search'])->name('front.search');
     Route::post('/ajax-search', [HomeController::class, 'ajaxSearch'])->name('front.ajaxSearch');

@@ -1102,6 +1102,12 @@
                 window.dataLayer.push({
                     'event': 'view_item',
                     'event_id': eventId,
+                    'content_name': productName,
+                    'content_type': 'product',
+                    'content_ids': [String(productId)],
+                    'content_category': {!! json_encode($singleProduct->category->name ?? '') !!},
+                    'value': price,
+                    'currency': 'BDT',
                     'ecommerce': {
                         'currency': 'BDT',
                         'value': price,
