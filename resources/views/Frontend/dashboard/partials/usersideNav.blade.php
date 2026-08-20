@@ -151,6 +151,7 @@
             </a>
         </li>
         
+        @if (addon_is_activated('affiliate_system'))
         <li>
             @php
                 $affiliate = Auth::user()->affiliate_user;
@@ -165,6 +166,7 @@
                 </a>
             @endif
         </li>
+        @endif
         
         <div class="user-nav-divider"></div>
         

@@ -696,6 +696,7 @@
                                         Track Order
                                     </a>
                                 </li>
+                                @if (addon_is_activated('affiliate_system'))
                                 <li class="mb-2">
                                     <a class="opacity-50 hov-opacity-100 text-light"
                                         href="@auth
@@ -710,6 +711,7 @@
                                     @else
                                         {{ route('login') }} @endauth">Be an affiliate partner</a>
                                 </li>
+                                @endif
                             </ul>
                         </div>
                     </div>
@@ -723,7 +725,7 @@
                 <div class="row align-items-center">
                     <div class="col-lg-4">
                         <div class="text-center text-md-left" current-verison="5.5.4">
-                            <p>All Rights Reserved By <a href="https://looksmen.com">LOOKSMEN</a><br></p>
+                            <p>All Rights Reserved By <a href="https://looksmen.com" style="color: white;>LOOKSMEN</a><br></p>
                             <p>
                             </p>
                         </div>
@@ -752,7 +754,7 @@
                         <div class="text-center text-md-right">
                             <ul class="list-inline mb-0">
                                 <li class="list-inline-item">
-                                    <a href="https://www.facebook.com/sabalontech"></a> <span style="color: white;">&nbsp;Website Designed By: <a href=""
+                                    <span style="color: white;">&nbsp;Website Designed By: <a href="https://www.facebook.com/sabalontech"
                                             target="_blank"><span style="color: white;">SABALON TECH</span></a></span>
                                 </li>
 
