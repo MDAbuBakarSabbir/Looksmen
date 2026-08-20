@@ -1128,9 +1128,6 @@
                 window.dataLayer.push({ ecommerce: null });
                 window.dataLayer.push(gtmPayload);
 
-                // Also push ViewContent alias for GTM triggers using CamelCase
-                window.dataLayer.push(Object.assign({}, gtmPayload, { 'event': 'ViewContent' }));
-
                 console.log("GTM ViewItem DataLayer Event Pushed:", eventId, productName, [String(productId)]);
             } catch (e) {
                 console.error("GTM ViewContent Error:", e);

@@ -594,8 +594,6 @@
             window.dataLayer.push({ ecommerce: null });
             window.dataLayer.push(gtmPurchasePayload);
 
-            // Also push Purchase alias for GTM triggers using CamelCase
-            window.dataLayer.push(Object.assign({}, gtmPurchasePayload, { 'event': 'Purchase' }));
             console.log("GTM Purchase DataLayer Event Pushed:", eventId, orderId, totalValue);
         } catch (e) {
             console.error("GTM Purchase DataLayer Error:", e);

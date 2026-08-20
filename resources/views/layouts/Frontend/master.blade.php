@@ -1460,9 +1460,6 @@
                 window.dataLayer.push({ ecommerce: null }); // Clear previous ecommerce object
                 window.dataLayer.push(gtmPayload);
 
-                // Also push AddToCart alias for GTM triggers using CamelCase
-                window.dataLayer.push(Object.assign({}, gtmPayload, { 'event': 'AddToCart' }));
-
                 console.log("GTM AddToCart DataLayer Event Pushed:", eventId, productName, [productId]);
             } catch (e) {
                 console.error("GTM AddToCart Error:", e);
