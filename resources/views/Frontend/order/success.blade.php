@@ -513,9 +513,7 @@
 
         // Google Tag Manager (DataLayer) Purchase Event with Full Customer & Order Data
         try {
-            window.dataLayer = window.dataLayer || [];
-            window.dataLayer.push({ ecommerce: null });
-            window.dataLayer.push({
+            var gtmPurchasePayload = {
                 'event': 'purchase',
                 'event_id': eventId,
                 'transaction_id': orderId,
@@ -591,7 +589,13 @@
                     'currency': 'BDT',
                     'items': {!! json_encode($itemsArr) !!}
                 }
-            });
+            };
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({ ecommerce: null });
+            window.dataLayer.push(gtmPurchasePayload);
+
+            // Also push Purchase alias for GTM triggers using CamelCase
+            window.dataLayer.push(Object.assign({}, gtmPurchasePayload, { 'event': 'Purchase' }));
             console.log("GTM Purchase DataLayer Event Pushed:", eventId, orderId, totalValue);
         } catch (e) {
             console.error("GTM Purchase DataLayer Error:", e);

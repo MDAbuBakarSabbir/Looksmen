@@ -1425,14 +1425,18 @@
 
             // Push to Google Tag Manager DataLayer
             try {
-                window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({ ecommerce: null }); // Clear previous ecommerce object
-                window.dataLayer.push({
+                var gtmPayload = {
                     'event': 'add_to_cart',
                     'event_id': eventId,
                     'content_name': productName,
                     'content_ids': [productId],
+                    'content_id': productId,
                     'content_type': 'product',
+                    'contents': [{
+                        'id': productId,
+                        'quantity': quantity,
+                        'item_price': productPrice
+                    }],
                     'value': totalVal,
                     'currency': currency,
                     'quantity': quantity,
@@ -1450,8 +1454,16 @@
                             'currency': currency
                         }]
                     }
-                });
-                console.log("GTM AddToCart DataLayer Event Pushed:", eventId, productName);
+                };
+
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ ecommerce: null }); // Clear previous ecommerce object
+                window.dataLayer.push(gtmPayload);
+
+                // Also push AddToCart alias for GTM triggers using CamelCase
+                window.dataLayer.push(Object.assign({}, gtmPayload, { 'event': 'AddToCart' }));
+
+                console.log("GTM AddToCart DataLayer Event Pushed:", eventId, productName, [productId]);
             } catch (e) {
                 console.error("GTM AddToCart Error:", e);
             }

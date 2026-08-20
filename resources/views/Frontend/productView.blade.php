@@ -1097,14 +1097,18 @@
             var eventId = 'view_item_' + productId + '_' + Date.now();
 
             try {
-                window.dataLayer = window.dataLayer || [];
-                window.dataLayer.push({ ecommerce: null });
-                window.dataLayer.push({
+                var gtmPayload = {
                     'event': 'view_item',
                     'event_id': eventId,
                     'content_name': productName,
                     'content_type': 'product',
                     'content_ids': [String(productId)],
+                    'content_id': String(productId),
+                    'contents': [{
+                        'id': String(productId),
+                        'quantity': 1,
+                        'item_price': price
+                    }],
                     'content_category': {!! json_encode($singleProduct->category->name ?? '') !!},
                     'value': price,
                     'currency': 'BDT',
@@ -1118,8 +1122,16 @@
                             'quantity': 1
                         }]
                     }
-                });
-                console.log("GTM ViewItem DataLayer Event Pushed:", eventId, productName);
+                };
+
+                window.dataLayer = window.dataLayer || [];
+                window.dataLayer.push({ ecommerce: null });
+                window.dataLayer.push(gtmPayload);
+
+                // Also push ViewContent alias for GTM triggers using CamelCase
+                window.dataLayer.push(Object.assign({}, gtmPayload, { 'event': 'ViewContent' }));
+
+                console.log("GTM ViewItem DataLayer Event Pushed:", eventId, productName, [String(productId)]);
             } catch (e) {
                 console.error("GTM ViewContent Error:", e);
             }

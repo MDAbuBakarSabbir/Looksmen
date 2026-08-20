@@ -1358,6 +1358,7 @@
         var totalVal = Number("{{ (float) ($subtotal ?? 0) }}");
         var checkoutItems = {!! json_encode($checkoutItemsArr) !!};
         var checkoutContentIds = {!! json_encode($checkoutContentIds) !!};
+        var checkoutFbContents = {!! json_encode($checkoutFbContents) !!};
 
         // Google Tag Manager (DataLayer) Event
         try {
@@ -1368,6 +1369,7 @@
                 'currency': 'BDT',
                 'content_type': 'product',
                 'content_ids': checkoutContentIds,
+                'contents': checkoutFbContents,
                 'num_items': {{ is_countable($cart ?? []) ? count($cart ?? []) : 0 }},
                 'customer_name': {!! json_encode($authName) !!},
                 'customer_phone': {!! json_encode($authPhone) !!},
@@ -1382,8 +1384,9 @@
             window.dataLayer.push({ ecommerce: null });
             window.dataLayer.push(gtmPayload);
 
-            // Also push initiate_checkout alias so all GTM trigger naming conventions match
+            // Also push initiate_checkout and InitiateCheckout aliases so all GTM trigger naming conventions match
             window.dataLayer.push(Object.assign({}, gtmPayload, { 'event': 'initiate_checkout' }));
+            window.dataLayer.push(Object.assign({}, gtmPayload, { 'event': 'InitiateCheckout' }));
             console.log("GTM BeginCheckout DataLayer Event Pushed:", gtmPayload);
         } catch (e) {
             console.error("GTM BeginCheckout Error:", e);
