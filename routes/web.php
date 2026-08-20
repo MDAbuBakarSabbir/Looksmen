@@ -37,6 +37,9 @@ Route::middleware(['maintainance'])->group(function () {
     Route::get('/facebook-catalog.xml', [FacebookCatalogController::class, 'index'])->name('facebook.catalog.xml');
     Route::get('/facebook-feed.xml', [FacebookCatalogController::class, 'index']);
     Route::get('/products-feed.xml', [FacebookCatalogController::class, 'index']);
+    Route::get('/facebook-catalog.csv', [FacebookCatalogController::class, 'csv'])->name('facebook.catalog.csv');
+    Route::get('/facebook-feed.csv', [FacebookCatalogController::class, 'csv']);
+    Route::get('/products-feed.csv', [FacebookCatalogController::class, 'csv']);
     Route::get('/flash-sale', [HomeController::class, 'flashSale'])->name('front.flashSale');
     Route::get('/search', [HomeController::class, 'search'])->name('front.search');
     Route::post('/ajax-search', [HomeController::class, 'ajaxSearch'])->name('front.ajaxSearch');
