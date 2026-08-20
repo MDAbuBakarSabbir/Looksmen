@@ -540,11 +540,15 @@
 
                 // Common Direct Aliases for GTM Variables
                 'name': customerName,
-                'phone': customerPhone,
+                'first_name': customerFirstName,
+                'last_name': customerLastName,
+                'phone': customerPhoneInt,
                 'email': customerEmail,
                 'address': customerAddress,
                 'city': customerCity,
                 'district': customerDistrict,
+                'country': 'BD',
+                'external_id': '{{ $order->user_id > 0 ? $order->user_id : ('order_' . $order->id) }}',
 
                 // GA4 Enhanced Conversions user_data format
                 'user_data': {
