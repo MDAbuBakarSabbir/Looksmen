@@ -1182,7 +1182,7 @@
         }
 
         $(document).ready(function() {
-            // Description See More / View Less Toggle (65% initial visible height)
+            // Description See More / View Less Toggle (50% initial visible height)
             (function() {
                 var $wrapper = $('#product-desc-wrapper');
                 var $content = $('#product-desc-content');
@@ -1196,8 +1196,8 @@
                     if (!$content.length) return;
                     var fullHeight = $content.outerHeight();
                     
-                    if (fullHeight > 140) {
-                        collapsedHeight = Math.round(fullHeight * 0.65);
+                    if (fullHeight > 120) {
+                        collapsedHeight = Math.round(fullHeight * 0.50); // Exactly 50% of description height
                         if (!$wrapper.hasClass('is-expanded')) {
                             $wrapper.css('max-height', collapsedHeight + 'px');
                             $overlay.show();
@@ -1234,8 +1234,8 @@
                             $wrapper.addClass('is-expanded').css('max-height', '');
                         }, 400);
                     } else {
-                        // Collapse smoothly back to 65%
-                        collapsedHeight = Math.round(fullHeight * 0.65);
+                        // Collapse smoothly back to 50%
+                        collapsedHeight = Math.round(fullHeight * 0.50);
                         $wrapper.css('max-height', fullHeight + 'px');
                         $wrapper.removeClass('is-expanded');
 
