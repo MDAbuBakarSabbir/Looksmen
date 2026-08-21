@@ -137,7 +137,40 @@
             top: 20px;
         }
         
-        .gallery-main-box { border-radius: 16px; transition: all 0.3s ease; }
+        .gallery-main-box {
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            min-height: 420px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ffffff;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        #main-product-image {
+            max-height: 480px;
+            min-height: 380px;
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .product-thumbnails {
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .product-thumb-item {
+            width: 65px;
+            height: 65px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
         
 
         
@@ -455,6 +488,47 @@
             padding: 8px 8px 10px;
         }
         @media (max-width: 767px) {
+            .product-title-modern {
+                font-size: 1.25rem !important;
+                line-height: 1.35 !important;
+            }
+            .prod-view-page {
+                padding-top: 14px !important;
+            }
+            .prod-main-card {
+                padding: 12px 10px !important;
+                border-radius: 16px;
+            }
+            .product-gallery-container {
+                position: static;
+                margin-left: -2px;
+                margin-right: -2px;
+            }
+            .gallery-main-box {
+                min-height: 420px !important;
+                height: 440px !important;
+                padding: 6px !important;
+                border-radius: 14px;
+            }
+            #main-product-image {
+                min-height: 400px !important;
+                max-height: 440px !important;
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: contain !important;
+            }
+            .product-thumbnails {
+                max-height: none !important;
+                overflow-x: auto !important;
+                overflow-y: hidden !important;
+                padding-bottom: 6px;
+                scrollbar-width: thin;
+            }
+            .product-thumb-item {
+                width: 60px !important;
+                height: 60px !important;
+                margin-bottom: 0 !important;
+            }
             .rel-products-grid {
                 grid-template-columns: repeat(4, 1fr);
                 gap: 8px;
@@ -464,6 +538,27 @@
             }
         }
         @media (max-width: 480px) {
+            .product-title-modern {
+                font-size: 1.15rem !important;
+                line-height: 1.35 !important;
+            }
+            .prod-main-card {
+                padding: 8px 6px !important;
+                border-radius: 12px;
+            }
+            .gallery-main-box {
+                min-height: 380px !important;
+                height: 400px !important;
+                padding: 4px !important;
+            }
+            #main-product-image {
+                min-height: 370px !important;
+                max-height: 400px !important;
+            }
+            .product-thumb-item {
+                width: 56px !important;
+                height: 56px !important;
+            }
             .rel-products-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
@@ -485,8 +580,8 @@
                                 @if ($singleProduct->productImages->count() > 0)
                                     <!-- Main Big Image Preview -->
                                     <div class="col-12 col-md order-1 order-md-2 mb-3 mb-md-0">
-                                        <div class="gallery-main-box border p-2 text-center bg-white shadow-sm img-zoom" style="min-height: 380px; display: flex; align-items: center; justify-content: center;">
-                                            <img id="main-product-image" class="img-fluid" style="max-height: 480px; width: 100%; object-fit: contain; transition: opacity 0.2s ease-in-out;"
+                                        <div class="gallery-main-box border p-2 text-center bg-white shadow-sm img-zoom">
+                                            <img id="main-product-image" class="img-fluid"
                                                 src="{{ asset('Uploads/' . $singleProduct->productImages->first()->image) }}"
                                                 onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
                                         </div>
@@ -494,11 +589,11 @@
 
                                     <!-- Thumbnails Column -->
                                     <div class="col-12 col-md-auto order-2 order-md-1">
-                                        <div class="product-thumbnails d-flex flex-row flex-md-column gap-2" style="max-height: 480px; overflow-y: auto;">
+                                        <div class="product-thumbnails d-flex flex-row flex-md-column gap-2">
                                             @foreach ($singleProduct->productImages as $key => $productImage)
                                                 <div class="product-thumb-item c-pointer p-1 rounded mb-2 {{ $key == 0 ? 'border-primary active-thumb' : '' }}"
                                                     data-image="{{ asset('Uploads/' . $productImage->image) }}"
-                                                    style="width: 65px; height: 65px; cursor: pointer; border: 2px solid {{ $key == 0 ? '#044244' : '#e2e8f0' }}; transition: all 0.2s ease;">
+                                                    style="border: 2px solid {{ $key == 0 ? '#044244' : '#e2e8f0' }};">
                                                     <img class="w-100 h-100" style="object-fit: cover; border-radius: 4px;"
                                                         src="{{ asset('Uploads/' . $productImage->image) }}"
                                                         onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
@@ -508,8 +603,8 @@
                                     </div>
                                 @else
                                     <div class="col-12">
-                                        <div class="gallery-main-box img-zoom">
-                                            <img class="img-fluid" src="{{ asset('frontend/assets/img/placeholder.jpg') }}">
+                                        <div class="gallery-main-box img-zoom border p-2">
+                                            <img id="main-product-image" class="img-fluid" src="{{ asset('frontend/assets/img/placeholder.jpg') }}">
                                         </div>
                                     </div>
                                 @endif
@@ -519,7 +614,7 @@
                         <!-- Product Specs/Info Section -->
                         <div class="col-xl-7 col-lg-6">
                             <div class="text-left pl-md-3">
-                                <h1 class="product-title-modern h2 font-weight-bold text-dark mb-3">{{ $singleProduct->title }}</h1>
+                                <h2 class="product-title-modern h2 font-weight-bold text-dark mb-3">{{ $singleProduct->title }}</h2>
 
                                 <div class="d-flex align-items-center flex-wrap mb-4">
                                     <div class="rating-pill-container d-inline-flex align-items-center bg-light px-3 py-1 font-weight-bold rounded-pill mr-3">

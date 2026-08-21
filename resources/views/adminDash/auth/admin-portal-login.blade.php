@@ -1,9 +1,36 @@
+@php
+    $faviconSetting = \App\Models\GeneralWebSettings::where('name', 'web_favicon')->first();
+    $faviconPath = null;
+    if ($faviconSetting && !empty($faviconSetting->value)) {
+        if (file_exists(public_path('adminDash/assets/img/layouts/' . $faviconSetting->value))) {
+            $faviconPath = 'adminDash/assets/img/layouts/' . $faviconSetting->value;
+        } elseif (file_exists(public_path('Uploads/' . $faviconSetting->value))) {
+            $faviconPath = 'Uploads/' . $faviconSetting->value;
+        } elseif (file_exists(public_path($faviconSetting->value))) {
+            $faviconPath = $faviconSetting->value;
+        }
+    }
+    if (!$faviconPath) {
+        if (file_exists(public_path('favicon.ico'))) {
+            $faviconPath = 'favicon.ico';
+        } elseif (file_exists(public_path('adminDash/assets/img/favicon/favicon.ico'))) {
+            $faviconPath = 'adminDash/assets/img/favicon/favicon.ico';
+        }
+    }
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Portal - Sign In</title>
+
+    <!-- Favicon -->
+    @if ($faviconPath)
+        <link rel="icon" href="{{ asset($faviconPath) }}">
+        <link rel="shortcut icon" href="{{ asset($faviconPath) }}">
+    @endif
+
     <!-- Import Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,40 +137,144 @@
 
         .brand-section {
             text-align: center;
-            margin-bottom: 36px;
+            margin-bottom: 34px;
+            position: relative;
         }
 
-        .brand-logo {
-            width: 48px;
-            height: 48px;
-            background: var(--accent-gradient);
-            border-radius: 12px;
+        .brand-logo-wrapper {
+            position: relative;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            margin-bottom: 18px;
         }
 
-        .brand-logo svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
+        .brand-logo-glow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 200px;
+            height: 90px;
+            background: var(--accent-gradient);
+            filter: blur(32px);
+            opacity: 0.4;
+            border-radius: 50%;
+            z-index: 0;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+        }
+
+        .brand-logo-wrapper:hover .brand-logo-glow {
+            opacity: 0.65;
+            transform: translate(-50%, -50%) scale(1.15);
+        }
+
+        .brand-logo-card {
+            position: relative;
+            z-index: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 30px;
+            min-height: 76px;
+            min-width: 170px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.07) 0%, rgba(255, 255, 255, 0.02) 100%);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 20px;
+            box-shadow: 
+                0 12px 32px -5px rgba(0, 0, 0, 0.45),
+                0 0 24px rgba(99, 102, 241, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.18);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .brand-logo-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 
+                0 16px 38px -5px rgba(0, 0, 0, 0.55),
+                0 0 32px rgba(99, 102, 241, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.25);
+        }
+
+        .brand-logo-img {
+            max-height: 70px;
+            max-width: 230px;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4));
+            transition: transform 0.3s ease;
+        }
+
+        .brand-logo-wrapper:hover .brand-logo-img {
+            transform: scale(1.03);
+        }
+
+        .brand-logo-fallback {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: #ffffff;
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+        }
+
+        .brand-logo-fallback svg {
+            width: 30px;
+            height: 30px;
+            color: var(--accent-color);
+        }
+
+        .portal-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 9999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: #a5b4fc;
+            margin-bottom: 12px;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: #10b981;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #10b981;
+            animation: pulseDot 2s infinite ease-in-out;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.8); }
         }
 
         .brand-section h1 {
-            font-size: 1.6rem;
+            font-size: 1.55rem;
             font-weight: 700;
             letter-spacing: -0.5px;
-            margin-bottom: 8px;
-            background: linear-gradient(to right, #ffffff, #d1d5db);
+            margin-bottom: 6px;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 60%, #94a3b8 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         .brand-section p {
-            font-size: 0.875rem;
+            font-size: 0.86rem;
             color: var(--text-secondary);
+            font-weight: 400;
+            line-height: 1.4;
         }
 
         .alert-error {
@@ -369,18 +500,47 @@
     <div class="login-container">
         <div class="login-card">
             <div class="brand-section">
-                <div class="brand-logo">
-                    @php
-                        $webLogo = \App\Models\GeneralWebSettings::where('name', 'web_logo')->first();
-                        $logoPath = 'Uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png';
-                        if ($webLogo && !empty($webLogo->value) && file_exists(public_path('adminDash/assets/img/layouts/' . $webLogo->value))) {
+                @php
+                    $webLogo = \App\Models\GeneralWebSettings::where('name', 'footer_logo')->first() 
+                               ?? \App\Models\GeneralWebSettings::where('name', 'web_logo')->first();
+                    $logoPath = null;
+                    if ($webLogo && !empty($webLogo->value)) {
+                        if (file_exists(public_path('adminDash/assets/img/layouts/' . $webLogo->value))) {
                             $logoPath = 'adminDash/assets/img/layouts/' . $webLogo->value;
+                        } elseif (file_exists(public_path('Uploads/' . $webLogo->value))) {
+                            $logoPath = 'Uploads/' . $webLogo->value;
+                        } elseif (file_exists(public_path($webLogo->value))) {
+                            $logoPath = $webLogo->value;
                         }
-                    @endphp
-                    <img src="{{ asset($logoPath) }}" alt="Website Logo" style="max-height: 50px; max-width: 100%;">
+                    }
+                    if (!$logoPath && file_exists(public_path('Uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png'))) {
+                        $logoPath = 'Uploads/fETh72eayEQqMyqsArGAXDlxFO3TzCj9dH9ukG12.png';
+                    }
+                @endphp
+
+                <div class="brand-logo-wrapper">
+                    <div class="brand-logo-glow"></div>
+                    <div class="brand-logo-card">
+                        @if ($logoPath)
+                            <img src="{{ asset($logoPath) }}" alt="Website Logo" class="brand-logo-img">
+                        @else
+                            <div class="brand-logo-fallback">
+                                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                </svg>
+                                <span>Admin Portal</span>
+                            </div>
+                        @endif
+                    </div>
                 </div>
-                <h1>Admin Control Panel</h1>
-                <p>Sign in with your administrator credentials</p>
+
+                <div>
+                    <div class="portal-badge">
+                        <span class="badge-dot"></span>
+                        <span>Secure Admin Portal</span>
+                    </div>
+                </div>
+                <p>Sign in with your administrator credentials to continue</p>
             </div>
 
             <!-- Global errors if any -->
