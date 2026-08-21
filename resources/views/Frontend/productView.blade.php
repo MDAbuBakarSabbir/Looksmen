@@ -828,7 +828,7 @@
                                                 <i class="fab fa-twitter" style="font-size: 1rem;"></i>
                                             </a>
                                             
-                                            <a href="https://t.me/share/url?url={{ $shareUrl }}&text={{ $shareTitle }}" 
+                                            {{-- <a href="https://t.me/share/url?url={{ $shareUrl }}&text={{ $shareTitle }}" 
                                                target="_blank" rel="noopener noreferrer" 
                                                class="btn btn-icon btn-sm rounded-circle text-white shadow-sm d-inline-flex align-items-center justify-content-center" 
                                                style="width: 36px; height: 36px; background-color: #0088cc; text-decoration: none; transition: transform 0.2s;"
@@ -842,7 +842,7 @@
                                                style="width: 36px; height: 36px; background-color: #0A66C2; text-decoration: none; transition: transform 0.2s;"
                                                title="Share on LinkedIn" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
                                                 <i class="fab fa-linkedin-in" style="font-size: 1rem;"></i>
-                                            </a>
+                                            </a> --}}
                                             
                                             <button type="button" 
                                                     onclick="copyProductUrl('{{ $currentUrl }}')" 
@@ -945,7 +945,7 @@
                                             width: 100%;
                                             overflow-x: hidden;
                                             font-size: 0.95rem;
-                                            line-height: 1.6;
+                                            line-height: 1.65;
                                             color: #475569;
                                         }
                                         .product-desc-content * {
@@ -955,14 +955,82 @@
                                         .product-desc-content img, .product-desc-content iframe {
                                             height: auto !important;
                                         }
+                                        
+                                        .product-desc-wrapper {
+                                            position: relative;
+                                            overflow: hidden;
+                                            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                                        }
+                                        .product-desc-wrapper.is-expanded {
+                                            max-height: none !important;
+                                        }
+                                        .desc-gradient-overlay {
+                                            position: absolute;
+                                            bottom: 0;
+                                            left: 0;
+                                            right: 0;
+                                            height: 90px;
+                                            background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.85) 60%, #ffffff 100%);
+                                            pointer-events: none;
+                                            transition: opacity 0.3s ease;
+                                            z-index: 1;
+                                        }
+                                        .product-desc-wrapper.is-expanded .desc-gradient-overlay {
+                                            opacity: 0;
+                                            display: none;
+                                        }
+                                        .desc-toggle-wrapper {
+                                            text-align: center;
+                                            margin-top: 16px;
+                                            position: relative;
+                                            z-index: 2;
+                                        }
+                                        .btn-toggle-desc {
+                                            background: #ffffff;
+                                            color: #044244;
+                                            border: 1.5px solid #044244;
+                                            padding: 8px 24px;
+                                            border-radius: 9999px;
+                                            font-size: 0.88rem;
+                                            font-weight: 600;
+                                            cursor: pointer;
+                                            display: inline-flex;
+                                            align-items: center;
+                                            gap: 8px;
+                                            transition: all 0.25s ease;
+                                            box-shadow: 0 2px 8px rgba(4, 66, 68, 0.08);
+                                        }
+                                        .btn-toggle-desc:hover {
+                                            background: #044244;
+                                            color: #ffffff;
+                                            box-shadow: 0 4px 14px rgba(4, 66, 68, 0.2);
+                                            transform: translateY(-1px);
+                                        }
+                                        .btn-toggle-desc .toggle-icon {
+                                            font-size: 0.78rem;
+                                            transition: transform 0.3s ease;
+                                        }
+                                        .btn-toggle-desc.is-open .toggle-icon {
+                                            transform: rotate(180deg);
+                                        }
                                     </style>
                                     <div class="p-3 p-md-4 text-left">
                                         <div class="mw-100 aiz-editor-data">
                                             <h3 class="fw-700 mb-3" style="color: #0f172a; font-size: 1.25rem; letter-spacing: -0.01em;">
                                                 Product Description
                                             </h3>
-                                            <div class="product-desc-content">
-                                                {!! strip_tags($singleProduct->description) == $singleProduct->description ? nl2br($singleProduct->description) : $singleProduct->description !!}
+                                            <div class="product-desc-wrapper" id="product-desc-wrapper">
+                                                <div class="product-desc-content" id="product-desc-content">
+                                                    {!! strip_tags($singleProduct->description) == $singleProduct->description ? nl2br($singleProduct->description) : $singleProduct->description !!}
+                                                </div>
+                                                <div class="desc-gradient-overlay" id="desc-gradient-overlay"></div>
+                                            </div>
+
+                                            <div class="desc-toggle-wrapper" id="desc-toggle-wrapper">
+                                                <button type="button" class="btn-toggle-desc" id="btn-toggle-desc">
+                                                    <span class="btn-toggle-text">See More</span>
+                                                    <i class="fa-solid fa-chevron-down toggle-icon"></i>
+                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -1114,6 +1182,83 @@
         }
 
         $(document).ready(function() {
+            // Description See More / View Less Toggle (65% initial visible height)
+            (function() {
+                var $wrapper = $('#product-desc-wrapper');
+                var $content = $('#product-desc-content');
+                var $btnToggle = $('#btn-toggle-desc');
+                var $toggleWrapper = $('#desc-toggle-wrapper');
+                var $btnText = $btnToggle.find('.btn-toggle-text');
+                var $overlay = $('#desc-gradient-overlay');
+                var collapsedHeight = 0;
+
+                function checkDescHeight() {
+                    if (!$content.length) return;
+                    var fullHeight = $content.outerHeight();
+                    
+                    if (fullHeight > 140) {
+                        collapsedHeight = Math.round(fullHeight * 0.65);
+                        if (!$wrapper.hasClass('is-expanded')) {
+                            $wrapper.css('max-height', collapsedHeight + 'px');
+                            $overlay.show();
+                            $toggleWrapper.show();
+                        }
+                    } else {
+                        $wrapper.addClass('is-expanded').css('max-height', '');
+                        $overlay.hide();
+                        $toggleWrapper.hide();
+                    }
+                }
+
+                checkDescHeight();
+                $content.find('img').on('load', checkDescHeight);
+                $(window).on('resize', function() {
+                    if (!$wrapper.hasClass('is-expanded')) {
+                        checkDescHeight();
+                    }
+                });
+
+                $btnToggle.on('click', function(e) {
+                    e.preventDefault();
+                    var isExpanded = $wrapper.hasClass('is-expanded');
+                    var fullHeight = $content.outerHeight();
+
+                    if (!isExpanded) {
+                        // Expand smoothly to 100%
+                        $wrapper.css('max-height', fullHeight + 'px');
+                        $overlay.fadeOut(250);
+                        $btnToggle.addClass('is-open');
+                        $btnText.text('View Less');
+
+                        setTimeout(function() {
+                            $wrapper.addClass('is-expanded').css('max-height', '');
+                        }, 400);
+                    } else {
+                        // Collapse smoothly back to 65%
+                        collapsedHeight = Math.round(fullHeight * 0.65);
+                        $wrapper.css('max-height', fullHeight + 'px');
+                        $wrapper.removeClass('is-expanded');
+
+                        if ($wrapper[0]) {
+                            void $wrapper[0].offsetHeight;
+                        }
+
+                        $wrapper.css('max-height', collapsedHeight + 'px');
+                        $overlay.fadeIn(250);
+                        $btnToggle.removeClass('is-open');
+                        $btnText.text('See More');
+
+                        // Smooth scroll back to description title if user scrolled past
+                        if ($wrapper.length) {
+                            var wrapperTop = $wrapper.offset().top - 90;
+                            if ($(window).scrollTop() > wrapperTop) {
+                                $('html, body').animate({ scrollTop: wrapperTop }, 300);
+                            }
+                        }
+                    }
+                });
+            })();
+
             function initZoom() {
                 if ($('.img-zoom')[0] && typeof $.fn.zoom === 'function') {
                     $('.img-zoom').trigger('zoom.destroy');
