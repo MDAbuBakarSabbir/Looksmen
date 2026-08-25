@@ -1632,6 +1632,14 @@
                     // ৩. সাবটোটাল আপডেট
                     $('.all-subtotal').text(response.subtotal);
 
+                    if (response.free_delivery !== undefined) {
+                        window.freeDeliveryState = response.free_delivery;
+                        updateModalFreeDeliveryUI(response.free_delivery);
+                        if (typeof updateFreeDeliveryUI === "function") {
+                            updateFreeDeliveryUI();
+                        }
+                    }
+
                     // ৪. গ্র্যান্ড টোটাল আপডেট (চেকআউট পেজের জন্য)
                     if (typeof calculateGrandTotal === "function") {
                         calculateGrandTotal(response.subtotal);
@@ -1641,8 +1649,35 @@
             }).fail(function() {
                 console.log("Error updating cart");
             });
+        }
 
+        function updateModalFreeDeliveryUI(fd) {
+            if (!fd) return;
+            let hasOffer = (fd.has_offer === true || fd.has_offer === "true" || fd.has_offer == 1);
+            let isFree = (fd.is_free === true || fd.is_free === "true" || fd.is_free == 1);
 
+            if (hasOffer) {
+                $('.free-delivery-progress-container').show();
+                $('#modal_fd_progress_title').text(fd.progress_message || '');
+                $('#modal_fd_progress_qty').text((fd.current_qty || 0) + '/' + (fd.threshold || 0));
+                $('#modal_fd_progress_bar').css('width', (fd.progress_percent || 0) + '%');
+                
+                if (isFree) {
+                    $('.free-delivery-progress-container').css({
+                        'background': 'linear-gradient(135deg, #ecfdf5, #f0fdf4)',
+                        'border-color': '#10b981'
+                    });
+                    $('#modal_fd_progress_bar').css('background', 'linear-gradient(90deg, #10b981, #059669)');
+                } else {
+                    $('.free-delivery-progress-container').css({
+                        'background': '#f8fafc',
+                        'border-color': '#e2e8f0'
+                    });
+                    $('#modal_fd_progress_bar').css('background', 'linear-gradient(90deg, #6366f1, #4f46e5)');
+                }
+            } else {
+                $('.free-delivery-progress-container').hide();
+            }
         }
 
         function calculateSubtotal() {
@@ -1662,22 +1697,20 @@
             $('.modal-footer .h5 span').text('৳ ' + subtotal.toFixed(0));
         }
 
-        // function calculateGrandTotal(subtotal) {
-        //     let shipping = parseFloat($('#charge_display').text()) || 0;
-        //     let discount = parseFloat($('#discount_amount').text()) || 0; // যদি ডিসকাউন্ট থাকে
-        //     let grandTotal = (parseFloat(subtotal) + shipping) - discount;
-
-        //     $('#grand-total').text('৳ ' + grandTotal.toFixed(0));
-        //     $('#payable_amount_input').val(grandTotal); // যদি ফর্ম পাঠাতে হয়
-        // }
         function calculateGrandTotal(subtotal) {
             // ১. সাবটোটাল থেকে সিম্বল সরিয়ে সংখ্যায় রূপান্তর
             let cleanSubtotal = String(subtotal).replace(/[৳,]/g, '').trim();
             let s = parseFloat(cleanSubtotal) || 0;
 
             // ২. শিপিং চার্জ এবং ডিসকাউন্ট নেওয়া
-            let shipping = parseFloat($('#charge_display').text()) || 0;
-            let discount = parseFloat($('#discount_amount').text()) || 0;
+            let isFree = window.freeDeliveryState && (window.freeDeliveryState.is_free === true || window.freeDeliveryState.is_free == 1);
+            let shipping = 0;
+            
+            if (!isFree) {
+                shipping = parseFloat($('#charge_display').text()) || 0;
+            }
+            
+            let discount = parseFloat($('#discount_amount').text().replace(/[৳,]/g, '').trim()) || 0;
 
             // ৩. গ্র্যান্ড টোটাল হিসাব
             let total = (s + shipping) - discount;
@@ -1685,7 +1718,7 @@
             // ৪. আউটপুট দেখানো (NaN চেকসহ)
             if (!isNaN(total)) {
                 $('#grand-total').text(total.toFixed(0)); // দশমিক ছাড়া দেখাতে
-                $('#hidden_total_amount').val(subtotal);
+                $('#hidden_total_amount').val(s);
                 $('#hidden_grand_total').val(total);
             } else {
                 $('#grand-total').text(s.toFixed(0));
@@ -1694,8 +1727,19 @@
 
         // জেলা পরিবর্তনের সাথে গ্র্যান্ড টোটাল আপডেট
         $(document).on('change', '#district_select', function() {
-            let charge = parseFloat($(this).find(':selected').data('charge')) || 0;
-            $('#charge_display').text(charge);
+            let selectedOption = $(this).find(':selected');
+            let charge = parseFloat(selectedOption.data('charge')) || 0;
+            let isFree = window.freeDeliveryState && (window.freeDeliveryState.is_free === true || window.freeDeliveryState.is_free == 1);
+
+            $('#original_charge_display').text(charge);
+
+            if (isFree) {
+                $('#charge_display').text('0');
+                $('#hidden_charge_display').val('0');
+            } else {
+                $('#charge_display').text(charge);
+                $('#hidden_charge_display').val(charge);
+            }
 
             // বর্তমান সাবটোটাল থেকে গ্র্যান্ড টোটাল আবার হিসাব করুন
             let currentSubtotal = $('.all-subtotal').first().text().replace(/[৳,]/g, '').trim();
@@ -1722,6 +1766,15 @@
 
                     // ৩. সাবটোটাল এবং গ্র্যান্ড টোটাল আপডেট করা
                     $('.all-subtotal').text(response.subtotal);
+                    
+                    if (response.free_delivery !== undefined) {
+                        window.freeDeliveryState = response.free_delivery;
+                        updateModalFreeDeliveryUI(response.free_delivery);
+                        if (typeof updateFreeDeliveryUI === "function") {
+                            updateFreeDeliveryUI();
+                        }
+                    }
+
                     if ($('#grand-total').length > 0) {
                         calculateGrandTotal(response.subtotal);
                     }
@@ -1849,7 +1902,7 @@
 
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous"
-        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=0"
+        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=1"
         nonce="mvlbA8Xg"></script>
 
     <script>

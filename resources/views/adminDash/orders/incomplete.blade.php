@@ -485,10 +485,30 @@
                                 </td>
                                 <td>
                                     @php
-                                        $productCodes = json_decode($incomOrder->product_id, true);
+                                        $rawProductData = json_decode($incomOrder->product_id, true);
                                         $products = [];
-                                        if (is_array($productCodes) && count($productCodes) > 0) {
-                                            $products = \App\Models\Product::whereIn('code', $productCodes)->with('firstImage')->get();
+                                        $displayCodes = [];
+                                        if (is_array($rawProductData) && count($rawProductData) > 0) {
+                                            $first = reset($rawProductData);
+                                            if (is_array($first)) {
+                                                $ids = array_filter(array_column($rawProductData, 'product_id'));
+                                                $codes = array_filter(array_column($rawProductData, 'code'));
+                                                $displayCodes = $codes;
+                                                $products = \App\Models\Product::where(function($q) use ($ids, $codes) {
+                                                    if (!empty($ids)) $q->whereIn('id', $ids);
+                                                    if (!empty($codes)) $q->orWhereIn('code', $codes);
+                                                })->with('firstImage')->get();
+                                            } else {
+                                                $displayCodes = $rawProductData;
+                                                $products = \App\Models\Product::whereIn('code', $rawProductData)
+                                                    ->orWhereIn('id', $rawProductData)
+                                                    ->with('firstImage')->get();
+                                            }
+                                        } elseif (!empty($incomOrder->product_id)) {
+                                            $displayCodes = [$incomOrder->product_id];
+                                            $products = \App\Models\Product::where('code', $incomOrder->product_id)
+                                                ->orWhere('id', $incomOrder->product_id)
+                                                ->with('firstImage')->get();
                                         }
                                     @endphp
                                     <div class="d-flex flex-column" style="gap: 8px;">
@@ -497,23 +517,19 @@
                                                 $imageSrc = asset('favicon.png');
                                                 if ($product->firstImage) {
                                                     $imgName = $product->firstImage->image;
-                                                    if (file_exists(public_path('Uploads/' . $imgName))) {
-                                                        $imageSrc = asset('Uploads/' . $imgName);
-                                                    } else {
-                                                        $imageSrc = asset('Uploads/' . $imgName);
-                                                    }
+                                                    $imageSrc = asset('Uploads/' . $imgName);
                                                 }
                                             @endphp
                                             <div class="d-flex align-items-center" style="gap: 8px;">
-                                                <img src="{{ $imageSrc }}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff;" alt="">
+                                                <img src="{{ $imageSrc }}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff;" alt="" onerror="this.onerror=null; this.src='{{ asset("favicon.png") }}';">
                                                 <span class="font-weight-bold text-dark" style="font-size: 0.8rem;">{{ $product->title }}</span>
                                             </div>
                                         @empty
-                                            @if (is_array($productCodes) && count($productCodes) > 0)
-                                                @foreach ($productCodes as $code)
+                                            @if (!empty($displayCodes))
+                                                @foreach ($displayCodes as $code)
                                                     <div class="d-flex align-items-center" style="gap: 8px;">
                                                         <img src="{{ asset('favicon.png') }}" style="width: 32px; height: 32px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0; background: #fff;" alt="">
-                                                        <span class="text-muted small" style="font-size: 0.8rem;">{{ $code }}</span>
+                                                        <span class="text-muted small" style="font-size: 0.8rem;">{{ is_string($code) || is_numeric($code) ? $code : 'Item' }}</span>
                                                     </div>
                                                 @endforeach
                                             @else

@@ -4,6 +4,10 @@
     CREATE NEW ORDER
 @endsection
 
+@section('style')
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+@endsection
+
 @section('content')
     <!-- Custom Premium Create Styles -->
     <style>
@@ -304,7 +308,7 @@
                                     <select class="form-select dropdown-groups" id="district" name="district_id" style="width: 100%;">
                                         <option value="" selected disabled>Select District</option>
                                         @foreach ($districts as $d)
-                                            <option value="{{ $d->id }}" {{ ($incompleteOrder && strtolower($incompleteOrder->district) == strtolower($d->name)) ? 'selected' : '' }}>{{ $d->name }}</option>
+                                            <option value="{{ $d->id }}" data-charge="{{ $d->delivery_charge ?? 0 }}" {{ ($incompleteOrder && strtolower($incompleteOrder->district) == strtolower($d->name)) ? 'selected' : '' }}>{{ $d->name }}</option>
                                         @endforeach
                                     </select>
                                 </div>
@@ -377,16 +381,98 @@
                                         <tr>
                                             <th style="width: 50px;">SL</th>
                                             <th>Product</th>
-                                            <th style="width: 120px;">Size</th>
+                                            <th style="width: 120px;">Attribute</th>
                                             <th style="width: 120px;">Color</th>
-                                            <th style="width: 75px;" class="text-center">Qty</th>
+                                            <th style="width: 115px;" class="text-center">Qty</th>
                                             <th style="width: 105px;" class="text-right">Price</th>
                                             <th style="width: 110px;" class="text-right">Total</th>
                                             <th style="width: 50px;" class="text-center">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody id="product-rows-container">
-                                        <!-- Dynamically injected items -->
+                                        @if(!empty($incompleteItems) && count($incompleteItems) > 0)
+                                            @foreach($incompleteItems as $idx => $item)
+                                                @php
+                                                    $product = $item['product'];
+                                                    $id = $product->id;
+                                                    $name = $product->title;
+                                                    $code = $product->code ?? 'N/A';
+                                                    $price = (float)$item['price'];
+                                                    $qty = (int)$item['quantity'];
+                                                    $selectedSize = $item['size'] ?? 'N/A';
+                                                    $selectedColor = $item['color'] ?? 'N/A';
+                                                    $image = $product->firstImage ? asset('Uploads/' . $product->firstImage->image) : asset('favicon.png');
+                                                    $rowTotal = $price * $qty;
+                                                @endphp
+                                                <tr class="product-row" data-product-id="{{ $id }}">
+                                                    <td class="sl-number font-weight-bold text-muted">{{ $idx + 1 }}</td>
+                                                    <td>
+                                                        <div class="d-flex align-items-center" style="gap: 8px;">
+                                                            <img style="height: 40px; width: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;" src="{{ $image }}" alt="Product Image" onerror="this.onerror=null; this.src='{{ asset("favicon.png") }}';">
+                                                            <div style="line-height: 1.3;">
+                                                                <span class="font-weight-bold text-dark d-block" style="font-size: 0.85rem; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 28) }}</span>
+                                                                <small class="text-muted" style="font-size: 0.7rem;">Code: {{ $code }}</small>
+                                                            </div>
+                                                        </div>
+                                                        <input type="hidden" name="product_ids[]" value="{{ $id }}">
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm spec-size" name="sizes[]" style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; width: 100%;">
+                                                            <option value="N/A" {{ $selectedSize == 'N/A' ? 'selected' : '' }}>N/A</option>
+                                                            @if($product->productAttributes && $product->productAttributes->count() > 0)
+                                                                @foreach($product->productAttributes as $attr)
+                                                                    @php
+                                                                        $attrName = $attr->attribute->name ?? 'Attribute';
+                                                                        $values = explode(',', $attr->attribute_value ?? '');
+                                                                    @endphp
+                                                                    @foreach($values as $val)
+                                                                        @php $cleanVal = trim($val); @endphp
+                                                                        @if($cleanVal)
+                                                                            <option value="{{ $cleanVal }}" {{ $selectedSize == $cleanVal ? 'selected' : '' }}>{{ $attrName }} : {{ $cleanVal }}</option>
+                                                                        @endif
+                                                                    @endforeach
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
+                                                    </td>
+                                                    <td>
+                                                        <select class="form-select form-select-sm spec-color" name="colors[]" style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; width: 100%;">
+                                                            <option value="N/A" {{ $selectedColor == 'N/A' ? 'selected' : '' }}>N/A</option>
+                                                            @if($product->productColors && $product->productColors->count() > 0)
+                                                                @foreach($product->productColors as $pc)
+                                                                    @if(!empty($pc->color?->color_name))
+                                                                        <option value="{{ $pc->color->color_name }}" {{ $selectedColor == $pc->color->color_name ? 'selected' : '' }}>{{ $pc->color->color_name }}</option>
+                                                                    @endif
+                                                                @endforeach
+                                                            @endif
+                                                        </select>
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <div class="input-group input-group-sm flex-nowrap justify-content-center" style="max-width: 95px; margin: 0 auto;">
+                                                            <div class="input-group-prepend">
+                                                                <button type="button" class="btn btn-light btn-qty-minus border" style="padding: 0.2rem 0.4rem; border-top-left-radius: 6px; border-bottom-left-radius: 6px;"><i class="fa-solid fa-minus" style="font-size: 10px;"></i></button>
+                                                            </div>
+                                                            <input class="form-control form-control-sm qty-input text-center px-0 font-weight-bold" type="number" name="quantities[]" value="{{ $qty }}" min="1" required style="padding: 0.2rem 0.2rem !important; min-width: 35px; width: 40px;">
+                                                            <div class="input-group-append">
+                                                                <button type="button" class="btn btn-light btn-qty-plus border" style="padding: 0.2rem 0.4rem; border-top-right-radius: 6px; border-bottom-right-radius: 6px;"><i class="fa-solid fa-plus" style="font-size: 10px;"></i></button>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <input class="form-control form-control-sm price-input text-right" type="number" name="prices[]" value="{{ $price }}" step="0.01" required style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; min-width: 85px;">
+                                                        <span class="row-total d-none">{{ $rowTotal }}</span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="row-total-display font-weight-bold">{{ number_format($rowTotal, 2) }}</span> ৳
+                                                    </td>
+                                                    <td class="text-center">
+                                                        <button type="button" class="btn-remove-row" title="Remove Product">
+                                                            <i class="fa-solid fa-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                        @endif
                                     </tbody>
                                 </table>
                             </div>
@@ -403,13 +489,19 @@
                                         <input type="number" class="form-control form-control-sm text-right" id="admin_discount" name="admin_discount" value="0" min="0" step="0.01" style="font-weight: 700;">
                                     </div>
                                     <div class="col-4">
-                                        <label class="form-label font-weight-normal text-muted mb-1" style="font-size: 0.8rem;">Shipping Charge</label>
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <label class="form-label font-weight-normal text-muted mb-0" style="font-size: 0.8rem;">Shipping Charge</label>
+                                            <span id="admin_free_badge" class="badge badge-success px-1 py-0 d-none" style="font-size: 10px; font-weight: 700; background-color: #059669; color: #fff; border-radius: 4px; width: auto !important; height: auto !important;">FREE</span>
+                                        </div>
                                         <input type="number" class="form-control form-control-sm text-right" id="delivery_charge" name="delivery_charge" value="0" min="0" step="0.01" style="font-weight: 700;">
                                     </div>
                                     <div class="col-4">
                                         <label class="form-label font-weight-normal text-muted mb-1" style="font-size: 0.8rem;">Paid Amount</label>
                                         <input type="number" class="form-control form-control-sm text-right" id="paid_amount" name="paid_amount" value="0" min="0" step="0.01" style="font-weight: 700; color: #047857;">
                                     </div>
+                                </div>
+                                <div id="admin_fd_alert" class="alert alert-success py-1 px-2 mt-2 mb-0 d-none" style="font-size: 11px; border-radius: 6px; background-color: #ecfdf5; border: 1px solid #10b981; color: #065f46;">
+                                    <i class="fa-solid fa-gift mr-1"></i> <span id="admin_fd_alert_text"></span>
                                 </div>
                                 <div class="calc-row due-row mt-3">
                                     <span>Due Amount:</span>
@@ -435,45 +527,47 @@
 @endsection
 
 @section('script')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <!-- Select2 and District Upazila dynamic link handler -->
     <script>
         $(document).ready(function() {
-            // Apply Select2 selectors
-            $('#district').select2({
-                placeholder: "Select District",
-                allowClear: true
-            });
-            $('#upazila').select2({
-                placeholder: "Select Upazila",
-                allowClear: true
-            });
+            // Apply Select2 selectors if available
+            if ($.fn.select2) {
+                $('#district').select2({
+                    placeholder: "Select District",
+                    allowClear: true
+                });
+                $('#upazila').select2({
+                    placeholder: "Select Upazila",
+                    allowClear: true
+                });
+            }
 
             // District change AJAX fetch for Upazilas
             $('#district').on('change', function() {
                 let districtId = $(this).val();
                 
                 // Clear upazila dropdown
-                $('#upazila').empty().append('<option value="" selected disabled>Select Upazila</option>').trigger('change');
+                $('#upazila').empty().append('<option value="" selected disabled>Select Upazila</option>');
+                if ($.fn.select2) {
+                    $('#upazila').trigger('change');
+                }
 
                 if (districtId) {
                     $.ajax({
-                        url: "/get-upazilas/" + districtId,
+                        url: "/admin/get-upazilas/" + districtId,
                         type: "GET",
                         dataType: "json",
                         success: function(data) {
                             $.each(data, function(index, upazila) {
                                 $('#upazila').append(new Option(upazila.name, upazila.id));
                             });
-                            // Trigger select2 update
-                            $('#upazila').trigger('change');
+                            if ($.fn.select2) {
+                                $('#upazila').trigger('change');
+                            }
                         },
                         error: function(xhr, status, error) {
                             console.error("Error loading upazilas:", error);
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: 'Failed to fetch upazilas matching the selected district.'
-                            });
                         }
                     });
                 }
@@ -484,16 +578,19 @@
                 let initialDistrictId = $('#district').val();
                 if (initialDistrictId) {
                     $.ajax({
-                        url: "/get-upazilas/" + initialDistrictId,
+                        url: "/admin/get-upazilas/" + initialDistrictId,
                         type: "GET",
                         dataType: "json",
                         success: function(data) {
+                            $('#upazila').empty().append('<option value="" disabled>Select Upazila</option>');
                             $.each(data, function(index, upazila) {
                                 let isSelected = "{{ strtolower($incompleteOrder->thana ?? '') }}" === upazila.name.toLowerCase();
                                 let option = new Option(upazila.name, upazila.id, isSelected, isSelected);
                                 $('#upazila').append(option);
                             });
-                            $('#upazila').trigger('change');
+                            if ($.fn.select2) {
+                                $('#upazila').trigger('change');
+                            }
                         }
                     });
                 }
@@ -503,6 +600,66 @@
 
     <!-- Calculation core logic -->
     <script>
+        window.isFreeDelivery = false;
+        window.manualDeliveryChargeEdited = false;
+
+        function checkAdminFreeDelivery() {
+            let items = [];
+            $('.product-row').each(function() {
+                let pId = $(this).find('input[name="product_ids[]"]').val();
+                let qty = parseInt($(this).find('.qty-input').val()) || 1;
+                if (pId) {
+                    items.push({ product_id: pId, quantity: qty });
+                }
+            });
+
+            let selectedDistrict = $('#district').find(':selected');
+            let districtCharge = parseFloat(selectedDistrict.data('charge')) || 0;
+
+            if (items.length === 0) {
+                window.isFreeDelivery = false;
+                $('#admin_free_badge').addClass('d-none');
+                $('#admin_fd_alert').addClass('d-none');
+                if (!window.manualDeliveryChargeEdited && selectedDistrict.val()) {
+                    $('#delivery_charge').val(districtCharge);
+                }
+                calculateTotals();
+                return;
+            }
+
+            $.ajax({
+                url: "{{ route('admin.check-free-delivery') }}",
+                type: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    items: items
+                },
+                success: function(res) {
+                    window.isFreeDelivery = (res && (res.is_free === true || res.is_free === 'true' || res.is_free == 1));
+
+                    if (window.isFreeDelivery) {
+                        $('#admin_free_badge').removeClass('d-none');
+                        $('#admin_fd_alert').removeClass('d-none').attr('class', 'alert alert-success py-1 px-2 mt-2 mb-0').css({'background-color': '#ecfdf5', 'border-color': '#10b981', 'color': '#065f46'});
+                        $('#admin_fd_alert_text').text(res.reason || '🎉 ফ্রি ডেলিভারি অফার একটিভ!');
+                        $('#delivery_charge').val(0);
+                    } else {
+                        $('#admin_free_badge').addClass('d-none');
+                        if (res && res.has_offer && res.progress_message) {
+                            $('#admin_fd_alert').removeClass('d-none').attr('class', 'alert alert-info py-1 px-2 mt-2 mb-0').css({'background-color': '#eff6ff', 'border-color': '#93c5fd', 'color': '#1e40af'});
+                            $('#admin_fd_alert_text').text(res.progress_message + ` (${res.current_qty}/${res.threshold})`);
+                        } else {
+                            $('#admin_fd_alert').addClass('d-none');
+                        }
+
+                        if (!window.manualDeliveryChargeEdited && selectedDistrict.val()) {
+                            $('#delivery_charge').val(districtCharge);
+                        }
+                    }
+                    calculateTotals();
+                }
+            });
+        }
+
         function calculateTotals() {
             let subtotal = 0;
 
@@ -550,7 +707,31 @@
 
         $(document).ready(function() {
             // Live modification bindings
-            $(document).on('input change', '.qty-input, .price-input, #admin_discount, #delivery_charge, #paid_amount', function() {
+            $(document).on('input change', '.price-input, #admin_discount, #paid_amount', function() {
+                calculateTotals();
+            });
+
+            $(document).on('input change', '.qty-input', function() {
+                checkAdminFreeDelivery();
+            });
+
+            // +/- Qty button click handlers
+            $(document).on('click', '.btn-qty-minus', function() {
+                let input = $(this).closest('td').find('.qty-input');
+                let val = parseInt(input.val()) || 1;
+                if (val > 1) {
+                    input.val(val - 1).trigger('change');
+                }
+            });
+
+            $(document).on('click', '.btn-qty-plus', function() {
+                let input = $(this).closest('td').find('.qty-input');
+                let val = parseInt(input.val()) || 1;
+                input.val(val + 1).trigger('change');
+            });
+
+            $(document).on('input', '#delivery_charge', function() {
+                window.manualDeliveryChargeEdited = true;
                 calculateTotals();
             });
 
@@ -560,6 +741,20 @@
                     $(this).find('.sl-number').text(index + 1);
                 });
             }
+
+            // District change listener for delivery charge
+            $('#district').on('change', function() {
+                let selectedDistrict = $(this).find(':selected');
+                let districtCharge = parseFloat(selectedDistrict.data('charge')) || 0;
+                window.manualDeliveryChargeEdited = false;
+
+                if (window.isFreeDelivery) {
+                    $('#delivery_charge').val(0);
+                } else {
+                    $('#delivery_charge').val(districtCharge);
+                }
+                calculateTotals();
+            });
 
             // Exclusivity between Size and Color selection
             $(document).on('change', '.spec-size', function() {
@@ -597,7 +792,7 @@
                     if (result.isConfirmed) {
                         row.remove();
                         reindexRows();
-                        calculateTotals();
+                        checkAdminFreeDelivery();
                         Swal.fire({
                             toast: true,
                             position: 'top',
@@ -624,6 +819,9 @@
             
             // Expose reindex function
             window.reindexRows = reindexRows;
+
+            // Initial calculation & free delivery check on page load
+            checkAdminFreeDelivery();
         });
     </script>
 
@@ -715,7 +913,7 @@
                         alreadyExists = true;
                         let qtyInput = $(this).find('.qty-input');
                         qtyInput.val(parseInt(qtyInput.val()) + 1);
-                        calculateTotals();
+                        checkAdminFreeDelivery();
                     }
                 });
 
@@ -758,7 +956,7 @@
                             <div class="d-flex align-items-center" style="gap: 8px;">
                                 <img style="height: 40px; width: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #e2e8f0;" src="${image}" alt="Product Image" onerror="this.onerror=null; this.src='{{ asset("favicon.png") }}';">
                                 <div style="line-height: 1.3;">
-                                    <span class="font-weight-bold text-dark d-block text-wrap" style="font-size: 0.85rem; max-width: 150px;">${name}</span>
+                                    <span class="font-weight-bold text-dark d-block" style="font-size: 0.85rem; max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${name}">${name.length > 28 ? name.substring(0, 28) + '...' : name}</span>
                                     <small class="text-muted" style="font-size: 0.7rem;">Code: ${code}</small>
                                 </div>
                             </div>
@@ -770,8 +968,16 @@
                         <td>
                             ${colorsSelect}
                         </td>
-                        <td>
-                            <input class="form-control form-control-sm qty-input text-center" type="number" name="quantities[]" value="1" min="1" required style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; min-width: 60px;">
+                        <td class="text-center">
+                            <div class="input-group input-group-sm flex-nowrap justify-content-center" style="max-width: 95px; margin: 0 auto;">
+                                <div class="input-group-prepend">
+                                    <button type="button" class="btn btn-light btn-qty-minus border" style="padding: 0.2rem 0.4rem; border-top-left-radius: 6px; border-bottom-left-radius: 6px;"><i class="fa-solid fa-minus" style="font-size: 10px;"></i></button>
+                                </div>
+                                <input class="form-control form-control-sm qty-input text-center px-0 font-weight-bold" type="number" name="quantities[]" value="1" min="1" required style="padding: 0.2rem 0.2rem !important; min-width: 35px; width: 40px;">
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-light btn-qty-plus border" style="padding: 0.2rem 0.4rem; border-top-right-radius: 6px; border-bottom-right-radius: 6px;"><i class="fa-solid fa-plus" style="font-size: 10px;"></i></button>
+                                </div>
+                            </div>
                         </td>
                         <td>
                             <input class="form-control form-control-sm price-input text-right" type="number" name="prices[]" value="${price}" step="0.01" required style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; min-width: 85px;">
@@ -788,7 +994,7 @@
                     </tr>`;
 
                     $('#product-rows-container').append(newRow);
-                    calculateTotals();
+                    checkAdminFreeDelivery();
 
                     Swal.fire({
                         toast: true,

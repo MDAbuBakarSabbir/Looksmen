@@ -30,6 +30,7 @@ class SubCategoryController extends Controller
         SubCategory::create([
             'category_id'=>$request->category_id ,
             'name'=>$request->subcategory_name ,
+            'free_delivery_qty'=>($request->filled('free_delivery_qty') && (int)$request->free_delivery_qty >= 2) ? (int)$request->free_delivery_qty : null,
             'slug'=>Str::slug($request->subcategory_name)  ,
             'meta_title'=>$request->meta_title ,
             'meta_descritption'=>$request->meta_description ,
@@ -53,6 +54,7 @@ class SubCategoryController extends Controller
         $subcategory->update([
             'category_id' => $request->category_id,
             'name' => $request->subcategory_name,
+            'free_delivery_qty' => ($request->filled('free_delivery_qty') && (int)$request->free_delivery_qty >= 2) ? (int)$request->free_delivery_qty : null,
             'slug' => Str::slug($request->subcategory_name),
             'meta_title' => $request->meta_title,
             'meta_descritption' => $request->meta_description,

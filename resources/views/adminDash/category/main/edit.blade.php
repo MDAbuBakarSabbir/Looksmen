@@ -32,6 +32,11 @@
                             <input type="number" step="0.01" name="commission_rate" class="form-control" placeholder="Enter Commission Rate" value="{{ $category->commission_rate }}" required style="border-radius: 8px; padding: 10px 14px;">
                         </div>
 
+                        <div class="form-group mb-3">
+                            <label class="form-label font-weight-bold text-muted">Free Delivery Minimum Quantity <small class="text-info font-weight-bold">(ঐচ্ছিক - একই ক্যাটাগরির ন্যূনতম কতটি আইটেম কিনলে ফ্রি ডেলিভারি হবে, যেমন: 2, 3 বা 4)</small></label>
+                            <input type="number" min="1" name="free_delivery_qty" class="form-control" placeholder="e.g. 2, 3 or 4 (মিনিমাম ২ টি থেকে কার্যকর, খালি রাখলে অফার বন্ধ থাকবে)" value="{{ $category->free_delivery_qty }}" style="border-radius: 8px; padding: 10px 14px;">
+                        </div>
+
                         <!-- Redesigned Icon Field -->
                         <div class="form-group mb-3">
                             <label class="form-label font-weight-bold text-muted">Category Icon Class<span class="text-danger">*</span></label>

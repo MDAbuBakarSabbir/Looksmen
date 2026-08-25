@@ -17,7 +17,8 @@ class CartController extends Controller
         } else {
             $cart = session()->get('cart', []);
         }
-        return view('Frontend.cart.cartView', compact('cart'));
+        $freeDelivery = check_free_delivery($cart);
+        return view('Frontend.cart.cartView', compact('cart', 'freeDelivery'));
     }
 
 
@@ -67,6 +68,7 @@ class CartController extends Controller
             }
 
             $totalCount = Cart::where('user_id', $userId)->count();
+            $cartItems = Cart::where('user_id', $userId)->with('product')->get();
         }
         // --- সেশন লজিক (গেস্ট ইউজার হলে) ---
         else {
@@ -92,7 +94,11 @@ class CartController extends Controller
             }
             session()->put('cart', $cart);
             $totalCount = count($cart);
+            $cartItems = $cart;
         }
+
+        $freeDelivery = check_free_delivery($cartItems);
+
         return response()->json([
             'status' => 'success',
             'message' => 'Product added to cart!',
@@ -101,7 +107,8 @@ class CartController extends Controller
             'product_name' => $product->title,
             'product_price' => (float) $product->new_price,
             'quantity' => $qty,
-            'currency' => 'BDT'
+            'currency' => 'BDT',
+            'free_delivery' => $freeDelivery
         ]);
     }
 
@@ -112,7 +119,8 @@ class CartController extends Controller
         } else {
             $cart = session()->get('cart', []);
         }
-        return view('Frontend.cart.partials.cart_details', compact('cart'));
+        $freeDelivery = check_free_delivery($cart);
+        return view('Frontend.cart.partials.cart_details', compact('cart', 'freeDelivery'));
     }
 
     public function updateCart(Request $request)
@@ -135,16 +143,19 @@ class CartController extends Controller
             $line_total = $price * $newQty;
 
             // ৪. ওই ইউজারের সব আইটেমের সাবটোটাল বের করা
-            $allCartItems = Cart::where('user_id', auth()->id())->get();
+            $allCartItems = Cart::where('user_id', auth()->id())->with('product')->get();
             $subtotal = 0;
             foreach ($allCartItems as $item) {
                 $itemPrice = (float) str_replace(',', '', $item->product->new_price);
                 $subtotal += ($itemPrice * $item->quantity);
             }
+            $freeDelivery = check_free_delivery($allCartItems);
+
             return response()->json([
                 'status' => 'success',
                 'line_total' => $line_total,
-                'subtotal' => $subtotal
+                'subtotal' => $subtotal,
+                'free_delivery' => $freeDelivery
             ]);
             }
 
@@ -168,11 +179,13 @@ class CartController extends Controller
                 $itemQty = (int) $item['quantity'];
                 $subtotal += ($itemPrice * $itemQty);
             }
+            $freeDelivery = check_free_delivery($cart);
 
             return response()->json([
                 'status' => 'success',
                 'line_total' => $line_total,
-                'subtotal' => $subtotal
+                'subtotal' => $subtotal,
+                'free_delivery' => $freeDelivery
             ]);
             }
         }
@@ -188,11 +201,20 @@ class CartController extends Controller
                 ->where('cart_id', $request->id)
                 ->delete();
 
-            $totalCount = Cart::where('user_id', auth()->id())->count();
+            $allCartItems = Cart::where('user_id', auth()->id())->with('product')->get();
+            $totalCount = $allCartItems->count();
+            $subtotal = 0;
+            foreach ($allCartItems as $item) {
+                $itemPrice = (float) str_replace(',', '', $item->product->new_price);
+                $subtotal += ($itemPrice * $item->quantity);
+            }
+            $freeDelivery = check_free_delivery($allCartItems);
 
             return response()->json([
                 'status' => 'success',
-                'cart_count' => $totalCount
+                'cart_count' => $totalCount,
+                'subtotal' => $subtotal,
+                'free_delivery' => $freeDelivery
             ]);
         } else {
             $cart = session()->get('cart');
@@ -201,9 +223,18 @@ class CartController extends Controller
                 session()->put('cart', $cart);
             }
             $totalCount = count(session()->get('cart', []));
+            $subtotal = 0;
+            foreach (session()->get('cart', []) as $item) {
+                $itemPrice = (float) str_replace(',', '', $item['price']);
+                $subtotal += ($itemPrice * (int)$item['quantity']);
+            }
+            $freeDelivery = check_free_delivery(session()->get('cart', []));
+
             return response()->json([
                 'status' => 'success',
-                'cart_count' => $totalCount
+                'cart_count' => $totalCount,
+                'subtotal' => $subtotal,
+                'free_delivery' => $freeDelivery
             ]);
         }
     }

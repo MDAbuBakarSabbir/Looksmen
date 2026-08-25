@@ -30,6 +30,11 @@
                         </div>
 
                         <div class="form-group mb-3">
+                            <label class="form-label font-weight-bold text-muted">Free Delivery Minimum Quantity <small class="text-info font-weight-bold">(ঐচ্ছিক - এই সাব-ক্যাটাগরির ন্যূনতম কতটি আইটেম কিনলে ফ্রি ডেলিভারি হবে, যেমন: 2, 3 বা 4)</small></label>
+                            <input type="number" min="1" name="free_delivery_qty" class="form-control" placeholder="e.g. 2, 3 or 4 (মিনিমাম ২ টি থেকে কার্যকর, খালি রাখলে অফার বন্ধ থাকবে)" value="{{ $subcategory->free_delivery_qty }}" style="border-radius: 8px; padding: 10px 14px;">
+                        </div>
+
+                        <div class="form-group mb-3">
                             <label class="form-label font-weight-bold text-muted">Meta Title (Optional)</label>
                             <input type="text" name="meta_title" class="form-control" placeholder="SEO Title" value="{{ $subcategory->meta_title }}" style="border-radius: 8px; padding: 10px 14px;">
                         </div>

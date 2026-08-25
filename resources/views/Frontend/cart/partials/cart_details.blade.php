@@ -9,6 +9,40 @@
 
 <div class="modal-body" style="max-height: calc(75vh - 120px); overflow-y: auto;">
     @if (!empty($cart) && count($cart) > 0)
+        @if(!empty($freeDelivery['has_offer']))
+            @php
+                $isFree = !empty($freeDelivery['is_free']);
+                $percent = $freeDelivery['progress_percent'] ?? 0;
+                $current = $freeDelivery['current_qty'] ?? 0;
+                $threshold = $freeDelivery['threshold'] ?? 0;
+            @endphp
+            <div class="free-delivery-progress-container mb-3 p-3" style="background: {{ $isFree ? 'linear-gradient(135deg, #ecfdf5, #f0fdf4)' : '#f8fafc' }}; border: 1px solid {{ $isFree ? '#10b981' : '#e2e8f0' }}; border-radius: 12px;">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle mr-2 d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; border-radius: 50%; background: {{ $isFree ? '#d1fae5' : '#e0e7ff' }}; color: {{ $isFree ? '#059669' : '#4f46e5' }};">
+                            <i class="las {{ $isFree ? 'la-check-circle' : 'la-truck' }} fs-16"></i>
+                        </div>
+                        <span class="fs-13 fw-600 {{ $isFree ? 'text-success' : 'text-dark' }}" id="modal_fd_progress_title">
+                            {{ $freeDelivery['progress_message'] ?? '' }}
+                        </span>
+                    </div>
+                    <span class="badge {{ $isFree ? 'badge-success' : 'badge-primary' }} px-2 py-1" style="width: auto !important; height: auto !important; min-width: auto !important; font-size: 11px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;">
+                        <span id="modal_fd_progress_qty">{{ $current }}/{{ $threshold }}</span>
+                    </span>
+                </div>
+
+                <div class="progress" style="height: 8px; border-radius: 10px; background-color: #e2e8f0; overflow: hidden;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         id="modal_fd_progress_bar"
+                         role="progressbar" 
+                         style="width: {{ $percent }}%; border-radius: 10px; transition: width 0.4s ease; background: {{ $isFree ? 'linear-gradient(90deg, #10b981, #059669)' : 'linear-gradient(90deg, #6366f1, #4f46e5)' }};" 
+                         aria-valuenow="{{ $percent }}" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+            </div>
+        @endif
         <div class="table-responsive">
             <table class="table table-borderless">
                 <thead class="thead-light">

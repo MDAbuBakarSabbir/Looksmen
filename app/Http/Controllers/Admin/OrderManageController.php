@@ -159,7 +159,9 @@ class OrderManageController extends Controller
 
         $page = request('page', 1);
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
 
         $html = view('adminDash.orders.extends.order_rows', compact('orders'))->render();
@@ -286,7 +288,7 @@ class OrderManageController extends Controller
             if (! $admin->hasPermission('delete_order')) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthorized: You do not have permission to delete orders.'
+                    'message' => 'Unauthorized: You do not have permission to delete orders.',
                 ], 403);
             }
 
@@ -301,15 +303,15 @@ class OrderManageController extends Controller
 
                 return response()->json([
                     'success' => true,
-                    'message' => count($ids) . ' orders deleted permanently.'
+                    'message' => count($ids).' orders deleted permanently.',
                 ]);
             } catch (Exception $e) {
                 DB::rollBack();
-                Log::error('Bulk Order Delete Error: ' . $e->getMessage());
+                Log::error('Bulk Order Delete Error: '.$e->getMessage());
 
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to delete orders: ' . $e->getMessage()
+                    'message' => 'Failed to delete orders: '.$e->getMessage(),
                 ], 500);
             }
         }
@@ -408,7 +410,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $countorders = $query->latest()->paginate($perPage)->withQueryString();
 
         return view('adminDash.orders.all', compact('countorders'));
@@ -430,7 +434,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -453,7 +459,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -476,7 +484,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -499,7 +509,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -526,7 +538,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -549,7 +563,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -572,7 +588,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -595,7 +613,9 @@ class OrderManageController extends Controller
             });
         }
         $perPage = (int) $request->input('per_page', 10);
-        if ($perPage <= 0) { $perPage = 10; }
+        if ($perPage <= 0) {
+            $perPage = 10;
+        }
         $orders = $query->latest()->paginate($perPage)->withQueryString();
         $countorders = $orders;
 
@@ -609,6 +629,14 @@ class OrderManageController extends Controller
             ->get();
 
         return response()->json($upazilas);
+    }
+
+    public function checkFreeDelivery(Request $request)
+    {
+        $items = $request->items ?? [];
+        $result = check_free_delivery($items);
+
+        return response()->json($result);
     }
 
     public function searchProducts(Request $request)
@@ -754,12 +782,12 @@ class OrderManageController extends Controller
     {
         $ids = $request->input('order_ids', []);
 
-        if (empty($ids) || !is_array($ids)) {
+        if (empty($ids) || ! is_array($ids)) {
             return response()->json(['status' => 'error', 'message' => 'No orders selected.']);
         }
 
-        $activeCourier = \App\Models\CourierApi::where('status', '1')->first();
-        
+        $activeCourier = CourierApi::where('status', '1')->first();
+
         $results = [];
         $successCount = 0;
         $failCount = 0;
@@ -771,18 +799,20 @@ class OrderManageController extends Controller
 
             foreach ($ids as $id) {
                 $order = Orders::find($id);
-                if (!$order) {
+                if (! $order) {
                     $results[] = ['order_id' => $id, 'status' => 'error', 'message' => 'Order not found.'];
                     $failCount++;
+
                     continue;
                 }
                 if ($order->consignment_id) {
-                    $results[] = ['order_id' => $id, 'invoice' => 'LM-' . $id, 'status' => 'success', 'message' => 'Already booked.', 'consignment_id' => $order->consignment_id, 'tracking_code' => $order->tracking_code];
+                    $results[] = ['order_id' => $id, 'invoice' => 'LM-'.$id, 'status' => 'success', 'message' => 'Already booked.', 'consignment_id' => $order->consignment_id, 'tracking_code' => $order->tracking_code];
                     $successCount++;
+
                     continue;
                 }
 
-                $invoice = (string) ($order->order_id ?? 'LM-' . $order->id);
+                $invoice = (string) ($order->order_id ?? 'LM-'.$order->id);
                 $data[] = [
                     'invoice' => $invoice,
                     'recipient_name' => (string) $order->name,
@@ -794,9 +824,9 @@ class OrderManageController extends Controller
                 $orderMap[$invoice] = $order;
             }
 
-            if (!empty($data)) {
+            if (! empty($data)) {
                 $response = $this->steadfast->bulkCreate($data);
-                
+
                 // Steadfast Bulk API returns an array directly, but our service might return ['status' => 500] if it threw an exception
                 if (isset($response['status']) && $response['status'] == 500) {
                     return response()->json(['status' => 'error', 'message' => $response['message']]);
@@ -807,7 +837,7 @@ class OrderManageController extends Controller
                     foreach ($response as $item) {
                         $inv = $item['invoice'] ?? '';
                         $order = $orderMap[$inv] ?? null;
-                        
+
                         if (isset($item['status']) && $item['status'] === 'success') {
                             if ($order) {
                                 $order->consignment_id = $item['consignment_id'];
@@ -817,7 +847,7 @@ class OrderManageController extends Controller
                                 $order->courier_popup_shown = 0;
                                 $order->save();
                             }
-                            
+
                             $results[] = [
                                 'order_id' => $order ? $order->id : '',
                                 'invoice' => $inv,
@@ -832,7 +862,7 @@ class OrderManageController extends Controller
                                 'order_id' => $order ? $order->id : '',
                                 'invoice' => $inv,
                                 'status' => 'error',
-                                'message' => 'Steadfast Bulk Error: ' . json_encode($item),
+                                'message' => 'Steadfast Bulk Error: '.json_encode($item),
                             ];
                             $failCount++;
                         }
@@ -845,21 +875,22 @@ class OrderManageController extends Controller
             // Fallback for single orders or other couriers
             foreach ($ids as $id) {
                 $order = Orders::find($id);
-                if (!$order) {
-                    $results[] = ['order_id' => $id, 'status' => 'error', 'message' => 'Order #' . $id . ' not found.'];
+                if (! $order) {
+                    $results[] = ['order_id' => $id, 'status' => 'error', 'message' => 'Order #'.$id.' not found.'];
                     $failCount++;
+
                     continue;
                 }
 
                 $result = $this->placeCourierOrderInternal($order);
 
                 $results[] = [
-                    'order_id'        => $id,
-                    'invoice'         => 'LM-' . $id,
-                    'status'          => $result['status'],
-                    'message'         => $result['message'],
-                    'consignment_id'  => $result['consignment_id'] ?? null,
-                    'tracking_code'   => $result['tracking_code'] ?? null,
+                    'order_id' => $id,
+                    'invoice' => 'LM-'.$id,
+                    'status' => $result['status'],
+                    'message' => $result['message'],
+                    'consignment_id' => $result['consignment_id'] ?? null,
+                    'tracking_code' => $result['tracking_code'] ?? null,
                 ];
 
                 if ($result['status'] === 'success') {
@@ -871,10 +902,10 @@ class OrderManageController extends Controller
         }
 
         return response()->json([
-            'status'        => 'done',
+            'status' => 'done',
             'success_count' => $successCount,
-            'fail_count'    => $failCount,
-            'results'       => $results,
+            'fail_count' => $failCount,
+            'results' => $results,
         ]);
     }
 
@@ -1019,11 +1050,86 @@ class OrderManageController extends Controller
         $districts = District::where('status', '1')->get();
         $thanas = Thana::where('status', '1')->get();
         $incompleteOrder = null;
+        $incompleteItems = [];
+
         if ($request->has('incomplete_id')) {
             $incompleteOrder = IncompleteOrders::find($request->incomplete_id);
+            if ($incompleteOrder && ! empty($incompleteOrder->product_id)) {
+                $raw = $incompleteOrder->product_id;
+                $decoded = json_decode($raw, true);
+
+                if (is_array($decoded) && count($decoded) > 0) {
+                    $first = reset($decoded);
+                    if (is_array($first) && (isset($first['product_id']) || isset($first['code']))) {
+                        // Rich array format with quantity, size, color, price
+                        $ids = array_filter(array_column($decoded, 'product_id'));
+                        $codes = array_filter(array_column($decoded, 'code'));
+
+                        $products = Product::where(function ($q) use ($ids, $codes) {
+                            if (! empty($ids)) {
+                                $q->whereIn('id', $ids);
+                            }
+                            if (! empty($codes)) {
+                                $q->orWhereIn('code', $codes);
+                            }
+                        })->with(['firstImage', 'productAttributes.attribute', 'productColors.color'])->get()->keyBy('id');
+
+                        $productsByCode = $products->keyBy('code');
+
+                        foreach ($decoded as $item) {
+                            $prod = null;
+                            if (! empty($item['product_id']) && isset($products[$item['product_id']])) {
+                                $prod = $products[$item['product_id']];
+                            } elseif (! empty($item['code']) && isset($productsByCode[$item['code']])) {
+                                $prod = $productsByCode[$item['code']];
+                            }
+
+                            if ($prod) {
+                                $incompleteItems[] = [
+                                    'product' => $prod,
+                                    'quantity' => (int) ($item['quantity'] ?? 1),
+                                    'price' => (float) ($item['price'] ?? $prod->new_price ?? 0),
+                                    'size' => $item['size'] ?? 'N/A',
+                                    'color' => $item['color'] ?? 'N/A',
+                                ];
+                            }
+                        }
+                    } else {
+                        // Array of product codes or IDs
+                        $products = Product::whereIn('code', $decoded)
+                            ->orWhereIn('id', $decoded)
+                            ->with(['firstImage', 'productAttributes.attribute', 'productColors.color'])->get();
+
+                        foreach ($products as $prod) {
+                            $incompleteItems[] = [
+                                'product' => $prod,
+                                'quantity' => 1,
+                                'price' => (float) ($prod->new_price ?? 0),
+                                'size' => 'N/A',
+                                'color' => 'N/A',
+                            ];
+                        }
+                    }
+                } elseif (! empty($raw)) {
+                    // Single string / code / ID
+                    $prod = Product::where('code', $raw)
+                        ->orWhere('id', $raw)
+                        ->with(['firstImage', 'productAttributes.attribute', 'productColors.color'])->first();
+
+                    if ($prod) {
+                        $incompleteItems[] = [
+                            'product' => $prod,
+                            'quantity' => 1,
+                            'price' => (float) ($prod->new_price ?? 0),
+                            'size' => 'N/A',
+                            'color' => 'N/A',
+                        ];
+                    }
+                }
+            }
         }
 
-        return view('adminDash.orders.create', compact('districts', 'thanas', 'incompleteOrder'));
+        return view('adminDash.orders.create', compact('districts', 'thanas', 'incompleteOrder', 'incompleteItems'));
     }
 
     public function store(Request $request)
@@ -1260,7 +1366,7 @@ class OrderManageController extends Controller
         $response = null;
 
         // শুধুমাত্র fraud_check_api সক্রিয় থাকলেই এবং প্রভাইডার সক্রিয় থাকলেই এপিআই কল করা হবে
-        if (isset($featuresConfig['fraud_check_api']) && $featuresConfig['fraud_check_api'] == '1' && (!isset($featuresConfig['fraud_check_order']) || $featuresConfig['fraud_check_order'] == '1')) {
+        if (isset($featuresConfig['fraud_check_api']) && $featuresConfig['fraud_check_api'] == '1' && (! isset($featuresConfig['fraud_check_order']) || $featuresConfig['fraud_check_order'] == '1')) {
             $fraudCheck = FraudCheck::where('status', '1')->first();
             if ($fraudCheck && ($fraudCheck->status ?? '0') === '1') {
                 $apiKey = $fraudCheck->api_key;
@@ -1528,7 +1634,7 @@ class OrderManageController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Unauthorized: You do not have permission to delete orders.'
+                    'message' => 'Unauthorized: You do not have permission to delete orders.',
                 ], 403);
             }
             abort(403, 'Unauthorized: You do not have permission to delete orders.');
@@ -1539,6 +1645,7 @@ class OrderManageController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json(['success' => false, 'message' => 'Order ID is required.'], 400);
             }
+
             return redirect()->back()->with('error', 'Order ID is required.');
         }
 
@@ -1550,6 +1657,7 @@ class OrderManageController extends Controller
                 if ($request->ajax() || $request->wantsJson()) {
                     return response()->json(['success' => false, 'message' => 'Order not found.'], 404);
                 }
+
                 return redirect()->back()->with('error', 'Order not found.');
             }
 
@@ -1562,23 +1670,23 @@ class OrderManageController extends Controller
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Order #LM-' . $orderId . ' deleted successfully.'
+                    'message' => 'Order #LM-'.$orderId.' deleted successfully.',
                 ]);
             }
 
-            return redirect()->route('order-index')->with('success', 'Order #LM-' . $orderId . ' deleted successfully.');
+            return redirect()->route('order-index')->with('success', 'Order #LM-'.$orderId.' deleted successfully.');
         } catch (Exception $e) {
             DB::rollBack();
-            Log::error('Order Delete Error: ' . $e->getMessage());
+            Log::error('Order Delete Error: '.$e->getMessage());
 
             if ($request->ajax() || $request->wantsJson()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to delete order: ' . $e->getMessage()
+                    'message' => 'Failed to delete order: '.$e->getMessage(),
                 ], 500);
             }
 
-            return redirect()->back()->with('error', 'Failed to delete order: ' . $e->getMessage());
+            return redirect()->back()->with('error', 'Failed to delete order: '.$e->getMessage());
         }
     }
 

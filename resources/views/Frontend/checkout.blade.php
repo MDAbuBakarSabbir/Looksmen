@@ -524,6 +524,42 @@
                             @endforeach
                         </div>
 
+                        @php
+                            $isFree = !empty($freeDelivery['is_free']);
+                            $hasOffer = !empty($freeDelivery['has_offer']);
+                            $percent = $freeDelivery['progress_percent'] ?? 0;
+                            $current = $freeDelivery['current_qty'] ?? 0;
+                            $threshold = $freeDelivery['threshold'] ?? 0;
+                        @endphp
+
+                        <!-- Free Delivery Progress Bar Container -->
+                        <div id="free_delivery_progress_container" class="mb-3 p-3" style="background: {{ $isFree ? 'linear-gradient(135deg, #ecfdf5, #f0fdf4)' : '#f8fafc' }}; border: 1px solid {{ $isFree ? '#10b981' : '#e2e8f0' }}; border-radius: 12px; display: {{ $hasOffer ? 'block' : 'none' }};">
+                            <div class="d-flex align-items-center justify-content-between mb-2">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-circle mr-2 d-flex align-items-center justify-content-center" id="chk_fd_icon_box" style="width: 28px; height: 28px; border-radius: 50%; background: {{ $isFree ? '#d1fae5' : '#e0e7ff' }}; color: {{ $isFree ? '#059669' : '#4f46e5' }};">
+                                        <i class="las {{ $isFree ? 'la-check-circle' : 'la-truck' }} fs-16" id="chk_fd_icon"></i>
+                                    </div>
+                                    <span class="fs-13 fw-600 {{ $isFree ? 'text-success' : 'text-dark' }}" id="chk_fd_progress_title">
+                                        {{ $freeDelivery['progress_message'] ?? '' }}
+                                    </span>
+                                </div>
+                                <span class="badge {{ $isFree ? 'badge-success' : 'badge-primary' }} px-2 py-1" id="chk_fd_badge" style="width: auto !important; height: auto !important; min-width: auto !important; font-size: 11px; border-radius: 6px; display: inline-flex; align-items: center; justify-content: center;">
+                                    <span id="chk_fd_progress_qty">{{ $current }}/{{ $threshold }}</span>
+                                </span>
+                            </div>
+
+                            <div class="progress" style="height: 8px; border-radius: 10px; background-color: #e2e8f0; overflow: hidden;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="chk_fd_progress_bar"
+                                     role="progressbar" 
+                                     style="width: {{ $percent }}%; border-radius: 10px; transition: width 0.4s ease; background: {{ $isFree ? 'linear-gradient(90deg, #10b981, #059669)' : 'linear-gradient(90deg, #6366f1, #4f46e5)' }};" 
+                                     aria-valuenow="{{ $percent }}" 
+                                     aria-valuemin="0" 
+                                     aria-valuemax="100">
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Calculations -->
                         <div id="order_summary">
                             <div class="summary-row">
@@ -532,7 +568,15 @@
                             </div>
                             <div class="summary-row">
                                 <span class="text-muted fw-500">Shipping Charge</span>
-                                <span class="fw-600">৳<span id="charge_display">0</span></span>
+                                <span class="fw-600">
+                                    <span id="free_delivery_badge" style="display: {{ !empty($freeDelivery['is_free']) ? 'inline-flex' : 'none' }}; align-items: center; gap: 8px;">
+                                        <span style="display: inline-block !important; width: auto !important; height: auto !important; min-width: auto !important; background-color: #059669 !important; color: #ffffff !important; font-size: 12px !important; font-weight: 700 !important; padding: 2px 8px !important; border-radius: 6px !important; letter-spacing: 0.5px; line-height: 1.4 !important; white-space: nowrap !important; text-transform: uppercase; box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25);">FREE</span>
+                                        <s class="text-muted" style="font-size: 13px; text-decoration: line-through;">৳<span id="original_charge_display">0</span></s>
+                                    </span>
+                                    <span id="normal_charge_container" style="display: {{ !empty($freeDelivery['is_free']) ? 'none' : 'inline-block' }};">
+                                        ৳<span id="charge_display">0</span>
+                                    </span>
+                                </span>
                             </div>
                             <div class="summary-row text-success">
                                 <span class="fw-500">Discount</span>
@@ -545,7 +589,7 @@
 
                             <!-- Hidden Inputs -->
                             <input type="hidden" name="total_amount" id="hidden_total_amount" value="{{ $subtotal }}">
-                            <input type="hidden" name="delivery_charge" id="hidden_charge_display" value="">
+                            <input type="hidden" name="delivery_charge" id="hidden_charge_display" value="{{ ($freeDelivery['is_free'] ?? false) ? '0' : '' }}">
                             <input type="hidden" name="coupon_discount" id="hidden_coupon_discount" value="0">
                             <input type="hidden" name="grand_total" id="hidden_grand_total" value="{{ $subtotal }}">
                         </div>
@@ -707,20 +751,80 @@
                 initSelect2();
             }
 
-            // ড্রপডাউন আইডি ঠিক আছে কি না নিশ্চিত করুন
-            $(document).on('change', '#district_select', function() {
+            window.freeDeliveryState = @json($freeDelivery ?? ['is_free' => false]);
 
-                // সিলেক্টেড অপশন থেকে ডেটা নেওয়া
-                let selectedOption = $(this).find(':selected');
-                let charge = selectedOption.data('charge');
+            window.updateFreeDeliveryUI = function() {
+                let fd = window.freeDeliveryState || {};
+                let isFree = (fd.is_free === true || fd.is_free === "true" || fd.is_free == 1);
+                let hasOffer = (fd.has_offer === true || fd.has_offer === "true" || fd.has_offer == 1);
+                let selectedOption = $('#district_select').find(':selected');
+                let charge = parseFloat(selectedOption.data('charge')) || 0;
+                
+                $('#original_charge_display').text(charge);
 
-                if (charge !== undefined && charge !== "") {
-                    $('#charge_display').text(charge);
-                    $('#hidden_charge_display').val(charge);
+                if (hasOffer) {
+                    $('#free_delivery_progress_container').css('display', 'block');
+                    $('#chk_fd_progress_title').text(fd.progress_message || '');
+                    $('#chk_fd_progress_qty').text((fd.current_qty || 0) + '/' + (fd.threshold || 0));
+                    $('#chk_fd_progress_bar').css('width', (fd.progress_percent || 0) + '%');
+                    
+                    if (isFree) {
+                        $('#free_delivery_progress_container').css({
+                            'background': 'linear-gradient(135deg, #ecfdf5, #f0fdf4)',
+                            'border-color': '#10b981'
+                        });
+                        $('#chk_fd_icon_box').css({'background': '#d1fae5', 'color': '#059669'});
+                        $('#chk_fd_icon').attr('class', 'las la-check-circle fs-16');
+                        $('#chk_fd_progress_title').attr('class', 'fs-13 fw-600 text-success');
+                        $('#chk_fd_badge').attr('class', 'badge badge-success px-2 py-1');
+                        $('#chk_fd_progress_bar').css('background', 'linear-gradient(90deg, #10b981, #059669)');
+
+                        $('#free_delivery_badge').css('display', 'inline-flex');
+                        $('#normal_charge_container').css('display', 'none');
+                        $('#charge_display').text('0');
+                        $('#hidden_charge_display').val('0');
+                    } else {
+                        $('#free_delivery_progress_container').css({
+                            'background': '#f8fafc',
+                            'border-color': '#e2e8f0'
+                        });
+                        $('#chk_fd_icon_box').css({'background': '#e0e7ff', 'color': '#4f46e5'});
+                        $('#chk_fd_icon').attr('class', 'las la-truck fs-16');
+                        $('#chk_fd_progress_title').attr('class', 'fs-13 fw-600 text-dark');
+                        $('#chk_fd_badge').attr('class', 'badge badge-primary px-2 py-1');
+                        $('#chk_fd_progress_bar').css('background', 'linear-gradient(90deg, #6366f1, #4f46e5)');
+
+                        $('#free_delivery_badge').css('display', 'none');
+                        $('#normal_charge_container').css('display', 'inline-block');
+                        if (charge > 0) {
+                            $('#charge_display').text(charge);
+                            $('#hidden_charge_display').val(charge);
+                        } else {
+                            $('#charge_display').text('0');
+                            $('#hidden_charge_display').val('');
+                        }
+                    }
                 } else {
-                    $('#charge_display').text('0');
+                    $('#free_delivery_progress_container').css('display', 'none');
+                    $('#free_delivery_badge').css('display', 'none');
+                    $('#normal_charge_container').css('display', 'inline-block');
+                    if (charge > 0) {
+                        $('#charge_display').text(charge);
+                        $('#hidden_charge_display').val(charge);
+                    } else {
+                        $('#charge_display').text('0');
+                        $('#hidden_charge_display').val('');
+                    }
                 }
-            });
+
+                let currentSubtotal = $('.all-subtotal').first().text().replace(/[৳,]/g, '').trim();
+                if (typeof calculateGrandTotal === 'function') {
+                    calculateGrandTotal(currentSubtotal);
+                }
+            };
+
+            // Initial UI Sync
+            updateFreeDeliveryUI();
         });
     </script>
 
@@ -1098,25 +1202,36 @@
         let incompleteTimer;
 
         // ইনপুট ফিল্ডগুলোতে টাইপ করলে বা মাউস সরালে অটো সেভ হবে
-        $(document).on('keyup change blur', '#name, #phone, #address, #district_select', function() {
+        $(document).on('input keyup change blur', '#name, #phone, #address, #district_select, input[name="address_id"]', function() {
             clearTimeout(incompleteTimer);
             incompleteTimer = setTimeout(function() {
                 saveIncompleteOrder();
-            }, 2000); // ২ সেকেন্ড টাইপিং বিরতি পেলে সেভ হবে
+            }, 800); // ৮০০ মিলিসেকেন্ড টাইপিং বিরতি পেলে সেভ হবে
         });
 
         function saveIncompleteOrder() {
-            let name = $('#name').val();
-            let phone = $('#phone').val();
-            let address = $('#address').val();
-            let district = $('#district_select option:selected').text().trim();
+            let name = $('#name').val() ? $('#name').val().trim() : '';
+            let rawPhone = $('#phone').val() ? $('#phone').val().trim() : '';
+            let address = $('#address').val() ? $('#address').val().trim() : '';
+            
+            // Logged-in user address book handling
+            let selectedSavedAddress = $('input[name="address_id"]:checked');
+            if (selectedSavedAddress.length > 0) {
+                if (!name) name = selectedSavedAddress.data('name') || '';
+                if (!rawPhone) rawPhone = selectedSavedAddress.data('phone') || '';
+                if (!address) address = selectedSavedAddress.data('address') || '';
+            }
 
-            // অন্তত নাম বা ফোন না থাকলে সেভ করার দরকার নেই
-            if (name === "" && phone === "") return;
-            if (phone.length < 11) return;
+            let phone = rawPhone.replace(/[^0-9]/g, '');
 
-            let subtotal = $('#summary-subtotal').text().replace(/[৳,Tk ]/g, '').trim();
-            let grand_total = $('#grand-total').text().replace(/[৳,Tk ]/g, '').trim();
+            // ফোন নম্বর অন্তত ১১ ডিজিট না হলে সেভ করার দরকার নেই
+            if (!phone || phone.length < 11) return;
+
+            let district_id = $('#district_select').val();
+            let district = ($('#district_select option:selected').val() && $('#district_select option:selected').val() !== 'null') ? $('#district_select option:selected').text().trim() : '';
+
+            let subtotal = $('#summary-subtotal').text().replace(/[^0-9.]/g, '').trim() || '0';
+            let grand_total = $('#grand-total').text().replace(/[^0-9.]/g, '').trim() || subtotal;
 
             $.ajax({
                 url: '{{ route('order.incomplete.store') }}',
@@ -1127,11 +1242,15 @@
                     phone: phone,
                     address: address,
                     district: district,
+                    district_id: (district_id && district_id !== 'null') ? district_id : null,
                     subtotal: subtotal,
                     grand_total: grand_total
                 },
                 success: function(response) {
-                    // Order updated silently
+                    console.log('Incomplete order saved successfully:', response);
+                },
+                error: function(xhr) {
+                    console.error('Incomplete order save failed:', xhr.responseText);
                 }
             });
         }

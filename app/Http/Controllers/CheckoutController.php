@@ -55,7 +55,9 @@ class CheckoutController extends Controller
             return redirect()->route('cartView')->with('error', 'Your cart is empty! Please add products first.');
         }
 
-        return view('Frontend.checkout', compact('districts', 'cart', 'addresses', 'featuresConfig', 'activePaymentMethods'));
+        $freeDelivery = check_free_delivery($cart);
+
+        return view('Frontend.checkout', compact('districts', 'cart', 'addresses', 'featuresConfig', 'activePaymentMethods', 'freeDelivery'));
     }
 
     public function checkFraud(Request $request)
@@ -215,33 +217,85 @@ class CheckoutController extends Controller
 
     public function storeIncompleteOrder(Request $request)
     {
-        $request->validate([
-            'phone' => 'required|string|min:11',
-        ]);
-        $cart = session()->get('cart', []);
+        $rawPhone = $request->phone ?? '';
+        $phone = preg_replace('/[^0-9]/', '', (string)$rawPhone);
 
-        // কার্ট থেকে শুধু প্রোডাক্ট আইডিগুলো সংগ্রহ করা
-        $productCodes = [];
-        foreach ($cart as $item) {
-            $productCodes[] = $item['code'] ?? 'N/A'; // আপনি চাইলে আইডি বা নাম রাখতে পারেন
+        if (empty($phone) || strlen($phone) < 11) {
+            return response()->json(['status' => 'error', 'message' => 'Valid phone number required'], 422);
         }
 
+        if (auth()->check()) {
+            $cart = \App\Models\Cart::where('user_id', auth()->id())->with('product')->get();
+        } else {
+            $cart = session()->get('cart', []);
+        }
+
+        $cartData = [];
+        foreach ($cart as $key => $item) {
+            if (is_object($item)) {
+                $pId = $item->product_id;
+                $code = $item->product->code ?? 'N/A';
+                $name = $item->product->title ?? 'N/A';
+                $price = $item->product->new_price ?? $item->price ?? 0;
+                $qty = $item->quantity ?? 1;
+                $size = $item->attribute ?? 'N/A';
+                $color = $item->color ?? 'N/A';
+            } else {
+                $pId = $item['id'] ?? $item['product_id'] ?? null;
+                $code = $item['code'] ?? 'N/A';
+                $name = $item['name'] ?? 'N/A';
+                $price = $item['price'] ?? 0;
+                $qty = $item['quantity'] ?? 1;
+                $size = $item['attribute'] ?? $item['size'] ?? 'N/A';
+                $color = $item['color'] ?? 'N/A';
+            }
+
+            $cartData[] = [
+                'product_id' => $pId,
+                'code' => $code,
+                'name' => $name,
+                'price' => (float)$price,
+                'quantity' => (int)$qty,
+                'size' => $size,
+                'color' => $color,
+            ];
+        }
+
+        $district = $request->district;
+        if ($request->district_id) {
+            $resolvedDistrict = District::getNameById($request->district_id);
+            if ($resolvedDistrict && $resolvedDistrict !== 'N/A') {
+                $district = $resolvedDistrict;
+            }
+        }
+
+        $thana = $request->thana;
+        if ($request->thana_id) {
+            $resolvedThana = Thana::getNameById($request->thana_id);
+            if ($resolvedThana && $resolvedThana !== 'N/A') {
+                $thana = $resolvedThana;
+            }
+        }
+
+        $subtotal = (string)($request->subtotal ?? '0');
+        $grand_total = (string)($request->grand_total ?? $subtotal);
+
         // ফোন নম্বর দিয়ে আপডেট বা নতুন তৈরি
-        IncompleteOrders::updateOrCreate(
-            ['phone' => $request->phone], // যদি এই ফোন অলরেডি থাকে তবে আপডেট হবে
+        $incomplete = IncompleteOrders::updateOrCreate(
+            ['phone' => $phone],
             [
-                'name' => $request->name ?? 'Customer',
-                'address' => $request->address ?? 'N/A',
-                'district' => District::getNameById($request->district_id),
-                'thana' => Thana::getNameById($request->thana_id),
-                'product_id' => json_encode($productCodes), // Array হিসেবে সেভ
-                'subtotal' => $request->subtotal,
-                'grand_total' => $request->grand_total,
+                'name' => $request->name ?: 'Customer',
+                'address' => $request->address ?: 'N/A',
+                'district' => $district ?: null,
+                'thana' => $thana ?: null,
+                'product_id' => json_encode($cartData),
+                'subtotal' => $subtotal,
+                'grand_total' => $grand_total,
                 'status' => 'incomplete',
             ]
         );
 
-        return response()->json(['status' => 'success']);
+        return response()->json(['status' => 'success', 'id' => $incomplete->id]);
     }
 
     public function storeOrder(Request $request)
@@ -281,6 +335,12 @@ class CheckoutController extends Controller
         try {
             DB::beginTransaction();
 
+            $freeDelivery = check_free_delivery($cart);
+            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float)$request->delivery_charge;
+            $subtotal = (float)$request->total_amount;
+            $couponDiscount = (float)($request->coupon_discount ?? 0);
+            $grandTotal = max(0, ($subtotal - $couponDiscount) + $deliveryCharge);
+
             // ২. Orders টেবিলে ডাটা ইনসার্ট
             $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
@@ -290,10 +350,10 @@ class CheckoutController extends Controller
             $order->district = District::getNameById($request->district_id);
             $order->thana = Thana::getNameById($request->thana_id);
             $order->address = $request->address;
-            $order->total_amount = $request->total_amount; // Subtotal
-            $order->coupon_discount = $request->coupon_discount ?? 0;
-            $order->delivery_charge = $request->delivery_charge;
-            $order->grand_total = $request->grand_total;
+            $order->total_amount = $subtotal; // Subtotal
+            $order->coupon_discount = $couponDiscount;
+            $order->delivery_charge = $deliveryCharge;
+            $order->grand_total = $grandTotal;
             $order->coupon_code = $request->coupon_code;
             $order->payment_type = $request->payment;
             $order->note = $request->note;
@@ -481,6 +541,11 @@ class CheckoutController extends Controller
             // খ. সেশন থেকে অর্ডার ডাটা নেওয়া
             $orderData = session()->get('pending_order_data');
             $cart = session()->get('cart', []);
+            $freeDelivery = check_free_delivery($cart);
+            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float)($orderData['delivery_charge'] ?? 0);
+            $subtotal = (float)($orderData['total_amount'] ?? 0);
+            $couponDiscount = (float)($orderData['coupon_discount'] ?? 0);
+            $grandTotal = max(0, ($subtotal - $couponDiscount) + $deliveryCharge);
 
             // গ. Orders টেবিলে ডাটা ইনসার্ট
             $order = new Orders;
@@ -491,8 +556,10 @@ class CheckoutController extends Controller
             $order->address = $orderData['address'];
             $order->district = District::getNameById($orderData['district_id'] ?? 0);
             $order->thana = Thana::getNameById($orderData['thana_id'] ?? 0);
-            $order->total_amount = $orderData['total_amount'];
-            $order->grand_total = $orderData['grand_total'];
+            $order->total_amount = $subtotal;
+            $order->delivery_charge = $deliveryCharge;
+            $order->coupon_discount = $couponDiscount;
+            $order->grand_total = $grandTotal;
             $order->payment_type = 'prepaid';
             $order->payment_status = 'partial_paid';
             $order->payment_id = $payment->id; // Payments টেবিলের আইডি লিঙ্কিং
@@ -615,6 +682,12 @@ class CheckoutController extends Controller
                 return redirect()->route('checkout')->with('error', 'সেশন টাইমআউট হয়ে গেছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
             }
 
+            $freeDelivery = check_free_delivery($cart);
+            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float)($orderData['delivery_charge'] ?? 0);
+            $subtotal = (float)($orderData['total_amount'] ?? 0);
+            $couponDiscount = (float)($orderData['coupon_discount'] ?? 0);
+            $grandTotal = max(0, ($subtotal - $couponDiscount) + $deliveryCharge);
+
             $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
             $order->ip_address = $request->ip();
@@ -623,10 +696,10 @@ class CheckoutController extends Controller
             $order->address = $orderData['address'];
             $order->district = District::getNameById($orderData['district_id'] ?? 0);
             $order->thana = Thana::getNameById($orderData['thana_id'] ?? 0);
-            $order->total_amount = $orderData['total_amount'];
-            $order->delivery_charge = $orderData['delivery_charge'];
-            $order->coupon_discount = $orderData['coupon_discount'] ?? 0;
-            $order->grand_total = $orderData['grand_total'];
+            $order->total_amount = $subtotal;
+            $order->delivery_charge = $deliveryCharge;
+            $order->coupon_discount = $couponDiscount;
+            $order->grand_total = $grandTotal;
             $order->coupon_code = $orderData['coupon_code'];
             $order->payment_type = $orderData['payment'];
             $order->note = $orderData['note'];

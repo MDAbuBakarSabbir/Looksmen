@@ -370,6 +370,9 @@
                                     <label class="form-label-custom">Commission Rate (%)<span class="text-danger">*</span></label>
                                     <input type="number" step="0.01" name="commission_rate" class="form-control-custom" placeholder="e.g. 5.50" required>
 
+                                    <label class="form-label-custom">Free Delivery Minimum Quantity (Optional)</label>
+                                    <input type="number" min="2" name="free_delivery_qty" class="form-control-custom" placeholder="e.g. 2, 3 or 4 (মিনিমাম ২ টি থেকে কার্যকর, খালি রাখলে বন্ধ থাকবে)">
+
                                     <label class="form-label-custom">Category Banner Image<span class="text-danger">*</span></label>
                                     <div class="image-upload-wrapper border rounded p-3 text-center mb-3" style="border: 2px dashed #cbd5e1; background-color: #f8fafc; border-radius: 12px; cursor: pointer; position: relative; min-height: 120px; display: flex; align-items: center; justify-content: center;">
                                         <input type="file" id="create-image-input" name="image" class="form-control-custom" required style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 2;">
@@ -425,6 +428,7 @@
                                         <th scope="col">Type</th>
                                         <th scope="col">Icon Class</th>
                                         <th scope="col">Commission Rate</th>
+                                        <th scope="col">Free Delivery</th>
                                         <th scope="col">Front View</th>
                                         <th scope="col">Status</th>
                                         <th scope="col" style="width: 120px; text-align: right;">Action</th>
@@ -451,6 +455,17 @@
                                             </td>
                                             <td><code style="background: #f3f4f6; color: #e11d48; padding: 4px 8px; border-radius: 4px; font-weight: 600;">{{ $maincategory->icon }}</code></td>
                                             <td>{{ $maincategory->commission_rate ?? 'N/A' }} %</td>
+                                            <td>
+                                                @if(!empty($maincategory->free_delivery_qty) && $maincategory->free_delivery_qty > 0)
+                                                    <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; padding: 5px 10px; border-radius: 6px;">
+                                                        <i class="fa-solid fa-truck-fast mr-1"></i> {{ $maincategory->free_delivery_qty }}+ pcs Free
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-light text-muted" style="border: 1px solid #e2e8f0; font-weight: 500; padding: 5px 10px; border-radius: 6px;">
+                                                        Disabled
+                                                    </span>
+                                                @endif
+                                            </td>
                                             <td>
                                                 <label class="switch mb-0">
                                                     <input class="status-switch status-switch-main" type="checkbox" data-id="{{ $maincategory->id }}" {{ $maincategory->status == '1' ? 'checked' : '' }}>
@@ -583,6 +598,9 @@
                                     <label class="form-label-custom">Sub Category Name<span class="text-danger">*</span></label>
                                     <input type="text" name="subcategory_name" class="form-control-custom" placeholder="e.g. T-shirts, Sneakers" required>
 
+                                    <label class="form-label-custom">Free Delivery Minimum Quantity (Optional)</label>
+                                    <input type="number" min="2" name="free_delivery_qty" class="form-control-custom" placeholder="e.g. 2, 3 or 4 (মিনিমাম ২ টি থেকে কার্যকর, খালি রাখলে বন্ধ থাকবে)">
+
                                     <label class="form-label-custom">Meta Title (Optional)</label>
                                     <input type="text" name="meta_title" class="form-control-custom" placeholder="SEO Title">
 
@@ -604,6 +622,7 @@
                                         <th scope="col" style="width: 80px;">#</th>
                                         <th scope="col">Sub Category Name</th>
                                         <th scope="col">Parent Main Category</th>
+                                        <th scope="col">Free Delivery</th>
                                         <th scope="col">Status</th>
                                         <th scope="col" style="width: 120px; text-align: right;">Action</th>
                                     </tr>
@@ -617,6 +636,17 @@
                                                 <span class="badge" style="background: #f3f4f6; color: #4f46e5; border: 1px solid rgba(79, 70, 229, 0.15); font-weight: 600; padding: 5px 12px; border-radius: 6px;">
                                                     {{ $subcategory->category->name ?? 'N/A' }}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                @if(!empty($subcategory->free_delivery_qty) && $subcategory->free_delivery_qty > 0)
+                                                    <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; padding: 5px 10px; border-radius: 6px;">
+                                                        <i class="fa-solid fa-truck-fast mr-1"></i> {{ $subcategory->free_delivery_qty }}+ pcs Free
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-light text-muted" style="border: 1px solid #e2e8f0; font-weight: 500; padding: 5px 10px; border-radius: 6px;">
+                                                        Disabled
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <label class="switch mb-0">
@@ -633,7 +663,7 @@
                                         </tr>
                                     @empty
                                         <tr>
-                                            <td colspan="5" class="text-center py-5 text-muted">
+                                            <td colspan="6" class="text-center py-5 text-muted">
                                                 <i class="fa-solid fa-folder-open text-muted mb-3" style="font-size: 40px; opacity: 0.5;"></i>
                                                 <p class="mb-0 font-weight-bold">No Subcategories Found</p>
                                             </td>
@@ -752,6 +782,9 @@
                                     <label class="form-label-custom">Child Category Name<span class="text-danger">*</span></label>
                                     <input type="text" name="childcategory_name" class="form-control-custom" placeholder="e.g. Slim Fit Shirts" required>
 
+                                    <label class="form-label-custom">Free Delivery Minimum Quantity (Optional)</label>
+                                    <input type="number" min="2" name="free_delivery_qty" class="form-control-custom" placeholder="e.g. 2, 3 or 4 (মিনিমাম ২ টি থেকে কার্যকর, খালি রাখলে বন্ধ থাকবে)">mber" min="1" name="free_delivery_qty" class="form-control-custom" placeholder="e.g. 2 or 3 (খালি রাখলে অফার বন্ধ থাকবে)">
+
                                     <label class="form-label-custom">Meta Title (Optional)</label>
                                     <input type="text" name="meta_title" class="form-control-custom" placeholder="SEO Title">
 
@@ -774,6 +807,7 @@
                                         <th scope="col">Child Category Name</th>
                                         <th scope="col">Parent Main Category</th>
                                         <th scope="col">Parent Sub Category</th>
+                                        <th scope="col">Free Delivery</th>
                                         <th scope="col">Status</th>
                                         <th scope="col" style="width: 120px; text-align: right;">Action</th>
                                     </tr>
@@ -792,6 +826,17 @@
                                                 <span class="badge" style="background: rgba(16, 185, 129, 0.08); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.15); font-weight: 600; padding: 5px 12px; border-radius: 6px;">
                                                     {{ $childcategory->subcategory->name ?? 'N/A' }}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                @if(!empty($childcategory->free_delivery_qty) && $childcategory->free_delivery_qty > 0)
+                                                    <span class="badge" style="background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.3); font-weight: 600; padding: 5px 10px; border-radius: 6px;">
+                                                        <i class="fa-solid fa-truck-fast mr-1"></i> {{ $childcategory->free_delivery_qty }}+ pcs Free
+                                                    </span>
+                                                @else
+                                                    <span class="badge badge-light text-muted" style="border: 1px solid #e2e8f0; font-weight: 500; padding: 5px 10px; border-radius: 6px;">
+                                                        Disabled
+                                                    </span>
+                                                @endif
                                             </td>
                                             <td>
                                                 <label class="switch mb-0">

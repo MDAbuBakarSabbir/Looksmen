@@ -301,3 +301,276 @@ if (!function_exists('send_custom_sms')) {
     }
 }
 
+if (!function_exists('check_free_delivery')) {
+    /**
+     * Check if current cart qualifies for free delivery based on category, subcategory, or childcategory rules.
+     *
+     * @param mixed $cart
+     * @return array
+     */
+    function check_free_delivery($cart = null) {
+        $result = [
+            'is_free' => false,
+            'has_offer' => false,
+            'reason' => '',
+            'progress_message' => '',
+            'type' => null,
+            'name' => '',
+            'threshold' => 0,
+            'current_qty' => 0,
+            'remaining_qty' => 0,
+            'progress_percent' => 0,
+            'matched_id' => null,
+        ];
+
+        try {
+            // If cart not passed, resolve from auth or session
+            if ($cart === null) {
+                if (auth()->check()) {
+                    $cart = \App\Models\Cart::where('user_id', auth()->id())->with('product')->get();
+                } else {
+                    $cart = session()->get('cart', []);
+                }
+            }
+
+            if (empty($cart) || (is_countable($cart) && count($cart) === 0)) {
+                return $result;
+            }
+
+            // Collect product IDs and item quantities
+            $items = [];
+            $productIds = [];
+
+            foreach ($cart as $key => $item) {
+                if (is_object($item)) {
+                    $pId = $item->product_id;
+                    $qty = (int)($item->quantity ?? 1);
+                    $product = $item->product ?? null;
+                } else {
+                    $pId = $item['id'] ?? $item['product_id'] ?? null;
+                    $qty = (int)($item['quantity'] ?? 1);
+                    $product = null;
+                }
+
+                if ($pId && $qty > 0) {
+                    $items[] = [
+                        'product_id' => $pId,
+                        'quantity' => $qty,
+                        'product' => $product
+                    ];
+                    $productIds[] = $pId;
+                }
+            }
+
+            if (empty($items)) {
+                return $result;
+            }
+
+            // Load products if needed
+            $productsById = [];
+            $missingProductIds = [];
+            foreach ($items as $it) {
+                if ($it['product']) {
+                    $productsById[$it['product_id']] = $it['product'];
+                } else {
+                    $missingProductIds[] = $it['product_id'];
+                }
+            }
+
+            if (!empty($missingProductIds)) {
+                $fetchedProducts = \App\Models\Product::whereIn('id', array_unique($missingProductIds))->get()->keyBy('id');
+                foreach ($fetchedProducts as $pId => $prod) {
+                    $productsById[$pId] = $prod;
+                }
+            }
+
+            // Group quantities
+            $categoryQuantities = [];
+            $subCategoryQuantities = [];
+            $childCategoryQuantities = [];
+
+            foreach ($items as $it) {
+                $prod = $productsById[$it['product_id']] ?? null;
+                if (!$prod) continue;
+
+                $qty = $it['quantity'];
+
+                if (!empty($prod->category_id)) {
+                    $catId = (int)$prod->category_id;
+                    $categoryQuantities[$catId] = ($categoryQuantities[$catId] ?? 0) + $qty;
+                }
+
+                if (!empty($prod->subcategory_id)) {
+                    $subId = (int)$prod->subcategory_id;
+                    $subCategoryQuantities[$subId] = ($subCategoryQuantities[$subId] ?? 0) + $qty;
+                }
+
+                if (!empty($prod->childcategory_id)) {
+                    $childId = (int)$prod->childcategory_id;
+                    $childCategoryQuantities[$childId] = ($childCategoryQuantities[$childId] ?? 0) + $qty;
+                }
+            }
+
+            $potentialOffers = [];
+
+            // 1. Check Child Categories first (highest specificity)
+            if (!empty($childCategoryQuantities)) {
+                $childCats = \App\Models\ChildCategory::whereIn('id', array_keys($childCategoryQuantities))
+                    ->where('status', '1')
+                    ->whereNotNull('free_delivery_qty')
+                    ->where('free_delivery_qty', '>', 0)
+                    ->get();
+
+                foreach ($childCats as $cCat) {
+                    $minQty = (int)$cCat->free_delivery_qty;
+                    if ($minQty > 0) {
+                        $cQty = $childCategoryQuantities[$cCat->id] ?? 0;
+                        $remaining = max(0, $minQty - $cQty);
+                        $percent = min(100, round(($cQty / $minQty) * 100));
+
+                        if ($cQty >= $minQty) {
+                            return [
+                                'is_free' => true,
+                                'has_offer' => true,
+                                'reason' => "ফ্রি ডেলিভারি অফার: '{$cCat->name}' থেকে {$minQty}+ টি অর্ডার করার জন্য ডেলিভারি সম্পূর্ণ ফ্রি!",
+                                'progress_message' => "🎉 অভিনন্দন! আপনি ফ্রি ডেলিভারি অফারটি পেয়েছেন!",
+                                'type' => 'childcategory',
+                                'name' => $cCat->name,
+                                'threshold' => $minQty,
+                                'current_qty' => $cQty,
+                                'remaining_qty' => 0,
+                                'progress_percent' => 100,
+                                'matched_id' => $cCat->id,
+                            ];
+                        } else {
+                            $potentialOffers[] = [
+                                'is_free' => false,
+                                'has_offer' => true,
+                                'reason' => "",
+                                'progress_message' => "ফ্রি ডেলিভারি পেতে '{$cCat->name}' থেকে আর মাত্র {$remaining}টি পণ্য যোগ করুন!",
+                                'type' => 'childcategory',
+                                'name' => $cCat->name,
+                                'threshold' => $minQty,
+                                'current_qty' => $cQty,
+                                'remaining_qty' => $remaining,
+                                'progress_percent' => $percent,
+                                'matched_id' => $cCat->id,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // 2. Check Sub Categories
+            if (!empty($subCategoryQuantities)) {
+                $subCats = \App\Models\SubCategory::whereIn('id', array_keys($subCategoryQuantities))
+                    ->where('status', '1')
+                    ->whereNotNull('free_delivery_qty')
+                    ->where('free_delivery_qty', '>', 0)
+                    ->get();
+
+                foreach ($subCats as $sCat) {
+                    $minQty = (int)$sCat->free_delivery_qty;
+                    if ($minQty > 0) {
+                        $sQty = $subCategoryQuantities[$sCat->id] ?? 0;
+                        $remaining = max(0, $minQty - $sQty);
+                        $percent = min(100, round(($sQty / $minQty) * 100));
+
+                        if ($sQty >= $minQty) {
+                            return [
+                                'is_free' => true,
+                                'has_offer' => true,
+                                'reason' => "ফ্রি ডেলিভারি অফার: '{$sCat->name}' থেকে {$minQty}+ টি অর্ডার করার জন্য ডেলিভারি সম্পূর্ণ ফ্রি!",
+                                'progress_message' => "🎉 অভিনন্দন! আপনি ফ্রি ডেলিভারি অফারটি পেয়েছেন!",
+                                'type' => 'subcategory',
+                                'name' => $sCat->name,
+                                'threshold' => $minQty,
+                                'current_qty' => $sQty,
+                                'remaining_qty' => 0,
+                                'progress_percent' => 100,
+                                'matched_id' => $sCat->id,
+                            ];
+                        } else {
+                            $potentialOffers[] = [
+                                'is_free' => false,
+                                'has_offer' => true,
+                                'reason' => "",
+                                'progress_message' => "ফ্রি ডেলিভারি পেতে '{$sCat->name}' থেকে আর মাত্র {$remaining}টি পণ্য যোগ করুন!",
+                                'type' => 'subcategory',
+                                'name' => $sCat->name,
+                                'threshold' => $minQty,
+                                'current_qty' => $sQty,
+                                'remaining_qty' => $remaining,
+                                'progress_percent' => $percent,
+                                'matched_id' => $sCat->id,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // 3. Check Main Categories
+            if (!empty($categoryQuantities)) {
+                $cats = \App\Models\Category::whereIn('id', array_keys($categoryQuantities))
+                    ->where('status', '1')
+                    ->whereNotNull('free_delivery_qty')
+                    ->where('free_delivery_qty', '>', 0)
+                    ->get();
+
+                foreach ($cats as $cat) {
+                    $minQty = (int)$cat->free_delivery_qty;
+                    if ($minQty > 0) {
+                        $catQty = $categoryQuantities[$cat->id] ?? 0;
+                        $remaining = max(0, $minQty - $catQty);
+                        $percent = min(100, round(($catQty / $minQty) * 100));
+
+                        if ($catQty >= $minQty) {
+                            return [
+                                'is_free' => true,
+                                'has_offer' => true,
+                                'reason' => "ফ্রি ডেলিভারি অফার: '{$cat->name}' ক্যাটাগরি থেকে {$minQty}+ টি অর্ডার করার জন্য ডেলিভারি সম্পূর্ণ ফ্রি!",
+                                'progress_message' => "🎉 অভিনন্দন! আপনি ফ্রি ডেলিভারি অফারটি পেয়েছেন!",
+                                'type' => 'category',
+                                'name' => $cat->name,
+                                'threshold' => $minQty,
+                                'current_qty' => $catQty,
+                                'remaining_qty' => 0,
+                                'progress_percent' => 100,
+                                'matched_id' => $cat->id,
+                            ];
+                        } else {
+                            $potentialOffers[] = [
+                                'is_free' => false,
+                                'has_offer' => true,
+                                'reason' => "",
+                                'progress_message' => "ফ্রি ডেলিভারি পেতে '{$cat->name}' ক্যাটাগরি থেকে আর মাত্র {$remaining}টি পণ্য যোগ করুন!",
+                                'type' => 'category',
+                                'name' => $cat->name,
+                                'threshold' => $minQty,
+                                'current_qty' => $catQty,
+                                'remaining_qty' => $remaining,
+                                'progress_percent' => $percent,
+                                'matched_id' => $cat->id,
+                            ];
+                        }
+                    }
+                }
+            }
+
+            // If not qualified yet, pick the one with highest progress percentage
+            if (!empty($potentialOffers)) {
+                usort($potentialOffers, function($a, $b) {
+                    return $b['progress_percent'] <=> $a['progress_percent'];
+                });
+                return $potentialOffers[0];
+            }
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Check Free Delivery Error: ' . $e->getMessage());
+        }
+
+        return $result;
+    }
+}
+
+
