@@ -490,6 +490,15 @@
                                     $qty = $isDb ? $rawItem->quantity : $rawItem['quantity'];
                                     $stock = $isDb ? $rawItem->product->stock ?? 10 : $rawItem['stock'] ?? 10;
                                     $code = $isDb ? $rawItem->product->code ?? 'N/A' : $rawItem['code'] ?? 'N/A';
+                                    $attribute = $isDb ? ($rawItem->attributes ?? $rawItem->attribute ?? null) : ($rawItem['attribute'] ?? $rawItem['attributes'] ?? $rawItem['size'] ?? null);
+                                    $color = $isDb ? ($rawItem->color ?? null) : ($rawItem['color'] ?? null);
+
+                                    if (!empty($attribute) && is_numeric($attribute)) {
+                                        $attrValObj = \App\Models\AttributeValues::find($attribute);
+                                        if ($attrValObj) {
+                                            $attribute = $attrValObj->value;
+                                        }
+                                    }
                                     
                                     $cleanPrice = (float) str_replace(',', '', $price);
                                     $line_total = $cleanPrice * (int) $qty;
@@ -501,8 +510,19 @@
                                         <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" alt="product">
                                     </div>
                                     <div class="cart-details">
-                                        <div class="cart-title text-truncate" style="max-width: 180px;">{{ $name }}</div>
-                                        <div class="text-info fs-11 fw-bold mb-1">Code: {{ $code }}</div><div class="attribute-name">:</div><div class="attribute-value"></div>
+                                        <div class="cart-title text-truncate" style="max-width: 180px;" title="{{ $name }}">{{ $name }}</div>
+                                        <div class="text-info fs-11 fw-bold mb-1">Code: {{ $code }}</div>
+                                        @if(!empty($attribute) && $attribute !== 'N/A')
+                                            <div class="attribute-info fs-11 text-muted mb-1">
+                                                <span class="attribute-value">{{ $attribute }}</span>
+                                            </div>
+                                        @endif
+                                        @if(!empty($color) && $color !== 'N/A')
+                                            <div class="color-info fs-11 text-muted mb-1">
+                                                <span class="color-name fw-600 text-dark">Color:</span>
+                                                <span class="color-value">{{ $color }}</span>
+                                            </div>
+                                        @endif
                                         <div class="cart-meta mt-1 d-flex align-items-center">
                                             <div class="input-group input-group-sm" style="width: 80px;">
                                                 <div class="input-group-prepend">

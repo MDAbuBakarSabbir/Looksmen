@@ -62,7 +62,7 @@
                                         <td>
                                             <span class="value-badge">{{ $attributeValue->value }}</span>
                                         </td>
-                                        <td style="text-align: right;" class="d-flex gap-2">
+                                        <td style="text-align: right;" class="d-flex">
                                             <button type="button" class="btn btn-primary btn-sm edit-value-btn" data-id="{{ $attributeValue->id }}" data-value="{{ $attributeValue->value }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; margin-right: 4px;">
                                                 <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
                                             </button>
