@@ -653,18 +653,27 @@ class OrderManageController extends Controller
             ->limit(10)
             ->get();
 
-        // প্রতিটি প্রোডাক্টের জন্য সঠিক থাম্বনেইল পাথ রিজলভ করে পাঠানো
+        // প্রতিটি প্রোডাক্টের জন্য সঠিক থাম্বনেইল পাথ ও অ্যাট্রিবিউট টেক্সট রিজলভ করে পাঠানো
         $products->each(function ($product) {
             $imageSrc = asset('favicon.png');
             if ($product->firstImage) {
                 $imgName = $product->firstImage->image;
-                if (file_exists(public_path('Uploads/'.$imgName))) {
-                    $imageSrc = asset('Uploads/'.$imgName);
-                } else {
-                    $imageSrc = asset('Uploads/'.$imgName);
-                }
+                $imageSrc = asset('Uploads/'.$imgName);
             }
             $product->first_image_url = $imageSrc;
+
+            if ($product->productAttributes) {
+                $product->productAttributes->each(function ($attr) {
+                    $valText = null;
+                    if ($attr->relationLoaded('attributeVal') && $attr->attributeVal) {
+                        $valText = $attr->attributeVal->value;
+                    } elseif (is_numeric($attr->attribute_value)) {
+                        $valObj = \App\Models\AttributeValues::find($attr->attribute_value);
+                        $valText = $valObj?->value;
+                    }
+                    $attr->resolved_value = $valText ?: $attr->attribute_value;
+                });
+            }
         });
 
         return response()->json($products);
