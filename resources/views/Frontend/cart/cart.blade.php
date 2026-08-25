@@ -96,7 +96,7 @@
                                             <span class="fs-14 fw-600 d-block text-truncate" style="max-width: 150px;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 25) }}</span>
                                             <small class="text-info font-weight-bold d-block">Code: {{ $code }}</small>
                                             @if(!empty($attribute) && $attribute !== 'N/A')
-                                                <small class="text-muted d-block"><span class="font-weight-bold text-dark">Attribute:</span> {{ $attribute }}</small>
+                                                <small class="text-muted d-block"><span class="font-weight-bold text-dark"></span> {{ $attribute }}</small>
                                             @endif
                                             @if(!empty($color) && $color !== 'N/A')
                                                 <small class="text-muted d-block"><span class="font-weight-bold text-dark">Color:</span> {{ $color }}</small>

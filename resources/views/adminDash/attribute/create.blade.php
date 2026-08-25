@@ -66,7 +66,7 @@
                                             <button type="button" class="btn btn-primary btn-sm edit-value-btn" data-id="{{ $attributeValue->id }}" data-value="{{ $attributeValue->value }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; margin-right: 4px;">
                                                 <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
                                             </button>
-                                            <a class="btn btn-danger btn-sm delete-value-btn" href="{{ route('attribute.value.destroy', $attributeValue->id) }}" data-id="{{ $attributeValue->id }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px;">
+                                            <a class="btn btn-danger btn-sm delete-value-btn" href="{{ url('admin/attributes/value/destroy/' . $attributeValue->id) }}" data-id="{{ $attributeValue->id }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px;">
                                                 <i class="fa-solid fa-trash mr-1"></i> Delete
                                             </a>
                                         </td>
@@ -193,7 +193,7 @@
 
                         // Add new row to table
                         let newRowIndex = $('#attribute-values-tbody tr').length + 1;
-                        let destroyUrl = "{{ route('attribute.value.destroy', ':id') }}".replace(':id', response.data.id);
+                        let destroyUrl = "{{ url('admin/attributes/value/destroy') }}/" + response.data.id;
                         
                         let newRow = `
                             <tr id="value-row-${response.data.id}" style="display: none;">
@@ -248,7 +248,7 @@
             $('#edit_value_id').val(id);
             $('#edit_value_input').val(val);
             
-            let updateUrl = "{{ route('attribute.value.update', ':id') }}".replace(':id', id);
+            let updateUrl = "{{ url('admin/attributevalues/update') }}/" + id;
             $('#edit-value-form').attr('action', updateUrl);
             
             $('#editValueModal').modal('show');
