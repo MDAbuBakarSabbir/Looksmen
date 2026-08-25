@@ -239,6 +239,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('attributes/create/{id}', 'create')->name('attribute.create')->middleware('admin.permission:create_attribute');
         Route::post('attributes/store', 'store')->name('attribute.store')->middleware('admin.permission:create_attribute');
         Route::post('attributevalues/store/{id}', 'valuestore')->name('value.store')->middleware('admin.permission:create_attribute');
+        Route::post('attributevalues/update/{id}', 'valueUpdate')->name('attribute.value.update')->middleware('admin.permission:create_attribute');
         Route::get('attributes/edit/{id}', 'edit')->name('attribute.edit')->middleware('admin.permission:manage_attribute');
         Route::post('attributes/update/{id}', 'update')->name('attribute.update')->middleware('admin.permission:manage_attribute');
         Route::get('attributes/destroy/{id}', 'destroy')->name('attribute.destroy')->middleware('admin.permission:manage_attribute');

@@ -57,6 +57,28 @@ class AttributeController extends Controller
         return back()->with('success', 'success');
     }
 
+    public function valueUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'value' => 'required',
+        ]);
+
+        $value = AttributeValues::findOrFail($id);
+        $value->update([
+            'value' => $request->value,
+        ]);
+
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'data' => $value,
+                'message' => 'Attribute value updated successfully',
+            ]);
+        }
+
+        return back()->with('success', 'Attribute value updated successfully');
+    }
+
     public function edit($id)
     {
         $attribute = Attribute::findOrFail($id);

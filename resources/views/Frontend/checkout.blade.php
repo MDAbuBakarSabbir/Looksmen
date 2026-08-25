@@ -502,7 +502,7 @@
                                     </div>
                                     <div class="cart-details">
                                         <div class="cart-title text-truncate" style="max-width: 180px;">{{ $name }}</div>
-                                        <div class="text-info fs-11 fw-bold mb-1">Code: {{ $code }}</div>
+                                        <div class="text-info fs-11 fw-bold mb-1">Code: {{ $code }}</div><div class="attribute-name">:</div><div class="attribute-value"></div>
                                         <div class="cart-meta mt-1 d-flex align-items-center">
                                             <div class="input-group input-group-sm" style="width: 80px;">
                                                 <div class="input-group-prepend">

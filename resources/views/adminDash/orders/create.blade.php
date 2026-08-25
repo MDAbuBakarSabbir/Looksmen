@@ -948,7 +948,7 @@
                     if (product && product.product_attributes && product.product_attributes.length > 0) {
                         product.product_attributes.forEach(function(attr) {
                             let attrName = (attr.attribute && attr.attribute.name) ? attr.attribute.name : 'Attribute';
-                            let valText = attr.resolved_value || (attr.attribute_val && attr.attribute_val.value) || (attr.attributeVal && attr.attributeVal.value) || attr.attribute_value;
+                            let valText = (attr.attribute_val && attr.attribute_val.value) ? attr.attribute_val.value : ((attr.attributeVal && attr.attributeVal.value) ? attr.attributeVal.value : attr.attribute_value);
                             if (valText) {
                                 sizesSelect += `<option value="${valText}">${valText}</option>`;
                             }

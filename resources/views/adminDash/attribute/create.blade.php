@@ -52,7 +52,7 @@
                                 <tr>
                                     <th scope="col" style="width: 80px;">SL</th>
                                     <th scope="col">Value</th>
-                                    <th scope="col" style="width: 120px; text-align: right;">Action</th>
+                                    <th scope="col" style="width: 170px; text-align: right;">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="attribute-values-tbody">
@@ -62,7 +62,10 @@
                                         <td>
                                             <span class="value-badge">{{ $attributeValue->value }}</span>
                                         </td>
-                                        <td style="text-align: right;">
+                                        <td style="text-align: right;" class="d-flex gap-2">
+                                            <button type="button" class="btn btn-primary btn-sm edit-value-btn" data-id="{{ $attributeValue->id }}" data-value="{{ $attributeValue->value }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; margin-right: 4px;">
+                                                <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                                            </button>
                                             <a class="btn btn-danger btn-sm delete-value-btn" href="{{ route('attribute.value.destroy', $attributeValue->id) }}" data-id="{{ $attributeValue->id }}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px;">
                                                 <i class="fa-solid fa-trash mr-1"></i> Delete
                                             </a>
@@ -103,6 +106,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Edit Value Modal -->
+    <div class="modal fade" id="editValueModal" tabindex="-1" role="dialog" aria-labelledby="editValueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content" style="border-radius: 12px; border: none; box-shadow: 0 10px 25px rgba(0,0,0,0.15);">
+                <div class="modal-header bg-white border-bottom p-4">
+                    <h5 class="modal-title font-weight-bold" id="editValueModalLabel" style="color: #1f2937;">
+                        <i class="fa-solid fa-pen-to-square text-primary mr-2"></i>Edit Attribute Value
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="edit-value-form" method="POST">
+                    @csrf
+                    <input type="hidden" id="edit_value_id" name="id">
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label font-weight-bold text-muted" style="font-size: 13px;">Value Name<span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="edit_value_input" name="value" placeholder="e.g. XL, Red, 16GB" required style="border-radius: 8px; padding: 10px 14px;">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-top p-3 bg-light" style="border-bottom-left-radius: 12px; border-bottom-right-radius: 12px;">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 8px; font-weight: 600;">Cancel</button>
+                        <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 600; background: linear-gradient(135deg, #4f46e5, #3b82f6); border: none;">
+                            <i class="fa-solid fa-floppy-disk mr-1"></i> Update Value
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('script')
@@ -133,11 +168,22 @@
                 data: form.serialize(),
                 success: function(response) {
                     if (response.success) {
-                        // Show success toast using mixin
-                        window.Toast.fire({
-                            icon: 'success',
-                            title: response.message || 'Value added successfully'
-                        });
+                        // Show success toast
+                        if (window.Toast) {
+                            window.Toast.fire({
+                                icon: 'success',
+                                title: response.message || 'Value added successfully'
+                            });
+                        } else if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                icon: 'success',
+                                title: response.message || 'Value added successfully'
+                            });
+                        }
 
                         // Reset form
                         form.trigger('reset');
@@ -156,6 +202,9 @@
                                     <span class="value-badge">${response.data.value}</span>
                                 </td>
                                 <td style="text-align: right;">
+                                    <button type="button" class="btn btn-primary btn-sm edit-value-btn" data-id="${response.data.id}" data-value="${response.data.value}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px; margin-right: 4px;">
+                                        <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                                    </button>
                                     <a class="btn btn-danger btn-sm delete-value-btn" href="${destroyUrl}" data-id="${response.data.id}" style="border-radius: 6px; font-weight: 600; font-size: 12px; padding: 6px 12px;">
                                         <i class="fa-solid fa-trash mr-1"></i> Delete
                                     </a>
@@ -171,10 +220,98 @@
                     if (xhr.responseJSON && xhr.responseJSON.errors) {
                         errorMessage = Object.values(xhr.responseJSON.errors).flat().join(' ');
                     }
-                    window.Toast.fire({
-                        icon: 'error',
-                        title: errorMessage
-                    });
+                    if (window.Toast) {
+                        window.Toast.fire({
+                            icon: 'error',
+                            title: errorMessage
+                        });
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMessage
+                        });
+                    }
+                },
+                complete: function() {
+                    submitBtn.prop('disabled', false).html(originalBtnHtml);
+                }
+            });
+        });
+
+        // Open Edit Value Modal
+        $(document).on('click', '.edit-value-btn', function(e) {
+            e.preventDefault();
+            let id = $(this).data('id');
+            let val = $(this).data('value');
+            
+            $('#edit_value_id').val(id);
+            $('#edit_value_input').val(val);
+            
+            let updateUrl = "{{ route('attribute.value.update', ':id') }}".replace(':id', id);
+            $('#edit-value-form').attr('action', updateUrl);
+            
+            $('#editValueModal').modal('show');
+        });
+
+        // Handle Edit Form Submission via AJAX
+        $('#edit-value-form').on('submit', function(e) {
+            e.preventDefault();
+            let form = $(this);
+            let url = form.attr('action');
+            let id = $('#edit_value_id').val();
+            let submitBtn = form.find('button[type="submit"]');
+            let originalBtnHtml = submitBtn.html();
+
+            submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Updating...');
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                data: form.serialize(),
+                success: function(response) {
+                    if (response.success) {
+                        $('#editValueModal').modal('hide');
+
+                        // Update table row badge and data-value attribute
+                        let row = $(`#value-row-${id}`);
+                        row.find('.value-badge').text(response.data.value);
+                        row.find('.edit-value-btn').data('value', response.data.value).attr('data-value', response.data.value);
+
+                        if (window.Toast) {
+                            window.Toast.fire({
+                                icon: 'success',
+                                title: response.message || 'Value updated successfully'
+                            });
+                        } else if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                showConfirmButton: false,
+                                timer: 2000,
+                                icon: 'success',
+                                title: response.message || 'Value updated successfully'
+                            });
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = 'Something went wrong. Please try again.';
+                    if (xhr.responseJSON && xhr.responseJSON.errors) {
+                        errorMessage = Object.values(xhr.responseJSON.errors).flat().join(' ');
+                    }
+                    if (window.Toast) {
+                        window.Toast.fire({
+                            icon: 'error',
+                            title: errorMessage
+                        });
+                    } else if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: errorMessage
+                        });
+                    }
                 },
                 complete: function() {
                     submitBtn.prop('disabled', false).html(originalBtnHtml);
