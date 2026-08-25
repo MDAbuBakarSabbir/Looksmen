@@ -57,6 +57,16 @@
     @include('adminDash.orders.extends.sort')
     <div class="card">
         <div class="card-body">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap" style="padding: 1rem 1.25rem; background: #ffffff; border-bottom: 1px solid #f1f5f9;">
+                <div class="d-flex align-items-center" style="gap: 12px;">
+                    <span style="font-weight: 700; font-size: 1rem; color: #1e293b;">
+                        <i class="fa-solid fa-boxes-stacked mr-2 text-primary"></i>Orders
+                    </span>
+                    <span class="badge" id="orderHeaderCountBadge" style="font-size: 12px; font-weight: 700; background: #eef2ff; color: #4f46e5; padding: 4px 12px; border-radius: 12px; border: 1px solid #e0e7ff;">
+                        Total: <span id="orderHeaderCountVal">{{ ($orders ?? $countorders)->total() }}</span>
+                    </span>
+                </div>
+            </div>
             <div class="table-responsive">
                 <table class="table">
                     <thead class="thead-light">
@@ -196,6 +206,7 @@
                         $('#orderPaginationInfo').html(
                             'Showing <strong>' + response.from + '</strong> &ndash; <strong>' + response.to + '</strong> of <strong>' + response.total + '</strong> orders'
                         );
+                        $('#orderHeaderCountVal').text(response.total);
                         buildPaginationButtons(response);
                     },
                     error: function(xhr) {

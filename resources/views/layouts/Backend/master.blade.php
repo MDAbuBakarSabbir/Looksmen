@@ -1355,6 +1355,30 @@
                     <li class="nav-label">Operations</li>
 
                     @if($user?->hasPermission('manage_order') || $user?->hasPermission('pending_order') || $user?->hasPermission('hold_order') || $user?->hasPermission('approved_order') || $user?->hasPermission('packaging_order') || $user?->hasPermission('shipment_order') || $user?->hasPermission('delivered_order') || $user?->hasPermission('canceled_order') || $user?->hasPermission('return_order') || $user?->hasPermission('incomplete_order') || $user?->hasPermission('create_order'))
+                    @php
+                        $sidebarOrderCounts = \Illuminate\Support\Facades\Cache::remember('backend_sidebar_order_counts', 10, function() {
+                            $counts = \Illuminate\Support\Facades\DB::table('orders')
+                                ->selectRaw("
+                                    SUM(CASE WHEN delivery_status = 'pending' THEN 1 ELSE 0 END) as pending,
+                                    SUM(CASE WHEN delivery_status = 'hold' THEN 1 ELSE 0 END) as hold,
+                                    SUM(CASE WHEN delivery_status = 'approved' THEN 1 ELSE 0 END) as approved,
+                                    SUM(CASE WHEN delivery_status = 'packaging' THEN 1 ELSE 0 END) as packaging,
+                                    SUM(CASE WHEN delivery_status IN ('in_courier', 'incourier') THEN 1 ELSE 0 END) as in_courier,
+                                    SUM(CASE WHEN delivery_status IN ('delivered', 'partial_delivered') THEN 1 ELSE 0 END) as delivered
+                                ")
+                                ->first();
+                            $incomplete = \Illuminate\Support\Facades\DB::table('incomplete_orders')->count();
+                            return [
+                                'pending' => (int)($counts->pending ?? 0),
+                                'hold' => (int)($counts->hold ?? 0),
+                                'approved' => (int)($counts->approved ?? 0),
+                                'packaging' => (int)($counts->packaging ?? 0),
+                                'in_courier' => (int)($counts->in_courier ?? 0),
+                                'delivered' => (int)($counts->delivered ?? 0),
+                                'incomplete' => (int)$incomplete,
+                            ];
+                        });
+                    @endphp
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="fa-solid fa-boxes-stacked mr-2"></i><span class="nav-text">Order Manage</span></a>
                         <ul aria-expanded="false">
@@ -1362,22 +1386,52 @@
                             <li><a href="{{ Route::has('order-index') ? route('order-index') : '#' }}">All Orders</a></li>
                             @endif
                             @if($user?->hasPermission('pending_order'))
-                            <li><a href="{{ Route::has('order-pending') ? route('order-pending') : '#' }}">Pending Orders</a></li>
+                            <li>
+                                <a href="{{ Route::has('order-pending') ? route('order-pending') : '#' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Pending Orders</span>
+                                    <span class="badge" style="font-size: 11px; font-weight: 600; background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 10px; border: 1px solid #e0e7ff; line-height: 1.2;">{{ $sidebarOrderCounts['pending'] ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                             @if($user?->hasPermission('hold_order'))
-                            <li><a href="{{ Route::has('order-hold') ? route('order-hold') : '#' }}">Hold Orders</a></li>
+                            <li>
+                                <a href="{{ Route::has('order-hold') ? route('order-hold') : '#' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Hold Orders</span>
+                                    <span class="badge" style="font-size: 11px; font-weight: 600; background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 10px; border: 1px solid #e0e7ff; line-height: 1.2;">{{ $sidebarOrderCounts['hold'] ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                             @if($user?->hasPermission('approved_order'))
-                            <li><a href="{{ Route::has('order-approved') ? route('order-approved') : '#' }}">Approved Orders</a></li>
+                            <li>
+                                <a href="{{ Route::has('order-approved') ? route('order-approved') : '#' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Approved Orders</span>
+                                    <span class="badge" style="font-size: 11px; font-weight: 600; background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 10px; border: 1px solid #e0e7ff; line-height: 1.2;">{{ $sidebarOrderCounts['approved'] ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                             @if($user?->hasPermission('packaging_order'))
-                            <li><a href="{{ Route::has('order-packaging') ? route('order-packaging') : '#' }}">Packaging Orders</a></li>
+                            <li>
+                                <a href="{{ Route::has('order-packaging') ? route('order-packaging') : '#' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Packaging Orders</span>
+                                    <span class="badge" style="font-size: 11px; font-weight: 600; background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 10px; border: 1px solid #e0e7ff; line-height: 1.2;">{{ $sidebarOrderCounts['packaging'] ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                             @if($user?->hasPermission('shipment_order'))
-                            <li><a href="{{ Route::has('order-incourier') ? route('order-incourier') : '#' }}">In-Courier Orders</a></li>
+                            <li>
+                                <a href="{{ Route::has('order-incourier') ? route('order-incourier') : '#' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>In-Courier Orders</span>
+                                    <span class="badge" style="font-size: 11px; font-weight: 600; background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 10px; border: 1px solid #e0e7ff; line-height: 1.2;">{{ $sidebarOrderCounts['in_courier'] ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                             @if($user?->hasPermission('delivered_order'))
-                            <li><a href="{{ Route::has('order-delivered') ? route('order-delivered') : '#' }}">Delivered Orders</a></li>
+                            <li>
+                                <a href="{{ Route::has('order-delivered') ? route('order-delivered') : '#' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Delivered Orders</span>
+                                    <span class="badge" style="font-size: 11px; font-weight: 600; background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 10px; border: 1px solid #e0e7ff; line-height: 1.2;">{{ $sidebarOrderCounts['delivered'] ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                             @if($user?->hasPermission('canceled_order'))
                             <li><a href="{{ Route::has('order-canceled') ? route('order-canceled') : '#' }}">Canceled Orders</a></li>
@@ -1386,7 +1440,12 @@
                             <li><a href="{{ Route::has('order-returned') ? route('order-returned') : '#' }}">Returned Orders</a></li>
                             @endif
                             @if($user?->hasPermission('incomplete_order'))
-                            <li><a href="{{ Route::has('incomplete.index') ? route('incomplete.index') : '#' }}">Incomplete Orders</a></li>
+                            <li>
+                                <a href="{{ Route::has('incomplete.index') ? route('incomplete.index') : '#' }}" style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span>Incomplete Orders</span>
+                                    <span class="badge" style="font-size: 11px; font-weight: 600; background: #eef2ff; color: #4f46e5; padding: 2px 8px; border-radius: 10px; border: 1px solid #e0e7ff; line-height: 1.2;">{{ $sidebarOrderCounts['incomplete'] ?? 0 }}</span>
+                                </a>
+                            </li>
                             @endif
                             @if($user?->hasPermission('create_order'))
                             <li><a href="{{ Route::has('admin.order-create') ? route('admin.order-create') : '#' }}">POS</a></li>
