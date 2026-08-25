@@ -73,6 +73,15 @@
                                 $qty = $isDb ? $rawItem->quantity : $rawItem['quantity'];
                                 $stock = $isDb ? $rawItem->product->stock ?? 10 : $rawItem['stock'] ?? 10;
                                 $code = $isDb ? $rawItem->product->code ?? 'N/A' : $rawItem['code'] ?? 'N/A';
+                                $attribute = $isDb ? ($rawItem->attributes ?? $rawItem->attribute ?? null) : ($rawItem['attribute'] ?? $rawItem['attributes'] ?? $rawItem['size'] ?? null);
+                                $color = $isDb ? ($rawItem->color ?? null) : ($rawItem['color'] ?? null);
+
+                                if (!empty($attribute) && is_numeric($attribute)) {
+                                    $attrValObj = \App\Models\AttributeValues::find($attribute);
+                                    if ($attrValObj) {
+                                        $attribute = $attrValObj->value;
+                                    }
+                                }
 
                                 $cleanPrice = (float) str_replace(',', '', $price);
                                 $line_total = $cleanPrice * (int) $qty;
@@ -85,7 +94,13 @@
                                         <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="size-60px mr-2 rounded">
                                         <div>
                                             <span class="fs-14 fw-600 d-block text-truncate" style="max-width: 150px;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 25) }}</span>
-                                            <small class="text-info font-weight-bold">Code: {{ $code }}</small>
+                                            <small class="text-info font-weight-bold d-block">Code: {{ $code }}</small>
+                                            @if(!empty($attribute) && $attribute !== 'N/A')
+                                                <small class="text-muted d-block"><span class="font-weight-bold text-dark">Attribute:</span> {{ $attribute }}</small>
+                                            @endif
+                                            @if(!empty($color) && $color !== 'N/A')
+                                                <small class="text-muted d-block"><span class="font-weight-bold text-dark">Color:</span> {{ $color }}</small>
+                                            @endif
                                         </div>
                                     </div>
                                 </td>

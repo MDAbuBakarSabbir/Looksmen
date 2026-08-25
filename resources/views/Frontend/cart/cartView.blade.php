@@ -318,6 +318,15 @@
                                     $qty = $isDb ? $rawItem->quantity : $rawItem['quantity'];
                                     $stock = $isDb ? $rawItem->product->stock ?? 10 : $rawItem['stock'] ?? 10;
                                     $code = $isDb ? $rawItem->product->code ?? 'N/A' : $rawItem['code'] ?? 'N/A';
+                                    $attribute = $isDb ? ($rawItem->attributes ?? $rawItem->attribute ?? null) : ($rawItem['attribute'] ?? $rawItem['attributes'] ?? $rawItem['size'] ?? null);
+                                    $color = $isDb ? ($rawItem->color ?? null) : ($rawItem['color'] ?? null);
+
+                                    if (!empty($attribute) && is_numeric($attribute)) {
+                                        $attrValObj = \App\Models\AttributeValues::find($attribute);
+                                        if ($attrValObj) {
+                                            $attribute = $attrValObj->value;
+                                        }
+                                    }
                                     
                                     $cleanPrice = (float) str_replace(',', '', $price);
                                     $line_total = $cleanPrice * (int) $qty;
@@ -331,7 +340,15 @@
                                         <img src="{{ $image ? asset('Uploads/' . $image) : asset('frontend/assets/img/placeholder.jpg') }}" class="product-img mr-4" alt="{{ $name }}">
                                         <div>
                                             <h4 class="product-title text-truncate" style="max-width: 220px;" title="{{ $name }}">{{ \Illuminate\Support\Str::limit($name, 28) }}</h4>
-                                            <div class="product-code mt-1"><i class="las la-barcode mr-1"></i> Code: {{ $code }}</div>
+                                            <div class="d-flex flex-wrap align-items-center mt-1" style="gap: 6px;">
+                                                <div class="product-code"><i class="las la-barcode mr-1"></i> Code: {{ $code }}</div>
+                                                @if(!empty($attribute) && $attribute !== 'N/A')
+                                                    <span class="product-code" style="background: rgba(99, 102, 241, 0.1); color: #4f46e5;"><i class="las la-tag mr-1"></i> {{ $attribute }}</span>
+                                                @endif
+                                                @if(!empty($color) && $color !== 'N/A')
+                                                    <span class="product-code" style="background: #f8fafc; border: 1px solid #e2e8f0; color: #334155;"><i class="las la-tint text-danger mr-1"></i> {{ $color }}</span>
+                                                @endif
+                                            </div>
                                         </div>
                                     </div>
 
