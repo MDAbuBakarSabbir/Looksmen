@@ -450,20 +450,20 @@
                                                                 @foreach($detail->orderProduct->productAttributes as $attr)
                                                                     @php
                                                                         $attrName = ($attr->attribute) ? $attr->attribute->name : 'Attribute';
-                                                                        $values = explode(',', $attr->attribute_value);
+                                                                        $valText = $attr->attributeVal->value ?? $attr->attribute_value;
+                                                                        $isSelectedAttr = (
+                                                                            strcasecmp(trim((string)$detail->product_attribute), trim((string)$valText)) === 0 ||
+                                                                            strcasecmp(trim((string)$detail->product_attribute), trim((string)$attr->attribute_value)) === 0
+                                                                        );
+                                                                        if ($isSelectedAttr) $hasSelectedAttr = true;
                                                                     @endphp
-                                                                    @foreach($values as $val)
-                                                                        @php
-                                                                            $val = trim($val);
-                                                                            $isSelectedAttr = strcasecmp(trim($detail->product_attribute), $val) === 0;
-                                                                            if ($isSelectedAttr) $hasSelectedAttr = true;
-                                                                        @endphp
-                                                                        <option value="{{ $val }}" @if($isSelectedAttr) selected @endif>{{ $attrName }} : {{ $val }}</option>
-                                                                    @endforeach
+                                                                    @if(!empty($valText))
+                                                                        <option value="{{ $valText }}" @if($isSelectedAttr) selected @endif>{{ $attrName }} : {{ $valText }}</option>
+                                                                    @endif
                                                                 @endforeach
                                                             @endif
                                                             @if(!$hasSelectedAttr && $detail->product_attribute && $detail->product_attribute != 'N/A')
-                                                                <option value="{{ $detail->product_attribute }}" selected>Attribute : {{ $detail->product_attribute }}</option>
+                                                                <option value="{{ $detail->product_attribute }}" selected>{{ $detail->product_attribute }}</option>
                                                             @endif
                                                         </select>
                                                     </td>

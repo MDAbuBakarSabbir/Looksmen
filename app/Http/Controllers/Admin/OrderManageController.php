@@ -644,7 +644,7 @@ class OrderManageController extends Controller
         $term = $request->term;
 
         // নাম অথবা কোড দিয়ে সার্চ করা (শুধুমাত্র একটিভ প্রোডাক্ট এবং রিলেশনস)
-        $products = Product::with(['firstImage', 'productAttributes.attribute', 'productColors.color'])
+        $products = Product::with(['firstImage', 'productAttributes.attribute', 'productAttributes.attributeVal', 'productColors.color'])
             ->where('status', '1')
             ->where(function ($q) use ($term) {
                 $q->where('title', 'LIKE', '%'.$term.'%')
@@ -1060,9 +1060,12 @@ class OrderManageController extends Controller
 
                 if (is_array($decoded) && count($decoded) > 0) {
                     $first = reset($decoded);
-                    if (is_array($first) && (isset($first['product_id']) || isset($first['code']))) {
+                    if (is_array($first) && (isset($first['product_id']) || isset($first['code']) || isset($first['id']))) {
                         // Rich array format with quantity, size, color, price
-                        $ids = array_filter(array_column($decoded, 'product_id'));
+                        $ids = array_filter(array_merge(
+                            array_column($decoded, 'product_id'),
+                            array_column($decoded, 'id')
+                        ));
                         $codes = array_filter(array_column($decoded, 'code'));
 
                         $products = Product::where(function ($q) use ($ids, $codes) {
@@ -1072,24 +1075,37 @@ class OrderManageController extends Controller
                             if (! empty($codes)) {
                                 $q->orWhereIn('code', $codes);
                             }
-                        })->with(['firstImage', 'productAttributes.attribute', 'productColors.color'])->get()->keyBy('id');
+                        })->with(['firstImage', 'productAttributes.attribute', 'productAttributes.attributeVal', 'productColors.color'])->get()->keyBy('id');
 
                         $productsByCode = $products->keyBy('code');
 
                         foreach ($decoded as $item) {
                             $prod = null;
-                            if (! empty($item['product_id']) && isset($products[$item['product_id']])) {
-                                $prod = $products[$item['product_id']];
+                            $pId = $item['product_id'] ?? $item['id'] ?? null;
+                            if (! empty($pId) && isset($products[$pId])) {
+                                $prod = $products[$pId];
                             } elseif (! empty($item['code']) && isset($productsByCode[$item['code']])) {
                                 $prod = $productsByCode[$item['code']];
                             }
 
                             if ($prod) {
+                                $rawSize = $item['size'] ?? $item['attribute'] ?? 'N/A';
+                                $resolvedSize = $rawSize;
+                                if (! empty($rawSize) && $rawSize !== 'N/A') {
+                                    if (is_numeric($rawSize)) {
+                                        $attrValObj = \App\Models\AttributeValues::find($rawSize);
+                                        if ($attrValObj) {
+                                            $resolvedSize = $attrValObj->value;
+                                        }
+                                    }
+                                }
+
                                 $incompleteItems[] = [
                                     'product' => $prod,
                                     'quantity' => (int) ($item['quantity'] ?? 1),
                                     'price' => (float) ($item['price'] ?? $prod->new_price ?? 0),
-                                    'size' => $item['size'] ?? 'N/A',
+                                    'size' => $resolvedSize,
+                                    'raw_size' => $rawSize,
                                     'color' => $item['color'] ?? 'N/A',
                                 ];
                             }
@@ -1098,7 +1114,7 @@ class OrderManageController extends Controller
                         // Array of product codes or IDs
                         $products = Product::whereIn('code', $decoded)
                             ->orWhereIn('id', $decoded)
-                            ->with(['firstImage', 'productAttributes.attribute', 'productColors.color'])->get();
+                            ->with(['firstImage', 'productAttributes.attribute', 'productAttributes.attributeVal', 'productColors.color'])->get();
 
                         foreach ($products as $prod) {
                             $incompleteItems[] = [
@@ -1106,6 +1122,7 @@ class OrderManageController extends Controller
                                 'quantity' => 1,
                                 'price' => (float) ($prod->new_price ?? 0),
                                 'size' => 'N/A',
+                                'raw_size' => 'N/A',
                                 'color' => 'N/A',
                             ];
                         }
@@ -1114,7 +1131,7 @@ class OrderManageController extends Controller
                     // Single string / code / ID
                     $prod = Product::where('code', $raw)
                         ->orWhere('id', $raw)
-                        ->with(['firstImage', 'productAttributes.attribute', 'productColors.color'])->first();
+                        ->with(['firstImage', 'productAttributes.attribute', 'productAttributes.attributeVal', 'productColors.color'])->first();
 
                     if ($prod) {
                         $incompleteItems[] = [
@@ -1122,6 +1139,7 @@ class OrderManageController extends Controller
                             'quantity' => 1,
                             'price' => (float) ($prod->new_price ?? 0),
                             'size' => 'N/A',
+                            'raw_size' => 'N/A',
                             'color' => 'N/A',
                         ];
                     }
@@ -1277,6 +1295,7 @@ class OrderManageController extends Controller
         $order = Orders::with([
             'orderDetails.orderProduct.firstImage',
             'orderDetails.orderProduct.productAttributes.attribute',
+            'orderDetails.orderProduct.productAttributes.attributeVal',
             'orderDetails.orderProduct.productColors.color',
         ])->findOrFail($id);
 

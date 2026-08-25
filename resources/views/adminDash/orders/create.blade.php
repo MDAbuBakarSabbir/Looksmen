@@ -418,20 +418,30 @@
                                                     </td>
                                                     <td>
                                                         <select class="form-select form-select-sm spec-size" name="sizes[]" style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; width: 100%;">
-                                                            <option value="N/A" {{ $selectedSize == 'N/A' ? 'selected' : '' }}>N/A</option>
+                                                            <option value="N/A" {{ ($selectedSize == 'N/A' || empty($selectedSize)) ? 'selected' : '' }}>N/A</option>
+                                                            @php $hasSelectedAttr = false; @endphp
                                                             @if($product->productAttributes && $product->productAttributes->count() > 0)
                                                                 @foreach($product->productAttributes as $attr)
                                                                     @php
                                                                         $attrName = $attr->attribute->name ?? 'Attribute';
-                                                                        $values = explode(',', $attr->attribute_value ?? '');
+                                                                        $valText = $attr->attributeVal->value ?? $attr->attribute_value;
+                                                                        $rawAttrVal = $attr->attribute_value;
+                                                                        $isSelected = (
+                                                                            strcasecmp(trim((string)$selectedSize), trim((string)$valText)) === 0 ||
+                                                                            strcasecmp(trim((string)$selectedSize), trim((string)$rawAttrVal)) === 0 ||
+                                                                            (!empty($item['raw_size']) && strcasecmp(trim((string)$item['raw_size']), trim((string)$rawAttrVal)) === 0)
+                                                                        );
+                                                                        if ($isSelected) {
+                                                                            $hasSelectedAttr = true;
+                                                                        }
                                                                     @endphp
-                                                                    @foreach($values as $val)
-                                                                        @php $cleanVal = trim($val); @endphp
-                                                                        @if($cleanVal)
-                                                                            <option value="{{ $cleanVal }}" {{ $selectedSize == $cleanVal ? 'selected' : '' }}>{{ $attrName }} : {{ $cleanVal }}</option>
-                                                                        @endif
-                                                                    @endforeach
+                                                                    @if(!empty($valText))
+                                                                        <option value="{{ $valText }}" {{ $isSelected ? 'selected' : '' }}>{{ $attrName }} : {{ $valText }}</option>
+                                                                    @endif
                                                                 @endforeach
+                                                            @endif
+                                                            @if(!$hasSelectedAttr && !empty($selectedSize) && $selectedSize !== 'N/A')
+                                                                <option value="{{ $selectedSize }}" selected>{{ $selectedSize }}</option>
                                                             @endif
                                                         </select>
                                                     </td>
@@ -926,12 +936,9 @@
                     if (product && product.product_attributes && product.product_attributes.length > 0) {
                         product.product_attributes.forEach(function(attr) {
                             let attrName = (attr.attribute && attr.attribute.name) ? attr.attribute.name : 'Attribute';
-                            if (attr.attribute_value) {
-                                let values = attr.attribute_value.split(',');
-                                values.forEach(function(val) {
-                                    let cleanVal = val.trim();
-                                    sizesSelect += `<option value="${cleanVal}">${attrName} : ${cleanVal}</option>`;
-                                });
+                            let valText = (attr.attribute_val && attr.attribute_val.value) ? attr.attribute_val.value : ((attr.attributeVal && attr.attributeVal.value) ? attr.attributeVal.value : attr.attribute_value);
+                            if (valText) {
+                                sizesSelect += `<option value="${valText}">${attrName} : ${valText}</option>`;
                             }
                         });
                     }
