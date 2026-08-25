@@ -98,6 +98,7 @@
         /* Product Table styling */
         .edit-table {
             width: 100%;
+            min-width: 750px;
             margin-bottom: 0;
         }
         .edit-table th {
@@ -107,13 +108,24 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            padding: 1rem;
+            padding: 0.75rem 0.5rem;
             border-bottom: 1px solid #e2e8f0;
         }
         .edit-table td {
-            padding: 1rem;
+            padding: 0.65rem 0.5rem;
             vertical-align: middle;
             border-bottom: 1px solid #f1f5f9;
+        }
+
+        .edit-table .spec-size,
+        .edit-table .spec-color {
+            padding: 0.35rem 1.4rem 0.35rem 0.55rem !important;
+            font-size: 0.82rem !important;
+            height: 34px !important;
+            min-width: 110px !important;
+            width: 100% !important;
+            background-position: right 0.4rem center !important;
+            background-size: 10px 10px !important;
         }
 
         /* Autocomplete Search styling */
@@ -406,14 +418,14 @@
                                 <table class="table edit-table" id="products-table">
                                     <thead>
                                         <tr>
-                                            <th style="width: 5%;">SL</th>
-                                            <th style="width: 25%;">Product</th>
-                                            <th style="width: 15%;">Attributes</th>
-                                            <th style="width: 15%;">Color</th>
-                                            <th style="width: 10%;">Qty</th>
-                                            <th style="width: 13%;">Price</th>
-                                            <th style="width: 12%;">Total</th>
-                                            <th class="text-right" style="width: 5%;">Remove</th>
+                                            <th style="width: 40px;" class="text-center">SL</th>
+                                            <th style="min-width: 170px;">Product</th>
+                                            <th style="min-width: 120px; width: 135px;">Attributes</th>
+                                            <th style="min-width: 110px; width: 125px;">Color</th>
+                                            <th style="width: 95px;" class="text-center">Qty</th>
+                                            <th style="width: 90px;" class="text-right">Price</th>
+                                            <th style="width: 95px;" class="text-right">Total</th>
+                                            <th class="text-center" style="width: 45px;">Remove</th>
                                         </tr>
                                     </thead>
                                     <tbody id="product-rows-container">
@@ -443,7 +455,7 @@
                                                         <input type="hidden" name="product_ids[]" value="{{ $detail->product_id }}">
                                                     </td>
                                                     <td>
-                                                        <select class="form-select form-select-sm spec-size" name="sizes[]" style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; width: 100%;">
+                                                        <select class="form-select form-select-sm spec-size" name="sizes[]">
                                                             <option value="N/A" @if(!$detail->product_attribute || $detail->product_attribute == 'N/A') selected @endif>N/A</option>
                                                             @php $hasSelectedAttr = false; @endphp
                                                             @if($detail->orderProduct && $detail->orderProduct->productAttributes)
@@ -458,7 +470,7 @@
                                                                         if ($isSelectedAttr) $hasSelectedAttr = true;
                                                                     @endphp
                                                                     @if(!empty($valText))
-                                                                        <option value="{{ $valText }}" @if($isSelectedAttr) selected @endif>{{ $attrName }} : {{ $valText }}</option>
+                                                                        <option value="{{ $valText }}" @if($isSelectedAttr) selected @endif>{{ $valText }}</option>
                                                                     @endif
                                                                 @endforeach
                                                             @endif
@@ -468,7 +480,7 @@
                                                         </select>
                                                     </td>
                                                     <td>
-                                                        <select class="form-select form-select-sm spec-color" name="colors[]" style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; width: 100%;">
+                                                        <select class="form-select form-select-sm spec-color" name="colors[]">
                                                             <option value="N/A" @if(!$detail->product_colour || $detail->product_colour == 'N/A') selected @endif>N/A</option>
                                                             @php $hasSelectedColor = false; @endphp
                                                             @if($detail->orderProduct && $detail->orderProduct->productColors)
@@ -478,7 +490,7 @@
                                                                             $isSelectedColor = strcasecmp(trim($detail->product_colour), trim($pc->color->color_name)) === 0;
                                                                             if ($isSelectedColor) $hasSelectedColor = true;
                                                                         @endphp
-                                                                        <option value="{{ $pc->color->color_name }}" @if($isSelectedColor) selected @endif>{{ $pc->color->color_name }}</option>
+                                                                         <option value="{{ $pc->color->color_name }}" @if($isSelectedColor) selected @endif>{{ $pc->color->color_name }}</option>
                                                                     @endif
                                                                 @endforeach
                                                             @endif
@@ -827,24 +839,21 @@
                     let nextSl = $('.product-row').length + 1;
 
                     // Build size select option list
-                    let sizesSelect = `<select class="form-select form-select-sm spec-size" name="sizes[]" style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; width: 100%;">
+                    let sizesSelect = `<select class="form-select form-select-sm spec-size" name="sizes[]">
                         <option value="N/A" selected>N/A</option>`;
                     if (product && product.product_attributes && product.product_attributes.length > 0) {
                         product.product_attributes.forEach(function(attr) {
                             let attrName = (attr.attribute && attr.attribute.name) ? attr.attribute.name : 'Attribute';
-                            if (attr.attribute_value) {
-                                let values = attr.attribute_value.split(',');
-                                values.forEach(function(val) {
-                                    let cleanVal = val.trim();
-                                    sizesSelect += `<option value="${cleanVal}">${attrName} : ${cleanVal}</option>`;
-                                });
+                            let valText = (attr.attribute_val && attr.attribute_val.value) ? attr.attribute_val.value : ((attr.attributeVal && attr.attributeVal.value) ? attr.attributeVal.value : attr.attribute_value);
+                            if (valText) {
+                                sizesSelect += `<option value="${valText}">${valText}</option>`;
                             }
                         });
                     }
                     sizesSelect += `</select>`;
 
                     // Build color select option list
-                    let colorsSelect = `<select class="form-select form-select-sm spec-color" name="colors[]" style="padding: 0.3rem 0.5rem !important; border-radius: 6px !important; width: 100%;">
+                    let colorsSelect = `<select class="form-select form-select-sm spec-color" name="colors[]">
                         <option value="N/A" selected>N/A</option>`;
                     if (product && product.product_colors && product.product_colors.length > 0) {
                         product.product_colors.forEach(function(pc) {
