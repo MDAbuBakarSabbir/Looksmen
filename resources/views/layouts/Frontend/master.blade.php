@@ -1902,7 +1902,7 @@
 
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous"
-        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=1"
+        src="https://connect.facebook.net/en_GB/sdk.js#xfbml=1&version=v14.0&appId=4979933988710837&autoLogAppEvents=0"
         nonce="mvlbA8Xg"></script>
 
     <script>
