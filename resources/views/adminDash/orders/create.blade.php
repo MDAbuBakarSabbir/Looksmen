@@ -628,7 +628,7 @@
             }
 
             $.ajax({
-                url: "{{ route('admin.check-free-delivery') }}",
+                url: "{{ url('admin/check-free-delivery') }}",
                 type: "POST",
                 data: {
                     _token: "{{ csrf_token() }}",

@@ -167,8 +167,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('orders/autocomplete', 'orderAutocomplete')->name('admin.orders.autocomplete')->middleware('admin.permission:manage_order');
         Route::get('/api/check-new-orders', 'checkNewOrders')->name('check.new.orders')->middleware('admin.permission:manage_order');
         Route::get('/get-upazilas/{district}', 'getUpazilas')->middleware('admin.permission:manage_order,create_order');
-        Route::get('/admin/product-search', 'searchProducts')->name('admin.product-search')->middleware('admin.permission:manage_order,manage_product,create_order');
-        Route::post('/admin/check-free-delivery', 'checkFreeDelivery')->name('admin.check-free-delivery')->middleware('admin.permission:manage_order,create_order');
+        Route::get('product-search', 'searchProducts')->name('admin.product-search')->middleware('admin.permission:manage_order,manage_product,create_order');
+        Route::post('check-free-delivery', 'checkFreeDelivery')->name('admin.check-free-delivery')->middleware('admin.permission:manage_order,create_order');
 
         // {orderId} হলো আপনার নির্দিষ্ট অর্ডারটির আইডি (যেমন: 1, 10, 50)
         Route::post('orders/steadfast-entry/{id}', 'placeCourierOrder')->name('entry.steadfast')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
