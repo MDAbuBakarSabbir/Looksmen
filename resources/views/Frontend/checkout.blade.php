@@ -1242,7 +1242,8 @@
                 if (!address) address = selectedSavedAddress.data('address') || '';
             }
 
-            let phone = rawPhone.replace(/[^0-9]/g, '');
+            let digits = rawPhone.replace(/[^0-9]/g, '');
+            let phone = digits.length >= 11 ? digits.slice(-11) : digits;
 
             // ফোন নম্বর অন্তত ১১ ডিজিট না হলে সেভ করার দরকার নেই
             if (!phone || phone.length < 11) return;

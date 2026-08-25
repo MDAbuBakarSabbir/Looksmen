@@ -1847,6 +1847,26 @@
         </script>
     @endif
 
+    @if (session('error'))
+        <script>
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "{{ session('error') }}"
+            });
+        </script>
+    @endif
+
+    @if ($errors->any())
+        <script>
+            Swal.fire({
+                icon: "error",
+                title: "Validation Error",
+                html: "{!! implode('<br>', $errors->all()) !!}"
+            });
+        </script>
+    @endif
+
     <script>
         $(document).ready(function() {
             let autoDeactivateTimer;

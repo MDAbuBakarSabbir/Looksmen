@@ -218,14 +218,15 @@ class CheckoutController extends Controller
     public function storeIncompleteOrder(Request $request)
     {
         $rawPhone = $request->phone ?? '';
-        $phone = preg_replace('/[^0-9]/', '', (string)$rawPhone);
+        $digits = preg_replace('/[^0-9]/', '', (string) $rawPhone);
+        $phone = strlen($digits) >= 11 ? substr($digits, -11) : $digits;
 
         if (empty($phone) || strlen($phone) < 11) {
-            return response()->json(['status' => 'error', 'message' => 'Valid phone number required'], 422);
+            return response()->json(['status' => 'error', 'message' => 'Valid 11-digit phone number required'], 422);
         }
 
         if (auth()->check()) {
-            $cart = \App\Models\Cart::where('user_id', auth()->id())->with('product')->get();
+            $cart = Cart::where('user_id', auth()->id())->with('product')->get();
         } else {
             $cart = session()->get('cart', []);
         }
@@ -254,8 +255,8 @@ class CheckoutController extends Controller
                 'product_id' => $pId,
                 'code' => $code,
                 'name' => $name,
-                'price' => (float)$price,
-                'quantity' => (int)$qty,
+                'price' => (float) $price,
+                'quantity' => (int) $qty,
                 'size' => $size,
                 'color' => $color,
             ];
@@ -277,8 +278,8 @@ class CheckoutController extends Controller
             }
         }
 
-        $subtotal = (string)($request->subtotal ?? '0');
-        $grand_total = (string)($request->grand_total ?? $subtotal);
+        $subtotal = (string) ($request->subtotal ?? '0');
+        $grand_total = (string) ($request->grand_total ?? $subtotal);
 
         // ফোন নম্বর দিয়ে আপডেট বা নতুন তৈরি
         $incomplete = IncompleteOrders::updateOrCreate(
@@ -336,17 +337,21 @@ class CheckoutController extends Controller
             DB::beginTransaction();
 
             $freeDelivery = check_free_delivery($cart);
-            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float)$request->delivery_charge;
-            $subtotal = (float)$request->total_amount;
-            $couponDiscount = (float)($request->coupon_discount ?? 0);
+            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float) $request->delivery_charge;
+            $subtotal = (float) $request->total_amount;
+            $couponDiscount = (float) ($request->coupon_discount ?? 0);
             $grandTotal = max(0, ($subtotal - $couponDiscount) + $deliveryCharge);
 
             // ২. Orders টেবিলে ডাটা ইনসার্ট
+            $rawPhone = $request->phone ?? '';
+            $digits = preg_replace('/[^0-9]/', '', (string) $rawPhone);
+            $cleanPhone = strlen($digits) >= 11 ? substr($digits, -11) : $digits;
+
             $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
             $order->ip_address = $request->ip();
             $order->name = $request->name;
-            $order->phone = $request->phone;
+            $order->phone = $cleanPhone;
             $order->district = District::getNameById($request->district_id);
             $order->thana = Thana::getNameById($request->thana_id);
             $order->address = $request->address;
@@ -413,7 +418,20 @@ class CheckoutController extends Controller
             OrderDetails::insert($orderDetails);
 
             // ৪. ইনকমপ্লিট অর্ডার ডিলিট করা (ফোন নম্বর দিয়ে ম্যাচ করে)
-            IncompleteOrders::where('phone', $request->phone)->delete();
+            IncompleteOrders::where(function ($q) use ($cleanPhone, $rawPhone, $digits) {
+                if (! empty($cleanPhone)) {
+                    $q->where('phone', $cleanPhone)
+                        ->orWhere('phone', 'like', "%{$cleanPhone}")
+                        ->orWhere('phone', '88'.$cleanPhone)
+                        ->orWhere('phone', '+88'.$cleanPhone);
+                }
+                if (! empty($rawPhone)) {
+                    $q->orWhere('phone', $rawPhone);
+                }
+                if (! empty($digits)) {
+                    $q->orWhere('phone', $digits);
+                }
+            })->delete();
             if ($request->coupon_code) {
                 Coupons::where('code', $request->coupon_code)->increment('used');
             }
@@ -542,9 +560,9 @@ class CheckoutController extends Controller
             $orderData = session()->get('pending_order_data');
             $cart = session()->get('cart', []);
             $freeDelivery = check_free_delivery($cart);
-            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float)($orderData['delivery_charge'] ?? 0);
-            $subtotal = (float)($orderData['total_amount'] ?? 0);
-            $couponDiscount = (float)($orderData['coupon_discount'] ?? 0);
+            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float) ($orderData['delivery_charge'] ?? 0);
+            $subtotal = (float) ($orderData['total_amount'] ?? 0);
+            $couponDiscount = (float) ($orderData['coupon_discount'] ?? 0);
             $grandTotal = max(0, ($subtotal - $couponDiscount) + $deliveryCharge);
 
             // গ. Orders টেবিলে ডাটা ইনসার্ট
@@ -562,7 +580,7 @@ class CheckoutController extends Controller
             $order->grand_total = $grandTotal;
             $order->payment_type = 'prepaid';
             $order->payment_status = 'partial_paid';
-            $order->payment_id = $payment->id; // Payments টেবিলের আইডি লিঙ্কিং
+            $order->payment_id = $payment->id;
             $order->delivery_status = 'pending';
             $order->save();
 
@@ -586,6 +604,26 @@ class CheckoutController extends Controller
                 ];
             }
             OrderDetails::insert($orderDetails);
+
+            // ইনকমপ্লিট অর্ডার ডিলিট করা
+            $rawPhone = $orderData['phone'] ?? '';
+            $digits = preg_replace('/[^0-9]/', '', (string) $rawPhone);
+            $cleanPhone = strlen($digits) >= 11 ? substr($digits, -11) : $digits;
+
+            IncompleteOrders::where(function ($q) use ($cleanPhone, $rawPhone, $digits) {
+                if (! empty($cleanPhone)) {
+                    $q->where('phone', $cleanPhone)
+                        ->orWhere('phone', 'like', "%{$cleanPhone}")
+                        ->orWhere('phone', '88'.$cleanPhone)
+                        ->orWhere('phone', '+88'.$cleanPhone);
+                }
+                if (! empty($rawPhone)) {
+                    $q->orWhere('phone', $rawPhone);
+                }
+                if (! empty($digits)) {
+                    $q->orWhere('phone', $digits);
+                }
+            })->delete();
 
             DB::commit();
 
@@ -618,81 +656,114 @@ class CheckoutController extends Controller
         // ১. ফর্ম ডাটা সেশনে রাখা
         session()->put('pending_order_data', $request->all());
 
-        $district = District::getById($request->district_id);
-        $payableAmount = $district ? $district->delivery_charge : 0; // শুধুমাত্র ডেলিভারি চার্জ
-
-        $post_data = [
-            'store_id' => env('SSLC_STORE_ID'),
-            'store_passwd' => env('SSLC_STORE_PASSWORD'),
-            'total_amount' => $payableAmount,
-            'currency' => 'BDT',
-            'tran_id' => 'SSLC_'.uniqid(),
-            'success_url' => route('ssl.success'),
-            'fail_url' => route('ssl.fail'),
-            'cancel_url' => route('ssl.cancel'),
-            'cus_email' => $request->email ?? 'customer@mail.com',
-            'cus_name' => $request->name,
-            'cus_phone' => $request->phone,
-            'cus_add1' => $request->address,
-            'cus_city' => $district ? $district->name : 'N/A',
-            'cus_country' => 'Bangladesh',
-            'shipping_method' => 'NO',
-            'product_name' => 'Delivery Charge',
-            'product_category' => 'Ecommerce',
-            'product_profile' => 'general',
-        ];
-
-        $url = env('SSLC_BASE_URL').'/gwprocess/v4/api.php';
-
-        $response = Http::asForm()->withoutVerifying()->post($url, $post_data);
-        $result = $response->json();
-
-        if ($result['status'] === 'SUCCESS') {
-            return redirect($result['GatewayPageURL']);
+        // ২. কার্ট ডাটা নেওয়া
+        if (auth()->check()) {
+            $dbCart = Cart::where('user_id', auth()->id())->with('product')->get();
+            $cart = [];
+            foreach ($dbCart as $item) {
+                $cart[] = [
+                    'id' => $item->product_id,
+                    'price' => $item->product->new_price,
+                    'quantity' => $item->quantity,
+                    'attribute' => $item->attributes ?? 'N/A',
+                    'color' => $item->color ?? 'N/A',
+                ];
+            }
+        } else {
+            $cart = session()->get('cart', []);
         }
 
-        return redirect()->back()->with('error', 'SSLCommerz Error: '.$result['failedreason']);
+        $freeDelivery = check_free_delivery($cart);
+        $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float) $request->delivery_charge;
+        $subtotal = (float) $request->total_amount;
+        $couponDiscount = (float) ($request->coupon_discount ?? 0);
+        $grandTotal = max(0, ($subtotal - $couponDiscount) + $deliveryCharge);
+
+        $post_data = [];
+        $post_data['total_amount'] = $grandTotal; // You cant not употребляйте float value here. It must be string or integer.
+        $post_data['currency'] = 'BDT';
+        $post_data['tran_id'] = uniqid(); // tran_id must be unique
+
+        // CUSTOMER INFORMATION
+        $post_data['cus_name'] = $request->name;
+        $post_data['cus_email'] = 'customer@gmail.com';
+        $post_data['cus_add1'] = $request->address;
+        $post_data['cus_add2'] = '';
+        $post_data['cus_city'] = '';
+        $post_data['cus_state'] = '';
+        $post_data['cus_postcode'] = '';
+        $post_data['cus_country'] = 'Bangladesh';
+        $post_data['cus_phone'] = $request->phone;
+        $post_data['cus_fax'] = '';
+
+        // SHIPMENT INFORMATION
+        $post_data['ship_name'] = 'Store Test';
+        $post_data['ship_add1'] = 'Dhaka';
+        $post_data['ship_add2'] = 'Dhaka';
+        $post_data['ship_city'] = 'Dhaka';
+        $post_data['ship_state'] = 'Dhaka';
+        $post_data['ship_postcode'] = '1000';
+        $post_data['ship_phone'] = '';
+        $post_data['ship_country'] = 'Bangladesh';
+
+        $post_data['shipping_method'] = 'NO';
+        $post_data['product_name'] = 'Computer';
+        $post_data['product_category'] = 'Goods';
+        $post_data['product_profile'] = 'physical-goods';
+
+        // OPTIONAL PARAMETERS
+        $post_data['value_a'] = 'ref001';
+        $post_data['value_b'] = 'ref002';
+        $post_data['value_c'] = 'ref003';
+        $post_data['value_d'] = 'ref004';
+
+        $sslc = new SslCommerzNotification;
+        // initiate(param1, param2, param3)
+        // param1 = array of the customer info and product information
+        // param2 = true / false; true = json response, false = redirect to sslcommerz gateway
+        // param3 = true / false; true = payment will be hosted on sslcommerz gateway, false = payment will be hosted on your server
+
+        $payment_options = $sslc->makePayment($post_data, 'hosted');
+
+        if (! is_array($payment_options)) {
+            print_r($payment_options);
+            $payment_options = [];
+        }
     }
 
-    public function success(Request $request)
+    public function sslCommerzSuccess(Request $request)
     {
-        // SSL থেকে আসা ডাটা
-        $tran_id = $request->input('tran_id');
-        $amount = $request->input('amount');
-        $orderData = session()->get('pending_order_data');
-
         try {
             DB::beginTransaction();
 
-            // ১. Payment টেবিলে ডাটা রাখা
             $payment = new Payment;
             $payment->user_id = auth()->id() ?? 0;
-            $payment->amount = $amount;
-            $payment->paymentID = $tran_id;
-            $payment->merchantInvoiceNumber = $request->input('bank_tran_id');
-            $payment->trxID = $request->input('val_id');
+            $payment->amount = $request->amount;
+            $payment->currency = $request->currency;
+            $payment->paymentID = $request->bank_tran_id;
+            $payment->trxID = $request->tran_id;
+            $payment->merchantInvoiceNumber = $request->tran_id;
+            $payment->payerReference = $request->card_brand ?? 'SSLCommerz';
             $payment->save();
 
-            // ২. Order সেভ করা (সেশন থেকে ডাটা নিয়ে)
+            $orderData = session()->get('pending_order_data');
             $cart = session()->get('cart', []);
-            if (! $orderData) {
-                // যদি সেশন না পাওয়া যায়, তবে ডাটাবেসে পেমেন্ট লগ করে রাখুন (ডিব্যাগিং এর জন্য)
-                \Log::error('SSL Success: Session Data Lost', ['request' => $request->all()]);
-
-                return redirect()->route('checkout')->with('error', 'সেশন টাইমআউট হয়ে গেছে। অনুগ্রহ করে আবার চেষ্টা করুন।');
-            }
 
             $freeDelivery = check_free_delivery($cart);
-            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float)($orderData['delivery_charge'] ?? 0);
-            $subtotal = (float)($orderData['total_amount'] ?? 0);
-            $couponDiscount = (float)($orderData['coupon_discount'] ?? 0);
+            $deliveryCharge = ($freeDelivery['is_free'] ?? false) ? 0 : (float) ($orderData['delivery_charge'] ?? 0);
+            $subtotal = (float) ($orderData['total_amount'] ?? 0);
+            $couponDiscount = (float) ($orderData['coupon_discount'] ?? 0);
             $grandTotal = max(0, ($subtotal - $couponDiscount) + $deliveryCharge);
+
+            $rawPhone = $orderData['phone'] ?? '';
+            $digits = preg_replace('/[^0-9]/', '', (string) $rawPhone);
+            $cleanPhone = strlen($digits) >= 11 ? substr($digits, -11) : $digits;
 
             $order = new Orders;
             $order->user_id = auth()->id() ?? 0;
             $order->ip_address = $request->ip();
             $order->name = $orderData['name'];
-            $order->phone = $orderData['phone'];
+            $order->phone = $cleanPhone ?: $rawPhone;
             $order->address = $orderData['address'];
             $order->district = District::getNameById($orderData['district_id'] ?? 0);
             $order->thana = Thana::getNameById($orderData['thana_id'] ?? 0);

@@ -1165,36 +1165,7 @@ class OrderManageController extends Controller
         try {
             DB::beginTransaction();
 
-            $order = new Orders;
-            $order->user_id = 0; // Created by admin
-            $order->ip_address = $request->ip();
-            $order->name = $request->name;
-            $order->phone = $request->phone;
-            $order->address = $request->address;
-            $order->comments = $request->comments;
-            $order->note = $request->note; // Customer note
-
-            $order->delivery_status = $request->delivery_status ?? 'pending';
-            $order->payment_type = $request->payment_type ?? 'Cash On Delivery';
-            $order->payment_status = 'pending';
-
-            // Resolve district and thana names if IDs are provided
-            if ($request->district_id) {
-                $district = District::find($request->district_id);
-                if ($district) {
-                    $order->district = $district->name;
-                }
-            }
-            if ($request->upazila_id) {
-                $thana = Thana::find($request->upazila_id);
-                if ($thana) {
-                    $order->thana = $thana->name;
-                }
-            }
-
-            $order->save(); // Save to generate the ID
-
-            // Process order items
+            // 1. Process order items and compute subtotal
             $productIds = $request->product_ids ?? [];
             $sizes = $request->sizes ?? [];
             $colors = $request->colors ?? [];
@@ -1203,7 +1174,7 @@ class OrderManageController extends Controller
 
             $totalAmount = 0;
 
-            // Group the products by ID, size, and color to prevent duplicates
+            // Group products by ID, size, and color to merge duplicates
             $groupedProducts = [];
             for ($i = 0; $i < count($productIds); $i++) {
                 if (empty($productIds[$i])) {
@@ -1232,35 +1203,92 @@ class OrderManageController extends Controller
             }
 
             foreach ($groupedProducts as $item) {
+                $totalAmount += ($item['qty'] * $item['price']);
+            }
+
+            $adminDiscount = (float) ($request->admin_discount ?? 0);
+            $couponDiscount = (float) ($request->coupon_discount ?? 0);
+            $deliveryCharge = (float) ($request->delivery_charge ?? 0);
+            $paidAmount = (float) ($request->paid_amount ?? 0);
+
+            $grandTotalCalculated = $totalAmount - $adminDiscount - $couponDiscount + $deliveryCharge;
+            $grandTotal = max(0, $grandTotalCalculated - $paidAmount);
+
+            $rawPhone = $request->phone ?? '';
+            $digits = preg_replace('/[^0-9]/', '', (string) $rawPhone);
+            $cleanPhone = strlen($digits) >= 11 ? substr($digits, -11) : $digits;
+
+            // 2. Instantiate and fill Orders model with all required columns before saving
+            $order = new Orders;
+            $order->user_id = 0; // Created by admin
+            $order->created_by = auth()->user()?->name ?? 'Admin';
+            $order->updated_by = auth()->id();
+            $order->ip_address = $request->ip();
+            $order->name = $request->name;
+            $order->phone = $cleanPhone;
+            $order->address = $request->address;
+            $order->comments = $request->comments;
+            $order->note = $request->note; // Customer note
+
+            $order->delivery_status = $request->delivery_status ?? 'pending';
+            $order->payment_type = $request->payment_type ?? 'Cash On Delivery';
+            $order->payment_status = ($paidAmount >= $grandTotalCalculated && $totalAmount > 0) ? 'paid' : 'pending';
+
+            $order->total_amount = $totalAmount;
+            $order->admin_discount = $adminDiscount;
+            $order->coupon_discount = $couponDiscount;
+            $order->delivery_charge = $deliveryCharge;
+            $order->paid_amount = $paidAmount;
+            $order->grand_total = $grandTotal;
+
+            // Resolve district and thana names if IDs are provided
+            if ($request->district_id) {
+                $district = District::find($request->district_id);
+                if ($district) {
+                    $order->district = $district->name;
+                }
+            }
+            if ($request->upazila_id) {
+                $thana = Thana::find($request->upazila_id);
+                if ($thana) {
+                    $order->thana = $thana->name;
+                }
+            }
+
+            $order->save();
+
+            // 3. Save order details
+            foreach ($groupedProducts as $item) {
                 $detail = new OrderDetails;
                 $detail->order_id = $order->id;
                 $detail->product_id = $item['id'];
                 $detail->product_attribute = $item['size'];
                 $detail->product_colour = $item['color'];
-
                 $detail->product_qty = $item['qty'];
                 $detail->unit_price = $item['price'];
                 $detail->total_price = $item['qty'] * $item['price'];
                 $detail->save();
-
-                $totalAmount += $detail->total_price;
             }
 
-            // Update financials
-            $order->total_amount = $totalAmount;
-            $order->admin_discount = (float) ($request->admin_discount ?? 0);
-            $order->coupon_discount = (float) ($request->coupon_discount ?? 0);
-            $order->delivery_charge = (float) ($request->delivery_charge ?? 0);
-            $order->paid_amount = (float) ($request->paid_amount ?? 0);
-
-            $grandTotalCalculated = $totalAmount - $order->admin_discount - $order->coupon_discount + $order->delivery_charge;
-            $order->grand_total = max(0, $grandTotalCalculated - $order->paid_amount);
-
-            $order->created_by = auth()->id();
-            $order->save();
-
-            if ($request->has('incomplete_id')) {
+            // Remove incomplete order record if converted or matching phone
+            if ($request->filled('incomplete_id')) {
                 IncompleteOrders::where('id', $request->incomplete_id)->delete();
+            }
+            if (!empty($cleanPhone) || !empty($rawPhone)) {
+                IncompleteOrders::where(function ($q) use ($cleanPhone, $rawPhone, $digits) {
+                    if (!empty($cleanPhone)) {
+                        $q->where('phone', $cleanPhone)
+                          ->orWhere('phone', 'like', "%{$cleanPhone}")
+                          ->orWhere('phone', '88' . $cleanPhone)
+                          ->orWhere('phone', '+88' . $cleanPhone);
+                    }
+                    if (!empty($rawPhone)) {
+                        $q->orWhere('phone', $rawPhone);
+                    }
+                    if (!empty($digits)) {
+                        $q->orWhere('phone', $digits);
+                    }
+                })->delete();
             }
 
             // Log order creation
