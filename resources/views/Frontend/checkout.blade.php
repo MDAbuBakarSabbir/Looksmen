@@ -632,6 +632,24 @@
                                 </button>
                                 @endif
                             @endif
+
+                            <!-- Trust & Reassurance Badges (Dynamic from Admin Settings) -->
+                            @php
+                                $showTrustBox = get_setting('show_product_trust_box', '1') == '1';
+                                $badge1 = get_setting('trust_badge_1', 'ক্যাশ অন ডেলিভারি');
+                                $badge2 = get_setting('trust_badge_2', 'চেক করে নেওয়ার সুযোগ');
+                            @endphp
+                            @if($showTrustBox)
+                            <div class="mt-3 p-2 rounded bg-light border text-center" style="font-size: 12px; color: #475569; border-color: #e2e8f0 !important;">
+                                <div class="d-flex align-items-center justify-content-center flex-wrap" style="gap: 8px;">
+                                    <span class="d-inline-flex align-items-center"><i class="las la-shield-alt text-success mr-1 fs-16"></i> ১০০% নিরাপদ চেকআউট</span>
+                                    <span class="text-muted d-none d-sm-inline">|</span>
+                                    <span class="d-inline-flex align-items-center"><i class="las la-truck text-primary mr-1 fs-16"></i> {{ $badge1 }}</span>
+                                    <span class="text-muted d-none d-sm-inline">|</span>
+                                    <span class="d-inline-flex align-items-center"><i class="las la-box-open text-warning mr-1 fs-16"></i> {{ $badge2 }}</span>
+                                </div>
+                            </div>
+                            @endif
                         </div>
                         
                     </div>

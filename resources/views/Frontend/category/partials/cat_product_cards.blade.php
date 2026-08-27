@@ -22,22 +22,26 @@
                 </div>
             </div>
             <div class="p-3 text-left d-flex flex-column flex-grow-1">
-                <div class="rating rating-sm mb-1">
-                    @php
-                        $avg = $catProduct->getAverageRating() ?? 0;
-                        $fullStars = floor($avg);
-                        $fraction = $avg - $fullStars;
-                    @endphp
-                    @for ($i = 1; $i <= 5; $i++)
-                        @if ($i <= $fullStars)
-                            <i class="las la-star text-warning"></i>
-                        @elseif ($i == $fullStars + 1 && $fraction >= 0.5)
-                            <i class="las la-star-half-alt text-warning"></i>
-                        @else
-                            <i class="las la-star text-secondary opacity-30"></i>
-                        @endif
-                    @endfor
-                </div>
+                @php
+                    $avg = $catProduct->getAverageRating() ?? 0;
+                @endphp
+                @if ($avg > 0)
+                    <div class="rating rating-sm mb-1">
+                        @php
+                            $fullStars = floor($avg);
+                            $fraction = $avg - $fullStars;
+                        @endphp
+                        @for ($i = 1; $i <= 5; $i++)
+                            @if ($i <= $fullStars)
+                                <i class="las la-star text-warning"></i>
+                            @elseif ($i == $fullStars + 1 && $fraction >= 0.5)
+                                <i class="las la-star-half-alt text-warning"></i>
+                            @else
+                                <i class="las la-star text-secondary opacity-30"></i>
+                            @endif
+                        @endfor
+                    </div>
+                @endif
                 <h3 class="fw-600 fs-14 text-truncate-2 lh-1-4 mb-2 flex-grow-1">
                     <a href="{{ route('ProductView', [$catProduct->id, $catProduct->slug]) }}" class="product-title-link">{{ $catProduct->title }}</a>
                 </h3>
@@ -47,9 +51,14 @@
                         <del class="price-old">&#2547;{{ $catProduct->old_price }}</del>
                     @endif
                 </div>
-                <button type="button" class="btn btn-primary w-100 action-add-to-cart" data-id="{{ $catProduct->id }}" data-type="product">
-                    <i class="las la-shopping-cart mr-1"></i> Add to Cart
-                </button>
+                <div class="product-card-btn-group">
+                    <button type="button" class="btn btn-card-cart action-add-to-cart" data-toggle="tooltip" data-title="Add to cart" data-id="{{ $catProduct->id }}" data-type="product" aria-label="Add to Cart">
+                        <i class="las la-shopping-cart"></i>
+                    </button>
+                    <button type="button" class="btn btn-card-buy buy-now-btn" data-title="Buy Now" data-id="{{ $catProduct->id }}" data-type="product">
+                        <span>Buy Now</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>

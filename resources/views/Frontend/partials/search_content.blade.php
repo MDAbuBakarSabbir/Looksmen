@@ -4,7 +4,7 @@
             <div class="fs-11 text-muted text-uppercase fw-600 mb-2">Categories</div>
             <div class="d-flex flex-wrap gap-1">
                 @foreach($categories as $cat)
-                    <a href="{{ route('catProductView', [$cat->id, $cat->slug]) }}" class="badge badge-soft-primary px-2 py-1 fs-12 fw-500 rounded">
+                    <a href="{{ route('catProductView', $cat->slug) }}" class="badge badge-soft-primary px-2 py-1 fs-12 fw-500 rounded">
                         {{ $cat->name }}
                     </a>
                 @endforeach

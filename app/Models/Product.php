@@ -10,7 +10,7 @@ class Product extends Model
 {
     /** @use HasFactory<\Database\Factories\OrdersFactory> */
     use HasFactory;
-    protected $guarded = [''];
+    protected $guarded = [];
 
     public function productImages()
     {

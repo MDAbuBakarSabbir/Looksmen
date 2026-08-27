@@ -107,7 +107,28 @@ class HomeController extends Controller
             Cache::put('home_flash_sale_products_v1', $flashSaleProducts, 600);
         }
 
-        return view('welcome', compact('categories', 'todaysDeals', 'newArivals', 'categoryProducts', 'banners', 'sliders', 'flashSaleProducts'));
+        $topProducts = Cache::remember('home_top_products_v2', 600, function () {
+            $prods = Product::with('firstImage')
+                ->where('status', '1')
+                ->withCount('orderDetails')
+                ->orderByDesc('order_details_count')
+                ->take(6)
+                ->get();
+            if ($prods->isEmpty()) {
+                $prods = Product::with('firstImage')->where('status', '1')->latest()->take(6)->get();
+            }
+            return $prods;
+        });
+        if (! ($topProducts instanceof Collection) || ($topProducts->isNotEmpty() && ! ($topProducts->first() instanceof Product))) {
+            Cache::forget('home_top_products_v2');
+            $topProducts = Product::with('firstImage')->where('status', '1')->withCount('orderDetails')->orderByDesc('order_details_count')->take(6)->get();
+            if ($topProducts->isEmpty()) {
+                $topProducts = Product::with('firstImage')->where('status', '1')->latest()->take(6)->get();
+            }
+            Cache::put('home_top_products_v2', $topProducts, 600);
+        }
+
+        return view('welcome', compact('categories', 'todaysDeals', 'newArivals', 'categoryProducts', 'banners', 'sliders', 'flashSaleProducts', 'topProducts'));
     }
 
     public function userDash()

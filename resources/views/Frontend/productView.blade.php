@@ -464,17 +464,31 @@
             100% { transform: scale(1); }
         }
 
-        /* Related Products Grid — no carousel */
+        /* Related Products Grid */
         .rel-products-grid {
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             gap: 10px;
+        }
+        @media (max-width: 1400px) {
+            .rel-products-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        @media (max-width: 991px) {
+            .rel-products-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+            }
         }
         .rel-products-grid .rel-product-card {
             border: 1px solid #e9ecef;
             border-radius: 10px;
             overflow: hidden;
             background: #fff;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
             transition: box-shadow 0.2s ease, transform 0.2s ease;
         }
         .rel-products-grid .rel-product-card:hover {
@@ -486,6 +500,9 @@
         }
         .rel-products-grid .rel-product-details {
             padding: 8px 8px 10px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
         }
         @media (max-width: 767px) {
             .product-title-modern {
@@ -530,11 +547,11 @@
                 margin-bottom: 0 !important;
             }
             .rel-products-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 8px !important;
             }
             .rel-products-grid .rel-product-img-box img {
-                height: 110px !important;
+                height: 135px !important;
             }
         }
         @media (max-width: 480px) {
@@ -616,37 +633,39 @@
                             <div class="text-left pl-md-3">
                                 <h2 class="product-title-modern h2 font-weight-bold text-dark mb-3">{{ $singleProduct->title }}</h2>
 
-                                <div class="d-flex align-items-center flex-wrap mb-4">
-                                    <div class="rating-pill-container d-inline-flex align-items-center bg-light px-3 py-1 font-weight-bold rounded-pill mr-3">
-                                        <span class="rating-stars-gold">
-                                            @php
-                                                $avg = $singleProduct->getAverageRating();
-                                                $fullStars = floor($avg);
-                                                $fraction = $avg - $fullStars;
-                                            @endphp
+                                @if ($singleProduct->reviews && $singleProduct->reviews->count() > 0)
+                                    <div class="d-flex align-items-center flex-wrap mb-4">
+                                        <div class="rating-pill-container d-inline-flex align-items-center bg-light px-3 py-1 font-weight-bold rounded-pill mr-3">
+                                            <span class="rating-stars-gold">
+                                                @php
+                                                    $avg = $singleProduct->getAverageRating();
+                                                    $fullStars = floor($avg);
+                                                    $fraction = $avg - $fullStars;
+                                                @endphp
 
-                                            @for ($i = 1; $i <= 5; $i++)
-                                                @if ($i <= $fullStars)
-                                                    <i class="fa-regular fa-star"></i>
-                                                @elseif ($i == $fullStars + 1)
-                                                    @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                        <i class="fa-regular fa-star-half-alt"></i>
-                                                    @elseif ($fraction > 0.7)
-                                                        <i class="fa-regular fa-star"></i>
+                                                @for ($i = 1; $i <= 5; $i++)
+                                                    @if ($i <= $fullStars)
+                                                        <i class="fa-solid fa-star"></i>
+                                                    @elseif ($i == $fullStars + 1)
+                                                        @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                            <i class="fa-solid fa-star-half-stroke"></i>
+                                                        @elseif ($fraction > 0.7)
+                                                            <i class="fa-solid fa-star"></i>
+                                                        @else
+                                                            <i class="fa-regular fa-star" style="color: #ced4da;"></i>
+                                                        @endif
                                                     @else
                                                         <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                     @endif
-                                                @else
-                                                    <i class="fa-regular fa-star" style="color: #ced4da;"></i>
-                                                @endif
-                                            @endfor
+                                                @endfor
+                                            </span>
+                                            <span class="font-weight-bold" style="color: #475569;">{{ number_format($avg, 1) }}</span>
+                                        </div>
+                                        <span class="text-muted" style="font-size: 0.9rem; font-weight: 500;">
+                                            ({{ $singleProduct->reviews->count() }} customer {{ Str::plural('review', $singleProduct->reviews->count()) }})
                                         </span>
-                                        <span class="font-weight-bold" style="color: #475569;">{{ number_format($avg, 1) }}</span>
                                     </div>
-                                    <span class="text-muted" style="font-size: 0.9rem; font-weight: 500;">
-                                        ({{ $singleProduct->reviews()->count() }} customer reviews)
-                                    </span>
-                                </div>
+                                @endif
 
                                 <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
                                     <div class="sold-by-badge px-3 py-2 font-weight-bold d-inline-block mr-2 mb-1">
@@ -766,6 +785,94 @@
                                         </button>
                                     @endif
                                 </div>
+
+                                <!-- Delivery Information & Trust Assurance Box (Admin Configurable) -->
+                                @php
+                                    $showTrustBox = get_setting('show_product_trust_box', '1') == '1';
+                                    $insideDhaka = get_setting('trust_delivery_inside_dhaka', 'ঢাকা সিটি: ৳৬০');
+                                    $outsideDhaka = get_setting('trust_delivery_outside_dhaka', 'ঢাকার বাইরে: ৳১২০');
+                                    $deliveryTime = get_setting('trust_delivery_time', 'ঢাকা: ২৪-৪৮ ঘণ্টা | সারা দেশ: ২-৩ দিন');
+                                    $badge1 = get_setting('trust_badge_1', 'ক্যাশ অন ডেলিভারি');
+                                    $badge2 = get_setting('trust_badge_2', 'চেক করে নেওয়ার সুযোগ');
+                                    $badge3 = get_setting('trust_badge_3', '৭ দিনে সহজ রিটার্ন');
+                                    $badge4 = get_setting('trust_badge_4', '১০০% অরিজিনাল পণ্য');
+                                @endphp
+                                @if($showTrustBox)
+                                <div class="product-trust-box mt-3 p-3" style="background: #ffffff; border: 1.5px solid #e2e8f0; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                                    <!-- Delivery Charges & Time Row (Mobile Optimized) -->
+                                    <div class="delivery-info-section mb-3 pb-3 border-bottom" style="border-color: #edf2f7 !important;">
+                                        <div class="row" style="margin-left: -5px; margin-right: -5px;">
+                                            <!-- Delivery Charge Box -->
+                                            <div class="col-12 col-sm-6 mb-2 mb-sm-0" style="padding-left: 5px; padding-right: 5px;">
+                                                <div class="d-flex align-items-center p-2 rounded h-100" style="background: #f8fafc; border: 1px solid #e8edf2;">
+                                                    <div class="trust-icon-pill mr-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; min-width: 36px; background: rgba(4, 66, 68, 0.1); border-radius: 8px; color: #044244;">
+                                                        <i class="fa-solid fa-truck-fast fs-15"></i>
+                                                    </div>
+                                                    <div style="min-width: 0; overflow: hidden;">
+                                                        <div class="fw-700 fs-12" style="color: #044244; line-height: 1.2; margin-bottom: 2px;">ডেলিভারি চার্জ</div>
+                                                        <div class="fs-12 text-dark fw-600" style="line-height: 1.35; word-break: break-word;">
+                                                            <span>{{ $insideDhaka }}</span>
+                                                            @if(!empty($outsideDhaka))
+                                                                <span class="text-muted mx-1">|</span>
+                                                                <span>{{ $outsideDhaka }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!-- Delivery Time Box -->
+                                            <div class="col-12 col-sm-6" style="padding-left: 5px; padding-right: 5px;">
+                                                <div class="d-flex align-items-center p-2 rounded h-100" style="background: #fff5f5; border: 1px solid #ffe3e3;">
+                                                    <div class="trust-icon-pill mr-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px; min-width: 36px; background: rgba(225, 29, 72, 0.1); border-radius: 8px; color: #e11d48;">
+                                                        <i class="fa-solid fa-bolt-lightning fs-15"></i>
+                                                    </div>
+                                                    <div style="min-width: 0; overflow: hidden;">
+                                                        <div class="fw-700 fs-12" style="color: #e11d48; line-height: 1.2; margin-bottom: 2px;">ডেলিভারি সময়</div>
+                                                        <div class="fs-12 text-dark fw-600" style="line-height: 1.35; word-break: break-word;">{{ $deliveryTime }}</div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Trust & Confidence Highlights (4 Badges) -->
+                                    <div class="row text-left" style="margin-left: -5px; margin-right: -5px;">
+                                        <div class="col-6 mb-2" style="padding-left: 5px; padding-right: 5px;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="d-flex align-items-center justify-content-center mr-2 flex-shrink-0" style="width: 22px; height: 22px; background: rgba(16, 185, 129, 0.12); border-radius: 50%;">
+                                                    <i class="fa-solid fa-circle-check fs-12" style="color: #10b981;"></i>
+                                                </div>
+                                                <span class="fs-12 fw-600 text-truncate" style="color: #334155;" title="{{ $badge1 }}">{{ $badge1 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6 mb-2" style="padding-left: 5px; padding-right: 5px;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="d-flex align-items-center justify-content-center mr-2 flex-shrink-0" style="width: 22px; height: 22px; background: rgba(4, 66, 68, 0.1); border-radius: 50%;">
+                                                    <i class="fa-solid fa-box-open fs-12" style="color: #044244;"></i>
+                                                </div>
+                                                <span class="fs-12 fw-600 text-truncate" style="color: #334155;" title="{{ $badge2 }}">{{ $badge2 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6" style="padding-left: 5px; padding-right: 5px;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="d-flex align-items-center justify-content-center mr-2 flex-shrink-0" style="width: 22px; height: 22px; background: rgba(245, 158, 11, 0.12); border-radius: 50%;">
+                                                    <i class="fa-solid fa-rotate-left fs-12" style="color: #f59e0b;"></i>
+                                                </div>
+                                                <span class="fs-12 fw-600 text-truncate" style="color: #334155;" title="{{ $badge3 }}">{{ $badge3 }}</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-6" style="padding-left: 5px; padding-right: 5px;">
+                                            <div class="d-flex align-items-center">
+                                                <div class="d-flex align-items-center justify-content-center mr-2 flex-shrink-0" style="width: 22px; height: 22px; background: rgba(99, 102, 241, 0.12); border-radius: 50%;">
+                                                    <i class="fa-solid fa-award fs-12" style="color: #6366f1;"></i>
+                                                </div>
+                                                <span class="fs-12 fw-600 text-truncate" style="color: #334155;" title="{{ $badge4 }}">{{ $badge4 }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
 
                                 <!-- Wishlist, Compare and Call to Order Links -->
                                 <div class="d-flex flex-wrap align-items-center mt-4 pt-3 border-top">
@@ -891,28 +998,32 @@
                                                         <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                             class="d-block text-reset" style="color: #0f172a; text-decoration: none;">{{ Str::limit($product->title, 32) }}</a>
                                                     </h4>
-                                                    <div class="rating-stars-gold mb-1" style="font-size: 0.75rem;">
-                                                        @php
-                                                            $avg = $product->getAverageRating();
-                                                            $fullStars = floor($avg);
-                                                            $fraction = $avg - $fullStars;
-                                                        @endphp
-                                                        @for ($i = 1; $i <= 5; $i++)
-                                                            @if ($i <= $fullStars)
-                                                                <i class="fa-regular fa-star"></i>
-                                                            @elseif ($i == $fullStars + 1)
-                                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                                    <i class="fa-regular fa-star-half-alt"></i>
-                                                                @elseif ($fraction > 0.7)
+                                                    @php
+                                                        $avg = $product->getAverageRating();
+                                                    @endphp
+                                                    @if ($avg > 0)
+                                                        <div class="rating-stars-gold mb-1" style="font-size: 0.75rem;">
+                                                            @php
+                                                                $fullStars = floor($avg);
+                                                                $fraction = $avg - $fullStars;
+                                                            @endphp
+                                                            @for ($i = 1; $i <= 5; $i++)
+                                                                @if ($i <= $fullStars)
                                                                     <i class="fa-regular fa-star"></i>
+                                                                @elseif ($i == $fullStars + 1)
+                                                                    @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                                        <i class="fa-regular fa-star-half-alt"></i>
+                                                                    @elseif ($fraction > 0.7)
+                                                                        <i class="fa-regular fa-star"></i>
+                                                                    @else
+                                                                        <i class="fa-regular fa-star" style="color: #ced4da;"></i>
+                                                                    @endif
                                                                 @else
                                                                     <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                                 @endif
-                                                            @else
-                                                                <i class="fa-regular fa-star" style="color: #ced4da;"></i>
-                                                            @endif
-                                                        @endfor
-                                                    </div>
+                                                            @endfor
+                                                        </div>
+                                                    @endif
                                                     <div>
                                                         <span class="fw-700" style="color: #044244; font-size: 0.95rem;">৳{{ $product->new_price }}</span>
                                                     </div>
@@ -931,8 +1042,10 @@
                             <div class="tab-header-modern nav" role="tablist">
                                 <a href="#tab_default_1" data-toggle="tab"
                                     class="tab-link-modern active show">Description</a>
-                                <a href="#tab_default_4" data-toggle="tab"
-                                    class="tab-link-modern">Reviews ({{ $singleProduct->reviews()->count() }})</a>
+                                @if ($singleProduct->reviews && $singleProduct->reviews->count() > 0)
+                                    <a href="#tab_default_4" data-toggle="tab"
+                                        class="tab-link-modern">Reviews ({{ $singleProduct->reviews->count() }})</a>
+                                @endif
                             </div>
 
                             <div class="tab-content pt-0">
@@ -1036,9 +1149,9 @@
                                     </div>
                                 </div>
 
-                                <div class="tab-pane fade" id="tab_default_4">
-                                    <div class="p-4 text-left">
-                                        @if ($singleProduct->reviews->count() > 0)
+                                @if ($singleProduct->reviews && $singleProduct->reviews->count() > 0)
+                                    <div class="tab-pane fade" id="tab_default_4">
+                                        <div class="p-4 text-left">
                                             <ul class="list-group list-group-flush">
                                                 @foreach ($singleProduct->reviews as $review)
                                                     <li class="list-group-item px-0 py-3 border-0" style="border-bottom: 1px solid #f1f5f9 !important;">
@@ -1072,14 +1185,9 @@
                                                     </li>
                                                 @endforeach
                                             </ul>
-                                        @else
-                                            <div class="text-center py-5">
-                                                <i class="fa fa-comment-slash text-muted mb-3" style="font-size: 48px; opacity: 0.4; display: block;"></i>
-                                                <span class="fs-15 text-muted fw-600">There are no reviews for this product yet.</span>
-                                            </div>
-                                        @endif
+                                        </div>
                                     </div>
-                                </div>
+                                @endif
                             </div>
                         </div>
 
@@ -1088,7 +1196,7 @@
                             <div class="related-card-modern bg-white border shadow-sm overflow-hidden text-left">
                                 <div class="related-title-modern h5 font-weight-bold text-dark p-4 mb-0 d-flex justify-content-between align-items-center">
                                     <span>Related Products</span>
-                                    <a href="{{ route('catProductView', [$singleProduct->category_id, $singleProduct->category->slug ?? 'category']) }}" 
+                                    <a href="{{ route('catProductView', $singleProduct->category->slug ?? 'category') }}" 
                                        class="btn btn-sm fw-600 rounded-pill px-3 py-1 d-inline-flex align-items-center" style="font-size: 0.85rem; border: 1.5px solid #044244; color: #044244; background: transparent; text-decoration: none;">
                                         View More <i class="fa fa-angle-right ml-1 fs-14"></i>
                                     </a>
@@ -1099,7 +1207,7 @@
                                             <div class="rel-product-card">
                                                 <div class="rel-product-img-box">
                                                     <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}" class="d-block">
-                                                        <img class="lazyload" style="height: 160px; width: 100%; object-fit: cover; border-radius: 8px;"
+                                                        <img class="lazyload" style="height: 160px; width: 100%; object-fit: cover;"
                                                             src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                                             data-src="{{ $relProduct->firstImage ? asset('Uploads/' . $relProduct->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}"
                                                             alt="{{ $relProduct->title }}"
@@ -1111,36 +1219,49 @@
                                                         @if($relProduct->old_price > $relProduct->new_price)
                                                             <del class="text-muted mr-1" style="font-size: 0.78rem;">৳{{ $relProduct->old_price }}</del>
                                                         @endif
-                                                        <span class="fw-700 d-block" style="color: #044244; font-size: 0.95rem;">৳{{ $relProduct->new_price }}</span>
+                                                        <span class="fw-700" style="color: #044244; font-size: 0.95rem;">৳{{ $relProduct->new_price }}</span>
                                                     </div>
                                                     
-                                                    <div class="rating-stars-gold mb-1" style="font-size: 0.7rem;">
-                                                        @php
-                                                            $avg = $relProduct->getAverageRating();
-                                                            $fullStars = floor($avg);
-                                                            $fraction = $avg - $fullStars;
-                                                        @endphp
-                                                        @for ($i = 1; $i <= 5; $i++)
-                                                            @if ($i <= $fullStars)
-                                                                <i class="fa-regular fa-star"></i>
-                                                            @elseif ($i == $fullStars + 1)
-                                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                                    <i class="fa-regular fa-star-half-alt"></i>
-                                                                @elseif ($fraction > 0.7)
+                                                    @php
+                                                        $avg = $relProduct->getAverageRating();
+                                                    @endphp
+                                                    @if ($avg > 0)
+                                                        <div class="rating-stars-gold mb-1" style="font-size: 0.7rem;">
+                                                            @php
+                                                                $fullStars = floor($avg);
+                                                                $fraction = $avg - $fullStars;
+                                                            @endphp
+                                                            @for ($i = 1; $i <= 5; $i++)
+                                                                @if ($i <= $fullStars)
                                                                     <i class="fa-regular fa-star"></i>
+                                                                @elseif ($i == $fullStars + 1)
+                                                                    @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                                        <i class="fa-regular fa-star-half-alt"></i>
+                                                                    @elseif ($fraction > 0.7)
+                                                                        <i class="fa-regular fa-star"></i>
+                                                                    @else
+                                                                        <i class="fa-regular fa-star" style="color: #ced4da;"></i>
+                                                                    @endif
                                                                 @else
                                                                     <i class="fa-regular fa-star" style="color: #ced4da;"></i>
                                                                 @endif
-                                                            @else
-                                                                <i class="fa-regular fa-star" style="color: #ced4da;"></i>
-                                                            @endif
-                                                        @endfor
-                                                    </div>
+                                                            @endfor
+                                                        </div>
+                                                    @endif
                                                     
-                                                    <h3 class="fw-600 mb-0" style="font-size: 0.8rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em;">
+                                                    <h3 class="fw-600 mb-2 flex-grow-1" style="font-size: 0.8rem; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 2.6em;">
                                                         <a href="{{ route('ProductView', [$relProduct->id, $relProduct->slug]) }}"
                                                             class="d-block" style="color: #0f172a; text-decoration: none;">{{ $relProduct->title }}</a>
                                                     </h3>
+
+                                                    <div class="product-card-btn-group mt-auto">
+                                                        <button type="button" class="btn btn-card-cart action-add-to-cart" data-toggle="tooltip" data-title="Add to cart" data-id="{{ $relProduct->id }}" data-type="product" aria-label="Add to Cart">
+                                                            <i class="las la-shopping-cart"></i>
+                                                        </button>
+                                                        <button type="button" class="btn btn-card-buy buy-now-btn" data-title="Buy Now" data-id="{{ $relProduct->id }}" data-type="product">
+                                                            <span>Buy Now</span>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         @endforeach

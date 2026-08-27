@@ -444,6 +444,59 @@ class GeneralWebSettingsController extends Controller
         return back()->with('success', 'Domain settings updated successfully! Changes will take effect immediately.');
     }
 
+    public function productTrustSettings(Request $request)
+    {
+        $fields = [
+            'show_product_trust_box' => $request->has('show_product_trust_box') ? '1' : '0',
+            'trust_delivery_inside_dhaka' => $request->trust_delivery_inside_dhaka ?? 'ঢাকা সিটি: ৳৬০',
+            'trust_delivery_outside_dhaka' => $request->trust_delivery_outside_dhaka ?? 'ঢাকার বাইরে: ৳১২০',
+            'trust_delivery_time' => $request->trust_delivery_time ?? 'ঢাকা: ২৪-৪৮ ঘণ্টা | সারা দেশ: ২-৩ দিন',
+            'trust_badge_1' => $request->trust_badge_1 ?? 'ক্যাশ অন ডেলিভারি',
+            'trust_badge_2' => $request->trust_badge_2 ?? 'চেক করে নেওয়ার সুযোগ',
+            'trust_badge_3' => $request->trust_badge_3 ?? '৭ দিনে সহজ রিটার্ন',
+            'trust_badge_4' => $request->trust_badge_4 ?? '১০০% অরিজিনাল পণ্য',
+        ];
+
+        foreach ($fields as $name => $value) {
+            GeneralWebSettings::updateOrCreate(
+                ['name' => $name],
+                ['value' => $value, 'status' => 1]
+            );
+        }
+
+        Cache::forget('global_webconfig_pluck');
+        Cache::forget('boot_general_web_settings_map');
+        Cache::forget('global_webinfo_first');
+        Cache::flush();
+
+        return back()->with('success', 'Product Page Trust & Delivery settings updated successfully!');
+    }
+
+    public function toggleTrustStatus(Request $request)
+    {
+        $status = $request->status == '1' ? '1' : '0';
+
+        GeneralWebSettings::updateOrCreate(
+            ['name' => 'show_product_trust_box'],
+            ['value' => $status, 'status' => (int) $status]
+        );
+
+        Cache::forget('global_webconfig_pluck');
+        Cache::forget('boot_general_web_settings_map');
+        Cache::forget('global_webinfo_first');
+        Cache::flush();
+
+        $msg = $status == '1' 
+            ? 'Product trust & delivery box activated!' 
+            : 'Product trust & delivery box deactivated!';
+
+        return response()->json([
+            'success' => true,
+            'status' => $status,
+            'message' => $msg,
+        ]);
+    }
+
     public function trackingSettings()
     {
         $webinfo = GeneralWebSettings::all();

@@ -22,7 +22,7 @@
     <!-- Categories -->
     @foreach ($categories as $category)
         <url>
-            <loc>{{ route('catProductView', [$category->id, $category->slug]) }}</loc>
+            <loc>{{ route('catProductView', $category->slug) }}</loc>
             <lastmod>{{ $category->updated_at->toAtomString() }}</lastmod>
             <changefreq>weekly</changefreq>
             <priority>0.8</priority>
@@ -32,7 +32,7 @@
     <!-- Subcategories -->
     @foreach ($subcategories as $subcategory)
         <url>
-            <loc>{{ route('subCatProductView', [$subcategory->id, $subcategory->slug]) }}</loc>
+            <loc>{{ route('subCatProductView', [$subcategory->category->slug ?? 'category', $subcategory->slug]) }}</loc>
             <lastmod>{{ $subcategory->updated_at->toAtomString() }}</lastmod>
             <changefreq>weekly</changefreq>
             <priority>0.7</priority>
@@ -42,7 +42,7 @@
     <!-- Child Categories -->
     @foreach ($childcategories as $childcategory)
         <url>
-            <loc>{{ route('childCatProductView', [$childcategory->id, $childcategory->slug]) }}</loc>
+            <loc>{{ route('childCatProductView', [$childcategory->subcategory->category->slug ?? 'category', $childcategory->subcategory->slug ?? 'sub-category', $childcategory->slug]) }}</loc>
             <lastmod>{{ $childcategory->updated_at->toAtomString() }}</lastmod>
             <changefreq>weekly</changefreq>
             <priority>0.6</priority>

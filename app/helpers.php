@@ -12,6 +12,23 @@ if (!function_exists('single_price')) {
     }
 }
 
+if (!function_exists('get_setting')) {
+    function get_setting($key, $default = null) {
+        try {
+            $settings = \Illuminate\Support\Facades\Cache::remember('boot_general_web_settings_map', 3600, function () {
+                return \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+            });
+            $val = $settings[$key] ?? null;
+            if ($val !== null && $val !== '') {
+                return $val;
+            }
+            return $default;
+        } catch (\Exception $e) {
+            return $default;
+        }
+    }
+}
+
 if (!function_exists('addon_is_activated')) {
     function addon_is_activated($addon) {
         if ($addon === 'affiliate_system') {

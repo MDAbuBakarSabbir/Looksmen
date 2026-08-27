@@ -14,18 +14,24 @@ use Illuminate\Support\Facades\Cache;
 
 class FrontCategoryController extends Controller
 {
-    public function catProductView($id, $slug)
+    public function catProductView($category_slug)
     {
         $page = (int) request('page', 1);
-        $category = Cache::remember('cat_view_model_'.$id, 3600, function () use ($id) {
-            return Category::with('subcategories.childcategories')->findOrFail($id);
+        $category = Cache::remember('cat_view_model_slug_'.$category_slug, 3600, function () use ($category_slug) {
+            return Category::with('subcategories.childcategories')
+                ->where('slug', $category_slug)
+                ->orWhere('id', $category_slug)
+                ->firstOrFail();
         });
         if (! ($category instanceof Category)) {
-            Cache::forget('cat_view_model_'.$id);
-            $category = Category::with('subcategories.childcategories')->findOrFail($id);
-            Cache::put('cat_view_model_'.$id, $category, 3600);
+            Cache::forget('cat_view_model_slug_'.$category_slug);
+            $category = Category::with('subcategories.childcategories')
+                ->where('slug', $category_slug)
+                ->orWhere('id', $category_slug)
+                ->firstOrFail();
+            Cache::put('cat_view_model_slug_'.$category_slug, $category, 3600);
         }
-        $catProducts = Cache::remember('cat_products_list_'.$id.'_page_'.$page, 600, function () use ($category) {
+        $catProducts = Cache::remember('cat_products_list_'.$category->id.'_page_'.$page, 600, function () use ($category) {
             return Product::where('category_id', $category->id)
                 ->where('status', '1')
                 ->with('firstImage')
@@ -36,7 +42,7 @@ class FrontCategoryController extends Controller
                 ->paginate(12);
         });
         if (! ($catProducts instanceof LengthAwarePaginator)) {
-            Cache::forget('cat_products_list_'.$id.'_page_'.$page);
+            Cache::forget('cat_products_list_'.$category->id.'_page_'.$page);
             $catProducts = Product::where('category_id', $category->id)
                 ->where('status', '1')
                 ->with('firstImage')
@@ -45,7 +51,7 @@ class FrontCategoryController extends Controller
                 }], 'review_star')
                 ->latest()
                 ->paginate(12);
-            Cache::put('cat_products_list_'.$id.'_page_'.$page, $catProducts, 600);
+            Cache::put('cat_products_list_'.$category->id.'_page_'.$page, $catProducts, 600);
         }
 
         $categoryType = 'category';
@@ -54,18 +60,33 @@ class FrontCategoryController extends Controller
         return view('Frontend.category.catProduct', compact('catProducts', 'category', 'categoryType', 'parentCategory'));
     }
 
-    public function subCatProductView($id, $slug)
+    public function subCatProductView($category_slug, $sub_category_slug = null)
     {
         $page = (int) request('page', 1);
-        $category = Cache::remember('subcat_view_model_'.$id, 3600, function () use ($id) {
-            return SubCategory::with('childcategories', 'category.subcategories')->findOrFail($id);
+        $lookupSlug = $sub_category_slug ?: $category_slug;
+        $category = Cache::remember('subcat_view_model_slug_'.$lookupSlug, 3600, function () use ($lookupSlug, $sub_category_slug) {
+            if ($sub_category_slug) {
+                $subCat = SubCategory::with('childcategories', 'category.subcategories')
+                    ->where('slug', $sub_category_slug)
+                    ->first();
+                if ($subCat) {
+                    return $subCat;
+                }
+            }
+            return SubCategory::with('childcategories', 'category.subcategories')
+                ->where('slug', $lookupSlug)
+                ->orWhere('id', $lookupSlug)
+                ->firstOrFail();
         });
         if (! ($category instanceof SubCategory)) {
-            Cache::forget('subcat_view_model_'.$id);
-            $category = SubCategory::with('childcategories', 'category.subcategories')->findOrFail($id);
-            Cache::put('subcat_view_model_'.$id, $category, 3600);
+            Cache::forget('subcat_view_model_slug_'.$lookupSlug);
+            $category = SubCategory::with('childcategories', 'category.subcategories')
+                ->where('slug', $lookupSlug)
+                ->orWhere('id', $lookupSlug)
+                ->firstOrFail();
+            Cache::put('subcat_view_model_slug_'.$lookupSlug, $category, 3600);
         }
-        $catProducts = Cache::remember('subcat_products_list_'.$id.'_page_'.$page, 600, function () use ($category) {
+        $catProducts = Cache::remember('subcat_products_list_'.$category->id.'_page_'.$page, 600, function () use ($category) {
             return Product::where('subcategory_id', $category->id)
                 ->where('status', '1')
                 ->with('firstImage')
@@ -76,7 +97,7 @@ class FrontCategoryController extends Controller
                 ->paginate(12);
         });
         if (! ($catProducts instanceof LengthAwarePaginator)) {
-            Cache::forget('subcat_products_list_'.$id.'_page_'.$page);
+            Cache::forget('subcat_products_list_'.$category->id.'_page_'.$page);
             $catProducts = Product::where('subcategory_id', $category->id)
                 ->where('status', '1')
                 ->with('firstImage')
@@ -85,7 +106,7 @@ class FrontCategoryController extends Controller
                 }], 'review_star')
                 ->latest()
                 ->paginate(12);
-            Cache::put('subcat_products_list_'.$id.'_page_'.$page, $catProducts, 600);
+            Cache::put('subcat_products_list_'.$category->id.'_page_'.$page, $catProducts, 600);
         }
 
         $categoryType = 'subcategory';
@@ -94,18 +115,33 @@ class FrontCategoryController extends Controller
         return view('Frontend.category.catProduct', compact('catProducts', 'category', 'categoryType', 'parentCategory'));
     }
 
-    public function childCatProductView($id, $slug)
+    public function childCatProductView($category_slug, $sub_category_slug = null, $child_category_slug = null)
     {
         $page = (int) request('page', 1);
-        $category = Cache::remember('childcat_view_model_'.$id, 3600, function () use ($id) {
-            return ChildCategory::with('subcategory.category.subcategories', 'subcategory.childcategories')->findOrFail($id);
+        $lookupSlug = $child_category_slug ?: ($sub_category_slug ?: $category_slug);
+        $category = Cache::remember('childcat_view_model_slug_'.$lookupSlug, 3600, function () use ($lookupSlug, $child_category_slug) {
+            if ($child_category_slug) {
+                $childCat = ChildCategory::with('subcategory.category.subcategories', 'subcategory.childcategories')
+                    ->where('slug', $child_category_slug)
+                    ->first();
+                if ($childCat) {
+                    return $childCat;
+                }
+            }
+            return ChildCategory::with('subcategory.category.subcategories', 'subcategory.childcategories')
+                ->where('slug', $lookupSlug)
+                ->orWhere('id', $lookupSlug)
+                ->firstOrFail();
         });
         if (! ($category instanceof ChildCategory)) {
-            Cache::forget('childcat_view_model_'.$id);
-            $category = ChildCategory::with('subcategory.category.subcategories', 'subcategory.childcategories')->findOrFail($id);
-            Cache::put('childcat_view_model_'.$id, $category, 3600);
+            Cache::forget('childcat_view_model_slug_'.$lookupSlug);
+            $category = ChildCategory::with('subcategory.category.subcategories', 'subcategory.childcategories')
+                ->where('slug', $lookupSlug)
+                ->orWhere('id', $lookupSlug)
+                ->firstOrFail();
+            Cache::put('childcat_view_model_slug_'.$lookupSlug, $category, 3600);
         }
-        $catProducts = Cache::remember('childcat_products_list_'.$id.'_page_'.$page, 600, function () use ($category) {
+        $catProducts = Cache::remember('childcat_products_list_'.$category->id.'_page_'.$page, 600, function () use ($category) {
             return Product::where('childcategory_id', $category->id)
                 ->where('status', '1')
                 ->with('firstImage')
@@ -116,7 +152,7 @@ class FrontCategoryController extends Controller
                 ->paginate(12);
         });
         if (! ($catProducts instanceof LengthAwarePaginator)) {
-            Cache::forget('childcat_products_list_'.$id.'_page_'.$page);
+            Cache::forget('childcat_products_list_'.$category->id.'_page_'.$page);
             $catProducts = Product::where('childcategory_id', $category->id)
                 ->where('status', '1')
                 ->with('firstImage')
@@ -125,12 +161,12 @@ class FrontCategoryController extends Controller
                 }], 'review_star')
                 ->latest()
                 ->paginate(12);
-            Cache::put('childcat_products_list_'.$id.'_page_'.$page, $catProducts, 600);
+            Cache::put('childcat_products_list_'.$category->id.'_page_'.$page, $catProducts, 600);
         }
 
         $categoryType = 'childcategory';
         $parentSubCategory = $category->subcategory;
-        $parentCategory = $category->subcategory->category;
+        $parentCategory = $category->subcategory ? $category->subcategory->category : null;
 
         return view('Frontend.category.catProduct', compact('catProducts', 'category', 'categoryType', 'parentCategory', 'parentSubCategory'));
     }

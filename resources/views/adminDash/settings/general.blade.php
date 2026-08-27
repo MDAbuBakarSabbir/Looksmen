@@ -629,6 +629,115 @@
         </div>
     </div>
 
+    {{-- ==================== Product Page Trust & Delivery Settings ==================== --}}
+    <div class="row mb-2">
+        <div class="col-lg-12">
+            <div class="settings-card card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width: 36px; height: 36px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fa-solid fa-shield-halved" style="color: #fff; font-size: 16px;"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin: 0; font-size: 15px; font-weight: 700; color: #1f2937;">Product Page Trust Badges & Delivery Info</h4>
+                            <p style="margin: 0; font-size: 11px; color: #059669; font-weight: 500;">Customize the delivery charges, time & confidence badges shown on single product page</p>
+                        </div>
+                    </div>
+                    <span style="background: rgba(16,185,129,0.1); color: #059669; font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px;">CONVERSION BOOST</span>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('websettings.productTrustSettings') }}" method="POST" class="settingsUpdateForm">
+                        @csrf
+                        
+                        <div class="d-flex align-items-center justify-content-between p-3 mb-4 rounded" style="background: #f8fafc; border: 1px solid #e2e8f0;">
+                            <div>
+                                <label class="form-label mb-0 fw-700" style="color: #0f172a;">Show Trust & Delivery Box on Product Page</label>
+                                <p class="text-muted mb-0" style="font-size: 12px;">Toggle on/off to show or hide the entire reassurance box under Buy Now button</p>
+                            </div>
+                            <div class="d-flex align-items-center" style="gap: 12px;">
+                                <span id="trustBoxStatusBadge" class="badge {{ get_setting('show_product_trust_box', '1') == '1' ? 'bg-success' : 'bg-danger' }} text-white px-3 py-1" style="border-radius: 20px; font-size: 12px; font-weight: 700;">
+                                    {{ get_setting('show_product_trust_box', '1') == '1' ? 'Active' : 'Inactive' }}
+                                </span>
+                                <label class="switch mb-0">
+                                    <input type="checkbox" id="trust_box_status_switch" class="trust-status-switch" data-url="{{ route('websettings.toggleTrustStatus') }}" {{ get_setting('show_product_trust_box', '1') == '1' ? 'checked' : '' }}>
+                                    <span class="slider round" title="Click to Toggle"></span>
+                                </label>
+                                <input type="hidden" name="show_product_trust_box" id="hidden_show_product_trust_box" value="{{ get_setting('show_product_trust_box', '1') }}">
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Delivery Inside Dhaka Text</label>
+                                <input type="text" class="form-control" name="trust_delivery_inside_dhaka" value="{{ $webConfig['trust_delivery_inside_dhaka']['value'] ?? 'ঢাকা সিটি: ৳৬০' }}" placeholder="ঢাকা সিটি: ৳৬০" required>
+                                <small class="text-muted" style="font-size: 11px;">Shown under delivery charge icon</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Delivery Outside Dhaka Text</label>
+                                <input type="text" class="form-control" name="trust_delivery_outside_dhaka" value="{{ $webConfig['trust_delivery_outside_dhaka']['value'] ?? 'ঢাকার বাইরে: ৳১২০' }}" placeholder="ঢাকার বাইরে: ৳১২০" required>
+                                <small class="text-muted" style="font-size: 11px;">Shown beside inside Dhaka rate</small>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Delivery Time Text</label>
+                                <input type="text" class="form-control" name="trust_delivery_time" value="{{ $webConfig['trust_delivery_time']['value'] ?? 'ঢাকা: ২৪-৪৮ ঘণ্টা | সারা দেশ: ২-৩ দিন' }}" placeholder="ঢাকা: ২৪-৪৮ ঘণ্টা | সারা দেশ: ২-৩ দিন" required>
+                                <small class="text-muted" style="font-size: 11px;">Estimated delivery duration</small>
+                            </div>
+                        </div>
+
+                        <hr class="my-4" style="border-color: #f1f5f9;">
+
+                        <h6 class="fw-700 text-dark mb-3"><i class="fa-solid fa-award text-primary mr-1"></i> Trust & Confidence Badges (4 Badges)</h6>
+                        
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label">Badge 1 Text (Cash On Delivery)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-circle-check text-success"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control" name="trust_badge_1" value="{{ $webConfig['trust_badge_1']['value'] ?? 'ক্যাশ অন ডেলিভারি' }}" placeholder="ক্যাশ অন ডেলিভারি" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Badge 2 Text (Inspect Before Payment)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-box-open" style="color: #044244;"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control" name="trust_badge_2" value="{{ $webConfig['trust_badge_2']['value'] ?? 'চেক করে নেওয়ার সুযোগ' }}" placeholder="চেক করে নেওয়ার সুযোগ" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Badge 3 Text (Easy Return Policy)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-rotate-left text-warning"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control" name="trust_badge_3" value="{{ $webConfig['trust_badge_3']['value'] ?? '৭ দিনে সহজ রিটার্ন' }}" placeholder="৭ দিনে সহজ রিটার্ন" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Badge 4 Text (Original Guarantee)</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-award" style="color: #6366f1;"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control" name="trust_badge_4" value="{{ $webConfig['trust_badge_4']['value'] ?? '১০০% অরিজিনাল পণ্য' }}" placeholder="১০০% অরিজিনাল পণ্য" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-flex align-items-center gap-3">
+                            <button type="submit" class="btn btn-primary" style="background: #10b981; border-color: #10b981; padding: 10px 24px;">
+                                <i class="fa-solid fa-floppy-disk mr-1"></i> Save Trust & Delivery Settings
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- ==================== Domain Configuration ==================== --}}
     <div class="row mb-2">
         <div class="col-lg-12">
@@ -969,6 +1078,66 @@
                     } else {
                         // User clicked cancel, revert the switch to its original state
                         switchElement.prop('checked', !newStatus);
+                    }
+                });
+            });
+
+            // Trust Box Status Instant AJAX Toggle with Toast Notification
+            $(document).on('change', '#trust_box_status_switch', function() {
+                const sw = $(this);
+                const isChecked = sw.is(':checked') ? 1 : 0;
+                const url = sw.data('url');
+
+                // Update hidden input for full form submissions
+                $('#hidden_show_product_trust_box').val(isChecked);
+
+                $.ajax({
+                    url: url,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        status: isChecked
+                    },
+                    success: function(res) {
+                        if (res.success) {
+                            const badge = $('#trustBoxStatusBadge');
+                            if (isChecked) {
+                                badge.text('Active').removeClass('bg-danger').addClass('bg-success');
+                            } else {
+                                badge.text('Inactive').removeClass('bg-success').addClass('bg-danger');
+                            }
+
+                            // Toast notification
+                            if (typeof Toast !== 'undefined' && typeof Toast.fire === 'function') {
+                                Toast.fire({
+                                    icon: isChecked ? 'success' : 'info',
+                                    title: res.message
+                                });
+                            } else if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: isChecked ? 'success' : 'info',
+                                    title: res.message,
+                                    showConfirmButton: false,
+                                    timer: 2500,
+                                    timerProgressBar: true
+                                });
+                            }
+                        } else {
+                            sw.prop('checked', !isChecked);
+                            $('#hidden_show_product_trust_box').val(!isChecked ? 1 : 0);
+                            if (typeof Toast !== 'undefined' && typeof Toast.fire === 'function') {
+                                Toast.fire({ icon: 'error', title: res.message || 'Something went wrong!' });
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        sw.prop('checked', !isChecked);
+                        $('#hidden_show_product_trust_box').val(!isChecked ? 1 : 0);
+                        if (typeof Toast !== 'undefined' && typeof Toast.fire === 'function') {
+                            Toast.fire({ icon: 'error', title: 'Failed to update status!' });
+                        }
                     }
                 });
             });

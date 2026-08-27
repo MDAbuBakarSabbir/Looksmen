@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class GeneralWebSettings extends Model
 {
-    protected $guarded = [''];
+    protected $guarded = [];
 
     protected static function booted()
     {

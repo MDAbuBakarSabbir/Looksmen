@@ -113,9 +113,6 @@ Route::middleware(['maintainance'])->group(function () {
 
     Route::controller(FrontCategoryController::class)->group(function () {
         Route::get('/all-category', 'allcategory')->name('front.allCategory');
-        Route::get('/category/{id}/{slug}', 'catProductView')->name('catProductView')->where('id', '[0-9]+');
-        Route::get('/sub-category/{id}/{slug}', 'subCatProductView')->name('subCatProductView')->where('id', '[0-9]+');
-        Route::get('/child-category/{id}/{slug}', 'childCatProductView')->name('childCatProductView')->where('id', '[0-9]+');
         Route::get('/product/compare', 'ProductCompare')->name('ProductCompare');
         Route::get('/product/{id}/{slug}', 'ProductView')->name('ProductView')->where('id', '[0-9]+');
         Route::get('/page/{slug}', 'pages')->name('pages');
@@ -152,6 +149,16 @@ Route::middleware(['maintainance'])->group(function () {
             Route::post('/affiliate/payment-settings', 'payment_settings_store')->name('affiliate.user.payment_settings_store');
             Route::post('/affiliate/withdraw-request', 'withdraw_request_store')->name('affiliate.user.withdraw_request_store');
         });
+    });
+
+    // Dynamic SEO Category, Subcategory, and Child-Category Routing
+    // Category: looksmen.com/{category_slug}
+    // Sub-Category: looksmen.com/{category_slug}/{sub_category_slug}
+    // Child-Category: looksmen.com/{category_slug}/{sub_category_slug}/{child_category_slug}
+    Route::controller(FrontCategoryController::class)->group(function () {
+        Route::get('/{category_slug}/{sub_category_slug}/{child_category_slug}', 'childCatProductView')->name('childCatProductView');
+        Route::get('/{category_slug}/{sub_category_slug}', 'subCatProductView')->name('subCatProductView');
+        Route::get('/{category_slug}', 'catProductView')->name('catProductView');
     });
 
 });

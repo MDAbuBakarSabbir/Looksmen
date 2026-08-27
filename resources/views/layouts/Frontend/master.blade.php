@@ -13,9 +13,13 @@
         Cache::put('global_webinfo_first', $webinfo, 3600);
     }
     $webConfig = Cache::remember('global_webconfig_pluck', 3600, function () {
-        $first = GeneralWebSettings::first();
-        return $first ? $first->pluck('value', 'name', 'status')->toArray() : [];
+        return GeneralWebSettings::pluck('value', 'name')->toArray();
     });
+    if (!is_array($webConfig) || empty($webConfig)) {
+        Cache::forget('global_webconfig_pluck');
+        $webConfig = GeneralWebSettings::pluck('value', 'name')->toArray();
+        Cache::put('global_webconfig_pluck', $webConfig, 3600);
+    }
     $pages = Cache::remember('global_pages_list', 3600, function () {
         return Pages::where('status', 1)->get();
     });
@@ -172,6 +176,93 @@
             --primary: #044244;
             --hov-primary: #044244;
             --soft-primary: rgba(4, 66, 68, 0.1);
+        }
+
+        /* Global Theme Product Card Action Buttons (Mobile & Desktop Optimized) */
+        .product-card-btn-group {
+            display: flex !important;
+            gap: 6px !important;
+            width: 100% !important;
+            margin-top: 8px !important;
+            align-items: center !important;
+        }
+        .product-card-btn-group .btn-card-cart {
+            flex: 0 0 36px !important;
+            width: 36px !important;
+            height: 34px !important;
+            padding: 0 !important;
+            border-radius: 6px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            background-color: rgba(4, 66, 68, 0.08) !important;
+            color: #044244 !important;
+            border: 1.5px solid rgba(4, 66, 68, 0.25) !important;
+            box-shadow: 0 1px 2px rgba(4, 66, 68, 0.04) !important;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            cursor: pointer !important;
+            text-decoration: none !important;
+        }
+        .product-card-btn-group .btn-card-cart i {
+            font-size: 18px !important;
+            line-height: 1 !important;
+        }
+        .product-card-btn-group .btn-card-cart:hover {
+            background-color: #044244 !important;
+            color: #ffffff !important;
+            border-color: #044244 !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 10px rgba(4, 66, 68, 0.2) !important;
+        }
+        .product-card-btn-group .btn-card-buy {
+            flex: 1 1 auto !important;
+            min-width: 0 !important;
+            height: 34px !important;
+            padding: 0 8px !important;
+            font-size: 13.5px !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.2px !important;
+            border-radius: 6px !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1.2 !important;
+            text-decoration: none !important;
+            background: linear-gradient(135deg, #044244 0%, #065b5e 100%) !important;
+            color: #ffffff !important;
+            border: 1.5px solid #044244 !important;
+            box-shadow: 0 2px 6px rgba(4, 66, 68, 0.22) !important;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            white-space: nowrap !important;
+            cursor: pointer !important;
+        }
+        .product-card-btn-group .btn-card-buy:hover {
+            background: linear-gradient(135deg, #02292a 0%, #044244 100%) !important;
+            border-color: #02292a !important;
+            color: #ffffff !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(4, 66, 68, 0.35) !important;
+        }
+        @media (max-width: 575.98px) {
+            .product-card-btn-group {
+                gap: 4px !important;
+                margin-top: 6px !important;
+            }
+            .product-card-btn-group .btn-card-cart {
+                flex: 0 0 32px !important;
+                width: 32px !important;
+                height: 32px !important;
+                border-radius: 5px !important;
+            }
+            .product-card-btn-group .btn-card-cart i {
+                font-size: 16px !important;
+            }
+            .product-card-btn-group .btn-card-buy {
+                height: 32px !important;
+                font-size: 12.5px !important;
+                padding: 0 6px !important;
+                border-radius: 5px !important;
+            }
         }
 
         #map {
@@ -407,7 +498,7 @@
                                         <ul class="list-unstyled categories no-scrollbar py-2 mb-0 text-left">
                                             @foreach ($categories as $category)
                                                 <li class="category-nav-element" data-id="{{ $category->id }}">
-                                                    <a href="{{ route('catProductView', [$category->id, $category->slug]) }}"
+                                                    <a href="{{ route('catProductView', $category->slug) }}"
                                                         class="text-truncate text-reset py-2 px-3 d-block">
                                                         <img class="cat-image mr-2 opacity-60 ls-is-cached lazyloaded"
                                                             src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
@@ -425,7 +516,7 @@
                                                                         @foreach ($category->subcategories as $subCat)
                                                                             <li class="fw-600 border-bottom pb-2 mb-3">
                                                                                 <a class="text-reset"
-                                                                                    href="{{ route('subCatProductView', [$subCat->id, $subCat->slug]) }}">
+                                                                                    href="{{ route('subCatProductView', [$category->slug, $subCat->slug]) }}">
                                                                                     {{ $subCat->name }}</a>
                                                                             </li>
                                                                         @endforeach
@@ -998,7 +1089,7 @@
             @foreach ($categories as $category)
                 <li class="border-bottom">
                     <div class="d-flex align-items-center justify-content-between py-3 px-4">
-                        <a href="{{ route('catProductView', [$category->id, $category->slug]) }}" class="text-reset text-dark fw-600 flex-grow-1 d-flex align-items-center" style="text-decoration: none;">
+                        <a href="{{ route('catProductView', $category->slug) }}" class="text-reset text-dark fw-600 flex-grow-1 d-flex align-items-center" style="text-decoration: none;">
                             <img class="cat-image mr-3 opacity-60 lazyload"
                                 src="{{ asset('frontend') }}/assets/img/placeholder.jpg"
                                 data-src="{{ asset('Uploads/'.$category->banner) }}"
@@ -1021,7 +1112,7 @@
                             @foreach ($category->subcategories as $subCat)
                                 <li class="py-2 border-bottom-0">
                                     <div class="d-flex align-items-center justify-content-between">
-                                        <a href="{{ route('subCatProductView', [$subCat->id, $subCat->slug]) }}" class="text-reset text-dark fs-14 fw-500 py-1 flex-grow-1" style="text-decoration: none;">
+                                        <a href="{{ route('subCatProductView', [$category->slug, $subCat->slug]) }}" class="text-reset text-dark fs-14 fw-500 py-1 flex-grow-1" style="text-decoration: none;">
                                             {{ $subCat->name }}
                                         </a>
                                         @if ($subCat->childcategories->count() > 0)
@@ -1035,7 +1126,7 @@
                                         <ul class="list-unstyled childcategory-list">
                                             @foreach ($subCat->childcategories as $childCat)
                                                 <li class="py-1">
-                                                    <a href="{{ route('childCatProductView', [$childCat->id, $childCat->slug]) }}" class="text-reset text-muted fs-13 py-1 d-block" style="text-decoration: none;">
+                                                    <a href="{{ route('childCatProductView', [$category->slug, $subCat->slug, $childCat->slug]) }}" class="text-reset text-muted fs-13 py-1 d-block" style="text-decoration: none;">
                                                         <i class="las la-minus mr-1 fs-10 opacity-50"></i> {{ $childCat->name }}
                                                     </a>
                                                 </li>

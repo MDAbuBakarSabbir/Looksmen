@@ -15,8 +15,8 @@ class SitemapController extends Controller
     {
         $products = Product::where('status', '1')->orderBy('updated_at', 'desc')->get();
         $categories = Category::where('status', '1')->orderBy('updated_at', 'desc')->get();
-        $subcategories = Subcategory::where('status', '1')->orderBy('updated_at', 'desc')->get();
-        $childcategories = ChildCategory::where('status', '1')->orderBy('updated_at', 'desc')->get();
+        $subcategories = SubCategory::with('category')->where('status', '1')->orderBy('updated_at', 'desc')->get();
+        $childcategories = ChildCategory::with('subcategory.category')->where('status', '1')->orderBy('updated_at', 'desc')->get();
         $pages = Pages::where('status', 1)->orderBy('updated_at', 'desc')->get();
 
         return response()->view('sitemap', [

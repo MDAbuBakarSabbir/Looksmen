@@ -25,7 +25,7 @@ HOME
                     <ul class="list-unstyled categories no-scrollbar py-2 mb-0 text-left">
                         @foreach ($categories as $category)
                             <li class="category-nav-element" data-id="{{ $category->id }}">
-                                <a href="{{ route('catProductView', [$category->id, $category->slug]) }}"
+                                <a href="{{ route('catProductView', $category->slug) }}"
                                     class="text-truncate text-reset py-2 px-3 d-block">
                                     <i class="cat-image lazyload mr-2 opacity-60 {{ (str_starts_with($category->icon, 'fa-') && !str_contains($category->icon, ' ')) ? 'fa-solid ' . $category->icon : $category->icon }}"></i>
                                     <span class="cat-name">{{ $category->name }}</span>
@@ -39,7 +39,7 @@ HOME
                                                     <div class="p-2">
                                                         <h6 class="mb-3">
                                                             <a class="text-reset fw-600 fs-14"
-                                                                href="{{ route('subCatProductView', [$subCat->id, $subCat->slug]) }}">
+                                                                href="{{ route('subCatProductView', [$category->slug, $subCat->slug]) }}">
                                                                 {{ $subCat->name }}
                                                             </a>
                                                         </h6>
@@ -47,7 +47,7 @@ HOME
                                                             @foreach ($subCat->childcategories as $childCat)
                                                                 <li class="mb-2">
                                                                     <a class="text-reset opacity-60 hov-opacity-100"
-                                                                        href="{{ route('childCatProductView', [$childCat->id, $childCat->slug]) }}">
+                                                                        href="{{ route('childCatProductView', [$category->slug, $subCat->slug, $childCat->slug]) }}">
                                                                         {{ $childCat->name }}
                                                                     </a>
                                                                 </li>
@@ -105,7 +105,7 @@ HOME
                                 <div class="row gutters-5">
                                     @foreach ($categoryChunk as $category)
                                         <div class="col-4 mt-3 minw-0">
-                                            <a href="{{ route('catProductView', [$category->id, $category->slug]) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm text-center">
+                                            <a href="{{ route('catProductView', $category->slug) }}" class="d-block rounded bg-white p-2 text-reset shadow-sm text-center">
                                                 <img
                                                     src="{{ asset('frontend/assets/img/placeholder.jpg') }}"
                                                     data-src="{{ asset('Uploads') }}/{{ $category->banner }}"
@@ -222,34 +222,43 @@ HOME
                                         <del class="fw-600 opacity-50 mr-1">৳{{ $newArival->old_price }}</del>
                                         <span class="fw-700 text-primary">৳{{ $newArival->new_price }}</span>
                                     </div>
-                                    <div class="rating rating-sm mt-1">
-                                        @php
-                                            $avg = $newArival->getAverageRating();
-                                            $fullStars = floor($avg);
-                                            $fraction = $avg - $fullStars;
-                                        @endphp
-                                        @for ($i = 1; $i <= 5; $i++)
-                                            @if ($i <= $fullStars)
-                                                <i class="las la-star" style="color: #ffc107;"></i>
-                                            @elseif ($i == $fullStars + 1)
-                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                    <i class="las la-star-half-alt" style="color: #ffc107;"></i>
-                                                @elseif ($fraction > 0.7)
+                                    @php
+                                        $avg = $newArival->getAverageRating();
+                                    @endphp
+                                    @if ($avg > 0)
+                                        <div class="rating rating-sm mt-1">
+                                            @php
+                                                $fullStars = floor($avg);
+                                                $fraction = $avg - $fullStars;
+                                            @endphp
+                                            @for ($i = 1; $i <= 5; $i++)
+                                                @if ($i <= $fullStars)
                                                     <i class="las la-star" style="color: #ffc107;"></i>
+                                                @elseif ($i == $fullStars + 1)
+                                                    @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                        <i class="las la-star-half-alt" style="color: #ffc107;"></i>
+                                                    @elseif ($fraction > 0.7)
+                                                        <i class="las la-star" style="color: #ffc107;"></i>
+                                                    @else
+                                                        <i class="las la-star" style="color: #ced4da;"></i>
+                                                    @endif
                                                 @else
                                                     <i class="las la-star" style="color: #ced4da;"></i>
                                                 @endif
-                                            @else
-                                                <i class="las la-star" style="color: #ced4da;"></i>
-                                            @endif
-                                        @endfor
-                                    </div>
+                                            @endfor
+                                        </div>
+                                    @endif
                                     <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
                                         <a href="{{ route('ProductView', [$newArival->id, $newArival->slug]) }}" class="d-block text-reset">{{ $newArival->title }}</a>
                                     </h3>
-                                    <button type="button" class="btn btn-primary action-add-to-cart mt-2" style="width: 100%" data-title="Add to cart" data-id="{{ $newArival->id }}" data-type="product">
-                                        Add to Cart
-                                    </button>
+                                    <div class="product-card-btn-group">
+                                        <button type="button" class="btn btn-card-cart action-add-to-cart" data-toggle="tooltip" data-title="Add to cart" data-id="{{ $newArival->id }}" data-type="product" aria-label="Add to Cart">
+                                            <i class="las la-shopping-cart"></i>
+                                        </button>
+                                        <button type="button" class="btn btn-card-buy buy-now-btn" data-title="Buy Now" data-id="{{ $newArival->id }}" data-type="product">
+                                            <span>Buy Now</span>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -349,7 +358,7 @@ HOME
                                     <span
                                         class="border-bottom border-primary border-width-2 pb-3 d-inline-block">{{ $categoryProduct->name }}</span>
                                 </h3>
-                                <a href="{{ route('catProductView', [$categoryProduct->id, $categoryProduct->slug]) }}"
+                                <a href="{{ route('catProductView', $categoryProduct->slug) }}"
                                     class="ml-auto mr-0 btn btn-primary btn-sm shadow-md">View More</a>
                             </div>
 
@@ -388,39 +397,48 @@ HOME
                                                     <del class="fw-600 opacity-50 mr-1">৳{{ $product->old_price }}</del>
                                                     <span class="fw-700 text-primary">৳{{ $product->new_price }}</span>
                                                 </div>
-                                                <div class="rating rating-sm mt-1">
-                                                    @php
-                                                        $avg = $product->getAverageRating();
-                                                        $fullStars = floor($avg);
-                                                        $fraction = $avg - $fullStars;
-                                                    @endphp
-                                                    @for ($i = 1; $i <= 5; $i++)
-                                                        @if ($i <= $fullStars)
-                                                            <i class="las la-star" style="color: #ffc107;"></i>
-                                                        @elseif ($i == $fullStars + 1)
-                                                            @if ($fraction >= 0.3 && $fraction <= 0.7)
-                                                                <i class="las la-star-half-alt"
-                                                                    style="color: #ffc107;"></i>
-                                                            @elseif ($fraction > 0.7)
+                                                @php
+                                                    $avg = $product->getAverageRating();
+                                                @endphp
+                                                @if ($avg > 0)
+                                                    <div class="rating rating-sm mt-1">
+                                                        @php
+                                                            $fullStars = floor($avg);
+                                                            $fraction = $avg - $fullStars;
+                                                        @endphp
+                                                        @for ($i = 1; $i <= 5; $i++)
+                                                            @if ($i <= $fullStars)
                                                                 <i class="las la-star" style="color: #ffc107;"></i>
+                                                            @elseif ($i == $fullStars + 1)
+                                                                @if ($fraction >= 0.3 && $fraction <= 0.7)
+                                                                    <i class="las la-star-half-alt"
+                                                                        style="color: #ffc107;"></i>
+                                                                @elseif ($fraction > 0.7)
+                                                                    <i class="las la-star" style="color: #ffc107;"></i>
+                                                                @else
+                                                                    <i class="las la-star" style="color: #ced4da;"></i>
+                                                                @endif
                                                             @else
                                                                 <i class="las la-star" style="color: #ced4da;"></i>
                                                             @endif
-                                                        @else
-                                                            <i class="las la-star" style="color: #ced4da;"></i>
-                                                        @endif
-                                                    @endfor
-                                                </div>
+                                                        @endfor
+                                                    </div>
+                                                @endif
                                                 <h3 class="fw-600 fs-13 text-truncate-2 lh-1-4 mb-0 h-35px">
                                                     <a href="{{ route('ProductView', [$product->id, $product->slug]) }}"
                                                         class="d-block text-reset">{{ $product->title }}</a>
                                                 </h3>
 
-                                                <button type="button" class="btn btn-primary action-add-to-cart mt-2"
-                                                    style="width: 100%" data-title="Add to cart"
-                                                    data-id="{{ $product->id }}" data-type="product">
-                                                    Add to Cart
-                                                </button>
+                                                <div class="product-card-btn-group">
+                                                    <button type="button" class="btn btn-card-cart action-add-to-cart" data-toggle="tooltip" data-title="Add to cart"
+                                                        data-id="{{ $product->id }}" data-type="product" aria-label="Add to Cart">
+                                                        <i class="las la-shopping-cart"></i>
+                                                    </button>
+                                                    <button type="button" class="btn btn-card-buy buy-now-btn" data-title="Buy Now"
+                                                        data-id="{{ $product->id }}" data-type="product">
+                                                        <span>Buy Now</span>
+                                                    </button>
+                                                </div>
 
                                             </div>
                                         </div>
@@ -482,22 +500,20 @@ HOME
         <div class="container">
             <div class="row gutters-10 align-items-stretch">
                 <!-- Top Categories -->
-                <div class="{{ $hasBrands ? 'col-lg-6' : 'col-12' }} mb-4 mb-lg-0">
+                <div class="col-lg-6 mb-4 mb-lg-0">
                     <div class="card shadow-sm border-0 h-100 rounded-lg transition-all hover-shadow-lg">
-                        <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4">
-                            <div class="d-flex align-items-center justify-content-between">
-                                <h3 class="h5 fw-700 text-dark mb-0 d-flex align-items-center">
-                                    <i class="las la-th-large text-primary mr-2 fs-24"></i> Top Categories
-                                </h3>
-                                <a href="{{ route('front.allCategory') }}" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
-                            </div>
+                        <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important;">
+                            <h3 class="h5 fw-700 text-dark mb-0 d-flex align-items-center">
+                                <i class="las la-th-large text-primary mr-2 fs-24"></i> Top Categories
+                            </h3>
+                            <a href="{{ route('front.allCategory') }}" class="text-primary fw-600 fs-13 hover-text-underline transition-all">View All <i class="las la-angle-right"></i></a>
                         </div>
                         <div class="card-body p-4 pt-2">
                             <div class="row gutters-10">
                                 @if(isset($categories) && $categories->count() > 0)
                                     @foreach($categories->take(6) as $cat)
                                     <div class="col-sm-6 mb-3">
-                                        <a href="{{ route('catProductView', [$cat->id, $cat->slug]) }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
+                                        <a href="{{ route('catProductView', $cat->slug) }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
                                             <div class="d-flex align-items-center">
                                                 <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3 overflow-hidden" style="width: 50px; height: 50px; min-width: 50px;">
                                                     @if(!empty($cat->banner) && (filter_var($cat->banner, FILTER_VALIDATE_URL) || file_exists(public_path('Uploads/' . $cat->banner))))
@@ -551,6 +567,52 @@ HOME
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-6 mb-4 mb-lg-0">
+                    <div class="card shadow-sm border-0 h-100 rounded-lg transition-all hover-shadow-lg">
+                        <div class="card-header bg-white border-bottom-0 pt-4 pb-2 px-4 d-flex align-items-center justify-content-between" style="display: flex !important; justify-content: space-between !important; align-items: center !important; width: 100% !important;">
+                            <h3 class="h5 fw-700 text-dark mb-0 d-flex align-items-center">
+                                <i class="las la-fire text-danger mr-2 fs-24"></i> Top Products
+                            </h3>
+                            <span class="badge px-3 py-1 fw-700 fs-11 text-danger" style="background: rgba(239, 68, 68, 0.1); border-radius: 20px; letter-spacing: 0.3px;">TOP 6</span>
+                        </div>
+                        <div class="card-body p-4 pt-2">
+                            <div class="row gutters-10">
+                                @if(isset($topProducts) && count($topProducts) > 0)
+                                    @foreach($topProducts as $prod)
+                                        @if(is_object($prod) && isset($prod->id))
+                                        <div class="col-sm-6 mb-3">
+                                            <a href="{{ route('ProductView', [$prod->id, $prod->slug]) }}" class="bg-white category-card d-block text-reset rounded-lg p-3 transition-all h-100">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="category-icon bg-light rounded-circle d-flex align-items-center justify-content-center mr-3 overflow-hidden flex-shrink-0" style="width: 50px; height: 50px; min-width: 50px;">
+                                                        <img src="{{ asset('frontend/assets/img/placeholder.jpg') }}" 
+                                                             data-src="{{ $prod->firstImage ? asset('Uploads/' . $prod->firstImage->image) : asset('frontend/assets/img/placeholder.jpg') }}" 
+                                                             alt="{{ $prod->title }}" 
+                                                             class="lazyload w-100 h-100" 
+                                                             style="object-fit: cover;" 
+                                                             onerror="this.onerror=null;this.src='{{ asset('frontend/assets/img/placeholder.jpg') }}';">
+                                                    </div>
+                                                    <div class="product-info flex-grow-1" style="min-width: 0;">
+                                                        <h4 class="fs-13 fw-600 mb-1 text-dark text-truncate" title="{{ $prod->title }}">{{ $prod->title }}</h4>
+                                                        <div class="fs-13">
+                                                            <span class="fw-700 text-primary">৳{{ $prod->new_price }}</span>
+                                                            @if($prod->old_price > $prod->new_price)
+                                                                <del class="text-muted fs-11 ml-1">৳{{ $prod->old_price }}</del>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="category-arrow text-primary opacity-0 transition-all ml-1">
+                                                        <i class="las la-arrow-right"></i>
+                                                    </div>
+                                                </div>
+                                            </a>
+                                        </div>
+                                        @endif
+                                    @endforeach
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
             </div>
         </div>
@@ -564,6 +626,93 @@ HOME
         .brand-card:hover { border-color: var(--primary) !important; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transform: translateY(-3px); }
         .hover-text-underline:hover { text-decoration: underline !important; }
         .transition-all { transition: all 0.3s ease; }
+
+        /* Theme-compliant Product Card Action Buttons (Mobile & Desktop Optimized) */
+        .product-card-btn-group {
+            display: flex;
+            gap: 6px;
+            width: 100%;
+            margin-top: 8px;
+            align-items: center;
+        }
+        .product-card-btn-group .btn-card-cart {
+            flex: 0 0 36px;
+            width: 36px;
+            height: 34px;
+            padding: 0;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(4, 66, 68, 0.08);
+            color: #044244;
+            border: 1.5px solid rgba(4, 66, 68, 0.25);
+            box-shadow: 0 1px 2px rgba(4, 66, 68, 0.04);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .product-card-btn-group .btn-card-cart i {
+            font-size: 18px;
+            line-height: 1;
+        }
+        .product-card-btn-group .btn-card-cart:hover {
+            background-color: #044244;
+            color: #ffffff;
+            border-color: #044244;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(4, 66, 68, 0.2);
+        }
+        .product-card-btn-group .btn-card-buy {
+            flex: 1 1 auto;
+            min-width: 0;
+            height: 34px;
+            padding: 0 8px;
+            font-size: 13.5px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            border-radius: 6px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1.2;
+            text-decoration: none;
+            background: linear-gradient(135deg, #044244 0%, #065b5e 100%);
+            color: #ffffff;
+            border: 1.5px solid #044244;
+            box-shadow: 0 2px 6px rgba(4, 66, 68, 0.22);
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .product-card-btn-group .btn-card-buy:hover {
+            background: linear-gradient(135deg, #02292a 0%, #044244 100%);
+            border-color: #02292a;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(4, 66, 68, 0.35);
+        }
+        @media (max-width: 575.98px) {
+            .product-card-btn-group {
+                gap: 4px;
+                margin-top: 6px;
+            }
+            .product-card-btn-group .btn-card-cart {
+                flex: 0 0 32px;
+                width: 32px;
+                height: 32px;
+                border-radius: 5px;
+            }
+            .product-card-btn-group .btn-card-cart i {
+                font-size: 16px;
+            }
+            .product-card-btn-group .btn-card-buy {
+                height: 32px;
+                font-size: 12.5px;
+                padding: 0 6px;
+                border-radius: 5px;
+            }
+        }
     </style>
 @endsection
 

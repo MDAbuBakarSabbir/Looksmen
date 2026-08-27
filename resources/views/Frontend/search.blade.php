@@ -177,51 +177,51 @@
                                             @if($categoryType == 'category')
                                                 <li class="mb-3">
                                                     <a class="text-primary fs-14 fw-700"
-                                                        href="{{ route('catProductView', [$category->id, $category->slug]) }}">
+                                                        href="{{ route('catProductView', $category->slug) }}">
                                                         <i class="las la-angle-down mr-1"></i>{{ $category->name }}
                                                     </a>
                                                 </li>
                                                 @foreach ($category->subcategories as $subcat)
                                                     <li class="ml-4 mb-2">
                                                         <a class="text-secondary fs-14 fw-500"
-                                                             href="{{ route('subCatProductView', [$subcat->id, $subcat->slug]) }}">{{ $subcat->name }}</a>
+                                                             href="{{ route('subCatProductView', [$category->slug, $subcat->slug]) }}">{{ $subcat->name }}</a>
                                                     </li>
                                                 @endforeach
                                             @elseif($categoryType == 'subcategory')
                                                 <li class="mb-3">
                                                     <a class="text-reset fs-14 fw-600"
-                                                        href="{{ route('catProductView', [$parentCategory->id, $parentCategory->slug]) }}">
+                                                        href="{{ route('catProductView', $parentCategory->slug) }}">
                                                         <i class="las la-angle-left mr-1"></i>{{ $parentCategory->name }}
                                                     </a>
                                                 </li>
                                                 <li class="mb-3 ml-3">
                                                     <a class="text-primary fs-14 fw-700"
-                                                        href="{{ route('subCatProductView', [$category->id, $category->slug]) }}">
+                                                        href="{{ route('subCatProductView', [$parentCategory->slug, $category->slug]) }}">
                                                         <i class="las la-angle-down mr-1"></i>{{ $category->name }}
                                                     </a>
                                                 </li>
                                                 @foreach ($category->childcategories as $childcat)
                                                     <li class="ml-5 mb-2">
                                                         <a class="text-secondary fs-14 fw-500"
-                                                             href="{{ route('childCatProductView', [$childcat->id, $childcat->slug]) }}">{{ $childcat->name }}</a>
+                                                             href="{{ route('childCatProductView', [$parentCategory->slug, $category->slug, $childcat->slug]) }}">{{ $childcat->name }}</a>
                                                     </li>
                                                 @endforeach
                                             @elseif($categoryType == 'childcategory')
                                                 <li class="mb-3">
                                                     <a class="text-reset fs-14 fw-600"
-                                                        href="{{ route('catProductView', [$parentCategory->id, $parentCategory->slug]) }}">
+                                                        href="{{ route('catProductView', $parentCategory->slug) }}">
                                                         <i class="las la-angle-left mr-1"></i>{{ $parentCategory->name }}
                                                     </a>
                                                 </li>
                                                 <li class="mb-3 ml-3">
                                                     <a class="text-reset fs-14 fw-600"
-                                                        href="{{ route('subCatProductView', [$parentSubCategory->id, $parentSubCategory->slug]) }}">
+                                                        href="{{ route('subCatProductView', [$parentCategory->slug, $parentSubCategory->slug]) }}">
                                                         <i class="las la-angle-left mr-1"></i>{{ $parentSubCategory->name }}
                                                     </a>
                                                 </li>
                                                 <li class="mb-3 ml-4">
                                                     <a class="text-primary fs-14 fw-700"
-                                                        href="{{ route('childCatProductView', [$category->id, $category->slug]) }}">
+                                                        href="{{ route('childCatProductView', [$parentCategory->slug, $parentSubCategory->slug, $category->slug]) }}">
                                                         <i class="las la-angle-down mr-1"></i>{{ $category->name }}
                                                     </a>
                                                 </li>

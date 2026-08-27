@@ -32,6 +32,8 @@ class AppServiceProvider extends ServiceProvider
                     return GeneralWebSettings::all()->pluck('value', 'name')->toArray();
                 });
 
+                \Illuminate\Support\Facades\View::share('webConfig', $settings);
+
                 $tz = $settings['timezone'] ?? env('APP_TIMEZONE') ?? config('app.timezone') ?? 'Asia/Dhaka';
                 if (! empty($tz) && in_array($tz, timezone_identifiers_list())) {
                     date_default_timezone_set($tz);

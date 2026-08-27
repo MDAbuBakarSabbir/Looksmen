@@ -439,6 +439,8 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('/websettings/webGtag', 'webGtag')->name('websettings.webGtag')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/webFbpixel', 'webFbpixel')->name('websettings.webFbpixel')->middleware('admin.permission:setup_general_settings');
         Route::post('/websettings/webDomain', 'webDomain')->name('websettings.webDomain')->middleware('admin.permission:setup_general_settings');
+        Route::post('/websettings/productTrustSettings', 'productTrustSettings')->name('websettings.productTrustSettings')->middleware('admin.permission:setup_general_settings');
+        Route::post('/websettings/toggle-trust-status', 'toggleTrustStatus')->name('websettings.toggleTrustStatus')->middleware('admin.permission:setup_general_settings');
     });
 
     Route::controller(AddressController::class)->group(function () {
