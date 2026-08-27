@@ -19,9 +19,17 @@ use App\Http\Controllers\SupportTicketController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('admin')->middleware('guest:admin')->group(function () {
-    Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('login', [AdminAuthController::class, 'login']);
+Route::prefix('admin')->group(function () {
+    Route::get('/', function () {
+        if (auth()->guard('admin')->check()) {
+            return redirect()->route('admin.dashboard');
+        }
+        return redirect()->route('admin.login');
+    });
+    Route::middleware('guest:admin')->group(function () {
+        Route::get('login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
+        Route::post('login', [AdminAuthController::class, 'login']);
+    });
 });
 
 // Public Catalog Feeds (Unrestricted for Web Crawlers & Meta)
@@ -152,13 +160,17 @@ Route::middleware(['maintainance'])->group(function () {
     });
 
     // Dynamic SEO Category, Subcategory, and Child-Category Routing
-    // Category: looksmen.com/{category_slug}
-    // Sub-Category: looksmen.com/{category_slug}/{sub_category_slug}
-    // Child-Category: looksmen.com/{category_slug}/{sub_category_slug}/{child_category_slug}
+    // Exclude reserved system prefixes (e.g., admin, api) so admin dashboard routes are not intercepted
     Route::controller(FrontCategoryController::class)->group(function () {
-        Route::get('/{category_slug}/{sub_category_slug}/{child_category_slug}', 'childCatProductView')->name('childCatProductView');
-        Route::get('/{category_slug}/{sub_category_slug}', 'subCatProductView')->name('subCatProductView');
-        Route::get('/{category_slug}', 'catProductView')->name('catProductView');
+        Route::get('/{category_slug}/{sub_category_slug}/{child_category_slug}', 'childCatProductView')
+            ->where('category_slug', '^(?!admin).*$')
+            ->name('childCatProductView');
+        Route::get('/{category_slug}/{sub_category_slug}', 'subCatProductView')
+            ->where('category_slug', '^(?!admin).*$')
+            ->name('subCatProductView');
+        Route::get('/{category_slug}', 'catProductView')
+            ->where('category_slug', '^(?!admin).*$')
+            ->name('catProductView');
     });
 
 });
@@ -170,10 +182,6 @@ Route::get('/clear-cache', function () {
     Artisan::call('optimize:clear');
 
     return 'Cache is cleared! You can go back to the homepage.';
-});
-
-Route::fallback(function () {
-    return response()->view('errors.404', [], 404);
 });
 
 require __DIR__.'/auth.php';
