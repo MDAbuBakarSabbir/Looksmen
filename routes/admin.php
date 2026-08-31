@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\ChildCategoryController;
 use App\Http\Controllers\Admin\ColorController;
 use App\Http\Controllers\Admin\CouponsController;
 use App\Http\Controllers\Admin\CourierApiController;
+use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\FeatureActivationController;
 use App\Http\Controllers\Admin\GeneralWebSettingsController;
 use App\Http\Controllers\Admin\OrderManageController;
@@ -487,6 +488,16 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
 
         Route::get('/customSMS', 'customSMS')->name('admin.customSMS')->middleware('admin.permission:manage_support_tickets');
         Route::post('/customSMS/send', 'sendCustomSMS')->name('admin.customSMS.send')->middleware('admin.permission:manage_support_tickets');
+    });
+
+    // FAQ & Help Center Routes
+    Route::controller(FaqController::class)->group(function () {
+        Route::get('/faq', 'index')->name('admin.faq.index')->middleware('admin.permission:manage_support_tickets');
+        Route::post('/faq/store', 'store')->name('admin.faq.store')->middleware('admin.permission:manage_support_tickets');
+        Route::get('/faq/edit/{id}', 'edit')->name('admin.faq.edit')->middleware('admin.permission:manage_support_tickets');
+        Route::post('/faq/update/{id}', 'update')->name('admin.faq.update')->middleware('admin.permission:manage_support_tickets');
+        Route::post('/faq/status', 'status')->name('admin.faq.status')->middleware('admin.permission:manage_support_tickets');
+        Route::delete('/faq/destroy/{id}', 'destroy')->name('admin.faq.destroy')->middleware('admin.permission:manage_support_tickets');
     });
 
     // Admin Wallet & Point System Routes

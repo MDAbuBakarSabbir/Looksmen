@@ -7,7 +7,7 @@
     $storeName = !empty($webConfig['web_name']) ? $webConfig['web_name'] : 'Looksmen';
 
     $activeMode = $mode ?? request()->get('tab', 'login');
-    if ($errors->has('name') || $errors->has('password_confirmation') || $errors->has('terms')) {
+    if (isset($errors) && ($errors->has('name') || $errors->has('email') || $errors->has('phone') || $errors->has('referral_code') || $errors->has('password') || $errors->has('password_confirmation') || $errors->has('terms'))) {
         $activeMode = 'register';
     }
 @endphp
@@ -484,6 +484,28 @@
                                 <i class="fa-solid fa-envelope input-box-icon"></i>
                             </div>
                             @error('email')
+                                <span class="invalid-feedback-custom">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label class="form-label-custom" for="reg_phone">Phone Number <span class="text-danger">*</span></label>
+                            <div class="input-box-wrapper">
+                                <input type="tel" name="phone" id="reg_phone" class="auth-input-control @error('phone') is-invalid @enderror" value="{{ old('phone') }}" placeholder="e.g. 017XXXXXXXX" required autocomplete="tel">
+                                <i class="fa-solid fa-phone input-box-icon"></i>
+                            </div>
+                            @error('phone')
+                                <span class="invalid-feedback-custom">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="form-group-custom">
+                            <label class="form-label-custom" for="reg_referral_code">Referral Code <span class="text-muted font-weight-normal" style="font-size: 0.82rem;">(Optional)</span></label>
+                            <div class="input-box-wrapper">
+                                <input type="text" name="referral_code" id="reg_referral_code" class="auth-input-control @error('referral_code') is-invalid @enderror" value="{{ old('referral_code', request()->get('ref', request()->cookie('referral_code', ''))) }}" placeholder="e.g. REF12345" autocomplete="off">
+                                <i class="fa-solid fa-gift input-box-icon"></i>
+                            </div>
+                            @error('referral_code')
                                 <span class="invalid-feedback-custom">{{ $message }}</span>
                             @enderror
                         </div>

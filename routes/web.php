@@ -48,6 +48,8 @@ Route::middleware(['maintainance'])->group(function () {
 
     Route::get('/user-dashboard', [HomeController::class, 'userDash'])->middleware(['auth', 'verified'])->name('dashboard');
     Route::get('/', [HomeController::class, 'home'])->name('home');
+    Route::get('/help', [HomeController::class, 'help'])->name('front.help');
+    Route::get('/help-center', [HomeController::class, 'help']);
     Route::match(['get', 'post'], '/track-order', [HomeController::class, 'trackOrder'])->name('front.trackOrder');
     Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
     Route::get('/flash-sale', [HomeController::class, 'flashSale'])->name('front.flashSale');
@@ -159,17 +161,19 @@ Route::middleware(['maintainance'])->group(function () {
         });
     });
 
-    // Dynamic SEO Category, Subcategory, and Child-Category Routing
-    // Exclude reserved system prefixes (e.g., admin, api) so admin dashboard routes are not intercepted
+    // Include Authentication Routes
+    require __DIR__.'/auth.php';
+
+    // Dynamic SEO Category, Subcategory, and Child-Category Routing (Catch-all MUST be at the end)
     Route::controller(FrontCategoryController::class)->group(function () {
         Route::get('/{category_slug}/{sub_category_slug}/{child_category_slug}', 'childCatProductView')
-            ->where('category_slug', '^(?!admin).*$')
+            ->where('category_slug', '^(?!(admin|api|login|register|logout|forgot-password|reset-password|verify-email|confirm-password|help|help-center|clear-cache|under-maintainance)).*$')
             ->name('childCatProductView');
         Route::get('/{category_slug}/{sub_category_slug}', 'subCatProductView')
-            ->where('category_slug', '^(?!admin).*$')
+            ->where('category_slug', '^(?!(admin|api|login|register|logout|forgot-password|reset-password|verify-email|confirm-password|help|help-center|clear-cache|under-maintainance)).*$')
             ->name('subCatProductView');
         Route::get('/{category_slug}', 'catProductView')
-            ->where('category_slug', '^(?!admin).*$')
+            ->where('category_slug', '^(?!(admin|api|login|register|logout|forgot-password|reset-password|verify-email|confirm-password|help|help-center|clear-cache|under-maintainance)).*$')
             ->name('catProductView');
     });
 
@@ -183,5 +187,3 @@ Route::get('/clear-cache', function () {
 
     return 'Cache is cleared! You can go back to the homepage.';
 });
-
-require __DIR__.'/auth.php';

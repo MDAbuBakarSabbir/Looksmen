@@ -423,12 +423,11 @@
                 <div class="row">
                     <div class="col-lg-7 col">
                         <ul class="list-inline d-flex justify-content-between justify-content-lg-start mb-0">
-
                             <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
-                                <a href="tel:01568482005" class="text-reset d-inline-block opacity-60 py-2">
+                                <a href="tel:{{ $webConfig['contact_phone'] ?? '01568482005' }}" class="text-reset d-inline-block opacity-60 py-2">
                                     <i class="la la-phone"></i>
                                     <span>Help line</span>
-                                    <span>01568482005</span>
+                                    <span>{{ $webConfig['contact_phone'] ?? '01568482005' }}</span>
                                 </a>
                             </li>
                         </ul>
@@ -438,7 +437,7 @@
                         <ul class="list-inline mb-0 h-100 d-flex justify-content-end align-items-center">
                             @auth
                                 <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
-                                        <a href="{{ route('login') }}"
+                                        <a href="{{ route('dashboard') }}"
                                             class="text-reset d-inline-block opacity-60 py-2">Account</a>
                                     </li>
                                 <li class="list-inline-item mr-3 border-right border-left-0 pr-3 pl-0">
@@ -607,7 +606,7 @@
 
                 <div class="d-none d-lg-block ml-3 mr-0">
                     <div class="" id="wishlist">
-                        <a href="{{ route('login') }}" class="d-flex align-items-center text-reset">
+                        <a href="{{ auth()->check() ? route('wishlist') : route('login') }}" class="d-flex align-items-center text-reset">
                             <i class="la la-heart-o la-2x opacity-80 "></i>
                             <span class="flex-grow-1 ml-1">
                                 <span class="badge badge-primary  badge-inline badge-pill">0</span>
@@ -668,6 +667,12 @@
                     <a href="{{ route('front.allCategory') }}"
                         class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
                         All Categories
+                    </a>
+                </li>
+                <li class="list-inline-item mr-0">
+                    <a href="{{ route('front.help') }}"
+                        class="opacity-100 fs-14 px-3 py-2 d-inline-block fw-600 hov-opacity-100 text-reset">
+                        Help Center
                     </a>
                 </li>
             </ul>
@@ -785,6 +790,11 @@
                                 <li class="mb-2">
                                     <a class="opacity-50 hov-opacity-100 text-reset" href="{{ route('front.trackOrder') }}">
                                         Track Order
+                                    </a>
+                                </li>
+                                <li class="mb-2">
+                                    <a class="opacity-50 hov-opacity-100 text-reset" href="{{ route('front.help') }}">
+                                        Help Center
                                     </a>
                                 </li>
                                 @if (addon_is_activated('affiliate_system'))
@@ -1011,29 +1021,28 @@
                 </div>
                 <div class="modal-body">
                     <div class="p-3">
-                        <form class="form-default" role="form" action="" method="POST">
+                        <form class="form-default" role="form" action="{{ route('login') }}" method="POST">
                             @csrf
-                            <input type="hidden" name="_token" value="kbxvDqGfGdVazCkZ4DhRVh8xW2Ztv6FGgoKTFXGQ">
                             <div class="form-group">
-                                <input type="email" class="form-control h-auto form-control-lg " value=""
-                                    placeholder="Email" name="email">
+                                <input type="email" class="form-control h-auto form-control-lg" value=""
+                                    placeholder="Email" name="email" required>
                             </div>
 
                             <div class="form-group">
                                 <input type="password" name="password" class="form-control h-auto form-control-lg"
-                                    placeholder="Password">
+                                    placeholder="Password" required>
                             </div>
 
                             <div class="row mb-2">
                                 <div class="col-6">
                                     <label class="aiz-checkbox">
                                         <input type="checkbox" name="remember">
-                                        <span class=opacity-60>Remember Me</span>
+                                        <span class="opacity-60">Remember Me</span>
                                         <span class="aiz-square-check"></span>
                                     </label>
                                 </div>
                                 <div class="col-6 text-right">
-                                    <a href="../password/reset.html" class="text-reset opacity-60 fs-14">Forgot
+                                    <a href="{{ route('password.request') }}" class="text-reset opacity-60 fs-14">Forgot
                                         password?</a>
                                 </div>
                             </div>
@@ -1044,8 +1053,8 @@
                         </form>
 
                         <div class="text-center mb-3">
-                            <p class="text-muted mb-0">Dont have an account?</p>
-                            <a href="../users/registration.html">Register Now</a>
+                            <p class="text-muted mb-0">Don't have an account?</p>
+                            <a href="{{ route('register') }}">Register Now</a>
                         </div>
                     </div>
                 </div>

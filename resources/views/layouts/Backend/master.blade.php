@@ -1575,6 +1575,7 @@
                     @if($user?->hasPermission('manage_support_tickets'))
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i class="fa-solid fa-headset mr-2"></i><span class="nav-text">Support</span></a>
                         <ul aria-expanded="false">
+                            <li><a href="{{ route('admin.faq.index') }}">FAQ / Help Center</a></li>
                             <li><a href="{{ route('admin.chat') }}">Customer Chat</a></li>
                             <li><a href="{{ route('admin.tickets') }}">Ticket</a></li>
                             <li><a href="{{ route('admin.aiSupport.index') }}">AI Live Support</a></li>

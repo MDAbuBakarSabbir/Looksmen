@@ -285,13 +285,25 @@ class HomeController extends Controller
         return view('Frontend.smtp.mail.otpMail', compact('user', 'otp', 'expireMinutes'));
     }
 
-    public function welcomeEmail()
+    public function help()
     {
-        $user = auth()->user() ?? (object) [
-            'name' => 'MD Abu Bakar Sabbir',
-            'email' => 'sabbir@example.com',
-        ];
+        $settings = Cache::rememberForever('boot_general_web_settings_map', function () {
+            return \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
+        });
+        $storeName = !empty($settings['web_name']) ? $settings['web_name'] : 'Looksmen';
+        $contactPhone = $settings['contact_phone'] ?? '01568482005';
+        $contactEmail = $settings['contact_email'] ?? 'support@looksmen.com';
+        $categories = Category::where('status', '1')->take(8)->get();
 
-        return view('Frontend.smtp.mail.welcomeMail', compact('user'));
+        $faqs = Cache::remember('frontend_active_faqs_list', 3600, function () {
+            return \App\Models\Faq::where('status', 1)
+                ->orderBy('order', 'asc')
+                ->orderBy('id', 'asc')
+                ->get();
+        });
+
+        $faqCategories = \App\Models\Faq::categories();
+
+        return view('Frontend.help', compact('storeName', 'settings', 'contactPhone', 'contactEmail', 'categories', 'faqs', 'faqCategories'));
     }
 }

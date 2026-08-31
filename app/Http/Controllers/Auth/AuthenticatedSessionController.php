@@ -30,6 +30,9 @@ class AuthenticatedSessionController extends Controller
         $request->session()->regenerate();
 
         $user = Auth::user();
+        if ($user) {
+            $this->authenticated($request, $user);
+        }
         $settings = \App\Models\GeneralWebSettings::pluck('value', 'name')->toArray();
         $featuresConfig = \Illuminate\Support\Facades\Cache::rememberForever('feature_activations_map', function () {
             return \App\Models\FeatureActivation::pluck('status', 'name')->toArray();

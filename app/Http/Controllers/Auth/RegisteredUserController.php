@@ -38,21 +38,29 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'referral_code' => ['nullable', 'string', 'max:50'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $referred_by = null;
-        if ($request->hasCookie('referral_code')) {
-            $referrer = User::where('referral_code', $request->cookie('referral_code'))->first();
+        $referralCodeInput = trim($request->input('referral_code') ?? $request->cookie('referral_code', ''));
+        if (! empty($referralCodeInput)) {
+            $referrer = User::where('referral_code', $referralCodeInput)->first();
             if ($referrer) {
                 $referred_by = $referrer->id;
             }
         }
 
+        // Generate a unique referral code for this new user
+        $userReferralCode = strtoupper(substr(md5(uniqid((string) mt_rand(), true)), 0, 10));
+
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
+            'referral_code' => $userReferralCode,
             'referred_by' => $referred_by,
         ]);
 
