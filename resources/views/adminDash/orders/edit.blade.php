@@ -361,26 +361,33 @@
                                 <input type="text" class="form-control" name="address" placeholder="Customer Address" value="{{ $order->address }}" required>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="form-label">Order Status</label>
-                                <select class="form-select text-uppercase" name="delivery_status">
-                                    <option value="hold" @if($order->delivery_status == 'hold' || $order->delivery_status == 'new') selected @endif>Hold</option>
-                                    <option value="pending" @if($order->delivery_status == 'pending') selected @endif>Pending</option>
-                                    <option value="approved" @if($order->delivery_status == 'approved') selected @endif>Approved</option>
-                                    <option value="packaging" @if($order->delivery_status == 'packaging') selected @endif>Packaging</option>
-                                    <option value="incourier" @if($order->delivery_status == 'incourier' || $order->delivery_status == 'in_courier') selected @endif>In Courier</option>
-                                    <option value="delivered" @if($order->delivery_status == 'delivered') selected @endif>Delivered</option>
-                                    <option value="cancel" @if($order->delivery_status == 'cancel' || $order->delivery_status == 'cancelled' || $order->delivery_status == 'canceled') selected @endif>Cancel</option>
-                                    <option value="returned" @if($order->delivery_status == 'returned') selected @endif>Returned</option>
-                                </select>
+                            <div class="row mb-3">
+                                <div class="col-6">
+                                    <label class="form-label">Order Status</label>
+                                    <select class="form-select text-uppercase" name="delivery_status">
+                                        <option value="hold" @if($order->delivery_status == 'hold' || $order->delivery_status == 'new') selected @endif>Hold</option>
+                                        <option value="pending" @if($order->delivery_status == 'pending') selected @endif>Pending</option>
+                                        <option value="approved" @if($order->delivery_status == 'approved') selected @endif>Approved</option>
+                                        <option value="packaging" @if($order->delivery_status == 'packaging') selected @endif>Packaging</option>
+                                        <option value="incourier" @if($order->delivery_status == 'incourier' || $order->delivery_status == 'in_courier') selected @endif>In Courier</option>
+                                        <option value="delivered" @if($order->delivery_status == 'delivered') selected @endif>Delivered</option>
+                                        <option value="cancel" @if($order->delivery_status == 'cancel' || $order->delivery_status == 'cancelled' || $order->delivery_status == 'canceled') selected @endif>Cancel</option>
+                                        <option value="returned" @if($order->delivery_status == 'returned') selected @endif>Returned</option>
+                                    </select>
+                                </div>
+    
+                                <div class="col-6">
+                                    <label class="form-label">Payment Status</label>
+                                    <select class="form-select text-uppercase" name="payment_status">
+                                        <option value="unpaid" @if($order->payment_status == 'unpaid') selected @endif>Unpaid</option>
+                                        <option value="paid" @if($order->payment_status == 'paid') selected @endif>Paid</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Payment Status</label>
-                                <select class="form-select text-uppercase" name="payment_status">
-                                    <option value="unpaid" @if($order->payment_status == 'unpaid') selected @endif>Unpaid</option>
-                                    <option value="paid" @if($order->payment_status == 'paid') selected @endif>Paid</option>
-                                </select>
+                                <label class="form-label">Consignment ID</label>
+                                <input type="text" class="form-control" name="consignment_id" placeholder="Consignment ID" value="{{ $order->consignment_id }}">
                             </div>
 
                             <div class="mb-3">

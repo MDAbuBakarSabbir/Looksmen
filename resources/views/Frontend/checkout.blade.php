@@ -623,11 +623,11 @@
                             @if ($cartCount == 0)
                                 <a href="{{ url('/') }}" class="btn btn-chk-primary text-center d-block">Continue Shopping</a>
                             @else
-                                <button type="submit" id="confirm_order_btn" class="btn btn-chk-primary" {{ $isFrontendFraudCheckActive ? 'disabled="disabled"' : '' }}>
+                                <button type="submit" id="confirm_order_btn" class="btn btn-chk-primary">
                                     <i class="las la-check-circle me-1"></i> Confirm Order
                                 </button>
                                 @if ($featuresConfig['payment_api'] == '1')
-                                <button type="submit" id="proceed_payment_btn" class="btn btn-chk-primary" style="display: none;" {{ $isFrontendFraudCheckActive ? 'disabled="disabled"' : '' }}>
+                                <button type="submit" id="proceed_payment_btn" class="btn btn-chk-primary" style="display: none;" >
                                     <i class="las la-credit-card me-1"></i> Proceed to Payment
                                 </button>
                                 @endif
@@ -1294,13 +1294,7 @@
             });
         }
     </script>
-    <script>
-        $('form').on('submit', function() {
-            $(this).find('button[type="submit"]').attr('disabled', 'disabled');
-            $(this).find('#btn_text').text('Processing...');
-            $(this).find('#btn_spinner').removeClass('d-none');
-        });
-    </script>
+
     <script>
         function validatePhoneNumber(phone) {
             phone = (phone || '').trim();
@@ -1438,6 +1432,7 @@
             
             // Show preloader and disable button to prevent multiple clicks
             $('#confirm_order_btn').prop('disabled', true).html('<i class="las la-spinner la-spin"></i> Processing...');
+            $('#proceed_payment_btn').prop('disabled', true).html('<i class="las la-spinner la-spin"></i> Processing...');
             
             if (typeof Swal !== 'undefined') {
                 Swal.fire({
