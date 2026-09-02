@@ -204,6 +204,8 @@
             return;
         }
 
+        const precheckUrl = '{{ route("orders.precheck-bulk-courier") }}';
+
         // Collect order IDs and build preview table
         selectedOrderData = [];
         let rows = '';
@@ -227,16 +229,62 @@
             </tr>`;
         });
 
-        $('#bulkCourierPreviewBody').html(rows);
-        $('#bulkCourierSubtitle').text(checked.length + ' orders selected — active courier will be used.');
+        const btn = $(this);
+        const originalHtml = btn.html();
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Checking...');
 
-        // Reset modal state
-        $('#bulkCourierPreview').show();
-        $('#bulkCourierResults').hide();
-        $('#bulkCourierLoading').hide();
-        $('#bulkCourierSubmitBtn').prop('disabled', false).show();
+        $.ajax({
+            url: precheckUrl,
+            type: 'POST',
+            data: {
+                _token: csrfToken,
+                order_ids: selectedOrderData
+            },
+            success: function(response) {
+                btn.prop('disabled', false).html(originalHtml);
 
-        $('#bulkCourierModal').modal('show');
+                if (response.status === 'warning' && response.warnings && response.warnings.length > 0) {
+                    let warningHtml = '<div style="max-height: 200px; overflow-y: auto; margin-bottom: 15px;"><ul style="text-align: left; font-size: 14px;">';
+                    response.warnings.forEach(w => {
+                        warningHtml += `<li><strong>${w.current_order_invoice}</strong> (${w.phone}) has active consignment: <strong>${w.previous_consignment_id}</strong></li>`;
+                    });
+                    warningHtml += '</ul></div><p class="font-weight-bold" style="font-size: 15px;">Do you still want to proceed with Bulk Courier Entry?</p>';
+
+                    Swal.fire({
+                        title: 'Active Consignments Found!',
+                        html: warningHtml,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#0ea5e9',
+                        cancelButtonColor: '#64748b',
+                        confirmButtonText: 'Yes, proceed anyway'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            showModal(checked.length, rows);
+                        }
+                    });
+                } else {
+                    showModal(checked.length, rows);
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).html(originalHtml);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to pre-check orders. Please try again.', confirmButtonColor: '#0ea5e9' });
+            }
+        });
+
+        function showModal(count, rowsHtml) {
+            $('#bulkCourierPreviewBody').html(rowsHtml);
+            $('#bulkCourierSubtitle').text(count + ' orders selected — active courier will be used.');
+
+            // Reset modal state
+            $('#bulkCourierPreview').show();
+            $('#bulkCourierResults').hide();
+            $('#bulkCourierLoading').hide();
+            $('#bulkCourierSubmitBtn').prop('disabled', false).show();
+
+            $('#bulkCourierModal').modal('show');
+        }
     });
 
     $('#bulkCourierSubmitBtn').on('click', function () {

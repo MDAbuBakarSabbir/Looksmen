@@ -429,12 +429,12 @@
             text-transform: uppercase;
         }
 
-        /* Steadfast booking panel styling */
-        .steadfast-card {
+        /* Courier booking panel styling */
+        .courier-card {
             background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
             border: 1px solid #bfdbfe;
         }
-        .btn-steadfast-book {
+        .btn-courier-book {
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: #ffffff !important;
             width: 100%;
@@ -451,13 +451,14 @@
             transition: all 0.2s ease;
             cursor: pointer;
         }
-        .btn-steadfast-book:hover {
+        .btn-courier-book:hover {
             background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
             transform: translateY(-1px);
             box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
         }
-        .btn-steadfast-book:active {
-            transform: translateY(0);
+        .btn-courier-book:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
         }
     </style>
 
@@ -941,16 +942,16 @@
                     </div>
                 </div>
 
-                <!-- Steadfast Courier Integration Card (Conditional) -->
-                @if (isset($featuresConfig['courier_api']) && $featuresConfig['courier_api'] == '1' && ($order->consignment_id != null || ($activeCourier && $activeCourier->courier_name == 'steadfast')))
-                    <div class="premium-card steadfast-card">
+                <!-- Courier Integration Card (Conditional) -->
+                @if (isset($featuresConfig['courier_api']) && $featuresConfig['courier_api'] == '1' && ($order->consignment_id != null || $activeCourier))
+                    <div class="premium-card courier-card">
                         <div class="card-header">
-                            <span><i class="fa-solid fa-truck-ramp-box mr-2 text-primary"></i>Steadfast Courier</span>
+                            <span><i class="fa-solid fa-truck-ramp-box mr-2 text-primary"></i>{{ $activeCourier ? ucfirst($activeCourier->courier_name) : 'Courier' }}</span>
                         </div>
                         <div class="card-body">
                             @if ($order->consignment_id == null)
-                                <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.4;">Book order directly with Steadfast courier for shipping with one click.</p>
-                                <button class="btn-steadfast-book" id="bookSteadfastBtn" data-id="{{ $order->id }}">
+                                <p class="text-muted mb-3" style="font-size: 0.85rem; line-height: 1.4;">Book order directly with {{ $activeCourier ? ucfirst($activeCourier->courier_name) : 'Courier' }} for shipping with one click.</p>
+                                <button type="button" class="btn-courier-book" id="bookCourierBtn" data-id="{{ $order->id }}" data-courier="{{ $activeCourier ? ucfirst($activeCourier->courier_name) : 'Courier' }}">
                                     <i class="fa-solid fa-truck"></i> Send to Courier
                                 </button>
                             @else
@@ -1087,16 +1088,17 @@
         });
     </script>
 
-    <!-- Steadfast Booking AJAX Script -->
+    <!-- Courier Booking AJAX Script -->
     <script>
-        $(document).on('click', '#bookSteadfastBtn', function(e) {
+        $(document).on('click', '#bookCourierBtn', function(e) {
             e.preventDefault();
             let btn = $(this);
             let orderId = btn.data('id');
+            let courierName = btn.data('courier');
 
             Swal.fire({
-                title: 'Send to Steadfast?',
-                text: "Are you sure you want to book this order on Steadfast Courier?",
+                title: 'Send to ' + courierName + '?',
+                text: "Are you sure you want to book this order on " + courierName + "?",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonColor: '#2563eb',

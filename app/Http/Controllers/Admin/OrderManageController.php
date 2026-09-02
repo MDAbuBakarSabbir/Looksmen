@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Admin\affiliate\AffiliateController;
 use App\Http\Controllers\Controller;
+use App\Models\AttributeValues;
 use App\Models\CourierApi;
 use App\Models\District;
 use App\Models\FeatureActivation;
@@ -777,6 +778,56 @@ class OrderManageController extends Controller
         return $this->placeCourierOrder($id);
     }
 
+    // AJAX: Pre-check for Bulk Courier Entry
+    public function precheckBulkCourier(Request $request)
+    {
+        $ids = $request->input('order_ids', []);
+
+        if (empty($ids) || ! is_array($ids)) {
+            return response()->json(['status' => 'error', 'message' => 'No orders selected.']);
+        }
+
+        $warnings = [];
+
+        foreach ($ids as $id) {
+            $currentOrder = Orders::find($id);
+            if (! $currentOrder) {
+                continue;
+            }
+
+            $currentInvoice = $currentOrder->order_id ?? 'LM-'.$currentOrder->id;
+
+            // Find existing entries by phone or for this exact order
+            $previousOrders = Orders::where(function($q) use ($currentOrder, $currentInvoice) {
+                    $q->where('phone', $currentOrder->phone)
+                      ->orWhere('order_id', $currentInvoice)
+                      ->orWhere('id', $currentOrder->id);
+                })
+                ->whereNotNull('consignment_id')
+                ->get();
+
+            foreach ($previousOrders as $prevOrder) {
+                $status = strtolower($prevOrder->delivery_status);
+                // If the previous entry is NOT completed/cancelled, it is active
+                if (! in_array($status, ['delivered', 'returned', 'cancel', 'canceled', 'delivery'])) {
+                    // Active consignment found
+                    $warnings[] = [
+                        'current_order_invoice' => $currentInvoice,
+                        'phone' => $currentOrder->phone,
+                        'previous_consignment_id' => $prevOrder->consignment_id,
+                        'previous_status' => $prevOrder->delivery_status,
+                    ];
+                }
+            }
+        }
+
+        if (count($warnings) > 0) {
+            return response()->json(['status' => 'warning', 'warnings' => $warnings]);
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
     // AJAX: Bulk Courier Entry — submit multiple orders to courier at once
     public function bulkCourierEntry(Request $request)
     {
@@ -1093,7 +1144,7 @@ class OrderManageController extends Controller
                                 $resolvedSize = $rawSize;
                                 if (! empty($rawSize) && $rawSize !== 'N/A') {
                                     if (is_numeric($rawSize)) {
-                                        $attrValObj = \App\Models\AttributeValues::find($rawSize);
+                                        $attrValObj = AttributeValues::find($rawSize);
                                         if ($attrValObj) {
                                             $resolvedSize = $attrValObj->value;
                                         }
@@ -1274,18 +1325,18 @@ class OrderManageController extends Controller
             if ($request->filled('incomplete_id')) {
                 IncompleteOrders::where('id', $request->incomplete_id)->delete();
             }
-            if (!empty($cleanPhone) || !empty($rawPhone)) {
+            if (! empty($cleanPhone) || ! empty($rawPhone)) {
                 IncompleteOrders::where(function ($q) use ($cleanPhone, $rawPhone, $digits) {
-                    if (!empty($cleanPhone)) {
+                    if (! empty($cleanPhone)) {
                         $q->where('phone', $cleanPhone)
-                          ->orWhere('phone', 'like', "%{$cleanPhone}")
-                          ->orWhere('phone', '88' . $cleanPhone)
-                          ->orWhere('phone', '+88' . $cleanPhone);
+                            ->orWhere('phone', 'like', "%{$cleanPhone}")
+                            ->orWhere('phone', '88'.$cleanPhone)
+                            ->orWhere('phone', '+88'.$cleanPhone);
                     }
-                    if (!empty($rawPhone)) {
+                    if (! empty($rawPhone)) {
                         $q->orWhere('phone', $rawPhone);
                     }
-                    if (!empty($digits)) {
+                    if (! empty($digits)) {
                         $q->orWhere('phone', $digits);
                     }
                 })->delete();
@@ -1542,6 +1593,9 @@ class OrderManageController extends Controller
             $order->address = $request->address;
             $order->comments = $request->comments;
             $order->note = $request->note; // Customer note
+            if ($request->has('consignment_id')) {
+                $order->consignment_id = $request->consignment_id;
+            }
 
             if ($request->has('delivery_status')) {
                 // If status changed, log it
