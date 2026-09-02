@@ -95,6 +95,10 @@
                     <button class="btn btn-success" id="bulkCourierEntryBtn" style="height: 38px; border-radius: 4px; padding: 0 16px; font-weight: 600; letter-spacing: 0.3px;">
                         <i class="fas fa-truck mr-1"></i> Bulk Courier Entry
                     </button>
+
+                    <button class="btn btn-info ml-2" id="syncCourierBtn" style="height: 38px; border-radius: 4px; padding: 0 16px; font-weight: 600; letter-spacing: 0.3px; color: #fff;">
+                        <i class="fas fa-sync-alt mr-1"></i> Sync Courier Status
+                    </button>
                 </div>
                 <div class="col-md-4 text-md-right">
                     <a href="{{ route('admin.order-create') }}" class="btn btn-primary" style="height: 38px; line-height: 24px; border-radius: 4px; font-weight: 500;">
@@ -193,6 +197,40 @@
     // ---- Bulk Courier Entry ----
     const bulkCourierUrl  = '{{ route("orders.bulk-courier-entry") }}';
     const csrfToken       = '{{ csrf_token() }}';
+
+    $('#syncCourierBtn').on('click', function(e) {
+        e.preventDefault();
+        const btn = $(this);
+        const originalHtml = btn.html();
+        
+        btn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Syncing...');
+
+        $.ajax({
+            url: '{{ route("orders.sync-courier-status") }}',
+            type: 'POST',
+            data: { _token: csrfToken },
+            success: function(response) {
+                btn.prop('disabled', false).html(originalHtml);
+                if (response.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Sync Complete',
+                        text: response.message,
+                        timer: 2000,
+                        showConfirmButton: false
+                    }).then(() => {
+                        window.location.reload();
+                    });
+                } else {
+                    Swal.fire({ icon: 'error', title: 'Sync Failed', text: response.message || 'Unknown error occurred.' });
+                }
+            },
+            error: function() {
+                btn.prop('disabled', false).html(originalHtml);
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Server error during sync.' });
+            }
+        });
+    });
 
     // Store selected order data for preview
     let selectedOrderData = [];

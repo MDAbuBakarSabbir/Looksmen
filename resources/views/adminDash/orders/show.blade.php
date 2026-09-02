@@ -509,10 +509,13 @@
                             Updated By: <strong>{{ $order->admin->name }}</strong>
                         </span>
                     @endif
-                    <div>
+                    <div class="d-flex align-items-center flex-wrap" style="gap: 6px;">
                         <span class="status-badge-lg status-{{ $order->delivery_status }}-lg">
                             {{ ucfirst($order->delivery_status) }}
                         </span>
+                        @if(strtolower($order->delivery_status) === 'delivered' && strtolower($order->return_status) === 'partial')
+                            <span class="badge" style="font-size: 11px; padding: 4px 8px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>
+                        @endif
                     </div>
                 </div>
             </div>

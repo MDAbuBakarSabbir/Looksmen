@@ -172,6 +172,7 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::post('check-free-delivery', 'checkFreeDelivery')->name('admin.check-free-delivery')->middleware('admin.permission:manage_order,create_order');
 
         // {orderId} হলো আপনার নির্দিষ্ট অর্ডারটির আইডি (যেমন: 1, 10, 50)
+        Route::post('orders/sync-courier-status', 'syncCourierStatus')->name('orders.sync-courier-status')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('orders/steadfast-entry/{id}', 'placeCourierOrder')->name('entry.steadfast')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('orders/precheck-bulk-courier', 'precheckBulkCourier')->name('orders.precheck-bulk-courier')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');
         Route::post('orders/bulk-courier-entry', 'bulkCourierEntry')->name('orders.bulk-courier-entry')->middleware('admin.permission:manage_order,pending_order,hold_order,approved_order,packaging_order,shipment_order,delivered_order,canceled_order,return_order');

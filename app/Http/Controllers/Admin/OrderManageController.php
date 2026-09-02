@@ -798,11 +798,11 @@ class OrderManageController extends Controller
             $currentInvoice = $currentOrder->order_id ?? 'LM-'.$currentOrder->id;
 
             // Find existing entries by phone or for this exact order
-            $previousOrders = Orders::where(function($q) use ($currentOrder, $currentInvoice) {
-                    $q->where('phone', $currentOrder->phone)
-                      ->orWhere('order_id', $currentInvoice)
-                      ->orWhere('id', $currentOrder->id);
-                })
+            $previousOrders = Orders::where(function ($q) use ($currentOrder, $currentInvoice) {
+                $q->where('phone', $currentOrder->phone)
+                    ->orWhere('order_id', $currentInvoice)
+                    ->orWhere('id', $currentOrder->id);
+            })
                 ->whereNotNull('consignment_id')
                 ->get();
 
@@ -1066,6 +1066,58 @@ class OrderManageController extends Controller
         }
 
         return response()->json(['status' => 'error', 'message' => 'Tracking for '.ucfirst($activeCourier->courier_name).' is not implemented yet.']);
+    }
+
+    public function syncCourierStatus()
+    {
+        $activeCourier = CourierApi::where('status', '1')->first();
+        if (! $activeCourier || strtolower($activeCourier->courier_name) !== 'steadfast') {
+            return response()->json(['status' => 'error', 'message' => 'Steadfast is not currently the active courier.']);
+        }
+
+        // Fetch incourier orders with consignment IDs
+        $orders = Orders::whereIn('delivery_status', ['in_courier', 'incourier'])
+            ->whereNotNull('consignment_id')
+            ->get();
+
+        $updatedCount = 0;
+
+        foreach ($orders as $order) {
+            $response = $this->steadfast->checkStatusByTrackingCode($order->tracking_code ?? $order->consignment_id);
+
+            // Fallback to invoice if tracking code check fails
+            if (! isset($response['status']) || $response['status'] != 200) {
+                $response = $this->steadfast->checkStatusByInvoice($order->order_id);
+            }
+
+            if (isset($response['status']) && $response['status'] == 200) {
+                $steadfastStatus = strtolower($response['delivery_status'] ?? '');
+
+                $changed = false;
+
+                if ($steadfastStatus === 'delivered') {
+                    $order->delivery_status = 'delivered';
+                    $changed = true;
+                } elseif (in_array($steadfastStatus, ['cancelled', 'returned'])) {
+                    $order->delivery_status = 'returned';
+                    $changed = true;
+                } elseif ($steadfastStatus === 'partial_delivered') {
+                    $order->delivery_status = 'delivered';
+                    $order->return_status = 'partial'; // Mark as partial
+                    $changed = true;
+                }
+
+                if ($changed) {
+                    $order->save();
+                    $updatedCount++;
+                }
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Successfully synced {$updatedCount} order(s).",
+        ]);
     }
 
     public function checkNewOrders(Request $request)

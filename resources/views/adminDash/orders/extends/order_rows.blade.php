@@ -157,10 +157,13 @@
         <!-- Status Column -->
         <td style="vertical-align: middle;">
             <div class="d-flex flex-column" style="gap: 6px;">
-                <div>
+                <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
                     <span id="status-badge-{{ $order->id }}" class="status-pill status-{{ $order->delivery_status }}">
                         {{ ucfirst($order->delivery_status) }}
                     </span>
+                    @if(strtolower($order->delivery_status) === 'delivered' && strtolower($order->return_status) === 'partial')
+                        <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>
+                    @endif
                 </div>
                 <div class="text-muted" style="font-size: 11px; line-height: 1.5; min-width: 135px;">
                     <div class="d-flex align-items-center" style="gap: 4px;">
