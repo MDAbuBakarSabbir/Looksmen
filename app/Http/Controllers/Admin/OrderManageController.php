@@ -795,12 +795,11 @@ class OrderManageController extends Controller
                 continue;
             }
 
-            $currentInvoice = $currentOrder->order_id ?? 'LM-'.$currentOrder->id;
+            $currentInvoice = 'LM-'.$currentOrder->id;
 
             // Find existing entries by phone or for this exact order
-            $previousOrders = Orders::where(function ($q) use ($currentOrder, $currentInvoice) {
+            $previousOrders = Orders::where(function ($q) use ($currentOrder) {
                 $q->where('phone', $currentOrder->phone)
-                    ->orWhere('order_id', $currentInvoice)
                     ->orWhere('id', $currentOrder->id);
             })
                 ->whereNotNull('consignment_id')
@@ -1087,7 +1086,7 @@ class OrderManageController extends Controller
 
             // Fallback to invoice if tracking code check fails
             if (! isset($response['status']) || $response['status'] != 200) {
-                $response = $this->steadfast->checkStatusByInvoice($order->order_id);
+                $response = $this->steadfast->checkStatusByInvoice($order->order_id ?? 'LM-'.$order->id);
             }
 
             if (isset($response['status']) && $response['status'] == 200) {
