@@ -157,12 +157,18 @@
         <!-- Status Column -->
         <td style="vertical-align: middle;">
             <div class="d-flex flex-column" style="gap: 6px;">
-                <div class="d-flex align-items-center flex-wrap" style="gap: 4px;">
+                <div class="d-flex align-items-center flex-wrap" style="gap: 4px;" id="status-badges-container-{{ $order->id }}">
                     <span id="status-badge-{{ $order->id }}" class="status-pill status-{{ $order->delivery_status }}">
                         {{ ucfirst($order->delivery_status) }}
                     </span>
-                    @if(strtolower($order->delivery_status) === 'delivered' && strtolower($order->return_status) === 'partial')
-                        <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>
+                    @if(strtolower($order->delivery_status) === 'delivered')
+                        @if(strtolower($order->return_status) === 'partial')
+                            <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>
+                        @elseif(strtolower($order->return_status) === 'unpaid return')
+                            <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #ef4444; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">UNPAID RETURN</span>
+                        @elseif(strtolower($order->return_status) === 'paid return')
+                            <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #10b981; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PAID RETURN</span>
+                        @endif
                     @endif
                 </div>
                 <div class="text-muted" style="font-size: 11px; line-height: 1.5; min-width: 135px;">
@@ -389,7 +395,6 @@
 
             let orderId = $(this).data('id');
             let status = $(this).data('status');
-            let badge = $('#status-badge-' + orderId);
 
             $.ajax({
                 url: "/admin/orders/status",
@@ -401,15 +406,11 @@
                 },
                 success: function(response) {
                     if (response.success) {
-                        
-                        badge.text(response.status_text);
+                        if (response.badge_html) {
+                            $('#status-badges-container-' + response.order_id).html(response.badge_html);
+                        }
                         
                         $('#dropdown-menu-' + response.order_id).html(response.new_dropdown);
-                        
-                        badge.removeClass('status-new status-hold status-pending status-approved status-packaging status-incourier status-in_courier status-delivered status-cancel status-canceled status-returned');
-                        badge.addClass('status-' + response.status);
-
-                        
                         if (response.consignment_id) {
                             $('#courier-info-' + response.order_id).html(`
                                 <span class="badge badge-light text-dark font-weight-bold" style="font-size: 11px; padding: 5px 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: monospace; display: inline-block;">

@@ -201,8 +201,22 @@ class OrderManageController extends Controller
                 $order->delivery_status = 'incourier';
                 $order->save();
             }
+        } elseif (in_array($request->status, ['partial', 'unpaid return', 'paid return'])) {
+            $order->delivery_status = 'delivered'; // Return statuses are assumed to be a subset of delivered
+            $order->return_status = $request->status;
+
+            // Payment logic for return statuses (similar to delivered)
+            if ($order->payment_status != 'paid' && $request->status == 'paid return') {
+                $order->payment_status = 'paid';
+                $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
+                $order->grand_total = 0;
+            }
+
+            $order->updated_by = auth()->id();
+            $order->save();
         } else {
             $order->delivery_status = $request->status;
+            $order->return_status = null; // Clear return status if it's a regular delivery status
             if ($request->status == 'delivered') {
                 $order->payment_status = 'paid';
                 $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
@@ -258,11 +272,23 @@ class OrderManageController extends Controller
         $statusText = ucfirst($order->delivery_status);
         $view = view('adminDash.orders.extends.buttons', compact('order'))->render();
 
+        $badgeHtml = '<span id="status-badge-'.$order->id.'" class="status-pill status-'.$order->delivery_status.'">'.ucfirst($order->delivery_status).'</span>';
+        if (strtolower($order->delivery_status) === 'delivered') {
+            if (strtolower($order->return_status) === 'partial') {
+                $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>';
+            } elseif (strtolower($order->return_status) === 'unpaid return') {
+                $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #ef4444; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">UNPAID RETURN</span>';
+            } elseif (strtolower($order->return_status) === 'paid return') {
+                $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #10b981; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PAID RETURN</span>';
+            }
+        }
+
         return response()->json([
             'success' => true,
             'status' => $order->delivery_status,
             'status_text' => $statusText,
             'badge_class' => $badgeClass,
+            'badge_html' => $badgeHtml,
             'order_id' => $order->id,
             'new_dropdown' => $view,
             'consignment_id' => $order->consignment_id,

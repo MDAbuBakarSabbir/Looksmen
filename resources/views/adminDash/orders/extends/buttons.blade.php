@@ -1,5 +1,5 @@
 @php
-    $currentStatus = $order->delivery_status;
+    $currentStatus = $order->return_status ? $order->return_status : $order->delivery_status;
     $allStatuses = [
         'pending' => ['label' => 'Pending', 'icon' => 'fa-hourglass-half', 'color' => 'text-warning'],
         'hold' => ['label' => 'Hold', 'icon' => 'fa-clock', 'color' => 'text-secondary'],
@@ -8,7 +8,10 @@
         'incourier' => ['label' => 'In Courier', 'icon' => 'fa-truck', 'color' => 'text-info'],
         'delivered' => ['label' => 'Delivered', 'icon' => 'fa-circle-dollar-to-slot', 'color' => 'text-success'],
         'cancel' => ['label' => 'Cancel', 'icon' => 'fa-circle-xmark', 'color' => 'text-danger'],
-        'returned' => ['label' => 'Returned', 'icon' => 'fa-arrow-rotate-left', 'color' => 'text-dark']
+        'returned' => ['label' => 'Returned', 'icon' => 'fa-arrow-rotate-left', 'color' => 'text-dark'],
+        'partial' => ['label' => 'Partial Return', 'icon' => 'fa-arrow-rotate-left', 'color' => 'text-warning'],
+        'unpaid return' => ['label' => 'Unpaid Return', 'icon' => 'fa-arrow-rotate-left', 'color' => 'text-danger'],
+        'paid return' => ['label' => 'Paid Return', 'icon' => 'fa-arrow-rotate-left', 'color' => 'text-success']
     ];
 @endphp
 

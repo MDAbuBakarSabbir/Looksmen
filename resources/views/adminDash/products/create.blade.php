@@ -137,14 +137,21 @@
                     </div>
                     <div class="premium-card-body">
                         <div class="row">
-                            <div class="col-6 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Buying Price <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text" style="background:#f8fafc; border-color:#cbd5e1;">$</span>
+                                    <input type="number" class="form-control" name="buying_price" required min="0" step="0.01">
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Actual Price <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text" style="background:#f8fafc; border-color:#cbd5e1;">$</span>
                                     <input type="number" class="form-control" name="old_price" required min="0" step="0.01">
                                 </div>
                             </div>
-                            <div class="col-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Sale Price <span class="text-danger">*</span></label>
                                 <div class="input-group">
                                     <span class="input-group-text" style="background:#f8fafc; border-color:#cbd5e1;">$</span>
