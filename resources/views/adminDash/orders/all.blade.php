@@ -2,15 +2,16 @@
 @section('title')
     @php
         $routeName = request()->route()->getName();
-        $title = match ($routeName) {
-            'order-hold' => 'HOLD ORDERS',
-            'order-pending' => 'PENDING ORDERS',
-            'order-approved' => 'APPROVED ORDERS',
-            'order-packaging' => 'PACKAGING ORDERS',
-            'order-incourier' => 'IN-COURIER ORDERS',
-            'order-delivered' => 'DELIVERED ORDERS',
-            'order-canceled' => 'CANCELED ORDERS',
-            'order-returned' => 'RETURNED ORDERS',
+        $statusParam = request('status');
+        $title = match ($statusParam ?: $routeName) {
+            'hold', 'order-hold' => 'HOLD ORDERS',
+            'pending', 'order-pending' => 'PENDING ORDERS',
+            'approved', 'order-approved' => 'APPROVED ORDERS',
+            'packaging', 'order-packaging' => 'PACKAGING ORDERS',
+            'in_courier', 'incourier', 'order-incourier' => 'IN-COURIER ORDERS',
+            'delivered', 'partial_delivered', 'order-delivered' => 'DELIVERED ORDERS',
+            'canceled', 'cancel', 'cancelled', 'order-canceled' => 'CANCELED ORDERS',
+            'returned', 'return', 'order-returned' => 'RETURNED ORDERS',
             default => 'ALL ORDERS',
         };
     @endphp
@@ -140,10 +141,91 @@
             };
 
             let currentRoute = "{{ request()->route()->getName() }}";
-            let initialStatus = routeToStatus[currentRoute] || '';
+            let initialStatus = "{{ request('status') }}" || routeToStatus[currentRoute] || '';
             $('.quixnav').data('active-status', initialStatus);
+            toggleUIBasedOnStatus(initialStatus);
 
-            let currentPage = 1;
+            let currentPage = parseInt("{{ request('page', 1) }}") || 1;
+
+            function updateBrowserUrl(data) {
+                try {
+                    let currentPath = window.location.pathname;
+                    if (currentPath.includes('-orders') && currentPath !== '/admin/orders') {
+                        currentPath = "{{ route('order-index') }}";
+                    }
+
+                    let urlObj = new URL(currentPath, window.location.origin);
+
+                    // Status
+                    if (data.status) {
+                        urlObj.searchParams.set('status', data.status);
+                    } else {
+                        urlObj.searchParams.delete('status');
+                    }
+
+                    // Timeframe
+                    if (data.timeframe && data.timeframe !== 'all') {
+                        urlObj.searchParams.set('timeframe', data.timeframe);
+                    } else {
+                        urlObj.searchParams.delete('timeframe');
+                    }
+
+                    // Custom dates
+                    if (data.timeframe === 'custom') {
+                        if (data.start_date) urlObj.searchParams.set('start_date', data.start_date);
+                        if (data.end_date) urlObj.searchParams.set('end_date', data.end_date);
+                    } else {
+                        urlObj.searchParams.delete('start_date');
+                        urlObj.searchParams.delete('end_date');
+                    }
+
+                    // Search
+                    if (data.search && data.search.trim()) {
+                        urlObj.searchParams.set('search', data.search.trim());
+                    } else {
+                        urlObj.searchParams.delete('search');
+                    }
+
+                    // Return Sort
+                    if (data.return_sort) {
+                        urlObj.searchParams.set('return_sort', data.return_sort);
+                    } else {
+                        urlObj.searchParams.delete('return_sort');
+                    }
+
+                    // Days
+                    if (data.days) {
+                        urlObj.searchParams.set('days', data.days);
+                    } else {
+                        urlObj.searchParams.delete('days');
+                    }
+
+                    // Admin ID
+                    if (data.admin_id) {
+                        urlObj.searchParams.set('admin_id', data.admin_id);
+                    } else {
+                        urlObj.searchParams.delete('admin_id');
+                    }
+
+                    // Per page
+                    if (data.per_page && data.per_page != 10) {
+                        urlObj.searchParams.set('per_page', data.per_page);
+                    } else {
+                        urlObj.searchParams.delete('per_page');
+                    }
+
+                    // Page
+                    if (data.page && data.page > 1) {
+                        urlObj.searchParams.set('page', data.page);
+                    } else {
+                        urlObj.searchParams.delete('page');
+                    }
+
+                    window.history.replaceState({ path: urlObj.toString() }, '', urlObj.toString());
+                } catch (err) {
+                    console.error('Failed to update URL:', err);
+                }
+            }
 
             function buildPaginationButtons(data) {
                 if (data.last_page <= 1) {
@@ -192,15 +274,22 @@
                 }
             }
 
-            function applyFilters(statusVal) {
+            window.applyFilters = function(statusVal, skipUrlUpdate) {
                 let tbody = $('.oldData');
                 tbody.html('<tr><td colspan="9" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading orders...</td></tr>');
 
+                let tf = $('#orderTimeframePills .pill-btn.active').data('time') || 'all';
+                let start = (tf === 'custom') ? $('#orderFilterStartDate').val() : '';
+                let end = (tf === 'custom') ? $('#orderFilterEndDate').val() : '';
+
                 let data = {
                     search: $('#orderSearch').val(),
-                    from: $('#from_date').val(),
-                    to: $('#to_date').val(),
-                    days: $('.daysFilter').val(),
+                    timeframe: tf,
+                    start_date: start,
+                    end_date: end,
+                    from: start || $('#from_date').val(),
+                    to: end || $('#to_date').val(),
+                    days: (tf === 'all') ? $('.daysFilter').val() : '',
                     admin_id: $('.adminFilter').val(),
                     per_page: $('.perPageFilter').val() || 10,
                     page: currentPage,
@@ -216,6 +305,21 @@
                 
                 toggleUIBasedOnStatus(data.status);
 
+                // Highlight the active status card
+                $('.order-status-btn').removeClass('active-status');
+                if (data.status) {
+                    let st = data.status;
+                    if (st === 'cancel' || st === 'cancelled') st = 'canceled';
+                    if (st === 'incourier') st = 'in_courier';
+                    if (st === 'partial_delivered') st = 'delivered';
+                    if (st === 'return') st = 'returned';
+                    $('.order-status-btn[data-status="' + st + '"]').addClass('active-status');
+                }
+
+                if (!skipUrlUpdate) {
+                    updateBrowserUrl(data);
+                }
+
                 $.ajax({
                     url: "{{ route('admin.orders.filter') }}",
                     type: 'GET',
@@ -229,13 +333,58 @@
                         );
                         $('#orderHeaderCountVal').text(response.total);
                         buildPaginationButtons(response);
+
+                        // Real-time status count update on all cards
+                        if (response.status_counts) {
+                            let sc = response.status_counts;
+                            if (sc.pending !== undefined) $('#count-pending').text(sc.pending);
+                            if (sc.hold !== undefined) $('#count-hold').text(sc.hold);
+                            if (sc.approved !== undefined) $('#count-approved').text(sc.approved);
+                            if (sc.packaging !== undefined) $('#count-packaging').text(sc.packaging);
+                            if (sc.in_courier !== undefined) $('#count-in_courier').text(sc.in_courier);
+                            if (sc.delivered !== undefined) $('#count-delivered').text(sc.delivered);
+                            if (sc.canceled !== undefined) $('#count-canceled').text(sc.canceled);
+                            if (sc.returned !== undefined) $('#count-returned').text(sc.returned);
+                            if (sc.partial !== undefined) $('#count-partial').text(sc.partial);
+                            if (sc.unpaid_return !== undefined) $('#count-unpaid_return').text(sc.unpaid_return);
+                            if (sc.paid_return !== undefined) $('#count-paid_return').text(sc.paid_return);
+                        }
                     },
                     error: function(xhr) {
                         console.error(xhr.responseText);
                         tbody.html('<tr><td colspan="9" class="text-center text-danger">Failed to load orders.</td></tr>');
                     }
                 });
-            }
+            };
+
+            window.refreshOrderStatusCounts = function() {
+                applyFilters(undefined, true);
+            };
+
+            window.addEventListener('popstate', function() {
+                let urlParams = new URLSearchParams(window.location.search);
+                let status = urlParams.get('status') || '';
+                let tf = urlParams.get('timeframe') || 'all';
+
+                $('#orderTimeframePills .pill-btn').removeClass('active');
+                $('#orderTimeframePills .pill-btn[data-time="' + tf + '"]').addClass('active');
+
+                if (tf === 'custom') {
+                    $('#orderCustomDateRow').removeClass('d-none');
+                    $('#orderFilterStartDate').val(urlParams.get('start_date') || '');
+                    $('#orderFilterEndDate').val(urlParams.get('end_date') || '');
+                } else {
+                    $('#orderCustomDateRow').addClass('d-none');
+                }
+
+                $('#orderSearch').val(urlParams.get('search') || '');
+                $('.daysFilter').val(urlParams.get('days') || '');
+                $('.adminFilter').val(urlParams.get('admin_id') || '');
+                $('#returnSort').val(urlParams.get('return_sort') || '');
+                currentPage = parseInt(urlParams.get('page')) || 1;
+
+                applyFilters(status, true);
+            });
 
             // Pagination click (delegated)
             $(document).on('click', '.order-paginator-btn', function() {
@@ -244,11 +393,75 @@
                 $('html, body').animate({ scrollTop: $('.oldData').offset().top - 100 }, 300);
             });
 
-            // Status Card Clicks — reset page
+            // Status Card Clicks — toggle on/off and reset page
             $(document).on('click', '.order-status-btn', function(e) {
                 e.preventDefault();
+                let clickedStatus = $(this).data('status');
+                let currentActive = $('.quixnav').data('active-status');
+
+                // If clicking active status card, toggle off to view all orders
+                if (clickedStatus === currentActive) {
+                    currentPage = 1;
+                    $('#returnSort').val('');
+                    applyFilters('');
+                } else {
+                    currentPage = 1;
+                    if (clickedStatus !== 'returned') {
+                        $('#returnSort').val('');
+                    }
+                    applyFilters(clickedStatus);
+                }
+            });
+
+            // Return Sub-badge Click Handler
+            $(document).on('click', '.return-sub-btn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                let sub = $(this).data('return');
+                $('#returnSort').val(sub);
                 currentPage = 1;
-                applyFilters($(this).data('status'));
+                applyFilters('returned');
+            });
+
+            // Timeframe Pills Click Handler (Clean, without alerts)
+            $(document).on('click', '#orderTimeframePills .pill-btn', function(e) {
+                e.preventDefault();
+                const time = $(this).data('time');
+                $('#orderTimeframePills .pill-btn').removeClass('active');
+                $(this).addClass('active');
+
+                if (time === 'custom') {
+                    $('#orderCustomDateRow').removeClass('d-none');
+                    if (!$('#orderFilterStartDate').val()) {
+                        const now = new Date();
+                        const year = now.getFullYear();
+                        const month = String(now.getMonth() + 1).padStart(2, '0');
+                        const day = String(now.getDate()).padStart(2, '0');
+                        $('#orderFilterStartDate').val(`${year}-${month}-01`);
+                        $('#orderFilterEndDate').val(`${year}-${month}-${day}`);
+                    }
+                    currentPage = 1;
+                    applyFilters();
+                } else {
+                    $('#orderCustomDateRow').addClass('d-none');
+                    currentPage = 1;
+                    applyFilters();
+                }
+            });
+
+            // Custom Date Range Listeners
+            $(document).on('change', '#orderFilterStartDate, #orderFilterEndDate', function() {
+                const tf = $('#orderTimeframePills .pill-btn.active').data('time');
+                if (tf === 'custom') {
+                    currentPage = 1;
+                    applyFilters();
+                }
+            });
+
+            $(document).on('click', '#orderApplyCustomDateBtn', function(e) {
+                e.preventDefault();
+                currentPage = 1;
+                applyFilters();
             });
 
             if ($('#orderSearch').val()) {

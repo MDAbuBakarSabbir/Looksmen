@@ -19,27 +19,47 @@ class FinanceController extends Controller
      */
     public function index(Request $request)
     {
-        $query = FinanceTransaction::query();
+        $timeframe = $request->get('timeframe', 'month');
 
-        // 1. Filter: Entry Type (INCOME / EXPENSE)
-        if ($request->filled('type') && in_array($request->type, ['INCOME', 'EXPENSE'])) {
-            $query->where('entry_type', $request->type);
+        $baseQuery = FinanceTransaction::query();
+
+        // 1. Filter: Timeframe
+        if ($timeframe === 'today') {
+            $baseQuery->whereDate('transaction_date', Carbon::today());
+        } elseif ($timeframe === 'week') {
+            $baseQuery->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+        } elseif ($timeframe === 'month') {
+            $baseQuery->whereBetween('transaction_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+        } elseif ($timeframe === 'year') {
+            $baseQuery->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+        } elseif ($timeframe === 'custom') {
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $baseQuery->whereBetween('transaction_date', [
+                    Carbon::parse($request->start_date)->startOfDay(),
+                    Carbon::parse($request->end_date)->endOfDay()
+                ]);
+            } elseif ($request->filled('start_date')) {
+                $baseQuery->where('transaction_date', '>=', Carbon::parse($request->start_date)->startOfDay());
+            } elseif ($request->filled('end_date')) {
+                $baseQuery->where('transaction_date', '<=', Carbon::parse($request->end_date)->endOfDay());
+            }
         }
+        // If $timeframe === 'all', no date constraint
 
         // 2. Filter: Category
         if ($request->filled('category') && $request->category !== 'ALL') {
-            $query->where('category', $request->category);
+            $baseQuery->where('category', $request->category);
         }
 
         // 3. Filter: Staff Name
         if ($request->filled('staff') && $request->staff !== 'ALL') {
-            $query->where('staff_name', $request->staff);
+            $baseQuery->where('staff_name', $request->staff);
         }
 
         // 4. Filter: Search Query (notes, category, staff, payment_method, amount)
         if ($request->filled('search')) {
             $search = trim($request->search);
-            $query->where(function ($q) use ($search) {
+            $baseQuery->where(function ($q) use ($search) {
                 $q->where('notes', 'like', "%{$search}%")
                   ->orWhere('category', 'like', "%{$search}%")
                   ->orWhere('staff_name', 'like', "%{$search}%")
@@ -48,47 +68,51 @@ class FinanceController extends Controller
             });
         }
 
-        // 5. Filter: Timeframe
-        if ($request->filled('timeframe')) {
-            $timeframe = $request->timeframe;
-            if ($timeframe === 'today') {
-                $query->whereDate('transaction_date', Carbon::today());
-            } elseif ($timeframe === 'week') {
-                $query->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
-            } elseif ($timeframe === 'month') {
-                $query->whereBetween('transaction_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
-            } elseif ($timeframe === 'year') {
-                $query->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
-            } elseif ($timeframe === 'custom' && $request->filled('start_date') && $request->filled('end_date')) {
-                $query->whereBetween('transaction_date', [
-                    Carbon::parse($request->start_date)->startOfDay(),
-                    Carbon::parse($request->end_date)->endOfDay()
-                ]);
-            }
+        // Summary KPI Metrics calculated on the active filters
+        $type = $request->get('type', 'ALL');
+        if ($type === 'INCOME') {
+            $totalIncome = (float) (clone $baseQuery)->where('entry_type', 'INCOME')->sum('amount');
+            $totalExpense = 0.0;
+            $incomeEntriesCount = (clone $baseQuery)->where('entry_type', 'INCOME')->count();
+            $expenseEntriesCount = 0;
+            $netBalance = $totalIncome;
+            $totalTransactions = $incomeEntriesCount;
+        } elseif ($type === 'EXPENSE') {
+            $totalIncome = 0.0;
+            $totalExpense = (float) (clone $baseQuery)->where('entry_type', 'EXPENSE')->sum('amount');
+            $incomeEntriesCount = 0;
+            $expenseEntriesCount = (clone $baseQuery)->where('entry_type', 'EXPENSE')->count();
+            $netBalance = -$totalExpense;
+            $totalTransactions = $expenseEntriesCount;
+        } else {
+            $totalIncome = (float) (clone $baseQuery)->where('entry_type', 'INCOME')->sum('amount');
+            $totalExpense = (float) (clone $baseQuery)->where('entry_type', 'EXPENSE')->sum('amount');
+            $netBalance = $totalIncome - $totalExpense;
+            $incomeEntriesCount = (clone $baseQuery)->where('entry_type', 'INCOME')->count();
+            $expenseEntriesCount = (clone $baseQuery)->where('entry_type', 'EXPENSE')->count();
+            $totalTransactions = $incomeEntriesCount + $expenseEntriesCount;
         }
 
-        // Fetch recent transactions (limit to 30 for the dashboard card list)
-        $transactions = $query->orderBy('transaction_date', 'desc')->orderBy('id', 'desc')->take(50)->get();
+        // Transactions Query for list and category breakdown (respecting type filter)
+        $txQuery = (clone $baseQuery);
+        if ($type === 'INCOME' || $type === 'EXPENSE') {
+            $txQuery->where('entry_type', $type);
+        }
 
-        // Summary KPI Metrics
-        $totalIncome = (float) FinanceTransaction::where('entry_type', 'INCOME')->sum('amount');
-        $totalExpense = (float) FinanceTransaction::where('entry_type', 'EXPENSE')->sum('amount');
-        $netBalance = $totalIncome - $totalExpense;
-        $totalTransactions = FinanceTransaction::count();
-        $incomeEntriesCount = FinanceTransaction::where('entry_type', 'INCOME')->count();
-        $expenseEntriesCount = FinanceTransaction::where('entry_type', 'EXPENSE')->count();
-
-        // Operational Breakdown & Category Distribution (Top 3 categories by expenditure / revenue)
-        $categoryBreakdown = FinanceTransaction::select('category', 'entry_type', DB::raw('SUM(amount) as total_amount'), DB::raw('COUNT(*) as entries_count'))
+        // Operational Breakdown & Category Distribution (Top 6 categories)
+        $categoryBreakdown = (clone $txQuery)->select('category', 'entry_type', DB::raw('SUM(amount) as total_amount'), DB::raw('COUNT(*) as entries_count'))
             ->groupBy('category', 'entry_type')
             ->orderByDesc('total_amount')
-            ->take(3)
+            ->take(6)
             ->get()
             ->map(function ($item) use ($totalExpense, $totalIncome) {
                 $base = $item->entry_type === 'EXPENSE' ? ($totalExpense ?: 1) : ($totalIncome ?: 1);
                 $item->percentage = min(100, round(($item->total_amount / $base) * 100));
                 return $item;
             });
+
+        // Recent transactions (limit to 50 for performance and smooth display)
+        $transactions = (clone $txQuery)->orderBy('transaction_date', 'desc')->orderBy('id', 'desc')->take(50)->get();
 
         // Staff list for suggestions and filters
         $staffList = Admins::pluck('name')
@@ -97,11 +121,11 @@ class FinanceController extends Controller
             ->filter()
             ->values();
 
-        // Return JSON if AJAX requested (for dynamic table / metrics refresh)
+        // Return JSON if AJAX requested (for dynamic table / metrics / breakdown refresh)
         if ($request->ajax()) {
             return response()->json([
                 'status' => 'success',
-                'transactions' => $transactions,
+                'timeframe' => $timeframe,
                 'metrics' => [
                     'totalIncome' => $totalIncome,
                     'totalExpense' => $totalExpense,
@@ -110,6 +134,26 @@ class FinanceController extends Controller
                     'incomeEntriesCount' => $incomeEntriesCount,
                     'expenseEntriesCount' => $expenseEntriesCount,
                 ],
+                'categoryBreakdown' => $categoryBreakdown,
+                'transactions' => $transactions->map(function ($tx) {
+                    $hasReceipt = !empty($tx->receipt_image) && file_exists(public_path('Uploads/finance/' . $tx->receipt_image));
+                    return [
+                        'id' => $tx->id,
+                        'entry_type' => $tx->entry_type,
+                        'amount' => (float) $tx->amount,
+                        'category' => $tx->category,
+                        'payment_method' => $tx->payment_method,
+                        'staff_name' => $tx->staff_name,
+                        'notes' => $tx->notes ?? '',
+                        'has_receipt' => $hasReceipt,
+                        'receipt_image' => $tx->receipt_image,
+                        'receipt_url' => $hasReceipt ? asset('Uploads/finance/' . $tx->receipt_image) : '',
+                        'date_formatted' => $tx->transaction_date ? $tx->transaction_date->format('M j, Y · g:i A') : ($tx->created_at ? $tx->created_at->format('M j, Y · g:i A') : 'N/A'),
+                        'date_raw' => $tx->transaction_date ? $tx->transaction_date->format('Y-m-d\TH:i') : '',
+                        'timestamp' => $tx->transaction_date ? $tx->transaction_date->timestamp : ($tx->created_at ? $tx->created_at->timestamp : 0),
+                    ];
+                }),
+                'totalMatching' => $totalTransactions,
                 'count' => $transactions->count(),
             ]);
         }
@@ -123,7 +167,8 @@ class FinanceController extends Controller
             'incomeEntriesCount',
             'expenseEntriesCount',
             'categoryBreakdown',
-            'staffList'
+            'staffList',
+            'timeframe'
         ));
     }
 
@@ -254,6 +299,39 @@ class FinanceController extends Controller
         if ($request->filled('staff') && $request->staff !== 'ALL') {
             $query->where('staff_name', $request->staff);
         }
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('notes', 'like', "%{$search}%")
+                  ->orWhere('category', 'like', "%{$search}%")
+                  ->orWhere('staff_name', 'like', "%{$search}%")
+                  ->orWhere('payment_method', 'like', "%{$search}%")
+                  ->orWhere('amount', 'like', "%{$search}%");
+            });
+        }
+        if ($request->filled('timeframe')) {
+            $timeframe = $request->timeframe;
+            if ($timeframe === 'today') {
+                $query->whereDate('transaction_date', Carbon::today());
+            } elseif ($timeframe === 'week') {
+                $query->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+            } elseif ($timeframe === 'month') {
+                $query->whereBetween('transaction_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+            } elseif ($timeframe === 'year') {
+                $query->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+            } elseif ($timeframe === 'custom') {
+                if ($request->filled('start_date') && $request->filled('end_date')) {
+                    $query->whereBetween('transaction_date', [
+                        Carbon::parse($request->start_date)->startOfDay(),
+                        Carbon::parse($request->end_date)->endOfDay()
+                    ]);
+                } elseif ($request->filled('start_date')) {
+                    $query->where('transaction_date', '>=', Carbon::parse($request->start_date)->startOfDay());
+                } elseif ($request->filled('end_date')) {
+                    $query->where('transaction_date', '<=', Carbon::parse($request->end_date)->endOfDay());
+                }
+            }
+        }
 
         $transactions = $query->orderBy('transaction_date', 'desc')->get();
 
@@ -310,24 +388,56 @@ class FinanceController extends Controller
      */
     public function allTrans(Request $request)
     {
+        $timeframe = $request->get('timeframe', 'all');
+
         $query = FinanceTransaction::query();
 
+        // 1. Filter: Timeframe
+        if ($timeframe === 'today') {
+            $query->whereDate('transaction_date', Carbon::today());
+        } elseif ($timeframe === 'week') {
+            $query->whereBetween('transaction_date', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+        } elseif ($timeframe === 'month') {
+            $query->whereBetween('transaction_date', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+        } elseif ($timeframe === 'year') {
+            $query->whereBetween('transaction_date', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+        } elseif ($timeframe === 'custom') {
+            if ($request->filled('start_date') && $request->filled('end_date')) {
+                $query->whereBetween('transaction_date', [
+                    Carbon::parse($request->start_date)->startOfDay(),
+                    Carbon::parse($request->end_date)->endOfDay()
+                ]);
+            } elseif ($request->filled('start_date')) {
+                $query->where('transaction_date', '>=', Carbon::parse($request->start_date)->startOfDay());
+            } elseif ($request->filled('end_date')) {
+                $query->where('transaction_date', '<=', Carbon::parse($request->end_date)->endOfDay());
+            }
+        }
+
+        // 2. Filter: Entry Type (Income / Expense)
         if ($request->filled('type') && in_array($request->type, ['INCOME', 'EXPENSE'])) {
             $query->where('entry_type', $request->type);
         }
+
+        // 3. Filter: Category
         if ($request->filled('category') && $request->category !== 'ALL') {
             $query->where('category', $request->category);
         }
+
+        // 4. Filter: Staff Name
         if ($request->filled('staff') && $request->staff !== 'ALL') {
             $query->where('staff_name', $request->staff);
         }
+
+        // 5. Filter: Search Query
         if ($request->filled('search')) {
             $search = trim($request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('notes', 'like', "%{$search}%")
                   ->orWhere('category', 'like', "%{$search}%")
                   ->orWhere('staff_name', 'like', "%{$search}%")
-                  ->orWhere('payment_method', 'like', "%{$search}%");
+                  ->orWhere('payment_method', 'like', "%{$search}%")
+                  ->orWhere('amount', 'like', "%{$search}%");
             });
         }
 
@@ -343,12 +453,22 @@ class FinanceController extends Controller
             ->filter()
             ->values();
 
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => 'success',
+                'html' => view('adminDash.finance.partials.history_rows', compact('transactions'))->render(),
+                'pagination' => $transactions->hasPages() ? $transactions->links()->render() : '',
+                'total' => $transactions->total(),
+            ]);
+        }
+
         return view('adminDash.finance.allTrans', compact(
             'transactions',
             'totalIncome',
             'totalExpense',
             'netBalance',
-            'staffList'
+            'staffList',
+            'timeframe'
         ));
     }
 

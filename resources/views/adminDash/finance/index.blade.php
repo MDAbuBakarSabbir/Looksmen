@@ -910,6 +910,7 @@
                 </div>
             </div>
         </div>
+        
         <div class="col-md-6 col-12 text-md-right">
             <div class="d-flex flex-wrap gap-2 justify-content-md-end justify-content-start" style="gap: 8px;">
                 <button type="button" class="f-btn f-btn-income" data-toggle="modal" data-target="#transactionModal" data-mode="INCOME">
@@ -927,144 +928,7 @@
             </div>
         </div>
     </div>
-
-    {{-- KPI Metric Cards Grid (4 Columns) --}}
-    <div class="row mb-4">
-        {{-- Card 1: Net Balance --}}
-        <div class="col-xl-3 col-md-6 col-12 mb-3 mb-xl-0">
-            <div class="f-card kpi-card kpi-net">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="kpi-title">Net Balance</span>
-                        <div class="kpi-icon-box icon-cyan">
-                            <i class="fa-solid fa-wallet"></i>
-                        </div>
-                    </div>
-                    <div class="kpi-value" style="{{ $netBalance < 0 ? 'color: #f43f5e;' : ($netBalance > 0 ? 'color: #10b981;' : '') }}">
-                        {{ $netBalance < 0 ? '-৳' . number_format(abs($netBalance), 2) : '৳' . number_format($netBalance, 2) }}
-                    </div>
-                </div>
-                <div class="kpi-sub">
-                    <span class="badge badge-pill {{ $netBalance >= 0 ? 'badge-income' : 'badge-expense' }} mr-1" style="font-size: 11px;">
-                        <i class="fa-solid {{ $netBalance >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }}"></i> {{ $netBalance >= 0 ? 'Net Profit' : 'Net Deficit' }}
-                    </span>
-                    <span class="f-text-muted">Calculated balance</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Card 2: Total Revenue --}}
-        <div class="col-xl-3 col-md-6 col-12 mb-3 mb-xl-0">
-            <div class="f-card kpi-card kpi-revenue">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="kpi-title">Total Revenue</span>
-                        <div class="kpi-icon-box icon-emerald">
-                            <i class="fa-solid fa-arrow-trend-up"></i>
-                        </div>
-                    </div>
-                    <div class="kpi-value" style="color: #10b981;">৳{{ number_format($totalIncome, 2) }}</div>
-                </div>
-                <div class="kpi-sub">
-                    <span class="badge badge-pill badge-income mr-1" style="font-size: 11px;">
-                        <i class="fa-regular fa-circle-check"></i> {{ $incomeEntriesCount }} {{ Str::plural('entry', $incomeEntriesCount) }}
-                    </span>
-                    <span class="f-text-muted">Inflow recorded</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Card 3: Total Expenses --}}
-        <div class="col-xl-3 col-md-6 col-12 mb-3 mb-xl-0">
-            <div class="f-card kpi-card kpi-expense">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="kpi-title">Total Expense</span>
-                        <div class="kpi-icon-box icon-rose">
-                            <i class="fa-solid fa-arrow-trend-down"></i>
-                        </div>
-                    </div>
-                    <div class="kpi-value" style="color: #f43f5e;">৳{{ number_format($totalExpense, 2) }}</div>
-                </div>
-                <div class="kpi-sub">
-                    <span class="badge badge-pill badge-expense mr-1" style="font-size: 11px;">
-                        <i class="fa-solid fa-receipt"></i> {{ $expenseEntriesCount }} {{ Str::plural('entry', $expenseEntriesCount) }}
-                    </span>
-                    <span class="f-text-muted">Operational outlays</span>
-                </div>
-            </div>
-        </div>
-
-        {{-- Card 4: Operations / Transactions --}}
-        <div class="col-xl-3 col-md-6 col-12">
-            <div class="f-card kpi-card kpi-trans">
-                <div>
-                    <div class="d-flex align-items-center justify-content-between mb-2">
-                        <span class="kpi-title">Transactions</span>
-                        <div class="kpi-icon-box icon-violet">
-                            <i class="fa-solid fa-list-check"></i>
-                        </div>
-                    </div>
-                    <div class="kpi-value">{{ $totalTransactions }} <span style="font-size: 1rem; color: var(--f-text-muted); font-weight: 500;">Ops</span></div>
-                </div>
-                <div class="kpi-sub">
-                    <span class="badge badge-pill badge-method mr-1">
-                        <i class="fa-solid fa-bolt text-warning"></i> Active
-                    </span>
-                    <span class="f-text-muted">Total operations count</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Operational Breakdown Section --}}
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="f-card p-4">
-                <div class="d-flex align-items-center justify-content-between mb-3">
-                    <div class="d-flex align-items-center">
-                        <i class="fa-solid fa-chart-column mr-2" style="color: #06b6d4;"></i>
-                        <h5 class="font-weight-bold f-text-title mb-0 font-15">Operational Breakdown &amp; Category Distribution</h5>
-                    </div>
-                    <span class="badge badge-method font-11">Based on active records</span>
-                </div>
-
-                <div class="row">
-                    @forelse($categoryBreakdown as $cat)
-                        @php
-                            $isIncome = $cat->entry_type === 'INCOME';
-                            $dotColor = $isIncome ? '#10b981' : '#f43f5e';
-                            $barGrad = $isIncome ? 'linear-gradient(90deg, #059669, #2dd4bf)' : 'linear-gradient(90deg, #e11d48, #f59e0b)';
-                        @endphp
-                        <div class="col-lg-4 col-12 mb-3 mb-lg-0">
-                            <div class="breakdown-row" onclick="$('#filterCategory').val('{{ $cat->category }}').trigger('change');" title="Click to filter by {{ $cat->category }}">
-                                <div class="d-flex align-items-center justify-content-between font-12 mb-1">
-                                    <div class="d-flex align-items-center">
-                                        <span class="mr-2" style="width: 8px; height: 8px; border-radius: 50%; background-color: {{ $dotColor }}; display: inline-block;"></span>
-                                        <strong class="f-text-title">{{ $cat->category }}</strong>
-                                        <span class="badge badge-method ml-2" style="font-size: 10px;">{{ $cat->entries_count }} {{ Str::plural('entry', $cat->entries_count) }}</span>
-                                    </div>
-                                    <div class="text-right">
-                                        <strong style="color: {{ $dotColor }};">৳{{ number_format($cat->total_amount, 2) }}</strong>
-                                        <span class="f-text-muted font-11 ml-1">({{ $cat->percentage }}%)</span>
-                                    </div>
-                                </div>
-                                <div class="progress-track">
-                                    <div class="progress-bar-custom" style="width: {{ $cat->percentage }}%; background: {{ $barGrad }};"></div>
-                                </div>
-                            </div>
-                        </div>
-                    @empty
-                        <div class="col-12 text-center py-3">
-                            <span class="f-text-muted font-13"><i class="fa-solid fa-chart-pie mr-1"></i> No transactions recorded yet. Add your first income or expense entry above.</span>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Advanced Filtering & Search Bar --}}
+{{-- Advanced Filtering & Search Bar --}}
     <div class="row mb-4">
         <div class="col-12">
             <div class="filter-panel">
@@ -1072,12 +936,12 @@
                 <div class="row align-items-center mb-3">
                     <div class="col-lg-8 col-12 mb-3 mb-lg-0">
                         <div class="pill-group" id="timeframePills">
-                            <button type="button" class="pill-btn" data-time="today">Today</button>
-                            <button type="button" class="pill-btn" data-time="week">This Week</button>
-                            <button type="button" class="pill-btn" data-time="month">This Month</button>
-                            <button type="button" class="pill-btn" data-time="year">This Year</button>
-                            <button type="button" class="pill-btn" data-time="custom">Custom Range</button>
-                            <button type="button" class="pill-btn active" data-time="all">All Time</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'month') === 'today' ? 'active' : '' }}" data-time="today">Today</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'month') === 'week' ? 'active' : '' }}" data-time="week">This Week</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'month') === 'month' ? 'active' : '' }}" data-time="month">This Month</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'month') === 'year' ? 'active' : '' }}" data-time="year">This Year</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'month') === 'custom' ? 'active' : '' }}" data-time="custom">Custom Range</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'month') === 'all' ? 'active' : '' }}" data-time="all">All Time</button>
                         </div>
                     </div>
                     <div class="col-lg-4 col-12">
@@ -1130,6 +994,160 @@
                             <i class="fa-solid fa-rotate-left mr-1"></i> Reset Filters
                         </button>
                     </div>
+                </div>
+
+                {{-- Custom Date Range Row (Hidden by default unless Custom Range is active) --}}
+                <div id="customDateRangeRow" class="row align-items-center mt-3 pt-3 border-top {{ ($timeframe ?? 'month') === 'custom' ? '' : 'd-none' }}" style="border-color: var(--f-card-border) !important;">
+                    <div class="col-md-5 col-sm-6 col-12 mb-2 mb-md-0">
+                        <label class="font-11 font-weight-bold f-text-muted mb-1 d-block"><i class="fa-regular fa-calendar mr-1"></i> Start Date</label>
+                        <input type="date" id="filterStartDate" value="{{ request('start_date', date('Y-m-01')) }}" class="form-control f-input" style="height: 38px;">
+                    </div>
+                    <div class="col-md-5 col-sm-6 col-12 mb-2 mb-md-0">
+                        <label class="font-11 font-weight-bold f-text-muted mb-1 d-block"><i class="fa-regular fa-calendar-check mr-1"></i> End Date</label>
+                        <input type="date" id="filterEndDate" value="{{ request('end_date', date('Y-m-d')) }}" class="form-control f-input" style="height: 38px;">
+                    </div>
+                    <div class="col-md-2 col-12 d-flex align-items-end" style="height: 100%;">
+                        <div class="w-100 mt-md-4">
+                            <button type="button" id="applyCustomDateBtn" class="btn btn-block f-btn f-btn-income py-2" style="height: 38px;">
+                                <i class="fa-solid fa-check mr-1"></i> Apply
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{-- KPI Metric Cards Grid (4 Columns) --}}
+    <div class="row mb-4">
+        {{-- Card 1: Net Balance --}}
+        <div class="col-xl-3 col-md-6 col-12 mb-3 mb-xl-0">
+            <div class="f-card kpi-card kpi-net">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="kpi-title">Net Balance</span>
+                        <div class="kpi-icon-box icon-cyan">
+                            <i class="fa-solid fa-wallet"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value" id="kpiNetBalance" style="{{ $netBalance < 0 ? 'color: #f43f5e;' : ($netBalance > 0 ? 'color: #10b981;' : '') }}">
+                        {{ $netBalance < 0 ? '-৳' . number_format(abs($netBalance), 2) : '৳' . number_format($netBalance, 2) }}
+                    </div>
+                </div>
+                <div class="kpi-sub">
+                    <span class="badge badge-pill {{ $netBalance >= 0 ? 'badge-income' : 'badge-expense' }} mr-1" id="kpiNetBadge" style="font-size: 11px;">
+                        <i class="fa-solid {{ $netBalance >= 0 ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down' }}"></i> {{ $netBalance >= 0 ? 'Net Profit' : 'Net Deficit' }}
+                    </span>
+                    <span class="f-text-muted">Calculated balance</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 2: Total Revenue --}}
+        <div class="col-xl-3 col-md-6 col-12 mb-3 mb-xl-0">
+            <div class="f-card kpi-card kpi-revenue">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="kpi-title">Total Revenue</span>
+                        <div class="kpi-icon-box icon-emerald">
+                            <i class="fa-solid fa-arrow-trend-up"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value" id="kpiTotalRevenue" style="color: #10b981;">৳{{ number_format($totalIncome, 2) }}</div>
+                </div>
+                <div class="kpi-sub">
+                    <span class="badge badge-pill badge-income mr-1" id="kpiRevenueBadge" style="font-size: 11px;">
+                        <i class="fa-regular fa-circle-check"></i> <span id="kpiRevenueCount">{{ $incomeEntriesCount }} {{ Str::plural('entry', $incomeEntriesCount) }}</span>
+                    </span>
+                    <span class="f-text-muted">Inflow recorded</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 3: Total Expenses --}}
+        <div class="col-xl-3 col-md-6 col-12 mb-3 mb-xl-0">
+            <div class="f-card kpi-card kpi-expense">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="kpi-title">Total Expense</span>
+                        <div class="kpi-icon-box icon-rose">
+                            <i class="fa-solid fa-arrow-trend-down"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value" id="kpiTotalExpense" style="color: #f43f5e;">৳{{ number_format($totalExpense, 2) }}</div>
+                </div>
+                <div class="kpi-sub">
+                    <span class="badge badge-pill badge-expense mr-1" id="kpiExpenseBadge" style="font-size: 11px;">
+                        <i class="fa-solid fa-receipt"></i> <span id="kpiExpenseCount">{{ $expenseEntriesCount }} {{ Str::plural('entry', $expenseEntriesCount) }}</span>
+                    </span>
+                    <span class="f-text-muted">Operational outlays</span>
+                </div>
+            </div>
+        </div>
+
+        {{-- Card 4: Operations / Transactions --}}
+        <div class="col-xl-3 col-md-6 col-12">
+            <div class="f-card kpi-card kpi-trans">
+                <div>
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="kpi-title">Transactions</span>
+                        <div class="kpi-icon-box icon-violet">
+                            <i class="fa-solid fa-list-check"></i>
+                        </div>
+                    </div>
+                    <div class="kpi-value" id="kpiTotalTransactions">{{ $totalTransactions }} <span style="font-size: 1rem; color: var(--f-text-muted); font-weight: 500;">Ops</span></div>
+                </div>
+                <div class="kpi-sub">
+                    <span class="badge badge-pill badge-method mr-1">
+                        <i class="fa-solid fa-bolt text-warning"></i> Active
+                    </span>
+                    <span class="f-text-muted">Total operations count</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Operational Breakdown Section --}}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="f-card p-4">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        <i class="fa-solid fa-chart-column mr-2" style="color: #06b6d4;"></i>
+                        <h5 class="font-weight-bold f-text-title mb-0 font-15">Operational Breakdown &amp; Category Distribution</h5>
+                    </div>
+                    <span class="badge badge-method font-11">Based on active records</span>
+                </div>
+
+                <div class="row" id="categoryBreakdownContainer">
+                    @forelse($categoryBreakdown as $cat)
+                        @php
+                            $isIncome = $cat->entry_type === 'INCOME';
+                            $dotColor = $isIncome ? '#10b981' : '#f43f5e';
+                            $barGrad = $isIncome ? 'linear-gradient(90deg, #059669, #2dd4bf)' : 'linear-gradient(90deg, #e11d48, #f59e0b)';
+                        @endphp
+                        <div class="col-lg-4 col-12 mb-3 mb-lg-0">
+                            <div class="breakdown-row" onclick="$('#filterCategory').val('{{ $cat->category }}').trigger('change');" title="Click to filter by {{ $cat->category }}">
+                                <div class="d-flex align-items-center justify-content-between font-12 mb-1">
+                                    <div class="d-flex align-items-center">
+                                        <span class="mr-2" style="width: 8px; height: 8px; border-radius: 50%; background-color: {{ $dotColor }}; display: inline-block;"></span>
+                                        <strong class="f-text-title">{{ $cat->category }}</strong>
+                                        <span class="badge badge-method ml-2" style="font-size: 10px;">{{ $cat->entries_count }} {{ Str::plural('entry', $cat->entries_count) }}</span>
+                                    </div>
+                                    <div class="text-right">
+                                        <strong style="color: {{ $dotColor }};">৳{{ number_format($cat->total_amount, 2) }}</strong>
+                                        <span class="f-text-muted font-11 ml-1">({{ $cat->percentage }}%)</span>
+                                    </div>
+                                </div>
+                                <div class="progress-track">
+                                    <div class="progress-bar-custom" style="width: {{ $cat->percentage }}%; background: {{ $barGrad }};"></div>
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <div class="col-12 text-center py-3">
+                            <span class="f-text-muted font-13"><i class="fa-solid fa-chart-pie mr-1"></i> No transactions recorded yet. Add your first income or expense entry above.</span>
+                        </div>
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -1754,85 +1772,286 @@ $(document).ready(function() {
     });
 
     // =========================================================
-    // 3. Live Client-Side Filtering & Search
+    // 3. Live AJAX Filtering & Search (KPIs, Categories & Ledger)
     // =========================================================
-    let activeTimeframe = 'all';
+    let activeTimeframe = '{{ $timeframe ?? "month" }}';
+    let filterAjaxRequest = null;
+    let searchDebounceTimer = null;
 
     function applyFilters() {
-        const query = $('#ledgerSearchInput').val().toLowerCase().trim();
+        const query = $('#ledgerSearchInput').val().trim();
         const typeFilter = $('#filterType').val();
         const categoryFilter = $('#filterCategory').val();
         const staffFilter = $('#filterStaff').val();
+        const startDate = activeTimeframe === 'custom' ? $('#filterStartDate').val() : '';
+        const endDate = activeTimeframe === 'custom' ? $('#filterEndDate').val() : '';
 
-        // Date calculations for timeframe filter
-        const now = new Date();
-        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime() / 1000;
-        const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())).setHours(0, 0, 0, 0) / 1000;
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime() / 1000;
-        const startOfYear = new Date(now.getFullYear(), 0, 1).getTime() / 1000;
-
-        let visibleCount = 0;
-        const $items = $('#transactionsList .tx-item');
-
-        $items.each(function() {
-            const $item = $(this);
-            const textContent = $item.text().toLowerCase();
-            const itemType = $item.data('type') || '';
-            const itemCategory = $item.data('category') || '';
-            const itemStaff = $item.data('staff') || '';
-            const itemTimestamp = parseInt($item.data('timestamp')) || 0;
-
-            const matchesQuery = query === '' || textContent.indexOf(query) !== -1;
-            const matchesType = typeFilter === 'ALL' || itemType === typeFilter;
-            const matchesCategory = categoryFilter === 'ALL' || itemCategory === categoryFilter;
-            const matchesStaff = staffFilter === 'ALL' || itemStaff === staffFilter;
-
-            let matchesTimeframe = true;
-            if (activeTimeframe === 'today') {
-                matchesTimeframe = itemTimestamp >= startOfToday;
-            } else if (activeTimeframe === 'week') {
-                matchesTimeframe = itemTimestamp >= startOfWeek;
-            } else if (activeTimeframe === 'month') {
-                matchesTimeframe = itemTimestamp >= startOfMonth;
-            } else if (activeTimeframe === 'year') {
-                matchesTimeframe = itemTimestamp >= startOfYear;
+        // Validate custom date range
+        if (activeTimeframe === 'custom') {
+            if (startDate && endDate && startDate > endDate) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'warning',
+                    title: 'Start date cannot be after end date',
+                    showConfirmButton: false,
+                    timer: 2500
+                });
+                return;
             }
+        }
 
-            if (matchesQuery && matchesType && matchesCategory && matchesStaff && matchesTimeframe) {
-                $item.removeClass('d-none');
-                visibleCount++;
-            } else {
-                $item.addClass('d-none');
+        // Visual loading cues
+        $('#txCountBadge').html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Filtering...');
+        $('.kpi-card .kpi-value').css('opacity', '0.45');
+        $('#categoryBreakdownContainer').css('opacity', '0.45');
+
+        // Cancel pending request if rapid switching
+        if (filterAjaxRequest && filterAjaxRequest.readyState !== 4) {
+            filterAjaxRequest.abort();
+        }
+
+        filterAjaxRequest = $.ajax({
+            url: `{{ route('admin.finance.index') }}`,
+            type: 'GET',
+            data: {
+                timeframe: activeTimeframe,
+                start_date: startDate,
+                end_date: endDate,
+                type: typeFilter,
+                category: categoryFilter,
+                staff: staffFilter,
+                search: query
+            },
+            success: function(res) {
+                $('.kpi-card .kpi-value').css('opacity', '1');
+                $('#categoryBreakdownContainer').css('opacity', '1');
+
+                // 1. Update KPI Card 1: Net Balance
+                const net = parseFloat(res.metrics.netBalance) || 0;
+                const netFormatted = Math.abs(net).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (net < 0) {
+                    $('#kpiNetBalance').css('color', '#f43f5e').text('-৳' + netFormatted);
+                    $('#kpiNetBadge').attr('class', 'badge badge-pill badge-expense mr-1')
+                        .html('<i class="fa-solid fa-arrow-trend-down"></i> Net Deficit');
+                } else {
+                    $('#kpiNetBalance').css('color', '#10b981').text('৳' + netFormatted);
+                    $('#kpiNetBadge').attr('class', 'badge badge-pill badge-income mr-1')
+                        .html('<i class="fa-solid fa-arrow-trend-up"></i> Net Profit');
+                }
+
+                // 2. Update KPI Card 2: Total Revenue
+                const rev = parseFloat(res.metrics.totalIncome) || 0;
+                $('#kpiTotalRevenue').text('৳' + rev.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                const incCount = parseInt(res.metrics.incomeEntriesCount) || 0;
+                $('#kpiRevenueCount').text(`${incCount} ${incCount === 1 ? 'entry' : 'entries'}`);
+
+                // 3. Update KPI Card 3: Total Expenses
+                const exp = parseFloat(res.metrics.totalExpense) || 0;
+                $('#kpiTotalExpense').text('৳' + exp.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                const expCount = parseInt(res.metrics.expenseEntriesCount) || 0;
+                $('#kpiExpenseCount').text(`${expCount} ${expCount === 1 ? 'entry' : 'entries'}`);
+
+                // 4. Update KPI Card 4: Operations / Transactions
+                const totalOps = parseInt(res.metrics.totalTransactions) || 0;
+                $('#kpiTotalTransactions').html(`${totalOps} <span style="font-size: 1rem; color: var(--f-text-muted); font-weight: 500;">Ops</span>`);
+
+                // 5. Update Operational Breakdown & Category Distribution
+                const $breakdown = $('#categoryBreakdownContainer');
+                $breakdown.empty();
+                if (!res.categoryBreakdown || res.categoryBreakdown.length === 0) {
+                    $breakdown.html(`
+                        <div class="col-12 text-center py-3">
+                            <span class="f-text-muted font-13"><i class="fa-solid fa-chart-pie mr-1"></i> No transactions recorded for the selected filter.</span>
+                        </div>
+                    `);
+                } else {
+                    res.categoryBreakdown.forEach(function(cat) {
+                        const isInc = cat.entry_type === 'INCOME';
+                        const dotColor = isInc ? '#10b981' : '#f43f5e';
+                        const barGrad = isInc ? 'linear-gradient(90deg, #059669, #2dd4bf)' : 'linear-gradient(90deg, #e11d48, #f59e0b)';
+                        const catTotal = parseFloat(cat.total_amount) || 0;
+                        const catCount = parseInt(cat.entries_count) || 0;
+                        const pct = cat.percentage || 0;
+                        const formattedCatTotal = catTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                        const rowHtml = `
+                            <div class="col-lg-4 col-12 mb-3 mb-lg-0">
+                                <div class="breakdown-row" onclick="$('#filterCategory').val('${cat.category.replace(/'/g, "\\'")}').trigger('change');" title="Click to filter by ${cat.category}">
+                                    <div class="d-flex align-items-center justify-content-between font-12 mb-1">
+                                        <div class="d-flex align-items-center">
+                                            <span class="mr-2" style="width: 8px; height: 8px; border-radius: 50%; background-color: ${dotColor}; display: inline-block;"></span>
+                                            <strong class="f-text-title">${cat.category}</strong>
+                                            <span class="badge badge-method ml-2" style="font-size: 10px;">${catCount} ${catCount === 1 ? 'entry' : 'entries'}</span>
+                                        </div>
+                                        <div class="text-right">
+                                            <strong style="color: ${dotColor};">৳${formattedCatTotal}</strong>
+                                            <span class="f-text-muted font-11 ml-1">(${pct}%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="progress-track">
+                                        <div class="progress-bar-custom" style="width: ${pct}%; background: ${barGrad};"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $breakdown.append(rowHtml);
+                    });
+                }
+
+                // 6. Update Recent Transactions List
+                const $list = $('#transactionsList');
+                $list.find('.tx-item').remove();
+
+                if (!res.transactions || res.transactions.length === 0) {
+                    $('#emptyLedgerNotice').removeClass('d-none');
+                    $('#txCountBadge').text('Showing 0 of 0');
+                } else {
+                    $('#emptyLedgerNotice').addClass('d-none');
+                    $('#txCountBadge').text(`Showing ${res.count} of ${res.totalMatching}`);
+
+                    res.transactions.forEach(function(tx) {
+                        const isInc = tx.entry_type === 'INCOME';
+                        const iconClass = isInc ? 'icon-emerald' : 'icon-rose';
+                        const iconFa = isInc ? 'fa-arrow-trend-up' : 'fa-arrow-trend-down';
+                        const badgeClass = isInc ? 'badge-income' : 'badge-expense';
+                        const amtColor = isInc ? '#10b981' : '#f43f5e';
+                        const amtPrefix = isInc ? '+৳' : '-৳';
+                        const formattedAmt = parseFloat(tx.amount).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                        const receiptHtml = tx.has_receipt ? `
+                            <div class="receipt-thumb-box" title="View Full Receipt Photo (.webp)" data-receipt-src="${tx.receipt_url}">
+                                <img src="${tx.receipt_url}" alt="Receipt Preview">
+                                <div class="receipt-thumb-overlay">
+                                    <i class="fa-solid fa-magnifying-glass-plus"></i>
+                                </div>
+                            </div>
+                        ` : '';
+                        const notesHtml = tx.notes ? `
+                            <p class="f-text-muted font-12 mb-1 text-truncate" style="max-width: 550px;" title="${$('<div>').text(tx.notes).html()}">
+                                <i class="fa-regular fa-file-lines mr-1 text-muted"></i>
+                                <span>${$('<div>').text(tx.notes).html()}</span>
+                            </p>
+                        ` : '';
+
+                        const itemHtml = `
+                            <div class="tx-item"
+                                 data-id="${tx.id}"
+                                 data-type="${tx.entry_type}"
+                                 data-category="${$('<div>').text(tx.category).html()}"
+                                 data-staff="${$('<div>').text(tx.staff_name).html()}"
+                                 data-amount="${tx.amount}"
+                                 data-method="${$('<div>').text(tx.payment_method).html()}"
+                                 data-date="${tx.date_raw}"
+                                 data-notes="${$('<div>').text(tx.notes || '').html()}"
+                                 data-receipt="${tx.receipt_url || ''}"
+                                 data-timestamp="${tx.timestamp}">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-8 col-12 mb-3 mb-lg-0">
+                                        <div class="d-flex align-items-start">
+                                            <div class="tx-type-icon ${iconClass} mr-3">
+                                                <i class="fa-solid ${iconFa}"></i>
+                                            </div>
+                                            <div>
+                                                <div class="d-flex flex-wrap align-items-center mb-1" style="gap: 8px;">
+                                                    <h6 class="font-weight-bold f-text-title mb-0 font-15">${$('<div>').text(tx.category).html()}</h6>
+                                                    <span class="tx-badge ${badgeClass}">
+                                                        <i class="fa-solid ${isInc ? 'fa-arrow-up' : 'fa-arrow-down'} font-9"></i> ${tx.entry_type.charAt(0).toUpperCase() + tx.entry_type.slice(1).toLowerCase()}
+                                                    </span>
+                                                    <span class="badge-method">
+                                                        <i class="fa-regular fa-credit-card mr-1 text-muted"></i> ${$('<div>').text(tx.payment_method).html()}
+                                                    </span>
+                                                </div>
+                                                ${notesHtml}
+                                                <div class="d-flex flex-wrap align-items-center font-11 f-text-muted" style="gap: 14px;">
+                                                    <span>
+                                                        <i class="fa-regular fa-calendar-days mr-1 text-muted"></i> 
+                                                        ${tx.date_formatted}
+                                                    </span>
+                                                    <span>
+                                                        <i class="fa-regular fa-circle-user mr-1 text-success"></i> Added by:
+                                                        <strong class="text-success px-1.5 py-0.5 rounded" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.25);">${$('<div>').text(tx.staff_name).html()}</strong>
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4 col-12 text-lg-right text-left">
+                                        <div class="d-flex align-items-center justify-content-lg-end justify-content-between" style="gap: 14px;">
+                                            ${receiptHtml}
+                                            <div class="text-left text-lg-right">
+                                                <div class="font-weight-bold font-18" style="color: ${amtColor};">${amtPrefix}${formattedAmt}</div>
+                                            </div>
+                                            <div class="d-flex align-items-center" style="gap: 4px;">
+                                                <button type="button" class="tx-action-btn edit-tx-btn" title="Edit Transaction">
+                                                    <i class="fa-solid fa-pen-to-square"></i>
+                                                </button>
+                                                <button type="button" class="tx-action-btn delete-btn delete-tx-btn" title="Delete Transaction">
+                                                    <i class="fa-regular fa-trash-can"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        $('#emptyLedgerNotice').before(itemHtml);
+                    });
+                }
+            },
+            error: function(xhr, status) {
+                if (status === 'abort') return;
+                $('.kpi-card .kpi-value').css('opacity', '1');
+                $('#categoryBreakdownContainer').css('opacity', '1');
+                $('#txCountBadge').text('Filter update error');
             }
         });
-
-        $('#txCountBadge').text(`Showing ${visibleCount} of ${$items.length}`);
-
-        if (visibleCount === 0) {
-            $('#emptyLedgerNotice').removeClass('d-none');
-        } else {
-            $('#emptyLedgerNotice').addClass('d-none');
-        }
     }
 
-    $('#ledgerSearchInput').on('input', applyFilters);
-    $('#filterType, #filterCategory, #filterStaff').on('change', applyFilters);
+    // Input & Select Listeners
+    $('#ledgerSearchInput').on('input', function() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(function() {
+            applyFilters();
+        }, 300);
+    });
+
+    $('#filterType, #filterCategory, #filterStaff').on('change', function() {
+        applyFilters();
+    });
 
     // Timeframe Pills Click
     $('#timeframePills .pill-btn').on('click', function() {
+        const time = $(this).data('time');
         $('#timeframePills .pill-btn').removeClass('active');
         $(this).addClass('active');
-        activeTimeframe = $(this).data('time') || 'all';
-        applyFilters();
+        activeTimeframe = time;
 
-        Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'info',
-            title: `Filtered by: ${$(this).text()}`,
-            showConfirmButton: false,
-            timer: 1200
-        });
+        if (time === 'custom') {
+            $('#customDateRangeRow').removeClass('d-none');
+            // If empty, prefill start of month and today
+            if (!$('#filterStartDate').val()) {
+                const d = new Date();
+                $('#filterStartDate').val(new Date(d.getFullYear(), d.getMonth(), 2).toISOString().slice(0, 10));
+            }
+            if (!$('#filterEndDate').val()) {
+                $('#filterEndDate').val(new Date().toISOString().slice(0, 10));
+            }
+            applyFilters();
+        } else {
+            $('#customDateRangeRow').addClass('d-none');
+            applyFilters();
+        }
+    });
+
+    // Custom Date Range Listeners
+    $('#filterStartDate, #filterEndDate').on('change', function() {
+        if (activeTimeframe === 'custom') {
+            applyFilters();
+        }
+    });
+
+    $('#applyCustomDateBtn').on('click', function() {
+        applyFilters();
     });
 
     // Reset Filters Handler
@@ -1841,16 +2060,19 @@ $(document).ready(function() {
         $('#filterType').val('ALL');
         $('#filterCategory').val('ALL');
         $('#filterStaff').val('ALL');
+        $('#filterStartDate').val('{{ date("Y-m-01") }}');
+        $('#filterEndDate').val('{{ date("Y-m-d") }}');
         $('#timeframePills .pill-btn').removeClass('active');
-        $('#timeframePills .pill-btn[data-time="all"]').addClass('active');
-        activeTimeframe = 'all';
+        $('#timeframePills .pill-btn[data-time="month"]').addClass('active');
+        activeTimeframe = 'month';
+        $('#customDateRangeRow').addClass('d-none');
         applyFilters();
 
         Swal.fire({
             toast: true,
             position: 'top-end',
             icon: 'info',
-            title: 'Filters have been reset',
+            title: 'Filters reset to This Month',
             showConfirmButton: false,
             timer: 1500
         });
@@ -1874,7 +2096,10 @@ $(document).ready(function() {
         const type = $('#filterType').val();
         const cat = $('#filterCategory').val();
         const staff = $('#filterStaff').val();
-        const url = `{{ route('admin.finance.export') }}?type=${encodeURIComponent(type)}&category=${encodeURIComponent(cat)}&staff=${encodeURIComponent(staff)}`;
+        const search = $('#ledgerSearchInput').val().trim();
+        const start = activeTimeframe === 'custom' ? $('#filterStartDate').val() : '';
+        const end = activeTimeframe === 'custom' ? $('#filterEndDate').val() : '';
+        const url = `{{ route('admin.finance.export') }}?timeframe=${encodeURIComponent(activeTimeframe)}&start_date=${encodeURIComponent(start)}&end_date=${encodeURIComponent(end)}&type=${encodeURIComponent(type)}&category=${encodeURIComponent(cat)}&staff=${encodeURIComponent(staff)}&search=${encodeURIComponent(search)}`;
         window.location.href = url;
     });
 

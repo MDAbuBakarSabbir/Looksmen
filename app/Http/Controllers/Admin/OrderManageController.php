@@ -70,6 +70,123 @@ class OrderManageController extends Controller
         }
     }
 
+    /**
+     * Build base query for order filtering (search, timeframe, date range, days, admin).
+     */
+    protected function buildBaseOrderFilterQuery(Request $request)
+    {
+        $query = Orders::query();
+
+        // 1. SEARCH
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
+            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
+            $query->where(function ($q) use ($search, $last11) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$last11}%")
+                    ->orWhere('name', 'like', "%{$search}%");
+            });
+        }
+
+        // 2. TIMEFRAME FILTER (Compatible with modern timeframe pills)
+        if ($request->filled('timeframe') && $request->timeframe !== 'all') {
+            $tf = $request->timeframe;
+            if ($tf === 'today') {
+                $query->whereDate('created_at', Carbon::today());
+            } elseif ($tf === 'week') {
+                $query->whereBetween('created_at', [Carbon::now()->startOfWeek(), Carbon::now()->endOfWeek()]);
+            } elseif ($tf === 'month') {
+                $query->whereBetween('created_at', [Carbon::now()->startOfMonth(), Carbon::now()->endOfMonth()]);
+            } elseif ($tf === 'year') {
+                $query->whereBetween('created_at', [Carbon::now()->startOfYear(), Carbon::now()->endOfYear()]);
+            } elseif ($tf === 'custom') {
+                $start = $request->start_date ?? $request->from;
+                $end = $request->end_date ?? $request->to;
+                if ($start && $end) {
+                    $query->whereBetween('created_at', [
+                        Carbon::parse($start)->startOfDay(),
+                        Carbon::parse($end)->endOfDay(),
+                    ]);
+                } elseif ($start) {
+                    $query->where('created_at', '>=', Carbon::parse($start)->startOfDay());
+                } elseif ($end) {
+                    $query->where('created_at', '<=', Carbon::parse($end)->endOfDay());
+                }
+            }
+        } elseif ($request->filled('from') && $request->filled('to')) {
+            // 3. DATE RANGE (from & to)
+            $query->whereBetween('created_at', [
+                Carbon::parse($request->from)->startOfDay(),
+                Carbon::parse($request->to)->endOfDay(),
+            ]);
+        } elseif ($request->filled('days')) {
+            // 4. DAYS FILTER
+            match ($request->days) {
+                'today' => $query->whereDate('created_at', Carbon::today()),
+                'yesterday' => $query->whereDate('created_at', Carbon::today()->subDay()),
+                '7days' => $query->where('created_at', '>=', Carbon::now()->subDays(7)),
+                '30days' => $query->where('created_at', '>=', Carbon::now()->subDays(30)),
+                'this_year' => $query->whereYear('created_at', Carbon::now()->year),
+                'last_year' => $query->whereYear('created_at', Carbon::now()->subYear()->year),
+                default => null
+            };
+        }
+
+        // 5. ADMIN FILTER
+        if ($request->filled('admin_id')) {
+            $query->where('updated_by', $request->admin_id);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Calculate comprehensive status counts from a filtered base query.
+     */
+    protected function calculateOrderStatusCounts($baseQuery)
+    {
+        $counts = (clone $baseQuery)->select('delivery_status', DB::raw('count(*) as total'))
+            ->groupBy('delivery_status')
+            ->pluck('total', 'delivery_status')
+            ->toArray();
+
+        $returnCounts = (clone $baseQuery)->select('return_status', DB::raw('count(*) as total'))
+            ->whereNotNull('return_status')
+            ->groupBy('return_status')
+            ->pluck('total', 'return_status')
+            ->toArray();
+
+        $deliveredCount = (clone $baseQuery)->where(function ($q) {
+            $q->where(function ($sub) {
+                $sub->whereIn('delivery_status', ['delivered', 'partial_delivered'])
+                    ->where(function ($s) {
+                        $s->whereNull('return_status')
+                            ->orWhereNotIn('return_status', ['paid return', 'unpaid return']);
+                    });
+            })->orWhere('return_status', 'partial');
+        })->count();
+
+        $returnedCount = (clone $baseQuery)->where(function ($q) {
+            $q->whereIn('delivery_status', ['returned', 'return'])
+                ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
+        })->count();
+
+        return [
+            'pending' => $counts['pending'] ?? 0,
+            'hold' => $counts['hold'] ?? 0,
+            'approved' => $counts['approved'] ?? 0,
+            'packaging' => $counts['packaging'] ?? 0,
+            'in_courier' => ($counts['in_courier'] ?? 0) + ($counts['incourier'] ?? 0),
+            'delivered' => $deliveredCount,
+            'canceled' => ($counts['cancel'] ?? 0) + ($counts['canceled'] ?? 0) + ($counts['cancelled'] ?? 0),
+            'returned' => $returnedCount,
+            'partial' => $returnCounts['partial'] ?? 0,
+            'unpaid_return' => $returnCounts['unpaid return'] ?? 0,
+            'paid_return' => $returnCounts['paid return'] ?? 0,
+        ];
+    }
+
     public function filter(Request $request)
     {
         $status = $request->status;
@@ -103,67 +220,41 @@ class OrderManageController extends Controller
             abort(403, 'Unauthorized.');
         }
 
-        $query = Orders::query();
+        $baseQuery = $this->buildBaseOrderFilterQuery($request);
+        $statusCounts = $this->calculateOrderStatusCounts($baseQuery);
 
-        // STATUS
-        if ($request->status) {
+        $tableQuery = (clone $baseQuery);
+
+        // STATUS FILTER (Applies to table only)
+        if ($request->filled('status')) {
             $st = $request->status;
             if (in_array($st, ['in_courier', 'incourier'])) {
-                $query->whereIn('delivery_status', ['in_courier', 'incourier']);
+                $tableQuery->whereIn('delivery_status', ['in_courier', 'incourier']);
             } elseif (in_array($st, ['delivered', 'partial_delivered'])) {
-                $query->whereIn('delivery_status', ['delivered', 'partial_delivered']);
+                $tableQuery->where(function ($q) {
+                    $q->where(function ($sub) {
+                        $sub->whereIn('delivery_status', ['delivered', 'partial_delivered'])
+                            ->where(function ($s) {
+                                $s->whereNull('return_status')
+                                    ->orWhereNotIn('return_status', ['paid return', 'unpaid return']);
+                            });
+                    })->orWhere('return_status', 'partial');
+                });
             } elseif (in_array($st, ['cancel', 'canceled', 'cancelled'])) {
-                $query->whereIn('delivery_status', ['cancel', 'canceled', 'cancelled']);
+                $tableQuery->whereIn('delivery_status', ['cancel', 'canceled', 'cancelled']);
             } elseif (in_array($st, ['returned', 'return'])) {
                 if ($request->return_sort) {
                     $rs = str_replace('_', ' ', $request->return_sort);
-                    $query->where('return_status', $rs);
+                    $tableQuery->where('return_status', $rs);
                 } else {
-                    $query->where(function($q) {
+                    $tableQuery->where(function ($q) {
                         $q->whereIn('delivery_status', ['returned', 'return'])
-                          ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
+                            ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
                     });
                 }
             } else {
-                $query->where('delivery_status', $st);
+                $tableQuery->where('delivery_status', $st);
             }
-        }
-
-        // SEARCH
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
-        }
-
-        // DATE RANGE
-        if ($request->from && $request->to) {
-            $query->whereBetween('created_at', [
-                Carbon::parse($request->from)->startOfDay(),
-                Carbon::parse($request->to)->endOfDay(),
-            ]);
-        }
-
-        // DAYS FILTER
-        if ($request->days) {
-            match ($request->days) {
-                'today' => $query->whereDate('created_at', today()),
-                'yesterday' => $query->whereDate('created_at', today()->subDay()),
-                '7days' => $query->where('created_at', '>=', now()->subDays(7)),
-                '30days' => $query->where('created_at', '>=', now()->subDays(30)),
-                'this_year' => $query->whereYear('created_at', now()->year),
-                'last_year' => $query->whereYear('created_at', now()->subYear()->year),
-                default => null
-            };
-        }
-
-        // ADMIN FILTER
-        if ($request->admin_id) {
-            $query->where('updated_by', $request->admin_id);
         }
 
         $page = request('page', 1);
@@ -171,7 +262,7 @@ class OrderManageController extends Controller
         if ($perPage <= 0) {
             $perPage = 10;
         }
-        $orders = $query->latest()->paginate($perPage)->withQueryString();
+        $orders = $tableQuery->latest()->paginate($perPage)->withQueryString();
 
         $html = view('adminDash.orders.extends.order_rows', compact('orders'))->render();
 
@@ -182,6 +273,8 @@ class OrderManageController extends Controller
             'total' => $orders->total(),
             'from' => $orders->firstItem() ?? 0,
             'to' => $orders->lastItem() ?? 0,
+            'per_page' => $orders->perPage(),
+            'status_counts' => $statusCounts,
         ]);
     }
 
@@ -210,19 +303,34 @@ class OrderManageController extends Controller
                 $order->save();
             }
         } elseif (in_array($request->status, ['partial', 'unpaid return', 'paid return'])) {
-            $order->delivery_status = 'delivered'; // Return statuses are assumed to be a subset of delivered
-            $order->return_status = $request->status;
-
-            // Payment logic for return statuses (similar to delivered)
-            if ($order->payment_status != 'paid' && $request->status == 'paid return') {
+            if ($request->status === 'partial') {
+                $order->delivery_status = 'delivered';
+                $isPartialReturn = $request->has('is_partial_return') ? ((int) $request->is_partial_return === 1) : false;
+                $order->return_status = $isPartialReturn ? 'partial' : null;
+                if ($request->filled('partial_amount')) {
+                    $partialAmount = (float) $request->partial_amount;
+                    $totalPayable = (float) ($order->total_amount > 0 ? $order->total_amount : ((float) $order->paid_amount + (float) $order->grand_total));
+                    $order->paid_amount = $partialAmount;
+                    $order->grand_total = max(0, $totalPayable - $partialAmount);
+                    $order->payment_status = ($order->grand_total == 0) ? 'paid' : 'partial';
+                }
+            } elseif ($request->status === 'paid return') {
+                $order->delivery_status = 'returned';
+                $order->return_status = 'paid return';
                 $order->payment_status = 'paid';
                 $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
                 $order->grand_total = 0;
+            } elseif ($request->status === 'unpaid return') {
+                $order->delivery_status = 'returned';
+                $order->return_status = 'unpaid return';
+                $order->payment_status = 'unpaid';
             }
 
-            $order->updated_by = auth()->id();
+            $adminId = auth()->guard('admin')->id() ?? auth()->id() ?? 1;
+            $order->updated_by = $adminId;
             $order->save();
         } else {
+            $adminId = auth()->guard('admin')->id() ?? auth()->id() ?? 1;
             $order->delivery_status = $request->status;
             $order->return_status = null; // Clear return status if it's a regular delivery status
             if ($request->status == 'delivered') {
@@ -230,15 +338,15 @@ class OrderManageController extends Controller
                 $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
                 $order->grand_total = 0;
             }
-            $order->updated_by = auth()->id();
+            $order->updated_by = $adminId;
             $order->save();
         }
 
         $logs = new Logs;
-        $logs->user_id = auth()->id();
+        $logs->user_id = $adminId;
         $logs->order_id = $request->id;
         $logs->action_type = 'status_update';
-        $logs->details = 'Order status changed to '.$order->delivery_status;
+        $logs->details = 'Order status changed to '.$order->delivery_status.($order->return_status ? ' ('.$order->return_status.')' : '');
         $logs->order_status = $order->delivery_status;
         $logs->save();
 
@@ -277,27 +385,28 @@ class OrderManageController extends Controller
         }
 
         $badgeClass = ($order->delivery_status == 'cancel') ? 'bg-danger' : 'bg-info';
-        $statusText = ucfirst($order->delivery_status);
+        $statusText = $order->return_status ? ucwords($order->return_status) : ucfirst($order->delivery_status);
         $view = view('adminDash.orders.extends.buttons', compact('order'))->render();
 
         $badgeHtml = '<span id="status-badge-'.$order->id.'" class="status-pill status-'.$order->delivery_status.'">'.ucfirst($order->delivery_status).'</span>';
-        if (strtolower($order->delivery_status) === 'delivered') {
-            if (strtolower($order->return_status) === 'partial') {
-                $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>';
-            } elseif (strtolower($order->return_status) === 'unpaid return') {
-                $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #ef4444; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">UNPAID RETURN</span>';
-            } elseif (strtolower($order->return_status) === 'paid return') {
-                $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #10b981; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PAID RETURN</span>';
-            }
+        if (strtolower($order->return_status) === 'partial') {
+            $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>';
+        } elseif (strtolower($order->return_status) === 'unpaid return') {
+            $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #ef4444; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">UNPAID RETURN</span>';
+        } elseif (strtolower($order->return_status) === 'paid return') {
+            $badgeHtml .= '<span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #10b981; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PAID RETURN</span>';
         }
 
         return response()->json([
             'success' => true,
             'status' => $order->delivery_status,
+            'return_status' => $order->return_status,
             'status_text' => $statusText,
             'badge_class' => $badgeClass,
             'badge_html' => $badgeHtml,
             'order_id' => $order->id,
+            'paid_amount' => $order->paid_amount,
+            'grand_total' => $order->grand_total,
             'new_dropdown' => $view,
             'consignment_id' => $order->consignment_id,
             'tracking_code' => $order->tracking_code,
@@ -415,42 +524,90 @@ class OrderManageController extends Controller
         return response()->json(['success' => true, 'message' => 'Orders updated successfully.']);
     }
 
-    public function statusCount()
+    public function statusCount(Request $request)
     {
-        return response()->json([
-            'hold' => Orders::where('delivery_status', 'hold')->count(),
-            'pending' => Orders::where('delivery_status', 'pending')->count(),
-            'approved' => Orders::where('delivery_status', 'approved')->count(),
-            'packaging' => Orders::where('delivery_status', 'packaging')->count(),
-            'in_courier' => Orders::whereIn('delivery_status', ['in_courier', 'incourier'])->count(),
-            'delivered' => Orders::whereIn('delivery_status', ['delivered', 'partial_delivered'])->count(),
-            'canceled' => Orders::whereIn('delivery_status', ['cancel', 'canceled', 'cancelled'])->count(),
-            'returned' => Orders::where('delivery_status', 'returned')->count(),
-        ]);
+        $baseQuery = $this->buildBaseOrderFilterQuery($request);
+        $statusCounts = $this->calculateOrderStatusCounts($baseQuery);
+
+        return response()->json($statusCounts);
     }
 
     public function index(Request $request)
     {
-        if (! auth()->guard('admin')->user()->hasPermission('manage_order')) {
+        $user = auth()->guard('admin')->user();
+        $status = $request->status;
+
+        if (empty($status) && ! $user->hasPermission('manage_order')) {
             abort(403, 'You do not have permission to manage orders.');
         }
-        $query = Orders::with('admin');
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
+        if ($status === 'pending' && ! $user->hasPermission('pending_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view pending orders.');
         }
+        if ($status === 'hold' && ! $user->hasPermission('hold_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view hold orders.');
+        }
+        if ($status === 'approved' && ! $user->hasPermission('approved_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view approved orders.');
+        }
+        if ($status === 'packaging' && ! $user->hasPermission('packaging_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view packaging orders.');
+        }
+        if (in_array($status, ['in_courier', 'incourier']) && ! $user->hasPermission('shipment_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view in-courier orders.');
+        }
+        if (in_array($status, ['delivered', 'partial_delivered']) && ! $user->hasPermission('delivered_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view delivered orders.');
+        }
+        if (in_array($status, ['cancel', 'canceled', 'cancelled']) && ! $user->hasPermission('canceled_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view canceled orders.');
+        }
+        if (in_array($status, ['returned', 'return']) && ! $user->hasPermission('return_order') && ! $user->hasPermission('manage_order')) {
+            abort(403, 'You do not have permission to view return orders.');
+        }
+
+        $baseQuery = $this->buildBaseOrderFilterQuery($request)->with('admin');
+        $tableQuery = (clone $baseQuery);
+
+        // STATUS FILTER (Applies to table only)
+        if ($request->filled('status')) {
+            $st = $request->status;
+            if (in_array($st, ['in_courier', 'incourier'])) {
+                $tableQuery->whereIn('delivery_status', ['in_courier', 'incourier']);
+            } elseif (in_array($st, ['delivered', 'partial_delivered'])) {
+                $tableQuery->where(function ($q) {
+                    $q->where(function ($sub) {
+                        $sub->whereIn('delivery_status', ['delivered', 'partial_delivered'])
+                            ->where(function ($s) {
+                                $s->whereNull('return_status')
+                                    ->orWhereNotIn('return_status', ['paid return', 'unpaid return']);
+                            });
+                    })->orWhere('return_status', 'partial');
+                });
+            } elseif (in_array($st, ['cancel', 'canceled', 'cancelled'])) {
+                $tableQuery->whereIn('delivery_status', ['cancel', 'canceled', 'cancelled']);
+            } elseif (in_array($st, ['returned', 'return'])) {
+                if ($request->return_sort) {
+                    $rs = str_replace('_', ' ', $request->return_sort);
+                    $tableQuery->where('return_status', $rs);
+                } else {
+                    $tableQuery->where(function($q) {
+                        $q->whereIn('delivery_status', ['returned', 'return'])
+                          ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
+                    });
+                }
+            } else {
+                $tableQuery->where('delivery_status', $st);
+            }
+        }
+
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
         }
-        $countorders = $query->latest()->paginate($perPage)->withQueryString();
+        $orders = $tableQuery->latest()->paginate($perPage)->withQueryString();
+        $countorders = $orders;
 
-        return view('adminDash.orders.all', compact('countorders'));
+        return view('adminDash.orders.all', compact('orders', 'countorders'));
     }
 
     public function hold(Request $request)
@@ -458,16 +615,7 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('hold_order')) {
             abort(403, 'You do not have permission to view hold orders.');
         }
-        $query = Orders::where('delivery_status', 'hold');
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
-        }
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin')->where('delivery_status', 'hold');
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
@@ -483,16 +631,7 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('pending_order')) {
             abort(403, 'You do not have permission to view pending orders.');
         }
-        $query = Orders::where('delivery_status', 'pending');
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
-        }
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin')->where('delivery_status', 'pending');
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
@@ -508,16 +647,7 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('approved_order')) {
             abort(403, 'You do not have permission to view approved orders.');
         }
-        $query = Orders::where('delivery_status', 'approved');
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
-        }
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin')->where('delivery_status', 'approved');
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
@@ -533,16 +663,7 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('packaging_order')) {
             abort(403, 'You do not have permission to view packaging orders.');
         }
-        $query = Orders::where('delivery_status', 'packaging');
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
-        }
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin')->where('delivery_status', 'packaging');
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
@@ -558,20 +679,7 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('shipment_order')) {
             abort(403, 'You do not have permission to view in-courier orders.');
         }
-        $query = Orders::whereIn('delivery_status', [
-            'in_courier', 'incourier', 'unknown', 'in_review', 'hold',
-            'unknown_approval_pending', 'cancelled_approval_pending',
-            'partial_delivered_approval_pending', 'delivered_approval_pending', 'pending',
-        ]);
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
-        }
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin')->whereIn('delivery_status', ['in_courier', 'incourier']);
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
@@ -587,16 +695,16 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('delivered_order')) {
             abort(403, 'You do not have permission to view delivered orders.');
         }
-        $query = Orders::whereIn('delivery_status', ['delivered', 'partial_delivered']);
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin')
+            ->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereIn('delivery_status', ['delivered', 'partial_delivered'])
+                        ->where(function ($s) {
+                            $s->whereNull('return_status')
+                                ->orWhereNotIn('return_status', ['paid return', 'unpaid return']);
+                        });
+                })->orWhere('return_status', 'partial');
             });
-        }
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
@@ -612,16 +720,7 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('canceled_order')) {
             abort(403, 'You do not have permission to view canceled orders.');
         }
-        $query = Orders::whereIn('delivery_status', ['cancel', 'cancelled', 'canceled']);
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
-            });
-        }
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin')->whereIn('delivery_status', ['cancel', 'cancelled', 'canceled']);
         $perPage = (int) $request->input('per_page', 10);
         if ($perPage <= 0) {
             $perPage = 10;
@@ -637,14 +736,14 @@ class OrderManageController extends Controller
         if (! auth()->guard('admin')->user()->hasPermission('return_order')) {
             abort(403, 'You do not have permission to view returned orders.');
         }
-        $query = Orders::where('delivery_status', 'returned');
-        if ($request->search) {
-            $search = $request->search;
-            $cleanSearch = preg_replace('/[^0-9]/', '', $search);
-            $last11 = strlen($cleanSearch) >= 11 ? substr($cleanSearch, -11) : $search;
-            $query->where(function ($q) use ($search, $last11) {
-                $q->where('id', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$last11}%");
+        $query = $this->buildBaseOrderFilterQuery($request)->with('admin');
+        if ($request->return_sort) {
+            $rs = str_replace('_', ' ', $request->return_sort);
+            $query->where('return_status', $rs);
+        } else {
+            $query->where(function($q) {
+                $q->whereIn('delivery_status', ['returned', 'return'])
+                  ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
             });
         }
         $perPage = (int) $request->input('per_page', 10);

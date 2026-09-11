@@ -513,8 +513,12 @@
                         <span class="status-badge-lg status-{{ $order->delivery_status }}-lg">
                             {{ ucfirst($order->delivery_status) }}
                         </span>
-                        @if(strtolower($order->delivery_status) === 'delivered' && strtolower($order->return_status) === 'partial')
+                        @if(strtolower($order->return_status) === 'partial')
                             <span class="badge" style="font-size: 11px; padding: 4px 8px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>
+                        @elseif(strtolower($order->return_status) === 'unpaid return')
+                            <span class="badge" style="font-size: 11px; padding: 4px 8px; background-color: #ef4444; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">UNPAID RETURN</span>
+                        @elseif(strtolower($order->return_status) === 'paid return')
+                            <span class="badge" style="font-size: 11px; padding: 4px 8px; background-color: #10b981; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PAID RETURN</span>
                         @endif
                     </div>
                 </div>
@@ -996,36 +1000,56 @@
                     </div>
                     <div class="card-body">
                         <div class="status-grid" id="status-container-{{ $order->id }}">
-                            @if ($order->delivery_status == 'hold')
-                                <button class="status-btn-option btn-option-pending update-status" data-id="{{ $order->id }}" data-status="pending"><i class="fa-solid fa-hourglass-half"></i> Pending</button>
-                                <button class="status-btn-option btn-option-approved update-status" data-id="{{ $order->id }}" data-status="approved"><i class="fa-solid fa-circle-check"></i> Approve</button>
-                                <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
-                                <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            @elseif ($order->delivery_status == 'pending')
-                                <button class="status-btn-option btn-option-new update-status" data-id="{{ $order->id }}" data-status="hold"><i class="fa-solid fa-hand"></i> Hold</button>
-                                <button class="status-btn-option btn-option-approved update-status" data-id="{{ $order->id }}" data-status="approved"><i class="fa-solid fa-circle-check"></i> Approve</button>
-                                <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
-                                <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            @elseif ($order->delivery_status == 'approved')
-                                <button class="status-btn-option btn-option-pending update-status" data-id="{{ $order->id }}" data-status="pending"><i class="fa-solid fa-hourglass-half"></i> Pending</button>
-                                <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
-                                <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            @elseif ($order->delivery_status == 'packaging')
-                                <button class="status-btn-option btn-option-pending update-status" data-id="{{ $order->id }}" data-status="pending"><i class="fa-solid fa-hourglass-half"></i> Pending</button>
-                                <button class="status-btn-option btn-option-incourier update-status" data-id="{{ $order->id }}" data-status="incourier"><i class="fa-solid fa-truck"></i> In Courier</button>
-                                <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            @elseif ($order->delivery_status == 'cancelled' || $order->delivery_status == 'cancel')
-                                <button class="status-btn-option btn-option-pending update-status" data-id="{{ $order->id }}" data-status="pending"><i class="fa-solid fa-hourglass-half"></i> Pending</button>
-                                <button class="status-btn-option btn-option-incourier update-status" data-id="{{ $order->id }}" data-status="incourier"><i class="fa-solid fa-truck"></i> In Courier</button>
-                                <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
-                            @elseif ($order->delivery_status == 'returned')
-                                <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
-                            @else
-                                <button class="status-btn-option btn-option-pending update-status" data-id="{{ $order->id }}" data-status="pending"><i class="fa-solid fa-hourglass-half"></i> Pending</button>
-                                <button class="status-btn-option btn-option-approved update-status" data-id="{{ $order->id }}" data-status="approved"><i class="fa-solid fa-circle-check"></i> Approved</button>
-                                <button class="status-btn-option btn-option-packaging update-status" data-id="{{ $order->id }}" data-status="packaging"><i class="fa-solid fa-box"></i> Packaging</button>
-                                <button class="status-btn-option btn-option-cancel update-status" data-id="{{ $order->id }}" data-status="cancel"><i class="fa-solid fa-circle-xmark"></i> Cancel</button>
-                            @endif
+                            @php
+                                $deliveryStatus = strtolower($order->delivery_status ?? 'pending');
+                                $returnStatus = strtolower($order->return_status ?? '');
+                                $currentStatusKey = $returnStatus ?: $deliveryStatus;
+
+                                $allStatusOptions = [
+                                    'pending' => ['label' => 'Pending', 'icon' => 'fa-hourglass-half', 'class' => 'btn-option-pending'],
+                                    'hold' => ['label' => 'Hold', 'icon' => 'fa-hand', 'class' => 'btn-option-new'],
+                                    'approved' => ['label' => 'Approve', 'icon' => 'fa-circle-check', 'class' => 'btn-option-approved'],
+                                    'packaging' => ['label' => 'Packaging', 'icon' => 'fa-box', 'class' => 'btn-option-packaging'],
+                                    'incourier' => ['label' => 'In Courier', 'icon' => 'fa-truck', 'class' => 'btn-option-incourier'],
+                                    'delivered' => ['label' => 'Delivered', 'icon' => 'fa-circle-dollar-to-slot', 'class' => 'btn-option-approved'],
+                                    'returned' => ['label' => 'Returned', 'icon' => 'fa-arrow-rotate-left', 'class' => 'btn-option-cancel'],
+                                    'partial' => ['label' => 'Partial Delivery', 'icon' => 'fa-box-open', 'class' => 'btn-option-pending'],
+                                    'cancel' => ['label' => 'Cancel', 'icon' => 'fa-circle-xmark', 'class' => 'btn-option-cancel'],
+                                    'unpaid return' => ['label' => 'Unpaid Return', 'icon' => 'fa-arrow-rotate-left', 'class' => 'btn-option-cancel'],
+                                    'paid return' => ['label' => 'Paid Return', 'icon' => 'fa-arrow-rotate-left', 'class' => 'btn-option-approved'],
+                                ];
+
+                                $allowedStatuses = [];
+                                if (in_array($deliveryStatus, ['returned', 'return']) || in_array($returnStatus, ['unpaid return', 'paid return'])) {
+                                    $allowedStatuses = ['packaging', 'paid return', 'unpaid return', 'partial', 'cancel'];
+                                } elseif ($returnStatus === 'partial') {
+                                    $allowedStatuses = ['delivered', 'paid return', 'unpaid return', 'packaging', 'cancel'];
+                                } elseif ($deliveryStatus === 'hold' || $deliveryStatus === 'new') {
+                                    $allowedStatuses = ['pending', 'approved', 'packaging', 'cancel'];
+                                } elseif ($deliveryStatus === 'pending') {
+                                    $allowedStatuses = ['hold', 'approved', 'packaging', 'cancel'];
+                                } elseif ($deliveryStatus === 'approved') {
+                                    $allowedStatuses = ['pending', 'packaging', 'cancel'];
+                                } elseif ($deliveryStatus === 'packaging') {
+                                    $allowedStatuses = ['pending', 'incourier', 'cancel'];
+                                } elseif ($deliveryStatus === 'incourier' || $deliveryStatus === 'in_courier') {
+                                    $allowedStatuses = ['delivered', 'partial', 'returned', 'packaging', 'cancel'];
+                                } elseif ($deliveryStatus === 'delivered' || $deliveryStatus === 'partial_delivered') {
+                                    $allowedStatuses = ['partial', 'returned', 'packaging', 'cancel'];
+                                } elseif (in_array($deliveryStatus, ['cancel', 'cancelled', 'canceled'])) {
+                                    $allowedStatuses = ['pending', 'incourier', 'packaging'];
+                                } else {
+                                    $allowedStatuses = array_keys($allStatusOptions);
+                                }
+                            @endphp
+                            @foreach ($allowedStatuses as $stKey)
+                                @if ($stKey !== $currentStatusKey && isset($allStatusOptions[$stKey]))
+                                    @php $stOpt = $allStatusOptions[$stKey]; @endphp
+                                    <button class="status-btn-option {{ $stOpt['class'] }} update-status" data-id="{{ $order->id }}" data-status="{{ $stKey }}">
+                                        <i class="fa-solid {{ $stOpt['icon'] }}"></i> {{ $stOpt['label'] }}
+                                    </button>
+                                @endif
+                            @endforeach
                         </div>
                     </div>
                 </div>
@@ -1044,16 +1068,105 @@
             let orderId = btn.data('id');
             let status = btn.data('status');
 
+            if (status === 'partial') {
+                let total = parseFloat("{{ (float)($order->total_amount > 0 ? $order->total_amount : ((float)$order->paid_amount + (float)$order->grand_total)) }}") || 0;
+                let paid = parseFloat("{{ (float)($order->paid_amount ?? 0) }}") || 0;
+                let due = parseFloat("{{ (float)($order->grand_total ?? 0) }}") || 0;
+                let customer = "{{ addslashes($order->name ?? 'Customer') }}";
+                let isReturnChecked = {{ $order->return_status === 'partial' ? 'true' : 'false' }};
+
+                Swal.fire({
+                    title: 'Partial Delivery',
+                    html: `
+                        <div style="text-align: left; font-size: 13px; line-height: 1.6; margin-bottom: 15px; background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="font-weight-bold text-dark">Invoice #LM-${orderId}</span>
+                                <span class="text-muted font-weight-bold">${customer}</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Total Payable:</span> <strong>${total} ৳</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Current Paid:</span> <strong class="text-success">${paid} ৳</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Current Due:</span> <strong class="text-danger">${due} ৳</strong>
+                            </div>
+                        </div>
+                        <div style="text-align: left; margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: #1e293b;">
+                                Collected Partial Amount (পরিশোধিত আংশিক টাকা ৳):
+                            </label>
+                            <input type="number" id="swal-show-partial-amount" class="form-control" style="width: 100%; height: 40px; font-size: 14px; border-radius: 6px; border: 1px solid #cbd5e1;" 
+                                   value="${paid > 0 ? paid : ''}" min="0" max="${total > 0 ? total : 999999}" step="any" placeholder="Enter collected partial amount">
+                        </div>
+                        <div style="text-align: left; background: #f1f5f9; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <label class="d-flex align-items-center mb-0" style="cursor: pointer; gap: 10px; font-size: 13px; font-weight: 600; color: #0f172a;">
+                                <input type="checkbox" id="swal-show-partial-return" value="1" ${isReturnChecked ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer; accent-color: #059669;">
+                                <span>Partial Return</span>
+                            </label>
+                            <small class="text-muted d-block mt-1" style="font-size: 11px; margin-left: 28px; line-height: 1.3;">
+                                টিক দেওয়া থাকলে এই অর্ডারটি Return সেকশনেও শো করবে।
+                            </small>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-check mr-1"></i> Update Status',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#059669',
+                    cancelButtonColor: '#64748b',
+                    focusConfirm: false,
+                    didOpen: () => {
+                        $('#swal-show-partial-amount').focus();
+                    },
+                    preConfirm: () => {
+                        const amountVal = document.getElementById('swal-show-partial-amount').value;
+                        const returnChecked = document.getElementById('swal-show-partial-return').checked;
+
+                        if (amountVal === '' || amountVal === null) {
+                            Swal.showValidationMessage('Please enter a valid partial amount.');
+                            return false;
+                        }
+                        if (parseFloat(amountVal) < 0) {
+                            Swal.showValidationMessage('Amount cannot be negative.');
+                            return false;
+                        }
+
+                        return {
+                            partial_amount: amountVal,
+                            is_partial_return: returnChecked ? 1 : 0
+                        };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        submitShowStatusUpdate(btn, orderId, status, result.value.partial_amount, result.value.is_partial_return);
+                    }
+                });
+                return;
+            }
+
+            submitShowStatusUpdate(btn, orderId, status);
+        });
+
+        function submitShowStatusUpdate(btn, orderId, status, partialAmount = null, isPartialReturn = null) {
             btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Saving...');
+
+            let postData = {
+                _token: '{{ csrf_token() }}',
+                id: orderId,
+                status: status
+            };
+            if (partialAmount !== null) {
+                postData.partial_amount = partialAmount;
+            }
+            if (isPartialReturn !== null) {
+                postData.is_partial_return = isPartialReturn;
+            }
 
             $.ajax({
                 url: "{{ route('order.update.status') }}",
                 type: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    id: orderId,
-                    status: status
-                },
+                data: postData,
                 success: function(response) {
                     if (response.success) {
                         Swal.mixin({
@@ -1088,7 +1201,7 @@
                     btn.prop('disabled', false).html(status.toUpperCase());
                 }
             });
-        });
+        }
     </script>
 
     <!-- Courier Booking AJAX Script -->

@@ -145,11 +145,11 @@
                 </div>
                 <div class="d-flex justify-content-between">
                     <span class="text-muted">Paid:</span>
-                    <span class="text-success font-weight-bold">{{ $order->paid_amount ?? 0 }} ৳</span>
+                    <span class="text-success font-weight-bold" id="order-paid-{{ $order->id }}">{{ $order->paid_amount ?? 0 }} ৳</span>
                 </div>
                 <div class="d-flex justify-content-between border-top pt-1" style="border-top: 1px solid #e2e8f0 !important;">
                     <span class="text-muted font-weight-bold">Due:</span>
-                    <span class="font-weight-bold text-danger">{{ $order->grand_total }} ৳</span>
+                    <span class="font-weight-bold text-danger" id="order-due-{{ $order->id }}">{{ $order->grand_total }} ৳</span>
                 </div>
             </div>
         </td>
@@ -161,14 +161,12 @@
                     <span id="status-badge-{{ $order->id }}" class="status-pill status-{{ $order->delivery_status }}">
                         {{ ucfirst($order->delivery_status) }}
                     </span>
-                    @if(strtolower($order->delivery_status) === 'delivered')
-                        @if(strtolower($order->return_status) === 'partial')
-                            <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>
-                        @elseif(strtolower($order->return_status) === 'unpaid return')
-                            <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #ef4444; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">UNPAID RETURN</span>
-                        @elseif(strtolower($order->return_status) === 'paid return')
-                            <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #10b981; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PAID RETURN</span>
-                        @endif
+                    @if(strtolower($order->return_status) === 'partial')
+                        <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #f59e0b; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PARTIAL</span>
+                    @elseif(strtolower($order->return_status) === 'unpaid return')
+                        <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #ef4444; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">UNPAID RETURN</span>
+                    @elseif(strtolower($order->return_status) === 'paid return')
+                        <span class="badge" style="font-size: 10px; padding: 3px 6px; background-color: #10b981; color: white; border-radius: 4px; letter-spacing: 0.5px; font-weight: 600;">PAID RETURN</span>
                     @endif
                 </div>
                 <div class="text-muted" style="font-size: 11px; line-height: 1.5; min-width: 135px;">
@@ -395,19 +393,115 @@
 
             let orderId = $(this).data('id');
             let status = $(this).data('status');
+            let btn = $(this);
+
+            if (status === 'partial') {
+                let total = parseFloat(btn.data('total')) || 0;
+                let paid = parseFloat(btn.data('paid')) || 0;
+                let due = parseFloat(btn.data('due')) || 0;
+                let customer = btn.data('customer') || 'Customer';
+                let isReturnChecked = (parseInt(btn.data('is-return')) === 1);
+
+                Swal.fire({
+                    title: 'Partial Delivery',
+                    html: `
+                        <div style="text-align: left; font-size: 13px; line-height: 1.6; margin-bottom: 15px; background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="font-weight-bold text-dark">Invoice #LM-${orderId}</span>
+                                <span class="text-muted font-weight-bold">${customer}</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Total Payable:</span> <strong>${total} ৳</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Current Paid:</span> <strong class="text-success">${paid} ৳</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Current Due:</span> <strong class="text-danger">${due} ৳</strong>
+                            </div>
+                        </div>
+                        <div style="text-align: left; margin-bottom: 14px;">
+                            <label style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: #1e293b;">
+                                Collected Partial Amount (পরিশোধিত আংশিক টাকা ৳):
+                            </label>
+                            <input type="number" id="swal-partial-amount" class="form-control" style="width: 100%; height: 40px; font-size: 14px; border-radius: 6px; border: 1px solid #cbd5e1;" 
+                                   value="${paid > 0 ? paid : ''}" min="0" max="${total > 0 ? total : 999999}" step="any" placeholder="Enter collected partial amount">
+                        </div>
+                        <div style="text-align: left; background: #f1f5f9; padding: 10px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <label class="d-flex align-items-center mb-0" style="cursor: pointer; gap: 10px; font-size: 13px; font-weight: 600; color: #0f172a;">
+                                <input type="checkbox" id="swal-partial-return" value="1" ${isReturnChecked ? 'checked' : ''} style="width: 18px; height: 18px; cursor: pointer; accent-color: #059669;">
+                                <span>Partial Return</span>
+                            </label>
+                            <small class="text-muted d-block mt-1" style="font-size: 11px; margin-left: 28px; line-height: 1.3;">
+                                টিক দেওয়া থাকলে এই অর্ডারটি Return সেকশনেও শো করবে।
+                            </small>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-check mr-1"></i> Update Status',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#059669',
+                    cancelButtonColor: '#64748b',
+                    focusConfirm: false,
+                    didOpen: () => {
+                        $('#swal-partial-amount').focus();
+                    },
+                    preConfirm: () => {
+                        const amountVal = document.getElementById('swal-partial-amount').value;
+                        const returnChecked = document.getElementById('swal-partial-return').checked;
+
+                        if (amountVal === '' || amountVal === null) {
+                            Swal.showValidationMessage('Please enter a valid partial amount.');
+                            return false;
+                        }
+                        if (parseFloat(amountVal) < 0) {
+                            Swal.showValidationMessage('Amount cannot be negative.');
+                            return false;
+                        }
+
+                        return {
+                            partial_amount: amountVal,
+                            is_partial_return: returnChecked ? 1 : 0
+                        };
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        performOrderStatusUpdate(orderId, status, result.value.partial_amount, result.value.is_partial_return);
+                    }
+                });
+                return;
+            }
+
+            performOrderStatusUpdate(orderId, status);
+        });
+
+        function performOrderStatusUpdate(orderId, status, partialAmount = null, isPartialReturn = null) {
+            let postData = {
+                _token: "{{ csrf_token() }}",
+                id: orderId,
+                status: status
+            };
+            if (partialAmount !== null) {
+                postData.partial_amount = partialAmount;
+            }
+            if (isPartialReturn !== null) {
+                postData.is_partial_return = isPartialReturn;
+            }
 
             $.ajax({
                 url: "/admin/orders/status",
                 method: 'POST',
-                data: {
-                    _token: "{{ csrf_token() }}",
-                    id: orderId,
-                    status: status
-                },
+                data: postData,
                 success: function(response) {
                     if (response.success) {
                         if (response.badge_html) {
                             $('#status-badges-container-' + response.order_id).html(response.badge_html);
+                        }
+                        if (response.paid_amount !== undefined) {
+                            $('#order-paid-' + response.order_id).text(response.paid_amount + ' ৳');
+                        }
+                        if (response.grand_total !== undefined) {
+                            $('#order-due-' + response.order_id).text(response.grand_total + ' ৳');
                         }
                         
                         $('#dropdown-menu-' + response.order_id).html(response.new_dropdown);
@@ -440,6 +534,9 @@
                             icon: 'success',
                             title: 'Status updated to ' + response.status_text
                         });
+                        if (typeof refreshOrderStatusCounts === 'function') {
+                            refreshOrderStatusCounts();
+                        }
                     }
                 },
                 error: function(xhr) {
@@ -450,6 +547,6 @@
                     });
                 }
             });
-        });
+        }
     });
 </script>

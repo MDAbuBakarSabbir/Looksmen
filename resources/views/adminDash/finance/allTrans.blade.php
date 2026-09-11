@@ -9,6 +9,7 @@
         --f-card-border: #e2e8f0;
         --f-card-hover-border: #cbd5e1;
         --f-card-hover-bg: #f8fafc;
+        --f-card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
         --f-text-title: #0f172a;
         --f-text-body: #334155;
         --f-text-muted: #64748b;
@@ -16,7 +17,10 @@
         --f-input-border: #cbd5e1;
         --f-input-text: #0f172a;
         --f-input-placeholder: #94a3b8;
+        --f-panel-bg: #ffffff;
         --f-pill-group-bg: #f1f5f9;
+        --f-pill-text: #64748b;
+        --f-pill-hover-text: #0f172a;
         --f-pill-hover-bg: #e2e8f0;
         --f-item-bg: #ffffff;
         --f-modal-bg: #ffffff;
@@ -28,6 +32,8 @@
         --f-btn-sec-bg: #f1f5f9;
         --f-btn-sec-border: #e2e8f0;
         --f-btn-sec-text: #334155;
+        --f-btn-sec-hover-bg: #e2e8f0;
+        --f-btn-sec-hover-text: #0f172a;
         --f-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     }
     body.dark-mode {
@@ -36,6 +42,7 @@
         --f-card-border: #334155;
         --f-card-hover-border: #475569;
         --f-card-hover-bg: #24344d;
+        --f-card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.45);
         --f-text-title: #f8fafc;
         --f-text-body: #e2e8f0;
         --f-text-muted: #94a3b8;
@@ -43,7 +50,10 @@
         --f-input-border: #334155;
         --f-input-text: #f8fafc;
         --f-input-placeholder: #64748b;
+        --f-panel-bg: #1e293b;
         --f-pill-group-bg: #0f172a;
+        --f-pill-text: #94a3b8;
+        --f-pill-hover-text: #f8fafc;
         --f-pill-hover-bg: #1e293b;
         --f-item-bg: #1e293b;
         --f-modal-bg: #1e293b;
@@ -55,6 +65,9 @@
         --f-btn-sec-bg: #1e293b;
         --f-btn-sec-border: #334155;
         --f-btn-sec-text: #cbd5e1;
+        --f-btn-sec-hover-bg: #334155;
+        --f-btn-sec-hover-text: #ffffff;
+        --f-select-arrow: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
     }
     .f-card {
         background-color: var(--f-card-bg) !important;
@@ -166,9 +179,112 @@
         color: var(--f-btn-sec-text) !important;
     }
     .f-btn-secondary:hover {
-        background-color: var(--f-card-hover-border) !important;
-        color: var(--f-text-title) !important;
+        background-color: var(--f-btn-sec-hover-bg) !important;
+        color: var(--f-btn-sec-hover-text) !important;
         transform: translateY(-1px);
+    }
+
+    /* Filter Controls */
+    .filter-panel {
+        background-color: var(--f-panel-bg) !important;
+        border: 1px solid var(--f-card-border) !important;
+        border-radius: 14px;
+        padding: 18px;
+        box-shadow: var(--f-card-shadow);
+        transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+    .pill-group {
+        display: flex;
+        background-color: var(--f-pill-group-bg);
+        border: 1px solid var(--f-card-border);
+        border-radius: 10px;
+        padding: 3px;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    .pill-btn {
+        padding: 6px 14px;
+        font-size: 0.78rem;
+        font-weight: 600;
+        border-radius: 7px;
+        color: var(--f-pill-text);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        transition: all 0.18s ease;
+        outline: none !important;
+    }
+    .pill-btn:hover {
+        color: var(--f-pill-hover-text);
+        background-color: var(--f-pill-hover-bg);
+    }
+    .pill-btn.active {
+        background: linear-gradient(135deg, #059669, #0d9488) !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35);
+    }
+
+    .f-input-group {
+        position: relative;
+    }
+    .f-input-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--f-text-muted);
+        font-size: 13px;
+        pointer-events: none;
+    }
+    .f-input {
+        background-color: var(--f-input-bg) !important;
+        border: 1px solid var(--f-input-border) !important;
+        color: var(--f-input-text) !important;
+        font-size: 0.83rem !important;
+        border-radius: 8px !important;
+        padding: 8px 12px 8px 34px !important;
+        height: 38px !important;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        color-scheme: var(--f-color-scheme);
+    }
+    .f-input::placeholder {
+        color: var(--f-input-placeholder) !important;
+        opacity: 0.8;
+    }
+    .f-input:focus {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+        outline: none !important;
+    }
+
+    /* Custom Styled Select with SVG Chevron Arrow */
+    .f-select {
+        background-color: var(--f-input-bg) !important;
+        border: 1px solid var(--f-input-border) !important;
+        color: var(--f-input-text) !important;
+        font-size: 0.83rem !important;
+        border-radius: 8px !important;
+        height: 38px !important;
+        cursor: pointer;
+        appearance: none;
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        background-image: var(--f-select-arrow);
+        background-repeat: no-repeat;
+        background-position: right 14px center;
+        padding-right: 36px !important;
+        padding-left: 12px !important;
+        color-scheme: var(--f-color-scheme);
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .f-select:focus {
+        border-color: #10b981 !important;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2) !important;
+        outline: none !important;
+    }
+    .f-select option {
+        background-color: var(--f-card-bg);
+        color: var(--f-text-title);
     }
 
     /* Modal Customization (Bootstrap Modal Overrides) */
@@ -544,13 +660,18 @@
                     <i class="fa-solid fa-arrow-left font-14"></i>
                 </a>
                 <div>
-                    <h4 class="font-weight-bold f-text-title mb-0">Full Transaction History</h4>
+                    <h4 class="font-weight-bold f-text-title mb-0 d-flex align-items-center">
+                        Full Transaction History
+                        <span class="badge badge-pill font-11 px-2.5 py-1 ml-2" id="txCountBadge" style="background: var(--f-pill-group-bg); color: var(--f-text-muted); border: 1px solid var(--f-card-border); font-weight: 600;">
+                            {{ $transactions->total() }} records
+                        </span>
+                    </h4>
                     <small class="f-text-muted">Audit log of all income and expense records</small>
                 </div>
             </div>
         </div>
         <div class="col-md-6 col-12 text-md-right">
-            <a href="{{ route('admin.finance.export') }}" class="btn btn-success btn-sm font-weight-bold px-3 py-2 shadow-sm mr-2" style="border-radius: 8px;">
+            <a href="{{ route('admin.finance.export') }}" id="exportHistoryBtn" class="btn btn-success btn-sm font-weight-bold px-3 py-2 shadow-sm mr-2" style="border-radius: 8px;">
                 <i class="fa-solid fa-file-excel mr-1"></i> Export Excel/CSV
             </a>
             <a href="{{ route('admin.finance.index') }}" class="btn btn-secondary btn-sm font-weight-bold px-3 py-2" style="border-radius: 8px;">
@@ -559,38 +680,93 @@
         </div>
     </div>
 
-    {{-- Filters --}}
-    <div class="f-card p-3 mb-4">
-        <form method="GET" action="{{ route('admin.finance.history') }}">
-            <div class="row">
-                <div class="col-md-3 col-12 mb-2 mb-md-0">
-                    <input type="text" name="search" value="{{ request('search') }}" class="form-control form-control-sm" placeholder="Search notes, staff, category..." style="border-radius: 8px; height: 38px;">
+    {{-- Advanced Filtering & Search Bar --}}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="filter-panel">
+                {{-- First Row: Time Range Pills & Search --}}
+                <div class="row align-items-center mb-3">
+                    <div class="col-lg-8 col-12 mb-3 mb-lg-0">
+                        <div class="pill-group" id="timeframePills">
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'all') === 'today' ? 'active' : '' }}" data-time="today">Today</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'all') === 'week' ? 'active' : '' }}" data-time="week">This Week</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'all') === 'month' ? 'active' : '' }}" data-time="month">This Month</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'all') === 'year' ? 'active' : '' }}" data-time="year">This Year</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'all') === 'custom' ? 'active' : '' }}" data-time="custom">Custom Range</button>
+                            <button type="button" class="pill-btn {{ ($timeframe ?? 'all') === 'all' ? 'active' : '' }}" data-time="all">All Time</button>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-12">
+                        <div class="f-input-group">
+                            <i class="fa-solid fa-magnifying-glass f-input-icon"></i>
+                            <input type="text" id="ledgerSearchInput" class="form-control f-input" value="{{ request('search') }}" placeholder="Search notes, category, staff...">
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-3 col-6 mb-2 mb-md-0">
-                    <select name="type" class="form-control form-control-sm" style="border-radius: 8px; height: 38px;">
-                        <option value="">All Types (Income &amp; Expense)</option>
-                        <option value="INCOME" {{ request('type') == 'INCOME' ? 'selected' : '' }}>Income Only</option>
-                        <option value="EXPENSE" {{ request('type') == 'EXPENSE' ? 'selected' : '' }}>Expense Only</option>
-                    </select>
+
+                {{-- Second Row: Dropdown Selects & Reset --}}
+                <div class="row">
+                    <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
+                        <select id="filterType" class="form-control f-select">
+                            <option value="ALL">All Types (Income &amp; Expense)</option>
+                            <option value="INCOME" {{ request('type') === 'INCOME' ? 'selected' : '' }}>Income Only</option>
+                            <option value="EXPENSE" {{ request('type') === 'EXPENSE' ? 'selected' : '' }}>Expense Only</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
+                        <select id="filterCategory" class="form-control f-select">
+                            <option value="ALL">All Categories</option>
+                            @php
+                                $categories = [
+                                    'Online Sales', 'Shop Sales', 'Wholesale / Bulk Order', 'Exchange / Refund',
+                                    'Investment / Capital', 'Product Sourcing', 'Courier / Delivery',
+                                    'Dollar / Ads & Marketing', 'Packaging Material', 'Shop Rent & Maintenance',
+                                    'Staff Salary & Bonus', 'Utilities & Bills', 'Office Supplies & Snacks',
+                                    'Taxes / Bank Fees', 'Other Expense'
+                                ];
+                            @endphp
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat }}" {{ request('category') === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
+                        <select id="filterStaff" class="form-control f-select">
+                            <option value="ALL">All Staff (Recorded By)</option>
+                            @foreach($staffList as $staff)
+                                <option value="{{ $staff }}" {{ request('staff') === $staff ? 'selected' : '' }}>Recorded by: {{ $staff }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="col-md-3 col-sm-6 col-12">
+                        <button type="button" id="resetFiltersBtn" class="btn btn-block f-btn f-btn-secondary py-2" style="height: 38px; color: #f59e0b; border-color: rgba(245, 158, 11, 0.3);">
+                            <i class="fa-solid fa-rotate-left mr-1"></i> Reset Filters
+                        </button>
+                    </div>
                 </div>
-                <div class="col-md-3 col-6 mb-2 mb-md-0">
-                    <select name="staff" class="form-control form-control-sm" style="border-radius: 8px; height: 38px;">
-                        <option value="">All Staff</option>
-                        @foreach($staffList as $staff)
-                            <option value="{{ $staff }}" {{ request('staff') == $staff ? 'selected' : '' }}>{{ $staff }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-3 col-12 d-flex" style="gap: 8px;">
-                    <button type="submit" class="btn btn-primary btn-sm flex-grow-1 font-weight-bold" style="border-radius: 8px; height: 38px;">
-                        <i class="fa-solid fa-filter mr-1"></i> Filter
-                    </button>
-                    <a href="{{ route('admin.finance.history') }}" class="btn btn-light btn-sm font-weight-bold" style="border-radius: 8px; height: 38px; line-height: 26px;">
-                        Reset
-                    </a>
+
+                {{-- Custom Date Range Row (Hidden unless custom is active) --}}
+                <div id="customDateRangeRow" class="row align-items-center mt-3 pt-3 border-top {{ ($timeframe ?? 'all') === 'custom' ? '' : 'd-none' }}" style="border-color: var(--f-card-border) !important;">
+                    <div class="col-md-4 col-12 mb-2 mb-md-0">
+                        <div class="f-input-group">
+                            <i class="fa-regular fa-calendar f-input-icon"></i>
+                            <input type="date" id="filterStartDate" class="form-control f-input" value="{{ request('start_date') }}" placeholder="Start Date">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12 mb-2 mb-md-0">
+                        <div class="f-input-group">
+                            <i class="fa-regular fa-calendar f-input-icon"></i>
+                            <input type="date" id="filterEndDate" class="form-control f-input" value="{{ request('end_date') }}" placeholder="End Date">
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-12 d-flex align-items-center">
+                        <button type="button" id="applyCustomDateBtn" class="btn f-btn f-btn-income mr-2 flex-grow-1" style="height: 38px;">
+                            <i class="fa-solid fa-check mr-1"></i> Apply Range
+                        </button>
+                    </div>
                 </div>
             </div>
-        </form>
+        </div>
     </div>
 
     {{-- Table --}}
@@ -609,88 +785,19 @@
                         <th class="py-3 text-right px-3">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @forelse($transactions as $tx)
-                        <tr>
-                            <td class="px-3">
-                                <div class="font-weight-bold font-12 f-text-title">#FT-{{ str_pad($tx->id, 5, '0', STR_PAD_LEFT) }}</div>
-                                <div class="font-11 f-text-muted">{{ $tx->transaction_date ? $tx->transaction_date->format('M d, Y · h:i A') : $tx->created_at->format('M d, Y') }}</div>
-                            </td>
-                            <td>
-                                @if($tx->entry_type === 'INCOME')
-                                    <span class="badge badge-pill badge-income font-11 px-2.5 py-1">
-                                        <i class="fa-solid fa-arrow-up font-9 mr-1"></i> Income
-                                    </span>
-                                @else
-                                    <span class="badge badge-pill badge-expense font-11 px-2.5 py-1">
-                                        <i class="fa-solid fa-arrow-down font-9 mr-1"></i> Expense
-                                    </span>
-                                @endif
-                            </td>
-                            <td>
-                                <strong class="f-text-title font-13">{{ $tx->category }}</strong>
-                                @if($tx->notes)
-                                    <div class="font-11 f-text-muted text-truncate" style="max-width: 220px;" title="{{ $tx->notes }}">
-                                        {{ $tx->notes }}
-                                    </div>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge-method">{{ $tx->payment_method }}</span>
-                            </td>
-                            <td>
-                                <span class="font-weight-bold font-14 {{ $tx->entry_type === 'INCOME' ? 'text-success' : 'text-danger' }}">
-                                    {{ $tx->entry_type === 'INCOME' ? '+' : '-' }}৳{{ number_format($tx->amount, 2) }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="font-12 f-text-title font-weight-bold">{{ $tx->staff_name }}</span>
-                            </td>
-                            <td>
-                                @if($tx->receipt_image && file_exists(public_path('Uploads/finance/' . $tx->receipt_image)))
-                                    <img src="{{ asset('Uploads/finance/' . $tx->receipt_image) }}" alt="Receipt" class="tx-thumb-sm view-receipt-btn" data-src="{{ asset('Uploads/finance/' . $tx->receipt_image) }}" title="Click to view full receipt">
-                                @else
-                                    <span class="font-11 f-text-muted">None</span>
-                                @endif
-                            </td>
-                            <td class="text-right px-3">
-                                <button type="button" class="btn btn-sm btn-outline-info edit-tx-row-btn py-1 px-2" 
-                                        data-id="{{ $tx->id }}"
-                                        data-type="{{ $tx->entry_type }}"
-                                        data-category="{{ $tx->category }}"
-                                        data-method="{{ $tx->payment_method }}"
-                                        data-amount="{{ $tx->amount }}"
-                                        data-staff="{{ $tx->staff_name }}"
-                                        data-date="{{ $tx->transaction_date ? $tx->transaction_date->format('Y-m-d\TH:i') : '' }}"
-                                        data-notes="{{ $tx->notes ?? '' }}"
-                                        data-receipt="{{ $tx->receipt_image && file_exists(public_path('Uploads/finance/' . $tx->receipt_image)) ? asset('Uploads/finance/' . $tx->receipt_image) : '' }}"
-                                        title="Edit Transaction" 
-                                        style="border-radius: 6px;">
-                                    <i class="fa-solid fa-pen-to-square"></i>
-                                </button>
-                                <button type="button" class="btn btn-sm btn-outline-danger delete-tx-row-btn py-1 px-2" data-id="{{ $tx->id }}" title="Delete Entry" style="border-radius: 6px;">
-                                    <i class="fa-solid fa-trash-can font-11"></i>
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="8" class="text-center py-5">
-                                <i class="fa-solid fa-receipt f-text-muted mb-2 font-32"></i>
-                                <h6 class="font-weight-bold f-text-title">No transactions found</h6>
-                                <p class="font-12 f-text-muted mb-0">Try changing your search or filter options</p>
-                            </td>
-                        </tr>
-                    @endforelse
+                <tbody id="historyTableBody">
+                    @include('adminDash.finance.partials.history_rows', ['transactions' => $transactions])
                 </tbody>
             </table>
         </div>
 
-        @if($transactions->hasPages())
-            <div class="p-3 border-top d-flex justify-content-end">
-                {{ $transactions->links() }}
-            </div>
-        @endif
+        <div id="paginationContainer">
+            @if($transactions->hasPages())
+                <div class="p-3 border-top d-flex justify-content-end">
+                    {{ $transactions->links() }}
+                </div>
+            @endif
+        </div>
     </div>
 </div>
 
@@ -920,8 +1027,185 @@
 @section('script')
 <script>
 $(document).ready(function() {
+    // =========================================================
+    // Filter & Search Live Controller
+    // =========================================================
+    let activeTimeframe = '{{ $timeframe ?? request("timeframe", "all") }}';
+    let filterAjaxRequest = null;
+    let searchDebounceTimer = null;
+
+    function getFilterParams(page = 1) {
+        const type = $('#filterType').val();
+        const category = $('#filterCategory').val();
+        const staff = $('#filterStaff').val();
+        const search = $('#ledgerSearchInput').val().trim();
+        const start = activeTimeframe === 'custom' ? $('#filterStartDate').val() : '';
+        const end = activeTimeframe === 'custom' ? $('#filterEndDate').val() : '';
+
+        const params = {
+            timeframe: activeTimeframe,
+            type: type,
+            category: category,
+            staff: staff,
+            search: search,
+            page: page
+        };
+        if (activeTimeframe === 'custom') {
+            params.start_date = start;
+            params.end_date = end;
+        }
+        return params;
+    }
+
+    function updateExportLink() {
+        const params = getFilterParams(1);
+        const q = new URLSearchParams();
+        if (params.timeframe && params.timeframe !== 'all') q.set('timeframe', params.timeframe);
+        if (params.type && params.type !== 'ALL') q.set('type', params.type);
+        if (params.category && params.category !== 'ALL') q.set('category', params.category);
+        if (params.staff && params.staff !== 'ALL') q.set('staff', params.staff);
+        if (params.search) q.set('search', params.search);
+        if (params.start_date) q.set('start_date', params.start_date);
+        if (params.end_date) q.set('end_date', params.end_date);
+
+        const url = `{{ route('admin.finance.export') }}` + (q.toString() ? `?${q.toString()}` : '');
+        $('#exportHistoryBtn').attr('href', url);
+    }
+
+    function applyFilters(page = 1) {
+        const params = getFilterParams(page);
+
+        // Validate custom date range
+        if (activeTimeframe === 'custom' && params.start_date && params.end_date && params.start_date > params.end_date) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Start date cannot be after end date',
+                showConfirmButton: false,
+                timer: 2500
+            });
+            return;
+        }
+
+        // Show loading cues
+        $('#txCountBadge').html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> Filtering...');
+        $('#historyTableBody').css('opacity', '0.45');
+
+        if (filterAjaxRequest && filterAjaxRequest.readyState !== 4) {
+            filterAjaxRequest.abort();
+        }
+
+        filterAjaxRequest = $.ajax({
+            url: `{{ route('admin.finance.history') }}`,
+            type: 'GET',
+            data: params,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            success: function(res) {
+                $('#historyTableBody').html(res.html).css('opacity', '1');
+                $('#paginationContainer').html(res.pagination);
+                $('#txCountBadge').text(`${res.total} records`);
+                updateExportLink();
+
+                // Update browser URL without reloading
+                const q = new URLSearchParams();
+                if (params.timeframe && params.timeframe !== 'all') q.set('timeframe', params.timeframe);
+                if (params.type && params.type !== 'ALL') q.set('type', params.type);
+                if (params.category && params.category !== 'ALL') q.set('category', params.category);
+                if (params.staff && params.staff !== 'ALL') q.set('staff', params.staff);
+                if (params.search) q.set('search', params.search);
+                if (params.start_date) q.set('start_date', params.start_date);
+                if (params.end_date) q.set('end_date', params.end_date);
+                if (page > 1) q.set('page', page);
+
+                const newUrl = window.location.pathname + (q.toString() ? `?${q.toString()}` : '');
+                window.history.pushState({ path: newUrl }, '', newUrl);
+            },
+            error: function(xhr) {
+                if (xhr.statusText === 'abort') return;
+                $('#historyTableBody').css('opacity', '1');
+                $('#txCountBadge').text('Filter error');
+            }
+        });
+    }
+
+    // Timeframe Pills Click (Direct Live Filter - No Alert)
+    $('#timeframePills .pill-btn').on('click', function() {
+        const time = $(this).data('time');
+        $('#timeframePills .pill-btn').removeClass('active');
+        $(this).addClass('active');
+        activeTimeframe = time;
+
+        if (time === 'custom') {
+            $('#customDateRangeRow').removeClass('d-none');
+            if (!$('#filterStartDate').val()) {
+                const d = new Date();
+                $('#filterStartDate').val(new Date(d.getFullYear(), d.getMonth(), 2).toISOString().slice(0, 10));
+            }
+            if (!$('#filterEndDate').val()) {
+                $('#filterEndDate').val(new Date().toISOString().slice(0, 10));
+            }
+            applyFilters(1);
+        } else {
+            $('#customDateRangeRow').addClass('d-none');
+            applyFilters(1);
+        }
+    });
+
+    // Custom date listeners
+    $('#filterStartDate, #filterEndDate').on('change', function() {
+        if (activeTimeframe === 'custom') {
+            applyFilters(1);
+        }
+    });
+    $('#applyCustomDateBtn').on('click', function() {
+        applyFilters(1);
+    });
+
+    // Dropdown Selects change
+    $('#filterType, #filterCategory, #filterStaff').on('change', function() {
+        applyFilters(1);
+    });
+
+    // Search input typing with debounce
+    $('#ledgerSearchInput').on('input', function() {
+        clearTimeout(searchDebounceTimer);
+        searchDebounceTimer = setTimeout(function() {
+            applyFilters(1);
+        }, 350);
+    });
+
+    // Reset Filters Button
+    $('#resetFiltersBtn').on('click', function() {
+        $('#ledgerSearchInput').val('');
+        $('#filterType').val('ALL');
+        $('#filterCategory').val('ALL');
+        $('#filterStaff').val('ALL');
+        $('#filterStartDate').val('');
+        $('#filterEndDate').val('');
+        $('#timeframePills .pill-btn').removeClass('active');
+        $('#timeframePills .pill-btn[data-time="all"]').addClass('active');
+        activeTimeframe = 'all';
+        $('#customDateRangeRow').addClass('d-none');
+        applyFilters(1);
+    });
+
+    // Pagination link AJAX interception
+    $(document).on('click', '#paginationContainer a', function(e) {
+        e.preventDefault();
+        const href = $(this).attr('href');
+        if (href) {
+            const url = new URL(href, window.location.origin);
+            const page = url.searchParams.get('page') || 1;
+            applyFilters(page);
+            $('html, body').animate({ scrollTop: $('#historyTableBody').offset().top - 120 }, 200);
+        }
+    });
+
     // 1. Lightbox receipt preview
-    $('.view-receipt-btn').on('click', function() {
+    $(document).on('click', '.view-receipt-btn', function() {
         const src = $(this).data('src');
         if (src) {
             $('#receiptModalImg').attr('src', src);
@@ -1125,7 +1409,7 @@ $(document).ready(function() {
     });
 
     // 7. Delete row handler
-    $('.delete-tx-row-btn').on('click', function() {
+    $(document).on('click', '.delete-tx-row-btn', function() {
         const id = $(this).data('id');
         const $row = $(this).closest('tr');
 
