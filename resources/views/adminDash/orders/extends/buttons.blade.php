@@ -3,7 +3,11 @@
     $returnStatus = strtolower($order->return_status ?? '');
     $currentStatus = $returnStatus ?: $deliveryStatus;
 
-    $orderTotal = (float) ($order->total_amount > 0 ? $order->total_amount : ((float) $order->paid_amount + (float) $order->grand_total));
+    $orderGrandTotal = (float) ($order->total_amount ?? 0) - (float) ($order->admin_discount ?? 0) - (float) ($order->coupon_discount ?? 0) + (float) ($order->delivery_charge ?? 0);
+    if ($orderGrandTotal <= 0) {
+        $orderGrandTotal = ((float) ($order->paid_amount ?? 0) + (float) ($order->grand_total ?? 0)) ?: (float) ($order->total_amount ?? 0);
+    }
+    $orderTotal = (float) $orderGrandTotal;
     $orderPaid = (float) ($order->paid_amount ?? 0);
     $orderDue = (float) ($order->grand_total ?? 0);
 
@@ -75,6 +79,7 @@
                 data-total="{{ $orderTotal }}"
                 data-paid="{{ $orderPaid }}"
                 data-due="{{ $orderDue }}"
+                data-delivery-charge="{{ (float) ($order->delivery_charge ?? 0) }}"
                 data-is-return="{{ $order->return_status === 'partial' ? 1 : 0 }}"
                 data-customer="{{ $order->name ?? 'Customer' }}">
             <i class="fa-solid {{ $statusData['icon'] }} {{ $statusData['color'] }}" style="width: 20px;"></i>

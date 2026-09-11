@@ -318,7 +318,8 @@ class OrderManageController extends Controller
                 $order->delivery_status = 'returned';
                 $order->return_status = 'paid return';
                 $order->payment_status = 'paid';
-                $order->paid_amount = (float) $order->paid_amount + (float) $order->grand_total;
+                $paidAmount = $request->filled('paid_amount') ? (float) $request->paid_amount : (float) ($order->delivery_charge ?? 0);
+                $order->paid_amount = $paidAmount;
                 $order->grand_total = 0;
             } elseif ($request->status === 'unpaid return') {
                 $order->delivery_status = 'returned';
@@ -496,6 +497,24 @@ class OrderManageController extends Controller
                     \Log::error('Bulk Order Delivered Mail Error: '.$e->getMessage());
                 }
             }
+        } elseif (in_array($status, ['paid return', 'paid_return'])) {
+            $orders = Orders::whereIn('id', $ids)->get();
+            foreach ($orders as $order) {
+                $order->delivery_status = 'returned';
+                $order->return_status = 'paid return';
+                $order->payment_status = 'paid';
+                $order->paid_amount = (float) ($order->delivery_charge ?? 0);
+                $order->grand_total = 0;
+                $order->save();
+            }
+        } elseif (in_array($status, ['unpaid return', 'unpaid_return'])) {
+            $orders = Orders::whereIn('id', $ids)->get();
+            foreach ($orders as $order) {
+                $order->delivery_status = 'returned';
+                $order->return_status = 'unpaid return';
+                $order->payment_status = 'unpaid';
+                $order->save();
+            }
         } else {
             Orders::whereIn('id', $ids)
                 ->update(['delivery_status' => $status]);
@@ -590,9 +609,9 @@ class OrderManageController extends Controller
                     $rs = str_replace('_', ' ', $request->return_sort);
                     $tableQuery->where('return_status', $rs);
                 } else {
-                    $tableQuery->where(function($q) {
+                    $tableQuery->where(function ($q) {
                         $q->whereIn('delivery_status', ['returned', 'return'])
-                          ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
+                            ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
                     });
                 }
             } else {
@@ -741,9 +760,9 @@ class OrderManageController extends Controller
             $rs = str_replace('_', ' ', $request->return_sort);
             $query->where('return_status', $rs);
         } else {
-            $query->where(function($q) {
+            $query->where(function ($q) {
                 $q->whereIn('delivery_status', ['returned', 'return'])
-                  ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
+                    ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
             });
         }
         $perPage = (int) $request->input('per_page', 10);

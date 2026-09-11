@@ -138,10 +138,16 @@
 
         <!-- Amount Column -->
         <td style="vertical-align: middle;">
+            @php
+                $orderGrandTotal = (float) ($order->total_amount ?? 0) - (float) ($order->admin_discount ?? 0) - (float) ($order->coupon_discount ?? 0) + (float) ($order->delivery_charge ?? 0);
+                if ($orderGrandTotal <= 0) {
+                    $orderGrandTotal = ((float) ($order->paid_amount ?? 0) + (float) ($order->grand_total ?? 0)) ?: (float) ($order->total_amount ?? 0);
+                }
+            @endphp
             <div class="d-flex flex-column" style="gap: 4px; font-size: 12px; min-width: 110px;">
                 <div class="d-flex justify-content-between">
                     <span class="text-muted">Total:</span>
-                    <span class="font-weight-bold text-dark">{{ $order->total_amount }} ৳</span>
+                    <span class="font-weight-bold text-dark">{{ (float) $orderGrandTotal }} ৳</span>
                 </div>
                 <div class="d-flex justify-content-between">
                     <span class="text-muted">Paid:</span>
@@ -472,10 +478,70 @@
                 return;
             }
 
+            if (status === 'paid return') {
+                let deliveryCharge = parseFloat(btn.data('delivery-charge')) || 0;
+                let customer = btn.data('customer') || 'Customer';
+                let total = parseFloat(btn.data('total')) || 0;
+
+                Swal.fire({
+                    title: 'Paid Return',
+                    html: `
+                        <div style="text-align: left; font-size: 13px; line-height: 1.6; margin-bottom: 15px; background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                            <div class="d-flex justify-content-between mb-1">
+                                <span class="font-weight-bold text-dark">Invoice #LM-${orderId}</span>
+                                <span class="text-muted font-weight-bold">${customer}</span>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Order Total:</span> <strong>${total} ৳</strong>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 12px;">
+                                <span>Delivery Charge:</span> <strong class="text-primary">${deliveryCharge} ৳</strong>
+                            </div>
+                        </div>
+                        <div style="text-align: left; margin-bottom: 8px;">
+                            <label style="display: block; font-size: 12.5px; font-weight: 600; margin-bottom: 6px; color: #1e293b;">
+                                Paid Amount / Delivery Charge (পরিশোধিত টাকা ৳):
+                            </label>
+                            <input type="number" id="swal-paid-return-amount" class="form-control" style="width: 100%; height: 40px; font-size: 14px; border-radius: 6px; border: 1px solid #cbd5e1;" 
+                                   value="${deliveryCharge}" min="0" step="any" placeholder="Enter paid amount">
+                            <small class="text-muted d-block mt-1" style="font-size: 11.5px; line-height: 1.3;">
+                                ডিফল্টভাবে ডেলিভারি চার্জের পরিমাণ দেওয়া রয়েছে। প্রয়োজনে পরিবর্তন করতে পারেন।
+                            </small>
+                        </div>
+                    `,
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fa-solid fa-check mr-1"></i> Confirm Paid Return',
+                    cancelButtonText: 'Cancel',
+                    confirmButtonColor: '#059669',
+                    cancelButtonColor: '#64748b',
+                    focusConfirm: false,
+                    didOpen: () => {
+                        $('#swal-paid-return-amount').focus().select();
+                    },
+                    preConfirm: () => {
+                        const amountVal = document.getElementById('swal-paid-return-amount').value;
+                        if (amountVal === '' || amountVal === null) {
+                            Swal.showValidationMessage('Please enter a valid paid amount.');
+                            return false;
+                        }
+                        if (parseFloat(amountVal) < 0) {
+                            Swal.showValidationMessage('Amount cannot be negative.');
+                            return false;
+                        }
+                        return amountVal;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        performOrderStatusUpdate(orderId, status, null, null, result.value);
+                    }
+                });
+                return;
+            }
+
             performOrderStatusUpdate(orderId, status);
         });
 
-        function performOrderStatusUpdate(orderId, status, partialAmount = null, isPartialReturn = null) {
+        function performOrderStatusUpdate(orderId, status, partialAmount = null, isPartialReturn = null, paidAmount = null) {
             let postData = {
                 _token: "{{ csrf_token() }}",
                 id: orderId,
@@ -486,6 +552,9 @@
             }
             if (isPartialReturn !== null) {
                 postData.is_partial_return = isPartialReturn;
+            }
+            if (paidAmount !== null) {
+                postData.paid_amount = paidAmount;
             }
 
             $.ajax({
