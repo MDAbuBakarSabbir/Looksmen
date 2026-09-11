@@ -156,7 +156,7 @@
             text-align: center;
         }
 
-        .modal {
+        .modal:not(.fade) {
             position: fixed;
             z-index: 999;
             left: 0;
@@ -172,12 +172,12 @@
             transition: opacity 0.3s ease, visibility 0.3s ease;
         }
 
-        .modal.show {
+        .modal:not(.fade).show {
             opacity: 1;
             visibility: visible;
         }
 
-        .modal-content {
+        .modal:not(.fade) .modal-content {
             background: #fff;
             padding: 25px;
             border-radius: 12px;
@@ -187,11 +187,11 @@
             transition: transform 0.3s ease;
         }
 
-        .modal.show .modal-content {
+        .modal:not(.fade).show .modal-content {
             transform: translateY(0);
         }
 
-        .modal-content input {
+        .modal:not(.fade) .modal-content input {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -1522,7 +1522,13 @@
                         </li>
                         @endif
                     @endif
-
+                    @if($user?->hasPermission('finance_dashboard'))
+                    <li>
+                        <a href="{{ Route::has('admin.finance.index') ? route('admin.finance.index') : '#' }}" aria-expanded="false">
+                            <i class="fa-regular fa-money-bill-trend-up mr-2"></i><span class="nav-text">Finance</span>
+                        </a>
+                    </li>
+                    @endif
                     @if($user?->hasPermission('report_order') || $user?->hasPermission('report_product') || $user?->hasPermission('report_web_order') || $user?->hasPermission('report_meta_ads') || $user?->hasPermission('report_profit_sales') || $user?->hasPermission('report_employee') || $user?->hasPermission('report_my_limits'))
                     <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                 class="fa-solid fa-chart-pie mr-2"></i><span class="nav-text">Reports</span></a>

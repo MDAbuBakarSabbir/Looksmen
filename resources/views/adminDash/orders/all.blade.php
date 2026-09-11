@@ -174,6 +174,24 @@
                 $('#orderPaginationLinks').html(html);
             }
 
+            function toggleUIBasedOnStatus(statusVal) {
+                // Show/hide returnSortContainer
+                if (statusVal === 'returned' || statusVal === 'return') {
+                    $('#returnSortContainer').attr('style', 'gap: 8px; display: flex !important;');
+                } else {
+                    $('#returnSortContainer').attr('style', 'gap: 8px; display: none !important;');
+                    $('#returnSort').val(''); // Reset value when hiding
+                }
+
+                // Hide bulkCourierEntryBtn for specific statuses
+                const hiddenStatuses = ['incourier', 'in_courier', 'delivered', 'return', 'returned', 'paid return', 'paid_return', 'unpaid return', 'unpaid_return', 'partial'];
+                if (hiddenStatuses.includes(statusVal)) {
+                    $('#bulkCourierEntryBtn').hide();
+                } else {
+                    $('#bulkCourierEntryBtn').show();
+                }
+            }
+
             function applyFilters(statusVal) {
                 let tbody = $('.oldData');
                 tbody.html('<tr><td colspan="9" class="text-center py-4"><i class="fa-solid fa-spinner fa-spin mr-2"></i> Loading orders...</td></tr>');
@@ -185,7 +203,8 @@
                     days: $('.daysFilter').val(),
                     admin_id: $('.adminFilter').val(),
                     per_page: $('.perPageFilter').val() || 10,
-                    page: currentPage
+                    page: currentPage,
+                    return_sort: $('#returnSort').val()
                 };
 
                 if (statusVal !== undefined) {
@@ -194,6 +213,8 @@
                 } else {
                     data.status = $('.quixnav').data('active-status') || '';
                 }
+                
+                toggleUIBasedOnStatus(data.status);
 
                 $.ajax({
                     url: "{{ route('admin.orders.filter') }}",
@@ -247,7 +268,7 @@
             });
 
             // Date, Day, Admin & Per Page Filters — reset page
-            $(document).on('change', '#from_date, #to_date, .daysFilter, .adminFilter, .perPageFilter', function() {
+            $(document).on('change', '#from_date, #to_date, .daysFilter, .adminFilter, .perPageFilter, #returnSort', function() {
                 currentPage = 1;
                 applyFilters();
             });

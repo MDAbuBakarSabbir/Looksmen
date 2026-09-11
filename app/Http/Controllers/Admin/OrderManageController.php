@@ -115,7 +115,15 @@ class OrderManageController extends Controller
             } elseif (in_array($st, ['cancel', 'canceled', 'cancelled'])) {
                 $query->whereIn('delivery_status', ['cancel', 'canceled', 'cancelled']);
             } elseif (in_array($st, ['returned', 'return'])) {
-                $query->whereIn('delivery_status', ['returned', 'return']);
+                if ($request->return_sort) {
+                    $rs = str_replace('_', ' ', $request->return_sort);
+                    $query->where('return_status', $rs);
+                } else {
+                    $query->where(function($q) {
+                        $q->whereIn('delivery_status', ['returned', 'return'])
+                          ->orWhereIn('return_status', ['partial', 'unpaid return', 'paid return']);
+                    });
+                }
             } else {
                 $query->where('delivery_status', $st);
             }

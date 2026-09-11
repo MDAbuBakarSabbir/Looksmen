@@ -4,6 +4,12 @@
         ->pluck('total', 'delivery_status')
         ->toArray();
 
+    $returnCounts = \App\Models\Orders::select('return_status', \Illuminate\Support\Facades\DB::raw('count(*) as total'))
+        ->whereNotNull('return_status')
+        ->groupBy('return_status')
+        ->pluck('total', 'return_status')
+        ->toArray();
+
     $realCounts = [
         'pending'   => $counts['pending'] ?? 0,
         'hold'      => $counts['hold'] ?? 0,
@@ -12,7 +18,10 @@
         'in_courier'=> ($counts['in_courier'] ?? 0) + ($counts['incourier'] ?? 0),
         'delivered' => ($counts['delivered'] ?? 0) + ($counts['partial_delivered'] ?? 0),
         'canceled'  => ($counts['cancel'] ?? 0) + ($counts['canceled'] ?? 0) + ($counts['cancelled'] ?? 0),
-        'returned'  => ($counts['returned'] ?? 0) + ($counts['return'] ?? 0),
+        'returned'  => ($counts['returned'] ?? 0) + ($counts['return'] ?? 0) + ($returnCounts['partial'] ?? 0) + ($returnCounts['unpaid return'] ?? 0) + ($returnCounts['paid return'] ?? 0),
+        'partial' => $returnCounts['partial'] ?? 0,
+        'unpaid_return' => $returnCounts['unpaid return'] ?? 0,
+        'paid_return' => $returnCounts['paid return'] ?? 0,
     ];
 @endphp
 
@@ -123,7 +132,7 @@
                 <div class="col-lg-3 col-sm-6 mb-3">
                     <a href="{{ Route::has('order-returned') ? route('order-returned') : '#' }}" class="filter-order order-status-btn" data-status="returned">
                         <div class="card shadow">
-                            <div class="stat-widget-two card-body">
+                            <div class="stat-widget-two card-body pb-2">
                                 <div class="stat-content">
                                     <div class="stat-text">RETURNED ORDER</div>
                                 </div>
@@ -131,6 +140,11 @@
                                     <img style="height: 50px;"
                                         src="{{ asset('adminDash') }}/assets/img/orders/product-return.png" alt="img">
                                     <div class="stat-digit" id="count-returned">{{ $realCounts['returned'] }}</div>
+                                </div>
+                                <div class="mt-2 pt-2 border-top text-center" style="font-size: 11px; font-weight: bold; color: #555;">
+                                    <span class="text-warning" title="Partial Return">PARTIAL: <span id="count-partial">{{ $realCounts['partial'] }}</span></span> | 
+                                    <span class="text-danger" title="Unpaid Return">UNPAID: <span id="count-unpaid_return">{{ $realCounts['unpaid_return'] }}</span></span> | 
+                                    <span class="text-success" title="Paid Return">PAID: <span id="count-paid_return">{{ $realCounts['paid_return'] }}</span></span>
                                 </div>
                             </div>
                         </div>

@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\CouponsController;
 use App\Http\Controllers\Admin\CourierApiController;
 use App\Http\Controllers\Admin\FaqController;
 use App\Http\Controllers\Admin\FeatureActivationController;
+use App\Http\Controllers\Admin\FinanceController;
 use App\Http\Controllers\Admin\GeneralWebSettingsController;
 use App\Http\Controllers\Admin\OrderManageController;
 use App\Http\Controllers\Admin\PagesController;
@@ -312,6 +313,15 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/coupon/edit/{id}', 'edit')->middleware('admin.permission:manage_coupons');
         Route::post('/coupon/update', 'update')->name('coupon.update')->middleware('admin.permission:manage_coupons');
         Route::delete('/coupon/delete/{id}', 'destroy')->name('coupon.delete')->middleware('admin.permission:manage_coupons');
+    });
+
+    Route::controller(FinanceController::class)->group(function () {
+        Route::get('finance', 'index')->name('admin.finance.index')->middleware('admin.permission:manage_finance');
+        Route::post('finance/store', 'store')->name('admin.finance.store')->middleware('admin.permission:manage_finance');
+        Route::post('finance/update/{id}', 'update')->name('admin.finance.update')->middleware('admin.permission:manage_finance');
+        Route::delete('finance/delete/{id}', 'destroy')->name('admin.finance.delete')->middleware('admin.permission:manage_finance');
+        Route::get('finance/export', 'export')->name('admin.finance.export')->middleware('admin.permission:manage_finance');
+        Route::get('finance/history', 'allTrans')->name('admin.finance.history')->middleware('admin.permission:manage_finance');
     });
 
     // Report Routes

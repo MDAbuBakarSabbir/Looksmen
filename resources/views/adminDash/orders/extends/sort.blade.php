@@ -55,6 +55,16 @@
                     </select>
                 </div>
             </div>
+            <div id="returnSortContainer" class="d-flex align-items-center" style="gap: 8px; display: none !important;">
+                <select id="returnSort" class="form-control" style="width: 160px; border-radius: 4px; height: 38px;">
+                    <option value="">All Return Status</option>
+                    <optgroup label="Return Status">
+                        <option value="partial">Partial Return</option>
+                        <option value="unpaid_return">Unpaid Return</option>
+                        <option value="paid_return">Paid Return</option>
+                    </optgroup>
+                </select>
+            </div>
 
             <!-- Divider -->
             <hr class="my-3">
@@ -87,6 +97,7 @@
                             Apply
                         </button>
                     </div>
+                    
 
                     {{-- Divider --}}
                     <div style="width: 1px; height: 28px; background: #dee2e6;"></div>
