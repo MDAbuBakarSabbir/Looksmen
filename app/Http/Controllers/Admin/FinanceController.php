@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\FinanceTransaction;
 use App\Models\Admins;
+use App\Models\FinanceTransaction;
+use App\Models\Investor;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
-use Carbon\Carbon;
-use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 
 class FinanceController extends Controller
 {
@@ -36,7 +37,7 @@ class FinanceController extends Controller
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $baseQuery->whereBetween('transaction_date', [
                     Carbon::parse($request->start_date)->startOfDay(),
-                    Carbon::parse($request->end_date)->endOfDay()
+                    Carbon::parse($request->end_date)->endOfDay(),
                 ]);
             } elseif ($request->filled('start_date')) {
                 $baseQuery->where('transaction_date', '>=', Carbon::parse($request->start_date)->startOfDay());
@@ -65,10 +66,10 @@ class FinanceController extends Controller
             $search = trim($request->search);
             $baseQuery->where(function ($q) use ($search) {
                 $q->where('notes', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%")
-                  ->orWhere('staff_name', 'like', "%{$search}%")
-                  ->orWhere('payment_method', 'like', "%{$search}%")
-                  ->orWhere('amount', 'like', "%{$search}%");
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('staff_name', 'like', "%{$search}%")
+                    ->orWhere('payment_method', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
             });
         }
 
@@ -112,6 +113,7 @@ class FinanceController extends Controller
             ->map(function ($item) use ($totalExpense, $totalIncome) {
                 $base = $item->entry_type === 'EXPENSE' ? ($totalExpense ?: 1) : ($totalIncome ?: 1);
                 $item->percentage = min(100, round(($item->total_amount / $base) * 100));
+
                 return $item;
             });
 
@@ -144,11 +146,16 @@ class FinanceController extends Controller
             ->whereIn('category', ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'])
             ->count();
 
-        $investmentInvestors = FinanceTransaction::whereIn('category', ['Investment / Capital', 'Investment Withdrawal', 'Capital Withdrawal', 'Investment', 'Capital'])
-            ->distinct()
-            ->pluck('staff_name')
-            ->filter()
-            ->values();
+        $this->syncExistingInvestors();
+
+        $registeredInvestors = Investor::orderBy('name')->get()->map(function ($inv) {
+            $totalInvested = (float) $inv->transactions()->where('entry_type', 'INCOME')->sum('amount');
+            $totalWithdrawn = (float) $inv->transactions()->where('entry_type', 'EXPENSE')->sum('amount');
+            $inv->active_balance = max(0, $totalInvested - $totalWithdrawn);
+            return $inv;
+        });
+
+        $investmentInvestors = $registeredInvestors->pluck('name')->values();
 
         // Global cumulative metrics for fund limits
         $globalTotalIncome = (float) FinanceTransaction::where('entry_type', 'INCOME')->sum('amount');
@@ -176,10 +183,19 @@ class FinanceController extends Controller
                     'investedCount' => $investedCount,
                     'withdrawnCount' => $withdrawnCount,
                     'investors' => $investmentInvestors,
+                    'registeredInvestors' => $registeredInvestors->map(function ($inv) {
+                        return [
+                            'id' => $inv->id,
+                            'name' => $inv->name,
+                            'balance' => (float) $inv->active_balance,
+                            'phone' => $inv->phone,
+                        ];
+                    }),
                 ],
                 'categoryBreakdown' => $categoryBreakdown,
                 'transactions' => $transactions->map(function ($tx) {
-                    $hasReceipt = !empty($tx->receipt_image) && file_exists(public_path('Uploads/finance/' . $tx->receipt_image));
+                    $hasReceipt = ! empty($tx->receipt_image) && file_exists(public_path('Uploads/finance/'.$tx->receipt_image));
+
                     return [
                         'id' => $tx->id,
                         'entry_type' => $tx->entry_type,
@@ -190,7 +206,7 @@ class FinanceController extends Controller
                         'notes' => $tx->notes ?? '',
                         'has_receipt' => $hasReceipt,
                         'receipt_image' => $tx->receipt_image,
-                        'receipt_url' => $hasReceipt ? asset('Uploads/finance/' . $tx->receipt_image) : '',
+                        'receipt_url' => $hasReceipt ? asset('Uploads/finance/'.$tx->receipt_image) : '',
                         'date_formatted' => $tx->transaction_date ? $tx->transaction_date->format('M j, Y · g:i A') : ($tx->created_at ? $tx->created_at->format('M j, Y · g:i A') : 'N/A'),
                         'date_raw' => $tx->transaction_date ? $tx->transaction_date->format('Y-m-d\TH:i') : '',
                         'timestamp' => $tx->transaction_date ? $tx->transaction_date->timestamp : ($tx->created_at ? $tx->created_at->timestamp : 0),
@@ -218,7 +234,8 @@ class FinanceController extends Controller
             'investmentBalance',
             'investedCount',
             'withdrawnCount',
-            'investmentInvestors'
+            'investmentInvestors',
+            'registeredInvestors'
         ));
     }
 
@@ -256,10 +273,10 @@ class FinanceController extends Controller
                 if ($validated['amount'] > $activeCapital) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Capital withdrawal amount (৳' . number_format($validated['amount'], 2) . ') cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').',
+                        'message' => 'Capital withdrawal amount (৳'.number_format($validated['amount'], 2).') cannot exceed active capital balance (৳'.number_format($activeCapital, 2).').',
                         'errors' => [
-                            'amount' => ['Capital withdrawal cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').']
-                        ]
+                            'amount' => ['Capital withdrawal cannot exceed active capital balance (৳'.number_format($activeCapital, 2).').'],
+                        ],
                     ], 422);
                 }
             } else {
@@ -271,10 +288,10 @@ class FinanceController extends Controller
                 if ($validated['amount'] > $availableBalance) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Expense amount of ৳' . number_format($validated['amount'], 2) . ' cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').',
+                        'message' => 'Expense amount of ৳'.number_format($validated['amount'], 2).' cannot exceed available capital/balance (৳'.number_format($availableBalance, 2).').',
                         'errors' => [
-                            'amount' => ['Expense amount cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').']
-                        ]
+                            'amount' => ['Expense amount cannot exceed available capital/balance (৳'.number_format($availableBalance, 2).').'],
+                        ],
                     ], 422);
                 }
             }
@@ -299,7 +316,7 @@ class FinanceController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => ucfirst(strtolower($transaction->entry_type)) . ' entry of ৳' . number_format($transaction->amount, 2) . ' recorded successfully!',
+            'message' => ucfirst(strtolower($transaction->entry_type)).' entry of ৳'.number_format($transaction->amount, 2).' recorded successfully!',
             'transaction' => $transaction,
         ]);
     }
@@ -341,10 +358,10 @@ class FinanceController extends Controller
                 if ($validated['amount'] > $activeCapital) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Capital withdrawal amount (৳' . number_format($validated['amount'], 2) . ') cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').',
+                        'message' => 'Capital withdrawal amount (৳'.number_format($validated['amount'], 2).') cannot exceed active capital balance (৳'.number_format($activeCapital, 2).').',
                         'errors' => [
-                            'amount' => ['Capital withdrawal cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').']
-                        ]
+                            'amount' => ['Capital withdrawal cannot exceed active capital balance (৳'.number_format($activeCapital, 2).').'],
+                        ],
                     ], 422);
                 }
             } else {
@@ -356,10 +373,10 @@ class FinanceController extends Controller
                 if ($validated['amount'] > $availableBalance) {
                     return response()->json([
                         'status' => 'error',
-                        'message' => 'Expense amount of ৳' . number_format($validated['amount'], 2) . ' cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').',
+                        'message' => 'Expense amount of ৳'.number_format($validated['amount'], 2).' cannot exceed available capital/balance (৳'.number_format($availableBalance, 2).').',
                         'errors' => [
-                            'amount' => ['Expense amount cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').']
-                        ]
+                            'amount' => ['Expense amount cannot exceed available capital/balance (৳'.number_format($availableBalance, 2).').'],
+                        ],
                     ], 422);
                 }
             }
@@ -371,10 +388,10 @@ class FinanceController extends Controller
             if ($globalTotalExpense > $globalTotalIncomeAfter) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Cannot reduce this income/capital entry to ৳' . number_format($validated['amount'], 2) . ' because existing expenses (৳' . number_format($globalTotalExpense, 2) . ') would exceed remaining funds.',
+                    'message' => 'Cannot reduce this income/capital entry to ৳'.number_format($validated['amount'], 2).' because existing expenses (৳'.number_format($globalTotalExpense, 2).') would exceed remaining funds.',
                     'errors' => [
-                        'amount' => ['Amount cannot be less than required to cover existing expenses (৳' . number_format($globalTotalExpense, 2) . ').']
-                    ]
+                        'amount' => ['Amount cannot be less than required to cover existing expenses (৳'.number_format($globalTotalExpense, 2).').'],
+                    ],
                 ], 422);
             }
         }
@@ -382,13 +399,13 @@ class FinanceController extends Controller
         $receiptImageName = $transaction->receipt_image;
         if ($request->hasFile('receipt_image')) {
             // Delete old file if exists
-            if ($transaction->receipt_image && file_exists(public_path('Uploads/finance/' . $transaction->receipt_image))) {
-                @unlink(public_path('Uploads/finance/' . $transaction->receipt_image));
+            if ($transaction->receipt_image && file_exists(public_path('Uploads/finance/'.$transaction->receipt_image))) {
+                @unlink(public_path('Uploads/finance/'.$transaction->receipt_image));
             }
             $receiptImageName = $this->saveImageAsWebp($request->file('receipt_image'));
         } elseif ($request->input('remove_receipt') == '1') {
-            if ($transaction->receipt_image && file_exists(public_path('Uploads/finance/' . $transaction->receipt_image))) {
-                @unlink(public_path('Uploads/finance/' . $transaction->receipt_image));
+            if ($transaction->receipt_image && file_exists(public_path('Uploads/finance/'.$transaction->receipt_image))) {
+                @unlink(public_path('Uploads/finance/'.$transaction->receipt_image));
             }
             $receiptImageName = null;
         }
@@ -406,7 +423,7 @@ class FinanceController extends Controller
 
         return response()->json([
             'status' => 'success',
-            'message' => 'Transaction #' . $transaction->id . ' updated successfully!',
+            'message' => 'Transaction #'.$transaction->id.' updated successfully!',
             'transaction' => $transaction,
         ]);
     }
@@ -426,14 +443,14 @@ class FinanceController extends Controller
             if ($totalExpense > $remainingIncome) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Cannot delete this income/capital entry because existing expenses (৳' . number_format($totalExpense, 2) . ') would exceed remaining capital/income (৳' . number_format($remainingIncome, 2) . ').',
+                    'message' => 'Cannot delete this income/capital entry because existing expenses (৳'.number_format($totalExpense, 2).') would exceed remaining capital/income (৳'.number_format($remainingIncome, 2).').',
                 ], 422);
             }
         }
 
         // Remove receipt image from disk if exists
-        if ($transaction->receipt_image && file_exists(public_path('Uploads/finance/' . $transaction->receipt_image))) {
-            @unlink(public_path('Uploads/finance/' . $transaction->receipt_image));
+        if ($transaction->receipt_image && file_exists(public_path('Uploads/finance/'.$transaction->receipt_image))) {
+            @unlink(public_path('Uploads/finance/'.$transaction->receipt_image));
         }
 
         $transaction->delete();
@@ -468,10 +485,10 @@ class FinanceController extends Controller
             $search = trim($request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('notes', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%")
-                  ->orWhere('staff_name', 'like', "%{$search}%")
-                  ->orWhere('payment_method', 'like', "%{$search}%")
-                  ->orWhere('amount', 'like', "%{$search}%");
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('staff_name', 'like', "%{$search}%")
+                    ->orWhere('payment_method', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
             });
         }
         if ($request->filled('timeframe')) {
@@ -488,7 +505,7 @@ class FinanceController extends Controller
                 if ($request->filled('start_date') && $request->filled('end_date')) {
                     $query->whereBetween('transaction_date', [
                         Carbon::parse($request->start_date)->startOfDay(),
-                        Carbon::parse($request->end_date)->endOfDay()
+                        Carbon::parse($request->end_date)->endOfDay(),
                     ]);
                 } elseif ($request->filled('start_date')) {
                     $query->where('transaction_date', '>=', Carbon::parse($request->start_date)->startOfDay());
@@ -500,7 +517,7 @@ class FinanceController extends Controller
 
         $transactions = $query->orderBy('transaction_date', 'desc')->get();
 
-        $filename = 'finance_ledger_' . date('Y-m-d_His') . '.csv';
+        $filename = 'finance_ledger_'.date('Y-m-d_His').'.csv';
 
         $headers = [
             'Content-Type' => 'text/csv; charset=UTF-8',
@@ -530,7 +547,7 @@ class FinanceController extends Controller
 
             foreach ($transactions as $tx) {
                 fputcsv($file, [
-                    '#FT-' . str_pad($tx->id, 5, '0', STR_PAD_LEFT),
+                    '#FT-'.str_pad($tx->id, 5, '0', STR_PAD_LEFT),
                     $tx->entry_type,
                     $tx->amount,
                     $tx->category,
@@ -538,7 +555,7 @@ class FinanceController extends Controller
                     $tx->transaction_date ? $tx->transaction_date->format('Y-m-d H:i:s') : '',
                     $tx->staff_name,
                     $tx->notes ?? '',
-                    $tx->receipt_image ? asset('Uploads/finance/' . $tx->receipt_image) : 'None',
+                    $tx->receipt_image ? asset('Uploads/finance/'.$tx->receipt_image) : 'None',
                 ]);
             }
 
@@ -570,7 +587,7 @@ class FinanceController extends Controller
             if ($request->filled('start_date') && $request->filled('end_date')) {
                 $query->whereBetween('transaction_date', [
                     Carbon::parse($request->start_date)->startOfDay(),
-                    Carbon::parse($request->end_date)->endOfDay()
+                    Carbon::parse($request->end_date)->endOfDay(),
                 ]);
             } elseif ($request->filled('start_date')) {
                 $query->where('transaction_date', '>=', Carbon::parse($request->start_date)->startOfDay());
@@ -603,10 +620,10 @@ class FinanceController extends Controller
             $search = trim($request->search);
             $query->where(function ($q) use ($search) {
                 $q->where('notes', 'like', "%{$search}%")
-                  ->orWhere('category', 'like', "%{$search}%")
-                  ->orWhere('staff_name', 'like', "%{$search}%")
-                  ->orWhere('payment_method', 'like', "%{$search}%")
-                  ->orWhere('amount', 'like', "%{$search}%");
+                    ->orWhere('category', 'like', "%{$search}%")
+                    ->orWhere('staff_name', 'like', "%{$search}%")
+                    ->orWhere('payment_method', 'like', "%{$search}%")
+                    ->orWhere('amount', 'like', "%{$search}%");
             });
         }
 
@@ -647,15 +664,15 @@ class FinanceController extends Controller
     protected function saveImageAsWebp($file): string
     {
         $dir = public_path('Uploads/finance');
-        if (!file_exists($dir)) {
+        if (! file_exists($dir)) {
             mkdir($dir, 0777, true);
         }
 
-        $fileName = 'receipt_' . time() . '_' . Str::random(8) . '.webp';
-        $fullPath = $dir . '/' . $fileName;
+        $fileName = 'receipt_'.time().'_'.Str::random(8).'.webp';
+        $fullPath = $dir.'/'.$fileName;
 
         try {
-            $manager = new ImageManager(new Driver());
+            $manager = new ImageManager(new Driver);
             $image = $manager->decode($file);
             $image->scaleDown(width: 1400);
             $image->save($fullPath, quality: 80);
@@ -684,5 +701,249 @@ class FinanceController extends Controller
         }
 
         return $fileName;
+    }
+
+    /**
+     * Helper to auto-sync any historical investor names from FinanceTransaction into investors table.
+     */
+    public function syncExistingInvestors(): void
+    {
+        $existingNames = FinanceTransaction::whereIn('category', [
+            'Investment / Capital',
+            'Investment Withdrawal',
+            'Capital Withdrawal',
+            'Investment',
+            'Capital'
+        ])->distinct()->pluck('staff_name')->filter()->values();
+
+        foreach ($existingNames as $name) {
+            $name = trim($name);
+            if ($name && !Investor::where('name', $name)->exists()) {
+                Investor::create([
+                    'name' => $name,
+                    'status' => 'active',
+                    'notes' => 'Auto-synced from historical finance records.',
+                ]);
+            }
+        }
+    }
+
+    /**
+     * Display Investor Directory & Capital Portfolio Page.
+     */
+    public function investors(Request $request)
+    {
+        $this->syncExistingInvestors();
+
+        $totalInvested = (float) FinanceTransaction::where('entry_type', 'INCOME')
+            ->whereIn('category', ['Investment / Capital', 'Investment', 'Capital'])
+            ->sum('amount');
+
+        $totalWithdrawn = (float) FinanceTransaction::where('entry_type', 'EXPENSE')
+            ->whereIn('category', ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'])
+            ->sum('amount');
+
+        $investmentBalance = max(0, $totalInvested - $totalWithdrawn);
+        $totalInvestorsCount = Investor::count();
+
+        $query = Investor::query();
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('phone', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhere('notes', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status') && in_array($request->status, ['active', 'inactive'])) {
+            $query->where('status', $request->status);
+        }
+
+        $allInvestors = $query->get()->map(function ($inv) use ($totalInvested) {
+            $inv->total_invested = (float) $inv->transactions()->where('entry_type', 'INCOME')->sum('amount');
+            $inv->total_withdrawn = (float) $inv->transactions()->where('entry_type', 'EXPENSE')->sum('amount');
+            $inv->active_balance = $inv->total_invested - $inv->total_withdrawn;
+            $inv->share_pct = $totalInvested > 0 ? round(($inv->total_invested / $totalInvested) * 100, 1) : 0;
+            $inv->tx_count = $inv->transactions()->count();
+            $inv->last_tx = $inv->transactions()->orderByDesc('transaction_date')->first();
+            return $inv;
+        });
+
+        // Sorting
+        $sort = $request->get('sort', 'highest_balance');
+        if ($sort === 'highest_balance') {
+            $allInvestors = $allInvestors->sortByDesc('active_balance')->values();
+        } elseif ($sort === 'highest_invested') {
+            $allInvestors = $allInvestors->sortByDesc('total_invested')->values();
+        } elseif ($sort === 'most_transactions') {
+            $allInvestors = $allInvestors->sortByDesc('tx_count')->values();
+        } elseif ($sort === 'newest') {
+            $allInvestors = $allInvestors->sortByDesc('created_at')->values();
+        } elseif ($sort === 'name_asc') {
+            $allInvestors = $allInvestors->sortBy('name')->values();
+        }
+
+        return view('adminDash.finance.investors', compact(
+            'allInvestors',
+            'totalInvested',
+            'totalWithdrawn',
+            'investmentBalance',
+            'totalInvestorsCount',
+            'sort'
+        ));
+    }
+
+    /**
+     * Register a new Investor / Partner with optional initial capital deposit.
+     */
+    public function storeInvestor(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:150|unique:investors,name',
+            'phone' => 'nullable|string|max:50',
+            'email' => 'nullable|email|max:150',
+            'nid_or_passport' => 'nullable|string|max:100',
+            'address' => 'nullable|string|max:255',
+            'share_percentage' => 'nullable|numeric|min:0|max:100',
+            'notes' => 'nullable|string|max:1000',
+            'initial_investment' => 'nullable|numeric|min:0',
+            'payment_method' => 'nullable|string|max:100',
+            'receipt_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+        ]);
+
+        $investor = Investor::create([
+            'name' => trim($validated['name']),
+            'phone' => $validated['phone'] ?? null,
+            'email' => $validated['email'] ?? null,
+            'nid_or_passport' => $validated['nid_or_passport'] ?? null,
+            'address' => $validated['address'] ?? null,
+            'share_percentage' => $validated['share_percentage'] ?? 0,
+            'status' => 'active',
+            'notes' => $validated['notes'] ?? null,
+        ]);
+
+        $tx = null;
+        if (!empty($validated['initial_investment']) && $validated['initial_investment'] > 0) {
+            $imageName = null;
+            if ($request->hasFile('receipt_image')) {
+                $imageName = $this->saveImageAsWebp($request->file('receipt_image'));
+            }
+
+            $tx = FinanceTransaction::create([
+                'entry_type' => 'INCOME',
+                'amount' => $validated['initial_investment'],
+                'category' => 'Investment / Capital',
+                'payment_method' => $validated['payment_method'] ?? 'Bank Transfer',
+                'transaction_date' => Carbon::now(),
+                'staff_name' => $investor->name,
+                'notes' => 'Initial capital injection on onboarding. ' . ($validated['notes'] ?? ''),
+                'receipt_image' => $imageName,
+                'admin_id' => auth('admin')->id() ?? null,
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Partner '{$investor->name}' registered successfully!" . ($tx ? ' Initial capital of ৳' . number_format($tx->amount, 2) . ' deposited.' : ''),
+            'investor' => $investor,
+            'transaction' => $tx,
+        ]);
+    }
+
+    /**
+     * Return JSON data of investment history for an investor (for instant modal inspection).
+     */
+    public function investorHistoryAjax(Request $request, $id)
+    {
+        $investor = Investor::findOrFail($id);
+
+        $transactions = $investor->transactions()
+            ->orderByDesc('transaction_date')
+            ->orderByDesc('id')
+            ->get();
+
+        $totalInvested = (float) $transactions->where('entry_type', 'INCOME')->sum('amount');
+        $totalWithdrawn = (float) $transactions->where('entry_type', 'EXPENSE')->sum('amount');
+        $balance = $totalInvested - $totalWithdrawn;
+
+        return response()->json([
+            'status' => 'success',
+            'investor' => [
+                'id' => $investor->id,
+                'name' => $investor->name,
+                'phone' => $investor->phone ?? 'N/A',
+                'email' => $investor->email ?? 'N/A',
+                'address' => $investor->address ?? 'N/A',
+                'status' => $investor->status,
+                'notes' => $investor->notes ?? '',
+                'created_at' => $investor->created_at ? $investor->created_at->format('M d, Y') : 'N/A',
+            ],
+            'metrics' => [
+                'totalInvested' => $totalInvested,
+                'totalWithdrawn' => $totalWithdrawn,
+                'balance' => $balance,
+                'count' => $transactions->count(),
+                'formattedInvested' => '৳' . number_format($totalInvested, 2),
+                'formattedWithdrawn' => '৳' . number_format($totalWithdrawn, 2),
+                'formattedBalance' => '৳' . number_format($balance, 2),
+            ],
+            'transactions' => $transactions->map(function ($t) {
+                $hasReceipt = !empty($t->receipt_image) && file_exists(public_path('Uploads/finance/' . $t->receipt_image));
+                return [
+                    'id' => $t->id,
+                    'entry_type' => $t->entry_type,
+                    'category' => $t->category,
+                    'amount' => (float) $t->amount,
+                    'formatted_amount' => '৳' . number_format($t->amount, 2),
+                    'payment_method' => $t->payment_method,
+                    'notes' => $t->notes ?? '',
+                    'has_receipt' => $hasReceipt,
+                    'receipt_url' => $hasReceipt ? asset('Uploads/finance/' . $t->receipt_image) : null,
+                    'date_formatted' => $t->transaction_date ? $t->transaction_date->format('M d, Y · h:i A') : ($t->created_at ? $t->created_at->format('M d, Y · h:i A') : 'N/A'),
+                ];
+            }),
+        ]);
+    }
+
+    /**
+     * Dedicated Profile & Investment Ledger Page for an Investor.
+     */
+    public function investorDetail(Request $request, $id)
+    {
+        $investor = Investor::findOrFail($id);
+
+        $portfolioTotalInvested = (float) FinanceTransaction::where('entry_type', 'INCOME')
+            ->whereIn('category', ['Investment / Capital', 'Investment', 'Capital'])
+            ->sum('amount');
+
+        $portfolioTotalWithdrawn = (float) FinanceTransaction::where('entry_type', 'EXPENSE')
+            ->whereIn('category', ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'])
+            ->sum('amount');
+
+        $portfolioBalance = max(0, $portfolioTotalInvested - $portfolioTotalWithdrawn);
+
+        $transactions = $investor->transactions()
+            ->orderByDesc('transaction_date')
+            ->orderByDesc('id')
+            ->paginate(25)
+            ->withQueryString();
+
+        $investorTotalInvested = (float) $investor->transactions()->where('entry_type', 'INCOME')->sum('amount');
+        $investorTotalWithdrawn = (float) $investor->transactions()->where('entry_type', 'EXPENSE')->sum('amount');
+        $investorBalance = $investorTotalInvested - $investorTotalWithdrawn;
+        $investorSharePct = $portfolioTotalInvested > 0 ? round(($investorTotalInvested / $portfolioTotalInvested) * 100, 1) : 0;
+
+        return view('adminDash.finance.investor_detail', compact(
+            'investor',
+            'transactions',
+            'investorTotalInvested',
+            'investorTotalWithdrawn',
+            'investorBalance',
+            'investorSharePct',
+            'portfolioBalance'
+        ));
     }
 }

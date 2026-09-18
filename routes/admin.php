@@ -331,6 +331,10 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::delete('finance/delete/{id}', 'destroy')->name('admin.finance.delete')->middleware('admin.permission:manage_finance');
         Route::get('finance/export', 'export')->name('admin.finance.export')->middleware('admin.permission:manage_finance');
         Route::get('finance/history', 'allTrans')->name('admin.finance.history')->middleware('admin.permission:manage_finance');
+        Route::get('finance/investors', 'investors')->name('admin.finance.investors')->middleware('admin.permission:manage_finance');
+        Route::post('finance/investors/store', 'storeInvestor')->name('admin.finance.investors.store')->middleware('admin.permission:manage_finance');
+        Route::get('finance/investors/{id}', 'investorDetail')->name('admin.finance.investors.detail')->middleware('admin.permission:manage_finance');
+        Route::get('finance/investors/{id}/history-ajax', 'investorHistoryAjax')->name('admin.finance.investors.history.ajax')->middleware('admin.permission:manage_finance');
     });
 
     // Report Routes

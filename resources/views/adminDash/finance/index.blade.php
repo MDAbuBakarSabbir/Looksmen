@@ -1076,8 +1076,6 @@
 
 @section('content')
 <div class="finance-wrapper py-2">
-
-    {{-- Top Action & Header Bar --}}
     <div class="row align-items-center mb-4">
         <div class="col-md-6 col-12 mb-3 mb-md-0">
             <div class="d-flex align-items-center">
@@ -1128,11 +1126,10 @@
                                 <span class="badge badge-method font-11">
                                     <span class="investment-live-dot"></span> Active Working Treasury
                                 </span>
-                                @if(!empty($investmentInvestors) && count($investmentInvestors) > 0)
-                                    <span class="badge badge-pill badge-method font-11 d-none d-sm-inline-flex align-items-center" title="Registered Investors">
-                                        <i class="fa-solid fa-user-tie mr-1 text-info"></i> {{ count($investmentInvestors) }} {{ Str::plural('Partner', count($investmentInvestors)) }}
-                                    </span>
-                                @endif
+                                <a href="{{ route('admin.finance.investors') }}" class="badge badge-pill badge-method font-11 d-inline-flex align-items-center" title="Click to manage Investors & Partners directory" style="text-decoration: none; cursor: pointer;">
+                                    <i class="fa-solid fa-user-tie mr-1 text-info"></i>
+                                    <span>{{ !empty($investmentInvestors) ? count($investmentInvestors) : 0 }} {{ Str::plural('Partner', !empty($investmentInvestors) ? count($investmentInvestors) : 0) }}</span>
+                                </a>
                             </div>
 
                             <div class="d-flex flex-wrap align-items-baseline" style="gap: 12px;">
@@ -1220,6 +1217,9 @@
                                     <i class="fa-solid fa-sliders mr-1"></i> Capital Actions
                                 </span>
                                 <div class="d-flex flex-wrap gap-2 justify-content-lg-end justify-content-start w-100" style="gap: 10px;">
+                                    <a href="{{ route('admin.finance.investors') }}" class="f-btn f-btn-secondary flex-grow-1 flex-sm-grow-0" style="background: rgba(99, 102, 241, 0.15); color: #818cf8; border: 1px solid rgba(99, 102, 241, 0.35); text-decoration: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" title="Manage Investors & View Individual Ledgers">
+                                        <i class="fa-solid fa-users-gear font-13"></i> Investors Directory
+                                    </a>
                                     <button type="button" class="f-btn f-btn-investment-add flex-grow-1 flex-sm-grow-0" id="btnOpenAddInvestment" data-toggle="modal" data-target="#investmentModal" data-mode="ADD">
                                         <i class="fa-solid fa-circle-plus font-14"></i> Add Investment
                                     </button>
@@ -1597,7 +1597,7 @@
                     </div>
                     <div>
                         <h5 class="modal-title font-weight-bold f-text-title mb-0" id="transactionModalTitle">Add Finance Entry</h5>
-                        <small class="f-text-muted font-11">FreshEcom Business Tracking System</small>
+                        <small class="f-text-muted font-11">Business Tracking System</small>
                     </div>
                 </div>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -1730,7 +1730,7 @@
                             </div>
                             <div class="f-field-group">
                                 <i class="fa-solid fa-user-pen f-field-icon"></i>
-                                <input type="text" required list="staffSuggestions" id="entryStaff" class="f-modal-input" value="{{ auth('admin')->user()->name ?? 'Looksmen' }}" placeholder="e.g. Owner, Sabbir, Raju">
+                                <input type="text" disabled required list="staffSuggestions" id="entryStaff" class="f-modal-input" value="{{ auth('admin')->user()->name ?? 'Looksmen' }}" placeholder="e.g. Owner, Sabbir, Raju">
                             </div>
                             <datalist id="staffSuggestions">
                                 @foreach($staffList as $staff)
@@ -1882,27 +1882,52 @@
                         {{-- Investor / Partner Name --}}
                         <div class="col-md-6 col-12 form-group mb-3">
                             <div class="d-flex align-items-center justify-content-between mb-1">
-                                <label class="modal-label mb-0" for="invEntryStaff">
+                                <label class="modal-label mb-0" for="invEntryStaffSelect">
                                     <i class="fa-solid fa-user-tie mr-1.5 text-muted"></i> Investor / Partner Name <span class="text-danger ml-0.5">*</span>
                                 </label>
                                 <span class="badge badge-income font-10">
-                                    <i class="fa-solid fa-check font-9 mr-1"></i> Partner
+                                    <i class="fa-solid fa-handshake font-9 mr-1"></i> Partner
                                 </span>
                             </div>
                             <div class="f-field-group">
-                                <i class="fa-solid fa-user-pen f-field-icon"></i>
-                                <input type="text" required list="invStaffSuggestions" id="invEntryStaff" name="staff_name" class="f-modal-input" value="{{ auth('admin')->user()->name ?? 'Partner' }}" placeholder="e.g. Sabbir, Abu Bakar, Investor A">
+                                <i class="fa-solid fa-user-tie f-field-icon"></i>
+                                <select id="invEntryStaffSelect" class="f-modal-select" required>
+                                    <option value="" disabled selected>-- Select an Investor / Partner --</option>
+                                    @if(!empty($registeredInvestors) && $registeredInvestors->count() > 0)
+                                        @foreach($registeredInvestors as $regInv)
+                                            <option value="{{ $regInv->name }}" data-balance="{{ $regInv->active_balance }}">
+                                                {{ $regInv->name }} (Capital: ৳{{ number_format($regInv->active_balance, 2) }})
+                                            </option>
+                                        @endforeach
+                                    @elseif(!empty($investmentInvestors) && count($investmentInvestors) > 0)
+                                        @foreach($investmentInvestors as $invName)
+                                            <option value="{{ $invName }}">{{ $invName }}</option>
+                                        @endforeach
+                                    @endif
+                                    <option value="__NEW__">+ Enter New Partner Name...</option>
+                                </select>
                             </div>
-                            <datalist id="invStaffSuggestions">
-                                @if(!empty($investmentInvestors))
-                                    @foreach($investmentInvestors as $inv)
-                                        <option value="{{ $inv }}"></option>
-                                    @endforeach
-                                @endif
-                                @foreach($staffList as $staff)
-                                    <option value="{{ $staff }}"></option>
-                                @endforeach
-                            </datalist>
+
+                            {{-- Hidden actual staff input passed to backend --}}
+                            <input type="hidden" id="invEntryStaff" name="staff_name" value="">
+
+                            {{-- Custom Name Input (Toggled when __NEW__ is selected) --}}
+                            <div id="newInvestorFieldWrap" class="mt-2 d-none">
+                                <div class="f-field-group">
+                                    <i class="fa-solid fa-user-plus f-field-icon text-info"></i>
+                                    <input type="text" id="invEntryStaffCustom" class="f-modal-input" placeholder="Type new investor name here...">
+                                </div>
+                                <small class="f-text-muted font-11 d-block mt-1">
+                                    <i class="fa-solid fa-circle-info mr-1 text-info"></i> This partner will be registered in your Investor Directory.
+                                </small>
+                            </div>
+
+                            {{-- Selected Partner Specific Balance Indicator --}}
+                            <div id="invSelectedPartnerNotice" class="mt-1 d-none">
+                                <small class="font-11 font-weight-bold" style="color: #10b981;">
+                                    <i class="fa-solid fa-circle-info mr-1"></i> Partner Working Capital: <span id="invPartnerSpecificBalanceVal">৳0.00</span>
+                                </small>
+                            </div>
                         </div>
 
                         {{-- Payment Method --}}
@@ -2942,6 +2967,52 @@ $(document).ready(function() {
         $('#invEntryAmount').val('');
         $('#invEntryNotes').val('');
         resetInvReceiptUpload();
+
+        // Initialize investor select
+        const $invSelect = $('#invEntryStaffSelect');
+        const customInvestor = (triggerBtn && triggerBtn.data('investor')) ? triggerBtn.data('investor') : null;
+        if (customInvestor) {
+            $invSelect.val(customInvestor).trigger('change');
+        } else {
+            const firstAvailable = $invSelect.find('option:not([disabled]):not([value="__NEW__"]):first').val();
+            if (firstAvailable && !$invSelect.val()) {
+                $invSelect.val(firstAvailable).trigger('change');
+            } else if ($invSelect.val()) {
+                $invSelect.trigger('change');
+            }
+        }
+
+        validateInvAmount();
+    });
+
+    // Investor Selection in Investment Modal
+    $('#invEntryStaffSelect').on('change', function() {
+        const val = $(this).val();
+        if (val === '__NEW__') {
+            $('#newInvestorFieldWrap').removeClass('d-none');
+            $('#invEntryStaffCustom').focus();
+            $('#invEntryStaff').val($('#invEntryStaffCustom').val().trim());
+            $('#invSelectedPartnerNotice').addClass('d-none');
+        } else {
+            $('#newInvestorFieldWrap').addClass('d-none');
+            $('#invEntryStaff').val(val || '');
+            
+            const selectedOpt = $(this).find('option:selected');
+            const bal = selectedOpt.data('balance');
+            if (bal !== undefined && val) {
+                $('#invPartnerSpecificBalanceVal').text('৳' + parseFloat(bal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                $('#invSelectedPartnerNotice').removeClass('d-none');
+            } else {
+                $('#invSelectedPartnerNotice').addClass('d-none');
+            }
+        }
+        validateInvAmount();
+    });
+
+    $('#invEntryStaffCustom').on('input keyup', function() {
+        if ($('#invEntryStaffSelect').val() === '__NEW__') {
+            $('#invEntryStaff').val($(this).val().trim());
+        }
         validateInvAmount();
     });
 
@@ -3083,17 +3154,26 @@ $(document).ready(function() {
             }
         }
 
-        const staff = $('#invEntryStaff').val().trim();
+        let staff = ($('#invEntryStaff').val() || '').trim();
+        if (!staff) {
+            const selectVal = $('#invEntryStaffSelect').val();
+            if (selectVal === '__NEW__') {
+                staff = ($('#invEntryStaffCustom').val() || '').trim();
+            } else if (selectVal) {
+                staff = selectVal.trim();
+            }
+        }
+
         if (!staff) {
             Swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon: 'warning',
-                title: 'Please enter an investor or partner name',
+                title: 'Please select or enter an investor or partner name',
                 showConfirmButton: false,
                 timer: 3000
             });
-            $('#invEntryStaff').focus();
+            $('#invEntryStaffSelect').focus();
             return;
         }
 
