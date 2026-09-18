@@ -891,6 +891,186 @@
         max-height: 80vh;
         object-fit: contain;
     }
+
+    /* =========================================================
+       INVESTMENT & CAPITAL PORTFOLIO HUB STYLES
+       ========================================================= */
+    .investment-hub-card {
+        background: var(--f-card-bg);
+        border: 1px solid var(--f-card-border);
+        border-radius: 20px;
+        box-shadow: var(--f-card-shadow);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.25s ease;
+        padding: 24px;
+        margin-bottom: 24px;
+    }
+    .investment-hub-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #10b981 0%, #06b6d4 50%, #8b5cf6 100%);
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+    .investment-hub-bg-glow {
+        position: absolute;
+        top: -60px;
+        right: -60px;
+        width: 260px;
+        height: 260px;
+        background: radial-gradient(circle, rgba(16, 185, 129, 0.12) 0%, rgba(6, 182, 212, 0.05) 50%, transparent 70%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .investment-pill-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 12px;
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: rgba(16, 185, 129, 0.12);
+        color: #10b981;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+    .investment-live-dot {
+        display: inline-block;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25);
+        margin-right: 6px;
+        animation: invPulse 2s infinite;
+    }
+    @keyframes invPulse {
+        0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+        70% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .investment-balance-hero {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        color: var(--f-text-title);
+        margin: 4px 0 6px 0;
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .investment-balance-hero .curr {
+        font-size: 1.5rem;
+        color: #10b981;
+        font-weight: 700;
+    }
+    .inv-stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(175px, 1fr));
+        gap: 14px;
+        margin-top: 14px;
+    }
+    .inv-substat {
+        background: var(--f-pill-group-bg);
+        border: 1px solid var(--f-card-border);
+        border-radius: 14px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: all 0.2s ease;
+    }
+    .inv-substat:hover {
+        border-color: var(--f-card-hover-border);
+        transform: translateY(-1px);
+    }
+    .inv-stat-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+    .inv-progress-track {
+        height: 6px;
+        border-radius: 6px;
+        background: var(--f-track-bg);
+        overflow: hidden;
+        margin-top: 8px;
+    }
+    .inv-progress-fill {
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, #10b981, #06b6d4);
+        transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .f-btn-investment-add {
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+        border: none;
+        font-weight: 600;
+        padding: 10px 18px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .f-btn-investment-add:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45);
+        color: #ffffff !important;
+    }
+    .f-btn-investment-withdraw {
+        background: linear-gradient(135deg, #e11d48 0%, #f43f5e 100%);
+        color: #ffffff !important;
+        box-shadow: 0 4px 14px rgba(244, 63, 94, 0.35);
+        border: none;
+        font-weight: 600;
+        padding: 10px 18px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .f-btn-investment-withdraw:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(244, 63, 94, 0.45);
+        color: #ffffff !important;
+    }
+    .f-btn-investment-records {
+        background: var(--f-pill-group-bg);
+        border: 1px solid var(--f-card-border);
+        color: var(--f-text-title) !important;
+        font-weight: 600;
+        padding: 10px 16px;
+        border-radius: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.2s ease;
+    }
+    .f-btn-investment-records:hover {
+        background: var(--f-pill-hover-bg);
+        border-color: var(--f-card-hover-border);
+        color: var(--f-text-title) !important;
+    }
 </style>
 @endsection
 
@@ -928,7 +1108,142 @@
             </div>
         </div>
     </div>
-{{-- Advanced Filtering & Search Bar --}}
+
+    {{-- =========================================================================
+         INVESTMENT & CAPITAL PORTFOLIO HUB
+         Real-time working capital tracking, capital additions, withdrawals & investor ledger
+         ========================================================================= --}}
+    <div class="row">
+        <div class="col-12">
+            <div class="investment-hub-card">
+                <div class="investment-hub-bg-glow"></div>
+                <div class="position-relative" style="z-index: 1;">
+                    <div class="row align-items-center">
+                        {{-- Left Column: Active Capital Balance & Status --}}
+                        <div class="col-xl-7 col-lg-7 col-12 mb-3 mb-lg-0">
+                            <div class="d-flex flex-wrap align-items-center gap-2 mb-2" style="gap: 8px;">
+                                <span class="investment-pill-badge">
+                                    <i class="fa-solid fa-vault mr-1"></i> Capital &amp; Investment Portfolio
+                                </span>
+                                <span class="badge badge-method font-11">
+                                    <span class="investment-live-dot"></span> Active Working Treasury
+                                </span>
+                                @if(!empty($investmentInvestors) && count($investmentInvestors) > 0)
+                                    <span class="badge badge-pill badge-method font-11 d-none d-sm-inline-flex align-items-center" title="Registered Investors">
+                                        <i class="fa-solid fa-user-tie mr-1 text-info"></i> {{ count($investmentInvestors) }} {{ Str::plural('Partner', count($investmentInvestors)) }}
+                                    </span>
+                                @endif
+                            </div>
+
+                            <div class="d-flex flex-wrap align-items-baseline" style="gap: 12px;">
+                                <div>
+                                    <span class="f-text-muted font-12 font-weight-bold text-uppercase d-block" style="letter-spacing: 0.05em;">
+                                        Net Active Investment Balance
+                                    </span>
+                                    <div class="investment-balance-hero">
+                                        <span class="curr">৳</span>
+                                        <span id="invNetBalanceVal" style="{{ $investmentBalance < 0 ? 'color: #f43f5e;' : ($investmentBalance > 0 ? 'color: #10b981;' : '') }}">
+                                            {{ number_format(abs($investmentBalance), 2) }}
+                                        </span>
+                                        @if($investmentBalance < 0)
+                                            <span class="badge badge-pill badge-expense font-12" id="invBalanceBadge">
+                                                <i class="fa-solid fa-triangle-exclamation mr-1"></i> Net Deficit
+                                            </span>
+                                        @elseif($investmentBalance > 0)
+                                            <span class="badge badge-pill badge-income font-12" id="invBalanceBadge">
+                                                <i class="fa-solid fa-circle-check mr-1"></i> Healthy Capital
+                                            </span>
+                                        @else
+                                            <span class="badge badge-pill badge-method font-12" id="invBalanceBadge">
+                                                <i class="fa-solid fa-circle-minus mr-1"></i> Zero Balance
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Sub-metrics: Total Invested vs Withdrawn & Retention --}}
+                            <div class="inv-stats-grid">
+                                {{-- 1. Injected Capital --}}
+                                <div class="inv-substat">
+                                    <div class="inv-stat-icon icon-emerald">
+                                        <i class="fa-solid fa-arrow-down-left"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <span class="font-11 f-text-muted d-block text-truncate">Total Injected Capital</span>
+                                        <div class="d-flex align-items-baseline" style="gap: 6px;">
+                                            <strong class="font-15" style="color: #10b981;" id="invTotalInvestedVal">+৳{{ number_format($totalInvested, 2) }}</strong>
+                                            <span class="font-11 f-text-muted" id="invInvestedCount">({{ $investedCount }})</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- 2. Withdrawn Capital --}}
+                                <div class="inv-substat">
+                                    <div class="inv-stat-icon icon-rose">
+                                        <i class="fa-solid fa-arrow-up-right"></i>
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <span class="font-11 f-text-muted d-block text-truncate">Capital Withdrawn</span>
+                                        <div class="d-flex align-items-baseline" style="gap: 6px;">
+                                            <strong class="font-15" style="color: #f43f5e;" id="invTotalWithdrawnVal">-৳{{ number_format($totalWithdrawn, 2) }}</strong>
+                                            <span class="font-11 f-text-muted" id="invWithdrawnCount">({{ $withdrawnCount }})</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- 3. Capital Retention Rate --}}
+                                @php
+                                    $retentionPct = $totalInvested > 0 ? min(100, max(0, round(($investmentBalance / $totalInvested) * 100))) : 0;
+                                @endphp
+                                <div class="inv-substat">
+                                    <div class="inv-stat-icon icon-cyan">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                    </div>
+                                    <div class="w-100 overflow-hidden">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <span class="font-11 f-text-muted text-truncate">Capital Retained</span>
+                                            <strong class="font-12 f-text-title" id="invRetentionPct">{{ $retentionPct }}%</strong>
+                                        </div>
+                                        <div class="inv-progress-track">
+                                            <div class="inv-progress-fill" id="invRetentionBar" style="width: {{ $retentionPct }}%;"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Right Column: Investment Action Center --}}
+                        <div class="col-xl-5 col-lg-5 col-12 text-lg-right text-left">
+                            <div class="d-flex flex-column align-items-lg-end align-items-start">
+                                <span class="font-12 f-text-muted mb-2 font-weight-bold text-uppercase d-block" style="letter-spacing: 0.05em;">
+                                    <i class="fa-solid fa-sliders mr-1"></i> Capital Actions
+                                </span>
+                                <div class="d-flex flex-wrap gap-2 justify-content-lg-end justify-content-start w-100" style="gap: 10px;">
+                                    <button type="button" class="f-btn f-btn-investment-add flex-grow-1 flex-sm-grow-0" id="btnOpenAddInvestment" data-toggle="modal" data-target="#investmentModal" data-mode="ADD">
+                                        <i class="fa-solid fa-circle-plus font-14"></i> Add Investment
+                                    </button>
+                                    <button type="button" class="f-btn f-btn-investment-withdraw flex-grow-1 flex-sm-grow-0" id="btnOpenWithdrawInvestment" data-toggle="modal" data-target="#investmentModal" data-mode="WITHDRAW">
+                                        <i class="fa-solid fa-arrow-up-from-bracket font-14"></i> Withdraw Capital
+                                    </button>
+                                    <button type="button" class="f-btn f-btn-investment-records flex-grow-1 flex-sm-grow-0" id="btnFilterInvestmentRecords" title="Show only investment entries in table">
+                                        <i class="fa-solid fa-list-check font-13 text-info"></i> View Records
+                                    </button>
+                                </div>
+                                <div class="mt-2 text-lg-right text-left">
+                                    <small class="f-text-muted font-11">
+                                        <i class="fa-solid fa-lock mr-1 text-muted"></i> Entries are synchronized with Cash &amp; Bank Ledgers
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Advanced Filtering & Search Bar --}}
     <div class="row mb-4">
         <div class="col-12">
             <div class="filter-panel">
@@ -964,11 +1279,13 @@
                     <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
                         <select id="filterCategory" class="form-control f-select">
                             <option value="ALL">All Categories</option>
+                            <option value="ALL_INVESTMENTS">★ All Investments (Inflow &amp; Outflow)</option>
                             <option value="Online Sales">Online Sales</option>
                             <option value="Shop Sales">Shop Sales</option>
                             <option value="Wholesale / Bulk Order">Wholesale / Bulk Order</option>
                             <option value="Exchange / Refund">Exchange / Refund</option>
-                            <option value="Investment / Capital">Investment / Capital</option>
+                            <option value="Investment / Capital">Investment / Capital (Inflow)</option>
+                            <option value="Investment Withdrawal">Investment Withdrawal (Outflow)</option>
                             <option value="Product Sourcing">Product Sourcing</option>
                             <option value="Courier / Delivery">Courier / Delivery</option>
                             <option value="Dollar / Ads &amp; Marketing">Dollar / Ads &amp; Marketing</option>
@@ -1311,13 +1628,21 @@
                             <label class="modal-label mb-0" for="entryAmount">
                                 <i class="fa-solid fa-coins mr-1.5 text-muted"></i> Amount <span class="text-danger ml-0.5">*</span>
                             </label>
-                            <span class="badge badge-method font-11 font-weight-bold">
-                                BDT ৳ Currency
-                            </span>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <span class="badge badge-pill badge-income font-11 d-none" id="txAvailableFundsPill">
+                                    <i class="fa-solid fa-vault mr-1"></i> Available: ৳<span id="txAvailableFundsVal">0.00</span>
+                                </span>
+                                <span class="badge badge-method font-11 font-weight-bold">
+                                    BDT ৳ Currency
+                                </span>
+                            </div>
                         </div>
                         <div class="hero-amount-input-box">
                             <div class="hero-currency-symbol" id="heroCurrencySymbol">৳</div>
                             <input type="number" step="0.01" min="0.01" required placeholder="0.00" id="entryAmount" class="hero-amount-input" autocomplete="off">
+                        </div>
+                        <div id="txAmountLimitNotice" class="d-none mt-2 font-12 font-weight-bold p-2" style="color: #f43f5e; background: rgba(244, 63, 94, 0.1); border-radius: 8px; border-left: 3px solid #f43f5e;">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="txAmountLimitMsg"></span>
                         </div>
                         <div class="d-flex align-items-center flex-wrap mt-2" style="gap: 6px;">
                             <span class="font-11 f-text-muted mr-1"><i class="fa-solid fa-bolt text-warning mr-1"></i>Quick Add:</span>
@@ -1340,14 +1665,15 @@
                             <div class="f-field-group">
                                 <i class="fa-solid fa-tag f-field-icon"></i>
                                 <select id="entryCategory" class="f-modal-select" required>
-                                    <optgroup label="── Income Streams ──">
+                                    <optgroup label="── Income Streams &amp; Capital Inflow ──">
                                         <option value="Online Sales">Online Sales</option>
                                         <option value="Shop Sales">Shop Sales</option>
                                         <option value="Wholesale / Bulk Order">Wholesale / Bulk Order</option>
                                         <option value="Investment / Capital">Investment / Capital</option>
                                         <option value="Other">Other / Custom</option>
                                     </optgroup>
-                                    <optgroup label="── Operating Expenses ──">
+                                    <optgroup label="── Operating Expenses &amp; Capital Outflow ──">
+                                        <option value="Investment Withdrawal">Investment Withdrawal</option>
                                         <option value="Product Sourcing">Product Sourcing</option>
                                         <option value="Courier / Delivery">Courier / Delivery</option>
                                         <option value="Dollar / Ads &amp; Marketing">Dollar / Ads &amp; Marketing</option>
@@ -1357,6 +1683,7 @@
                                         <option value="Utilities &amp; Bills">Utilities &amp; Bills</option>
                                         <option value="Office Supplies &amp; Snacks">Office Supplies &amp; Snacks</option>
                                         <option value="Exchange / Refund">Exchange / Refund</option>
+                                        <option value="Other Expense">Other Expense</option>
                                     </optgroup>
                                 </select>
                             </div>
@@ -1477,6 +1804,213 @@
 </div>
 
 {{-- =========================================================================
+     MODAL: CAPITAL INVESTMENT & WITHDRAWAL (Dedicated Executive Modal)
+     ========================================================================= --}}
+<div class="modal fade f-modal" id="investmentModal" tabindex="-1" role="dialog" aria-labelledby="invModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" style="max-width: 750px !important; width: 95% !important;" role="document">
+        <div class="modal-content" style="width: 100% !important; max-width: 100% !important; padding: 0 !important; border-radius: 20px !important;">
+            <div class="modal-header d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <div class="kpi-icon-box icon-emerald mr-3" id="invModalHeaderIcon" style="width: 42px; height: 42px; border-radius: 12px;">
+                        <i class="fa-solid fa-vault font-16"></i>
+                    </div>
+                    <div>
+                        <h5 class="modal-title font-weight-bold f-text-title mb-0" id="invModalTitle">Add Capital Investment</h5>
+                        <small class="f-text-muted font-11">FreshEcom Working Capital Portfolio &amp; Treasury</small>
+                    </div>
+                </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form id="investmentForm" enctype="multipart/form-data">
+                @csrf
+                <input type="hidden" id="invMode" value="ADD">
+                <input type="hidden" id="invEntryType" name="entry_type" value="INCOME">
+                <input type="hidden" id="invCategory" name="category" value="Investment / Capital">
+
+                <div class="modal-body">
+                    {{-- Capital Action Switcher (Deposit vs Withdrawal) --}}
+                    <div class="type-switcher mb-3">
+                        <button type="button" class="type-switcher-btn active-income" id="invSwitchAddBtn">
+                            <i class="fa-solid fa-vault font-14"></i>
+                            <span>Deposit / Add Capital</span>
+                        </button>
+                        <button type="button" class="type-switcher-btn" id="invSwitchWithdrawBtn">
+                            <i class="fa-solid fa-money-bill-transfer font-14"></i>
+                            <span>Withdraw Capital</span>
+                        </button>
+                    </div>
+
+                    {{-- Hero Amount Card --}}
+                    <div class="hero-amount-card" id="invHeroAmountCard">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <label class="modal-label mb-0" for="invEntryAmount" id="invAmountLabel">
+                                <i class="fa-solid fa-coins mr-1.5 text-muted"></i> Investment Amount <span class="text-danger ml-0.5">*</span>
+                            </label>
+                            <div class="d-flex align-items-center" style="gap: 8px;">
+                                <span class="badge badge-pill badge-income font-11 d-none" id="invAvailableCapPill">
+                                    <i class="fa-solid fa-vault mr-1"></i> Active Cap: ৳<span id="invAvailableCapVal">{{ number_format(max(0, $investmentBalance), 2) }}</span>
+                                </span>
+                                <span class="badge badge-method font-11 font-weight-bold">
+                                    BDT ৳ Currency
+                                </span>
+                            </div>
+                        </div>
+                        <div class="hero-amount-input-box">
+                            <div class="hero-currency-symbol" id="invCurrencySymbol">৳</div>
+                            <input type="number" step="0.01" min="0.01" required placeholder="0.00" id="invEntryAmount" name="amount" class="hero-amount-input" autocomplete="off">
+                        </div>
+                        <div id="invAmountLimitNotice" class="d-none mt-2 font-12 font-weight-bold p-2" style="color: #f43f5e; background: rgba(244, 63, 94, 0.1); border-radius: 8px; border-left: 3px solid #f43f5e;">
+                            <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="invAmountLimitMsg"></span>
+                        </div>
+                        <div class="d-flex align-items-center flex-wrap mt-2" style="gap: 6px;">
+                            <span class="font-11 f-text-muted mr-1"><i class="fa-solid fa-bolt text-warning mr-1"></i>Quick Add:</span>
+                            <button type="button" class="amount-chip inv-withdraw-all-chip d-none" id="invWithdrawAllBtn" style="color: #6366f1; border-color: rgba(99, 102, 241, 0.4); font-weight: 600;">Withdraw All</button>
+                            <button type="button" class="amount-chip inv-amount-chip" data-val="10000">+৳10,000</button>
+                            <button type="button" class="amount-chip inv-amount-chip" data-val="25000">+৳25,000</button>
+                            <button type="button" class="amount-chip inv-amount-chip" data-val="50000">+৳50,000</button>
+                            <button type="button" class="amount-chip inv-amount-chip" data-val="100000">+৳100,000</button>
+                            <button type="button" class="amount-chip inv-amount-chip" data-val="500000">+৳500,000</button>
+                            <button type="button" class="amount-chip-clear ml-auto" id="invClearAmountChip">Clear</button>
+                        </div>
+                    </div>
+
+                    {{-- 2x2 Grid of Core Fields --}}
+                    <div class="row">
+                        {{-- Investor / Partner Name --}}
+                        <div class="col-md-6 col-12 form-group mb-3">
+                            <div class="d-flex align-items-center justify-content-between mb-1">
+                                <label class="modal-label mb-0" for="invEntryStaff">
+                                    <i class="fa-solid fa-user-tie mr-1.5 text-muted"></i> Investor / Partner Name <span class="text-danger ml-0.5">*</span>
+                                </label>
+                                <span class="badge badge-income font-10">
+                                    <i class="fa-solid fa-check font-9 mr-1"></i> Partner
+                                </span>
+                            </div>
+                            <div class="f-field-group">
+                                <i class="fa-solid fa-user-pen f-field-icon"></i>
+                                <input type="text" required list="invStaffSuggestions" id="invEntryStaff" name="staff_name" class="f-modal-input" value="{{ auth('admin')->user()->name ?? 'Partner' }}" placeholder="e.g. Sabbir, Abu Bakar, Investor A">
+                            </div>
+                            <datalist id="invStaffSuggestions">
+                                @if(!empty($investmentInvestors))
+                                    @foreach($investmentInvestors as $inv)
+                                        <option value="{{ $inv }}"></option>
+                                    @endforeach
+                                @endif
+                                @foreach($staffList as $staff)
+                                    <option value="{{ $staff }}"></option>
+                                @endforeach
+                            </datalist>
+                        </div>
+
+                        {{-- Payment Method --}}
+                        <div class="col-md-6 col-12 form-group mb-3">
+                            <label class="modal-label" for="invEntryPaymentMethod">
+                                <i class="fa-solid fa-wallet mr-1.5 text-muted"></i> Payment / Transfer Method <span class="text-danger ml-0.5">*</span>
+                            </label>
+                            <div class="f-field-group">
+                                <i class="fa-solid fa-building-columns f-field-icon"></i>
+                                <select id="invEntryPaymentMethod" name="payment_method" class="f-modal-select" required>
+                                    <option value="Bank Transfer">Bank Transfer (Corporate / Personal)</option>
+                                    <option value="Cash">Cash in Hand</option>
+                                    <option value="bKash/Nagad">bKash / Nagad (MFS)</option>
+                                    <option value="Cheque">Cheque / Pay Order</option>
+                                    <option value="Credit Card">Credit / Debit Card</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        {{-- Date & Time --}}
+                        <div class="col-md-6 col-12 form-group mb-3">
+                            <label class="modal-label" for="invEntryDateTime">
+                                <i class="fa-regular fa-calendar-days mr-1.5 text-muted"></i> Date &amp; Time <span class="text-danger ml-0.5">*</span>
+                            </label>
+                            <div class="f-field-group">
+                                <i class="fa-regular fa-clock f-field-icon"></i>
+                                <input type="datetime-local" required id="invEntryDateTime" name="transaction_date" class="f-modal-input" value="{{ date('Y-m-d\TH:i') }}">
+                            </div>
+                        </div>
+
+                        {{-- Ledger Category Display (Locked / Indicative) --}}
+                        <div class="col-md-6 col-12 form-group mb-3">
+                            <label class="modal-label">
+                                <i class="fa-solid fa-tags mr-1.5 text-muted"></i> Ledger Category Tag
+                            </label>
+                            <div class="f-field-group">
+                                <i class="fa-solid fa-shield-halved f-field-icon text-success"></i>
+                                <input type="text" id="invCategoryDisplay" class="f-modal-input" readonly value="Investment / Capital (Inflow)" style="background: var(--f-pill-group-bg); cursor: default;">
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Notes / Details --}}
+                    <div class="form-group mb-3">
+                        <label class="modal-label" for="invEntryNotes">
+                            <i class="fa-regular fa-comment-dots mr-1.5 text-muted"></i> Reference / Terms / Notes (Optional)
+                        </label>
+                        <div class="f-field-group">
+                            <i class="fa-solid fa-pen-nib f-field-icon" style="top: 18px;"></i>
+                            <textarea id="invEntryNotes" name="notes" rows="2" class="f-modal-textarea" placeholder="e.g. Initial seed equity, 25% partnership buy-in, Store expansion fund, Dividend withdrawal..."></textarea>
+                        </div>
+                    </div>
+
+                    {{-- Voucher / Cheque / Bank Slip Upload --}}
+                    <div class="form-group mb-0">
+                        <div class="d-flex align-items-center justify-content-between mb-1">
+                            <label class="modal-label mb-0">
+                                <i class="fa-solid fa-receipt mr-1.5 text-muted"></i> Bank Deposit Slip / Voucher Attachment (Optional)
+                            </label>
+                            <span class="font-11 f-text-muted">Auto-saved as WebP • Max 5MB</span>
+                        </div>
+
+                        <!-- Dropzone area -->
+                        <div class="upload-dropzone" id="invReceiptUploadTrigger">
+                            <div class="dropzone-icon-circle">
+                                <i class="fa-solid fa-cloud-arrow-up font-16"></i>
+                            </div>
+                            <div class="font-13 font-weight-bold f-text-title mb-1">Click or drag &amp; drop bank slip or voucher</div>
+                            <div class="font-11 f-text-muted">Upload cheque photo, bank wire confirmation, or signed slip (Saved in WebP)</div>
+                        </div>
+                        <input type="file" id="invReceiptFileInput" name="receipt_image" class="d-none" accept="image/*">
+
+                        <!-- Preview Card -->
+                        <div id="invReceiptPreviewCard" class="receipt-preview-card d-none mt-2">
+                            <div class="d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center overflow-hidden mr-2">
+                                    <div class="receipt-preview-img-box mr-3">
+                                        <img id="invReceiptPreviewImg" src="" alt="Voucher Preview">
+                                    </div>
+                                    <div class="overflow-hidden">
+                                        <div id="invFileUploadName" class="font-12 font-weight-bold f-text-title text-truncate">slip.png</div>
+                                        <div id="invFileUploadSize" class="font-11 f-text-muted">Ready to attach</div>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn-remove-receipt" id="invRemoveReceiptBtn" title="Remove attachment">
+                                    <i class="fa-solid fa-trash-can font-13"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer d-flex align-items-center justify-content-end">
+                    <button type="button" class="f-btn f-btn-secondary" data-dismiss="modal">
+                        <i class="fa-solid fa-xmark mr-1"></i> Cancel
+                    </button>
+                    <button type="submit" class="f-btn f-btn-income" id="invSubmitModalBtn">
+                        <i class="fa-solid fa-vault mr-1"></i> <span>Confirm Capital Deposit</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- =========================================================================
      MODAL: RECEIPT LIGHTBOX (Bootstrap 4 Modal for Image Preview)
      ========================================================================= --}}
 <div class="modal fade f-modal" id="receiptPreviewModal" tabindex="-1" role="dialog" aria-hidden="true">
@@ -1507,6 +2041,87 @@ $(document).ready(function() {
             'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
         }
     });
+
+    // =========================================================
+    // 0. Fund Limits & Capital Tracking
+    // =========================================================
+    let currentInvestmentBalance = {{ (float) max(0, $investmentBalance) }};
+    let currentAvailableWorkingBalance = {{ (float) max(0, $availableWorkingBalance ?? $netBalance) }};
+
+    function validateTxAmount() {
+        const entryType = $('#entryType').val();
+        const amount = parseFloat($('#entryAmount').val()) || 0;
+        const $notice = $('#txAmountLimitNotice');
+        const $msg = $('#txAmountLimitMsg');
+        const $submitBtn = $('#submitModalBtn');
+
+        if (entryType === 'EXPENSE') {
+            const cat = $('#entryCategory').val();
+            const isCapWithdrawal = ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'].includes(cat);
+            const limit = isCapWithdrawal ? currentInvestmentBalance : currentAvailableWorkingBalance;
+            const limitLabel = isCapWithdrawal ? 'Active Capital Balance' : 'Available Capital / Balance';
+
+            $('#txAvailableFundsPill').removeClass('d-none');
+            $('#txAvailableFundsVal').text(limit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+            if (amount > limit) {
+                $notice.removeClass('d-none');
+                $msg.html(`Expense amount (৳${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) exceeds ${limitLabel} (৳${limit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}). Capital এর চেয়ে বেশি খরচ করা যাবে না।`);
+                $submitBtn.prop('disabled', true);
+                return false;
+            } else {
+                $notice.addClass('d-none');
+                $submitBtn.prop('disabled', false);
+                return true;
+            }
+        } else {
+            $('#txAvailableFundsPill').addClass('d-none');
+            $notice.addClass('d-none');
+            $submitBtn.prop('disabled', false);
+            return true;
+        }
+    }
+
+    function validateInvAmount() {
+        const mode = $('#invMode').val();
+        const amount = parseFloat($('#invEntryAmount').val()) || 0;
+        const $notice = $('#invAmountLimitNotice');
+        const $msg = $('#invAmountLimitMsg');
+        const $submitBtn = $('#invSubmitModalBtn');
+
+        if (mode === 'WITHDRAW') {
+            $('#invAvailableCapPill').removeClass('d-none');
+            $('#invAvailableCapVal').text(currentInvestmentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+
+            if (currentInvestmentBalance <= 0) {
+                $notice.removeClass('d-none');
+                $msg.html(`Active capital balance is ৳0.00. Capital-এ কোনো ফান্ড নেই, উত্তোলন করা সম্ভব নয়।`);
+                $submitBtn.prop('disabled', true);
+                return false;
+            } else if (amount > currentInvestmentBalance) {
+                $notice.removeClass('d-none');
+                $msg.html(`Withdrawal amount (৳${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) exceeds active capital (৳${currentInvestmentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}). Capital এর চেয়ে বেশি তোলা যাবে না।`);
+                $submitBtn.prop('disabled', true);
+                return false;
+            } else {
+                $notice.addClass('d-none');
+                $submitBtn.prop('disabled', false);
+                return true;
+            }
+        } else {
+            $('#invAvailableCapPill').addClass('d-none');
+            $notice.addClass('d-none');
+            $submitBtn.prop('disabled', false);
+            return true;
+        }
+    }
+
+    // Real-time validation listeners for transaction modal
+    $('#entryAmount').on('input keyup change', validateTxAmount);
+    $('#entryCategory').on('change', validateTxAmount);
+
+    // Real-time validation listener for investment modal
+    $('#invEntryAmount').on('input keyup change', validateInvAmount);
 
     // =========================================================
     // 1. Transaction Modal Mode Switching & Interactions
@@ -1551,12 +2166,13 @@ $(document).ready(function() {
 
             if (!preserveCategory) {
                 const curCat = $('#entryCategory').val();
-                const expenseCats = ['Product Sourcing', 'Courier / Delivery', 'Dollar / Ads & Marketing', 'Packaging Material', 'Shop Rent & Maintenance', 'Staff Salary & Bonus', 'Utilities & Bills', 'Office Supplies & Snacks'];
+                const expenseCats = ['Investment Withdrawal', 'Product Sourcing', 'Courier / Delivery', 'Dollar / Ads & Marketing', 'Packaging Material', 'Shop Rent & Maintenance', 'Staff Salary & Bonus', 'Utilities & Bills', 'Office Supplies & Snacks'];
                 if (expenseCats.includes(curCat)) {
                     $('#entryCategory').val('Online Sales');
                 }
             }
         }
+        validateTxAmount();
     }
 
     // Modal Trigger Buttons
@@ -1573,6 +2189,7 @@ $(document).ready(function() {
             $('#entryNotes').val('');
             resetReceiptUpload();
         }
+        validateTxAmount();
     });
 
     // Switcher Inside Modal
@@ -1684,6 +2301,24 @@ $(document).ready(function() {
             });
             $('#entryAmount').focus();
             return;
+        }
+
+        if ($('#entryType').val() === 'EXPENSE') {
+            const cat = $('#entryCategory').val();
+            const isCapWithdrawal = ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'].includes(cat);
+            const limit = isCapWithdrawal ? currentInvestmentBalance : currentAvailableWorkingBalance;
+            const limitLabel = isCapWithdrawal ? 'Active Capital Balance' : 'Available Capital / Balance';
+
+            if (amount > limit) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Expense Exceeds Capital',
+                    html: `Expense amount (৳${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) exceeds ${limitLabel} (৳${limit.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}).<br><br><strong>Capital এর চেয়ে বেশি expense করা যাবে না।</strong>`,
+                    confirmButtonColor: '#0f172a'
+                });
+                $('#entryAmount').focus();
+                return;
+            }
         }
 
         const editId = $('#editTxId').val();
@@ -1855,6 +2490,53 @@ $(document).ready(function() {
                 // 4. Update KPI Card 4: Operations / Transactions
                 const totalOps = parseInt(res.metrics.totalTransactions) || 0;
                 $('#kpiTotalTransactions').html(`${totalOps} <span style="font-size: 1rem; color: var(--f-text-muted); font-weight: 500;">Ops</span>`);
+
+                // Update Investment Hub Card
+                if (res.investment) {
+                    const invBal = parseFloat(res.investment.balance) || 0;
+                    const invTotal = parseFloat(res.investment.totalInvested) || 0;
+                    const invWithdrawn = parseFloat(res.investment.totalWithdrawn) || 0;
+                    const invCount = parseInt(res.investment.investedCount) || 0;
+                    const wCount = parseInt(res.investment.withdrawnCount) || 0;
+                    const formattedBal = Math.abs(invBal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+                    $('#invNetBalanceVal').text(formattedBal);
+                    if (invBal < 0) {
+                        $('#invNetBalanceVal').css('color', '#f43f5e');
+                        $('#invBalanceBadge').attr('class', 'badge badge-pill badge-expense font-12')
+                            .html('<i class="fa-solid fa-triangle-exclamation mr-1"></i> Net Deficit');
+                    } else if (invBal > 0) {
+                        $('#invNetBalanceVal').css('color', '#10b981');
+                        $('#invBalanceBadge').attr('class', 'badge badge-pill badge-income font-12')
+                            .html('<i class="fa-solid fa-circle-check mr-1"></i> Healthy Capital');
+                    } else {
+                        $('#invNetBalanceVal').css('color', 'var(--f-text-title)');
+                        $('#invBalanceBadge').attr('class', 'badge badge-pill badge-method font-12')
+                            .html('<i class="fa-solid fa-circle-minus mr-1"></i> Zero Balance');
+                    }
+
+                    $('#invTotalInvestedVal').text('+৳' + invTotal.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                    $('#invTotalWithdrawnVal').text('-৳' + invWithdrawn.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                    $('#invInvestedCount').text(`(${invCount})`);
+                    $('#invWithdrawnCount').text(`(${wCount})`);
+
+                    const retention = invTotal > 0 ? Math.min(100, Math.max(0, Math.round((invBal / invTotal) * 100))) : 0;
+                    $('#invRetentionPct').text(`${retention}%`);
+                    $('#invRetentionBar').css('width', `${retention}%`);
+
+                    currentInvestmentBalance = Math.max(0, invBal);
+                    $('#invAvailableCapVal').text(currentInvestmentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                    if ($('#invMode').val() === 'WITHDRAW') {
+                        validateInvAmount();
+                    }
+                }
+
+                if (res.metrics && res.metrics.availableWorkingBalance !== undefined) {
+                    currentAvailableWorkingBalance = Math.max(0, parseFloat(res.metrics.availableWorkingBalance) || 0);
+                    if ($('#entryType').val() === 'EXPENSE') {
+                        validateTxAmount();
+                    }
+                }
 
                 // 5. Update Operational Breakdown & Category Distribution
                 const $breakdown = $('#categoryBreakdownContainer');
@@ -2142,11 +2824,15 @@ $(document).ready(function() {
                             window.location.reload();
                         }, 700);
                     },
-                    error: function() {
+                    error: function(xhr) {
+                        let errMsg = 'Could not delete transaction record. Please try again.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errMsg = xhr.responseJSON.message;
+                        }
                         Swal.fire({
                             icon: 'error',
                             title: 'Delete Failed',
-                            text: 'Could not delete transaction record. Please try again.',
+                            text: errMsg,
                             confirmButtonColor: '#e11d48'
                         });
                     }
@@ -2191,6 +2877,301 @@ $(document).ready(function() {
         $('#transactionModalTitle').text(`Edit Transaction (#FT-${String(id).padStart(5, '0')})`);
         $('#submitModalBtn span').text('Update Entry');
         $('#transactionModal').modal('show');
+    });
+
+    // =========================================================
+    // 5. Dedicated Investment & Capital Modal Logic
+    // =========================================================
+    function setInvestmentModalMode(mode) {
+        const $invMode = $('#invMode');
+        const $invEntryType = $('#invEntryType');
+        const $invCategory = $('#invCategory');
+        const $switchAdd = $('#invSwitchAddBtn');
+        const $switchWithdraw = $('#invSwitchWithdrawBtn');
+        const $modalTitle = $('#invModalTitle');
+        const $headerIcon = $('#invModalHeaderIcon');
+        const $heroCard = $('#invHeroAmountCard');
+        const $amountLabel = $('#invAmountLabel');
+        const $categoryDisplay = $('#invCategoryDisplay');
+        const $submitBtn = $('#invSubmitModalBtn');
+
+        if (mode === 'WITHDRAW') {
+            $invMode.val('WITHDRAW');
+            $invEntryType.val('EXPENSE');
+            $invCategory.val('Investment Withdrawal');
+            $switchAdd.removeClass('active-income');
+            $switchWithdraw.addClass('active-expense');
+            $modalTitle.text('Withdraw Investment / Capital');
+            $headerIcon.removeClass('icon-emerald').addClass('icon-rose');
+            $headerIcon.find('i').removeClass('fa-vault').addClass('fa-money-bill-transfer');
+            $heroCard.addClass('expense-mode');
+            $amountLabel.html('<i class="fa-solid fa-coins mr-1.5 text-muted"></i> Withdrawal Amount <span class="text-danger ml-0.5">*</span>');
+            $categoryDisplay.val('Investment Withdrawal (Outflow)');
+            $categoryDisplay.prev('i').removeClass('text-success').addClass('text-danger');
+            $submitBtn.removeClass('f-btn-income').addClass('f-btn-expense');
+            $submitBtn.html('<i class="fa-solid fa-arrow-up-from-bracket mr-1"></i> <span>Confirm Capital Withdrawal</span>');
+            $('#invWithdrawAllBtn').removeClass('d-none').text(`Withdraw All (৳${currentInvestmentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })})`);
+        } else {
+            $invMode.val('ADD');
+            $invEntryType.val('INCOME');
+            $invCategory.val('Investment / Capital');
+            $switchWithdraw.removeClass('active-expense');
+            $switchAdd.addClass('active-income');
+            $modalTitle.text('Add Capital Investment');
+            $headerIcon.removeClass('icon-rose').addClass('icon-emerald');
+            $headerIcon.find('i').removeClass('fa-money-bill-transfer').addClass('fa-vault');
+            $heroCard.removeClass('expense-mode');
+            $amountLabel.html('<i class="fa-solid fa-coins mr-1.5 text-muted"></i> Investment Amount <span class="text-danger ml-0.5">*</span>');
+            $categoryDisplay.val('Investment / Capital (Inflow)');
+            $categoryDisplay.prev('i').removeClass('text-danger').addClass('text-success');
+            $submitBtn.removeClass('f-btn-expense').addClass('f-btn-income');
+            $submitBtn.html('<i class="fa-solid fa-vault mr-1"></i> <span>Confirm Capital Deposit</span>');
+            $('#invWithdrawAllBtn').addClass('d-none');
+        }
+        validateInvAmount();
+    }
+
+    // Investment Modal Trigger
+    $('#investmentModal').on('show.bs.modal', function(e) {
+        const triggerBtn = $(e.relatedTarget);
+        const mode = (triggerBtn && triggerBtn.data('mode')) ? triggerBtn.data('mode') : 'ADD';
+        setInvestmentModalMode(mode);
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        $('#invEntryDateTime').val(now.toISOString().slice(0, 16));
+        $('#invEntryAmount').val('');
+        $('#invEntryNotes').val('');
+        resetInvReceiptUpload();
+        validateInvAmount();
+    });
+
+    // Switcher inside Investment Modal
+    $('#invSwitchAddBtn').on('click', function() {
+        setInvestmentModalMode('ADD');
+    });
+    $('#invSwitchWithdrawBtn').on('click', function() {
+        setInvestmentModalMode('WITHDRAW');
+    });
+
+    // Guard on Open Withdraw Capital Button in card
+    $('#btnOpenWithdrawInvestment').on('click', function(e) {
+        if (currentInvestmentBalance <= 0) {
+            e.preventDefault();
+            e.stopPropagation();
+            Swal.fire({
+                icon: 'warning',
+                title: 'No Capital Available',
+                text: 'Active capital balance is ৳0.00. You cannot withdraw capital until investment funds are deposited.',
+                confirmButtonColor: '#0f172a'
+            });
+            return false;
+        }
+    });
+
+    // Withdraw All Button Handler
+    $('#invWithdrawAllBtn').on('click', function(e) {
+        e.preventDefault();
+        $('#invEntryAmount').val(currentInvestmentBalance.toFixed(2)).trigger('input').focus();
+    });
+
+    // Quick Amount Chips for Investment
+    $('.inv-amount-chip').on('click', function(e) {
+        e.preventDefault();
+        const chipVal = parseFloat($(this).data('val')) || 0;
+        const currentVal = parseFloat($('#invEntryAmount').val()) || 0;
+        $('#invEntryAmount').val((currentVal + chipVal).toFixed(2)).trigger('input');
+    });
+    $('#invClearAmountChip').on('click', function(e) {
+        e.preventDefault();
+        $('#invEntryAmount').val('').trigger('input');
+    });
+
+    // Investment Dropzone & Receipt Upload
+    function resetInvReceiptUpload() {
+        const $fileInput = $('#invReceiptFileInput');
+        $fileInput.val('');
+        $('#invReceiptPreviewImg').attr('src', '');
+        $('#invReceiptPreviewCard').addClass('d-none');
+        $('#invReceiptUploadTrigger').removeClass('d-none');
+    }
+
+    $('#invReceiptUploadTrigger').on('click', function() {
+        $('#invReceiptFileInput').trigger('click');
+    });
+
+    $('#invReceiptFileInput').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            if (file.size > 5 * 1024 * 1024) {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'File exceeds 5MB limit',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                resetInvReceiptUpload();
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#invReceiptPreviewImg').attr('src', e.target.result);
+                $('#invFileUploadName').text(file.name);
+                $('#invFileUploadSize').text((file.size / 1024).toFixed(1) + ' KB (Will auto-convert to WebP)');
+                $('#invReceiptPreviewCard').removeClass('d-none');
+                $('#invReceiptUploadTrigger').addClass('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    $('#invRemoveReceiptBtn').on('click', function(e) {
+        e.stopPropagation();
+        resetInvReceiptUpload();
+    });
+
+    // Investment Dropzone Drag & Drop
+    const $invDropzone = $('#invReceiptUploadTrigger');
+    $invDropzone.on('dragover dragenter', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).addClass('dragover');
+    });
+    $invDropzone.on('dragleave dragend drop', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        $(this).removeClass('dragover');
+    });
+    $invDropzone.on('drop', function(e) {
+        const files = e.originalEvent.dataTransfer.files;
+        if (files && files.length > 0) {
+            const inputEl = document.getElementById('invReceiptFileInput');
+            inputEl.files = files;
+            $('#invReceiptFileInput').trigger('change');
+        }
+    });
+
+    // Submit Investment Form (AJAX Store)
+    $('#investmentForm').on('submit', function(e) {
+        e.preventDefault();
+        const amount = parseFloat($('#invEntryAmount').val());
+
+        if (isNaN(amount) || amount <= 0) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Please enter a valid amount',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            $('#invEntryAmount').focus();
+            return;
+        }
+
+        if ($('#invMode').val() === 'WITHDRAW') {
+            if (currentInvestmentBalance <= 0 || amount > currentInvestmentBalance) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Withdrawal Exceeds Capital',
+                    html: `Withdrawal amount (৳${amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}) exceeds Active Capital Balance (৳${currentInvestmentBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}).<br><br><strong>Capital এর চেয়ে বেশি উত্তোলন করা যাবে না।</strong>`,
+                    confirmButtonColor: '#0f172a'
+                });
+                $('#invEntryAmount').focus();
+                return;
+            }
+        }
+
+        const staff = $('#invEntryStaff').val().trim();
+        if (!staff) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Please enter an investor or partner name',
+                showConfirmButton: false,
+                timer: 3000
+            });
+            $('#invEntryStaff').focus();
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+        formData.append('entry_type', $('#invEntryType').val());
+        formData.append('amount', $('#invEntryAmount').val());
+        formData.append('category', $('#invCategory').val());
+        formData.append('payment_method', $('#invEntryPaymentMethod').val());
+        formData.append('transaction_date', $('#invEntryDateTime').val());
+        formData.append('staff_name', staff);
+        formData.append('notes', $('#invEntryNotes').val() || '');
+
+        const fileInput = document.getElementById('invReceiptFileInput');
+        if (fileInput.files && fileInput.files[0]) {
+            formData.append('receipt_image', fileInput.files[0]);
+        }
+
+        const $submitBtn = $('#invSubmitModalBtn');
+        const originalBtnHtml = $submitBtn.html();
+        $submitBtn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin mr-1"></i> <span>Recording...</span>');
+
+        $.ajax({
+            url: `{{ route('admin.finance.store') }}`,
+            type: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                $('#investmentModal').modal('hide');
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: response.message || 'Investment entry recorded successfully!',
+                    showConfirmButton: false,
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+                setTimeout(function() {
+                    window.location.reload();
+                }, 700);
+            },
+            error: function(xhr) {
+                $submitBtn.prop('disabled', false).html(originalBtnHtml);
+                let errorMsg = 'An error occurred while recording the investment entry.';
+                if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                    const errs = xhr.responseJSON.errors;
+                    errorMsg = Object.values(errs).flat().join('<br>');
+                } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Submission Error',
+                    html: errorMsg,
+                    confirmButtonColor: '#e11d48'
+                });
+            }
+        });
+    });
+
+    // Reset Investment Modal on close
+    $('#investmentModal').on('hidden.bs.modal', function() {
+        $('#investmentForm')[0].reset();
+        resetInvReceiptUpload();
+        setInvestmentModalMode('ADD');
+    });
+
+    // Quick Filter Button: View Investment Records in Ledger
+    $('#btnFilterInvestmentRecords').on('click', function(e) {
+        e.preventDefault();
+        $('#filterCategory').val('ALL_INVESTMENTS').trigger('change');
+        if ($('#transactionsList').length) {
+            $('html, body').animate({
+                scrollTop: $('#transactionsList').offset().top - 140
+            }, 400);
+        }
     });
 });
 </script>

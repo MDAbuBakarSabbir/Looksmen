@@ -716,10 +716,11 @@
                     <div class="col-md-3 col-sm-6 col-12 mb-2 mb-md-0">
                         <select id="filterCategory" class="form-control f-select">
                             <option value="ALL">All Categories</option>
+                            <option value="ALL_INVESTMENTS" {{ request('category') === 'ALL_INVESTMENTS' ? 'selected' : '' }}>★ All Investments (Inflow &amp; Outflow)</option>
                             @php
                                 $categories = [
                                     'Online Sales', 'Shop Sales', 'Wholesale / Bulk Order', 'Exchange / Refund',
-                                    'Investment / Capital', 'Product Sourcing', 'Courier / Delivery',
+                                    'Investment / Capital', 'Investment Withdrawal', 'Product Sourcing', 'Courier / Delivery',
                                     'Dollar / Ads & Marketing', 'Packaging Material', 'Shop Rent & Maintenance',
                                     'Staff Salary & Bonus', 'Utilities & Bills', 'Office Supplies & Snacks',
                                     'Taxes / Bank Fees', 'Other Expense'
@@ -895,7 +896,8 @@
                                         <option value="Investment / Capital">Investment / Capital</option>
                                         <option value="Other">Other / Custom</option>
                                     </optgroup>
-                                    <optgroup label="── Operating Expenses ──">
+                                    <optgroup label="── Operating Expenses &amp; Capital Outflow ──">
+                                        <option value="Investment Withdrawal">Investment Withdrawal</option>
                                         <option value="Product Sourcing">Product Sourcing</option>
                                         <option value="Courier / Delivery">Courier / Delivery</option>
                                         <option value="Dollar / Ads &amp; Marketing">Dollar / Ads &amp; Marketing</option>
@@ -1441,7 +1443,11 @@ $(document).ready(function() {
                         });
                     },
                     error: function(xhr) {
-                        Swal.fire('Error', 'Failed to delete record.', 'error');
+                        let errMsg = 'Failed to delete record.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errMsg = xhr.responseJSON.message;
+                        }
+                        Swal.fire('Error', errMsg, 'error');
                     }
                 });
             }

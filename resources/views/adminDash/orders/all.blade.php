@@ -23,7 +23,6 @@
         #actionButtonsContainer {
             display: none;
             position: absolute;
-
             z-index: 10;
             background-color: white;
             border: 1px solid #ccc;
@@ -40,13 +39,10 @@
         }
 
         .actionButtonsContainerClass {
-
             display: none;
             position: absolute;
-
             z-index: 10;
             background-color: white;
-
             border: 1px solid #ccc;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             padding: 5px;

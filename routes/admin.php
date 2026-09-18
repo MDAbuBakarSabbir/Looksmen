@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\affiliate\AffiliateController;
 use App\Http\Controllers\Admin\AttributeController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\BannerController;
+use App\Http\Controllers\Admin\CampaignController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ChildCategoryController;
 use App\Http\Controllers\Admin\ColorController;
@@ -313,6 +314,14 @@ Route::prefix('admin')->middleware('auth:admin')->group(function () {
         Route::get('/coupon/edit/{id}', 'edit')->middleware('admin.permission:manage_coupons');
         Route::post('/coupon/update', 'update')->name('coupon.update')->middleware('admin.permission:manage_coupons');
         Route::delete('/coupon/delete/{id}', 'destroy')->name('coupon.delete')->middleware('admin.permission:manage_coupons');
+    });
+    Route::controller(CampaignController::class)->group(function () {
+        Route::get('/campaign', 'index')->name('campaign')->middleware('admin.permission:manage_campaign');
+        Route::post('/campaign/store', 'store')->name('campaign.store')->middleware('admin.permission:manage_campaign');
+        Route::post('/campaign/status', 'status')->name('campaign.status')->middleware('admin.permission:manage_campaign');
+        Route::get('/campaign/edit/{id}', 'edit')->name('campaign.edit')->middleware('admin.permission:manage_campaign');
+        Route::post('/campaign/update', 'update')->name('campaign.update')->middleware('admin.permission:manage_campaign');
+        Route::delete('/campaign/delete/{id}', 'destroy')->name('campaign.delete')->middleware('admin.permission:manage_campaign');
     });
 
     Route::controller(FinanceController::class)->group(function () {

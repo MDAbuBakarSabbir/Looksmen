@@ -48,7 +48,11 @@ class FinanceController extends Controller
 
         // 2. Filter: Category
         if ($request->filled('category') && $request->category !== 'ALL') {
-            $baseQuery->where('category', $request->category);
+            if ($request->category === 'ALL_INVESTMENTS') {
+                $baseQuery->whereIn('category', ['Investment / Capital', 'Investment Withdrawal']);
+            } else {
+                $baseQuery->where('category', $request->category);
+            }
         }
 
         // 3. Filter: Staff Name
@@ -121,6 +125,36 @@ class FinanceController extends Controller
             ->filter()
             ->values();
 
+        // Investment & Capital Portfolio Metrics
+        $totalInvested = (float) FinanceTransaction::where('entry_type', 'INCOME')
+            ->whereIn('category', ['Investment / Capital', 'Investment', 'Capital'])
+            ->sum('amount');
+
+        $totalWithdrawn = (float) FinanceTransaction::where('entry_type', 'EXPENSE')
+            ->whereIn('category', ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'])
+            ->sum('amount');
+
+        $investmentBalance = $totalInvested - $totalWithdrawn;
+
+        $investedCount = FinanceTransaction::where('entry_type', 'INCOME')
+            ->whereIn('category', ['Investment / Capital', 'Investment', 'Capital'])
+            ->count();
+
+        $withdrawnCount = FinanceTransaction::where('entry_type', 'EXPENSE')
+            ->whereIn('category', ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'])
+            ->count();
+
+        $investmentInvestors = FinanceTransaction::whereIn('category', ['Investment / Capital', 'Investment Withdrawal', 'Capital Withdrawal', 'Investment', 'Capital'])
+            ->distinct()
+            ->pluck('staff_name')
+            ->filter()
+            ->values();
+
+        // Global cumulative metrics for fund limits
+        $globalTotalIncome = (float) FinanceTransaction::where('entry_type', 'INCOME')->sum('amount');
+        $globalTotalExpense = (float) FinanceTransaction::where('entry_type', 'EXPENSE')->sum('amount');
+        $availableWorkingBalance = max(0, $globalTotalIncome - $globalTotalExpense);
+
         // Return JSON if AJAX requested (for dynamic table / metrics / breakdown refresh)
         if ($request->ajax()) {
             return response()->json([
@@ -130,9 +164,18 @@ class FinanceController extends Controller
                     'totalIncome' => $totalIncome,
                     'totalExpense' => $totalExpense,
                     'netBalance' => $netBalance,
+                    'availableWorkingBalance' => $availableWorkingBalance,
                     'totalTransactions' => $totalTransactions,
                     'incomeEntriesCount' => $incomeEntriesCount,
                     'expenseEntriesCount' => $expenseEntriesCount,
+                ],
+                'investment' => [
+                    'totalInvested' => $totalInvested,
+                    'totalWithdrawn' => $totalWithdrawn,
+                    'balance' => $investmentBalance,
+                    'investedCount' => $investedCount,
+                    'withdrawnCount' => $withdrawnCount,
+                    'investors' => $investmentInvestors,
                 ],
                 'categoryBreakdown' => $categoryBreakdown,
                 'transactions' => $transactions->map(function ($tx) {
@@ -163,12 +206,19 @@ class FinanceController extends Controller
             'totalIncome',
             'totalExpense',
             'netBalance',
+            'availableWorkingBalance',
             'totalTransactions',
             'incomeEntriesCount',
             'expenseEntriesCount',
             'categoryBreakdown',
             'staffList',
-            'timeframe'
+            'timeframe',
+            'totalInvested',
+            'totalWithdrawn',
+            'investmentBalance',
+            'investedCount',
+            'withdrawnCount',
+            'investmentInvestors'
         ));
     }
 
@@ -188,6 +238,47 @@ class FinanceController extends Controller
             'notes' => 'nullable|string|max:1000',
             'receipt_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
         ]);
+
+        // Validation: Expenses and Capital Withdrawals cannot exceed available funds/capital
+        if ($validated['entry_type'] === 'EXPENSE') {
+            $isCapitalWithdrawal = in_array($validated['category'], ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital']);
+
+            // Calculate active capital
+            $totalInvested = (float) FinanceTransaction::where('entry_type', 'INCOME')
+                ->whereIn('category', ['Investment / Capital', 'Investment', 'Capital'])
+                ->sum('amount');
+            $totalWithdrawn = (float) FinanceTransaction::where('entry_type', 'EXPENSE')
+                ->whereIn('category', ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'])
+                ->sum('amount');
+            $activeCapital = max(0, $totalInvested - $totalWithdrawn);
+
+            if ($isCapitalWithdrawal) {
+                if ($validated['amount'] > $activeCapital) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Capital withdrawal amount (৳' . number_format($validated['amount'], 2) . ') cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').',
+                        'errors' => [
+                            'amount' => ['Capital withdrawal cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').']
+                        ]
+                    ], 422);
+                }
+            } else {
+                // Operating expenses: cannot exceed overall available working balance / capital
+                $globalTotalIncome = (float) FinanceTransaction::where('entry_type', 'INCOME')->sum('amount');
+                $globalTotalExpense = (float) FinanceTransaction::where('entry_type', 'EXPENSE')->sum('amount');
+                $availableBalance = max(0, $globalTotalIncome - $globalTotalExpense);
+
+                if ($validated['amount'] > $availableBalance) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Expense amount of ৳' . number_format($validated['amount'], 2) . ' cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').',
+                        'errors' => [
+                            'amount' => ['Expense amount cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').']
+                        ]
+                    ], 422);
+                }
+            }
+        }
 
         $imageName = null;
         if ($request->hasFile('receipt_image')) {
@@ -231,6 +322,63 @@ class FinanceController extends Controller
             'receipt_image' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
         ]);
 
+        // Validation: Expenses and Capital Withdrawals cannot exceed available funds/capital (excluding current record)
+        if ($validated['entry_type'] === 'EXPENSE') {
+            $isCapitalWithdrawal = in_array($validated['category'], ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital']);
+
+            // Calculate active capital excluding this transaction
+            $totalInvested = (float) FinanceTransaction::where('id', '!=', $id)
+                ->where('entry_type', 'INCOME')
+                ->whereIn('category', ['Investment / Capital', 'Investment', 'Capital'])
+                ->sum('amount');
+            $totalWithdrawn = (float) FinanceTransaction::where('id', '!=', $id)
+                ->where('entry_type', 'EXPENSE')
+                ->whereIn('category', ['Investment Withdrawal', 'Capital Withdrawal', 'Investment / Capital'])
+                ->sum('amount');
+            $activeCapital = max(0, $totalInvested - $totalWithdrawn);
+
+            if ($isCapitalWithdrawal) {
+                if ($validated['amount'] > $activeCapital) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Capital withdrawal amount (৳' . number_format($validated['amount'], 2) . ') cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').',
+                        'errors' => [
+                            'amount' => ['Capital withdrawal cannot exceed active capital balance (৳' . number_format($activeCapital, 2) . ').']
+                        ]
+                    ], 422);
+                }
+            } else {
+                // Operating expenses: cannot exceed overall available working balance / capital (excluding this transaction)
+                $globalTotalIncome = (float) FinanceTransaction::where('id', '!=', $id)->where('entry_type', 'INCOME')->sum('amount');
+                $globalTotalExpense = (float) FinanceTransaction::where('id', '!=', $id)->where('entry_type', 'EXPENSE')->sum('amount');
+                $availableBalance = max(0, $globalTotalIncome - $globalTotalExpense);
+
+                if ($validated['amount'] > $availableBalance) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Expense amount of ৳' . number_format($validated['amount'], 2) . ' cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').',
+                        'errors' => [
+                            'amount' => ['Expense amount cannot exceed available capital/balance (৳' . number_format($availableBalance, 2) . ').']
+                        ]
+                    ], 422);
+                }
+            }
+        } elseif ($validated['entry_type'] === 'INCOME') {
+            // If reducing or changing income, ensure remaining income covers existing expenses
+            $globalTotalIncomeAfter = (float) FinanceTransaction::where('id', '!=', $id)->where('entry_type', 'INCOME')->sum('amount') + $validated['amount'];
+            $globalTotalExpense = (float) FinanceTransaction::where('id', '!=', $id)->where('entry_type', 'EXPENSE')->sum('amount');
+
+            if ($globalTotalExpense > $globalTotalIncomeAfter) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cannot reduce this income/capital entry to ৳' . number_format($validated['amount'], 2) . ' because existing expenses (৳' . number_format($globalTotalExpense, 2) . ') would exceed remaining funds.',
+                    'errors' => [
+                        'amount' => ['Amount cannot be less than required to cover existing expenses (৳' . number_format($globalTotalExpense, 2) . ').']
+                    ]
+                ], 422);
+            }
+        }
+
         $receiptImageName = $transaction->receipt_image;
         if ($request->hasFile('receipt_image')) {
             // Delete old file if exists
@@ -270,6 +418,19 @@ class FinanceController extends Controller
     {
         $transaction = FinanceTransaction::findOrFail($id);
 
+        // If deleting income transaction, verify that expenses wouldn't exceed remaining income/capital
+        if ($transaction->entry_type === 'INCOME') {
+            $remainingIncome = (float) FinanceTransaction::where('id', '!=', $id)->where('entry_type', 'INCOME')->sum('amount');
+            $totalExpense = (float) FinanceTransaction::where('entry_type', 'EXPENSE')->sum('amount');
+
+            if ($totalExpense > $remainingIncome) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Cannot delete this income/capital entry because existing expenses (৳' . number_format($totalExpense, 2) . ') would exceed remaining capital/income (৳' . number_format($remainingIncome, 2) . ').',
+                ], 422);
+            }
+        }
+
         // Remove receipt image from disk if exists
         if ($transaction->receipt_image && file_exists(public_path('Uploads/finance/' . $transaction->receipt_image))) {
             @unlink(public_path('Uploads/finance/' . $transaction->receipt_image));
@@ -294,7 +455,11 @@ class FinanceController extends Controller
             $query->where('entry_type', $request->type);
         }
         if ($request->filled('category') && $request->category !== 'ALL') {
-            $query->where('category', $request->category);
+            if ($request->category === 'ALL_INVESTMENTS') {
+                $query->whereIn('category', ['Investment / Capital', 'Investment Withdrawal']);
+            } else {
+                $query->where('category', $request->category);
+            }
         }
         if ($request->filled('staff') && $request->staff !== 'ALL') {
             $query->where('staff_name', $request->staff);
@@ -421,7 +586,11 @@ class FinanceController extends Controller
 
         // 3. Filter: Category
         if ($request->filled('category') && $request->category !== 'ALL') {
-            $query->where('category', $request->category);
+            if ($request->category === 'ALL_INVESTMENTS') {
+                $query->whereIn('category', ['Investment / Capital', 'Investment Withdrawal']);
+            } else {
+                $query->where('category', $request->category);
+            }
         }
 
         // 4. Filter: Staff Name

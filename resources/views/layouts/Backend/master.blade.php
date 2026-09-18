@@ -1517,6 +1517,7 @@
                         <li><a class="has-arrow" href="javascript:void()" aria-expanded="false"><i
                                     class="fa-solid fa-hand-holding-dollar mr-2"></i><span class="nav-text">Promotion & Coupons</span></a>
                             <ul aria-expanded="false">
+                                <li><a href="{{ Route::has('campaign') ? route('campaign') : '#' }}">Campain</a></li>
                                 <li><a href="{{ Route::has('coupons') ? route('coupons') : '#' }}">Coupons</a></li>
                             </ul>
                         </li>

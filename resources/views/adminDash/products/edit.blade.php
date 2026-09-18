@@ -320,16 +320,16 @@
                     <div class="premium-card-body">
 
                         <div class="row">
-                            <div class="col-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Buying Price <span class="text-danger">*</span></label>
                                 <div class="input-prefix">
                                     <span class="input-prefix-text">৳</span>
-                                    <input type="number" class="form-control" name="old_price"
-                                           value="{{ old('old_price', $product->old_price) }}"
+                                    <input type="number" class="form-control" name="buying_price"
+                                           value="{{ old('buying_price', $product->buying_price) }}"
                                            required min="0" step="0.01">
                                 </div>
                             </div>
-                            <div class="col-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Actual Price <span class="text-danger">*</span></label>
                                 <div class="input-prefix">
                                     <span class="input-prefix-text">৳</span>
@@ -338,7 +338,7 @@
                                            required min="0" step="0.01">
                                 </div>
                             </div>
-                            <div class="col-6 mb-3">
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Sale Price <span class="text-danger">*</span></label>
                                 <div class="input-prefix">
                                     <span class="input-prefix-text">৳</span>
